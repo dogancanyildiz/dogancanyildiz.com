@@ -6,58 +6,65 @@ import { useLocale } from "@/components/locale-provider";
 import { skillCategories } from "@/data/skills";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 export default function AboutPage() {
   const { t } = useLocale();
 
   return (
-    <section className="px-4 py-16 sm:px-6 sm:py-24">
-      <div className="mx-auto max-w-2xl">
-        <motion.h1
+    <section className="section-space">
+      <div className="page-shell-narrow space-y-12">
+        <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-8 text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
         >
-          {t("about.title")}
-        </motion.h1>
+          <SectionHeading
+            eyebrow={t("about.eyebrow")}
+            title={t("about.title")}
+            description={t("about.intro")}
+          />
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.05 }}
-          className="space-y-6 text-muted-foreground"
+          className="surface-panel space-y-6 p-6 sm:p-8"
         >
-          <p className="leading-relaxed">{t("about.intro")}</p>
-          <p className="leading-relaxed">{t("about.p1")}</p>
-          <p className="leading-relaxed">{t("about.p2")}</p>
+          <span className="eyebrow">{t("about.manifestoEyebrow")}</span>
+          <div className="space-y-4">
+            <h2 className="text-3xl sm:text-4xl">{t("about.manifestoTitle")}</h2>
+            <p className="section-copy">{t("about.manifestoBody")}</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <p className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5 leading-7 text-muted-foreground">
+              {t("about.p1")}
+            </p>
+            <p className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5 leading-7 text-muted-foreground">
+              {t("about.p2")}
+            </p>
+          </div>
         </motion.div>
 
-        <motion.h2
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-4 mt-12 text-xl font-semibold text-foreground"
-        >
-          {t("about.skillsTitle")}
-        </motion.h2>
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.05 }}
-          className="mb-12 space-y-4"
+          className="space-y-6"
         >
+          <SectionHeading eyebrow={t("about.capabilitiesEyebrow")} title={t("about.skillsTitle")} />
           {skillCategories.map((category) => (
-            <div key={category.labelKey}>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
+            <div key={category.labelKey} className="surface-panel p-6">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground/70">
                 {t(category.labelKey)}
               </p>
               <ul className="flex flex-wrap gap-2">
                 {category.skills.map((skill) => (
                   <li
                     key={skill}
-                    className="rounded-md border border-border bg-muted/50 px-3 py-1.5 text-sm font-medium text-foreground"
+                    className="rounded-full border border-border/70 bg-background/70 px-4 py-2 text-sm font-medium text-foreground"
                   >
                     {skill}
                   </li>
@@ -67,71 +74,57 @@ export default function AboutPage() {
           ))}
         </motion.div>
 
-        <motion.h2
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-6 text-xl font-semibold text-foreground"
-        >
-          {t("about.experienceTitle")}
-        </motion.h2>
-        <ul className="mb-12 space-y-8 border-l-2 border-border pl-6">
+        <SectionHeading eyebrow={t("about.timelineEyebrow")} title={t("about.experienceTitle")} />
+        <ul className="space-y-5">
           <motion.li
             initial={{ opacity: 0, x: -8 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="relative -left-[1.625rem] flex flex-col gap-1"
+            className="surface-panel relative overflow-hidden p-6"
           >
-            <span className="absolute left-0 h-3 w-3 rounded-full bg-primary" />
+            <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
             <span className="font-semibold text-foreground">{t("about.exp1Role")}</span>
             <span className="text-sm text-muted-foreground">
               {t("about.exp1Company")} · {t("about.exp1Period")}
             </span>
-            <p className="text-sm text-muted-foreground">{t("about.exp1Desc")}</p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">{t("about.exp1Desc")}</p>
           </motion.li>
           <motion.li
             initial={{ opacity: 0, x: -8 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="relative -left-[1.625rem] flex flex-col gap-1"
+            className="surface-panel relative overflow-hidden p-6"
           >
-            <span className="absolute left-0 h-3 w-3 rounded-full bg-primary" />
+            <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
             <span className="font-semibold text-foreground">{t("about.exp2Role")}</span>
             <span className="text-sm text-muted-foreground">
               {t("about.exp2Company")} · {t("about.exp2Period")}
             </span>
-            <p className="text-sm text-muted-foreground">{t("about.exp2Desc")}</p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">{t("about.exp2Desc")}</p>
           </motion.li>
           <motion.li
             initial={{ opacity: 0, x: -8 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="relative -left-[1.625rem] flex flex-col gap-1"
+            className="surface-panel relative overflow-hidden p-6"
           >
-            <span className="absolute left-0 h-3 w-3 rounded-full bg-primary" />
+            <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
             <span className="font-semibold text-foreground">{t("about.exp3Role")}</span>
             <span className="text-sm text-muted-foreground">
               {t("about.exp3Company")} · {t("about.exp3Period")}
             </span>
-            <p className="text-sm text-muted-foreground">{t("about.exp3Desc")}</p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">{t("about.exp3Desc")}</p>
           </motion.li>
         </ul>
 
-        <motion.h2
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-6 text-xl font-semibold text-foreground"
-        >
-          {t("about.educationTitle")}
-        </motion.h2>
+        <SectionHeading eyebrow={t("about.educationEyebrow")} title={t("about.educationTitle")} />
         <motion.div
           initial={{ opacity: 0, x: -8 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          className="relative -left-[1.625rem] border-l-2 border-border pl-6"
+          className="surface-panel relative overflow-hidden p-6"
         >
-          <span className="absolute left-0 h-3 w-3 rounded-full bg-primary" />
+          <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
           <span className="font-semibold text-foreground">{t("about.edu1Degree")}</span>
           <span className="block text-sm text-muted-foreground">{t("about.edu1School")}</span>
           <span className="block text-sm text-muted-foreground">{t("about.edu1Period")}</span>
@@ -141,13 +134,16 @@ export default function AboutPage() {
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-10"
+          className="flex flex-wrap items-center gap-4"
         >
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" size="lg">
             <a href="/cv.pdf" download>
-              <Download className="mr-2 size-4" />
+              <Download className="size-4" />
               {t("about.downloadCV")}
             </a>
+          </Button>
+          <Button asChild size="lg">
+            <Link href="/projects">{t("about.projectsLink")}</Link>
           </Button>
         </motion.div>
 
@@ -155,7 +151,7 @@ export default function AboutPage() {
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-8 text-muted-foreground"
+          className="text-muted-foreground"
         >
           {t("about.browseIntro")}{" "}
           <Link href="/projects" className="text-primary underline-offset-4 hover:underline">

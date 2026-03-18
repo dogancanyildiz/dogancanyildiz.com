@@ -3,22 +3,26 @@
 import { motion } from "framer-motion";
 import { useLocale } from "@/components/locale-provider";
 import { skillCategories } from "@/data/skills";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 export function SkillsStrip() {
   const { t } = useLocale();
 
   return (
-    <section className="border-t border-border/40 bg-muted/30 px-4 py-12 sm:px-6">
-      <div className="mx-auto max-w-5xl">
-        <motion.p
+    <section className="section-space pt-8">
+      <div className="page-shell space-y-10">
+        <motion.div
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-8 text-center text-sm font-medium text-muted-foreground"
         >
-          {t("home.skillsTitle")}
-        </motion.p>
-        <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
+          <SectionHeading
+            eyebrow={t("home.skillsEyebrow")}
+            title={t("home.skillsTitle")}
+            description={t("home.skillsSubtitle")}
+          />
+        </motion.div>
+        <div className="grid gap-5 lg:grid-cols-3">
           {skillCategories.map((category, catIndex) => (
             <motion.div
               key={category.labelKey}
@@ -26,12 +30,12 @@ export function SkillsStrip() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: catIndex * 0.1 }}
-              className="flex flex-col items-center gap-3"
+              className="surface-panel flex flex-col gap-5 p-6"
             >
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
+              <span className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground/70">
                 {t(category.labelKey)}
               </span>
-              <ul className="flex flex-wrap justify-center gap-2">
+              <ul className="flex flex-wrap gap-2">
                 {category.skills.map((skill, i) => (
                   <motion.li
                     key={skill}
@@ -40,7 +44,7 @@ export function SkillsStrip() {
                     viewport={{ once: true }}
                     transition={{ delay: catIndex * 0.1 + i * 0.05 }}
                   >
-                    <span className="rounded-full border border-border bg-background px-4 py-1.5 text-sm font-medium text-foreground shadow-xs">
+                    <span className="inline-flex rounded-full border border-border/70 bg-background/70 px-4 py-2 text-sm font-medium text-foreground">
                       {skill}
                     </span>
                   </motion.li>

@@ -62,8 +62,14 @@ export function ContactForm() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       onSubmit={handleSubmit}
-      className="relative mx-auto max-w-lg space-y-6"
+      className="surface-panel relative mx-auto w-full max-w-2xl space-y-6 p-6 sm:p-8"
     >
+      <div className="space-y-2">
+        <span className="eyebrow">{t("form.introTitle")}</span>
+        <p className="text-sm leading-7 text-muted-foreground">
+          {t("form.introBody")}
+        </p>
+      </div>
       <div className="grid gap-2">
         <Label htmlFor="name">{t("form.name")}</Label>
         <Input
@@ -112,10 +118,12 @@ export function ContactForm() {
         <Input id="website" name="website" type="text" tabIndex={-1} />
       </div>
       {status === "error" && (
-        <p className="text-sm text-destructive">{errorMessage}</p>
+        <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {errorMessage}
+        </p>
       )}
       {status === "success" && (
-        <p className="text-sm text-green-600 dark:text-green-400">
+        <p className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
           {t("form.success")}
         </p>
       )}

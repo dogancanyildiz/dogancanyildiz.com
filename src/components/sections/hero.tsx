@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Download } from "lucide-react";
+import { ArrowRight, Download, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocale } from "@/components/locale-provider";
 
@@ -21,64 +21,106 @@ const item = {
 
 export function Hero() {
   const { t } = useLocale();
+  const highlights = [t("hero.focus1"), t("hero.focus2"), t("hero.focus3"), t("hero.focus4")];
 
   return (
-    <section className="relative overflow-hidden px-4 py-24 sm:px-6 sm:py-32">
-      <div className="mx-auto max-w-3xl text-center">
+    <section className="section-space relative overflow-hidden pt-10 sm:pt-14">
+      <div className="page-shell">
         <motion.div
           variants={container}
           initial="hidden"
           animate="show"
-          className="space-y-6"
+          className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end"
         >
-          <motion.div variants={item} className="flex justify-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-medium text-green-600 dark:text-green-400">
-              <span className="size-1.5 rounded-full bg-green-500" />
-              {t("hero.availableForWork")}
-            </span>
-          </motion.div>
+          <div className="space-y-8">
+            <motion.div variants={item} className="flex flex-wrap gap-3">
+              <span className="eyebrow">
+                <Sparkles className="size-3.5" />
+                {t("hero.eyebrow")}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
+                <span className="size-2 rounded-full bg-emerald-500" />
+                {t("hero.availableForWork")}
+              </span>
+            </motion.div>
 
-          <motion.p
-            variants={item}
-            className="text-sm font-medium text-primary sm:text-base"
-          >
-            {t("hero.greeting")} {t("hero.name")}
-          </motion.p>
-          <motion.p
-            variants={item}
-            className="text-base text-muted-foreground sm:text-lg"
-          >
-            {t("hero.role")}
-          </motion.p>
-          <motion.h1
-            variants={item}
-            className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl"
-          >
-            {t("hero.title")}
-          </motion.h1>
-          <motion.p
-            variants={item}
-            className="mx-auto max-w-xl text-lg text-muted-foreground"
-          >
-            {t("hero.subtitle")}
-          </motion.p>
-          <motion.div
-            variants={item}
-            className="flex flex-wrap items-center justify-center gap-4 pt-4"
-          >
-            <Button asChild size="lg">
-              <Link href="/projects">{t("hero.viewProjects")}</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/contact">{t("hero.contact")}</Link>
-            </Button>
-            <Button asChild variant="ghost" size="lg">
-              <a href="/cv.pdf" download>
-                <Download className="mr-2 size-4" />
-                {t("hero.downloadCV")}
-              </a>
-            </Button>
-          </motion.div>
+            <motion.div variants={item} className="space-y-5">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary sm:text-base">
+                {t("hero.greeting")} {t("hero.name")} · {t("hero.role")}
+              </p>
+              <h1 className="max-w-4xl text-5xl leading-[0.95] sm:text-6xl lg:text-7xl">
+                {t("hero.title")}
+              </h1>
+              <p className="max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">
+                {t("hero.subtitle")}
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={item}
+              className="flex flex-wrap items-center gap-3 pt-2"
+            >
+              <Button asChild size="lg">
+                <Link href="/projects">
+                  {t("hero.viewProjects")}
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/contact">{t("hero.contact")}</Link>
+              </Button>
+              <Button asChild variant="ghost" size="lg">
+                <a href="/cv.pdf" download>
+                  <Download className="size-4" />
+                  {t("hero.downloadCV")}
+                </a>
+              </Button>
+            </motion.div>
+          </div>
+
+          <motion.aside variants={item} className="surface-panel relative overflow-hidden p-6 sm:p-8">
+            <div className="absolute inset-x-10 top-0 h-24 rounded-full bg-primary/12 blur-3xl" />
+            <div className="relative space-y-8">
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                  {t("hero.summaryTitle")}
+                </p>
+                <p className="text-base leading-7 text-foreground/85">
+                  {t("hero.summaryBody")}
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-4">
+                  <p className="font-display text-3xl text-foreground">5+</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("hero.metricYears")}</p>
+                </div>
+                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-4">
+                  <p className="font-display text-3xl text-foreground">12</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("hero.metricProjects")}</p>
+                </div>
+                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-4">
+                  <p className="font-display text-3xl text-foreground">UI + FE</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("hero.metricFocus")}</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                  {t("hero.focusLabel")}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {highlights.map((highlight) => (
+                    <span
+                      key={highlight}
+                      className="rounded-full border border-border/70 bg-accent/45 px-4 py-2 text-sm text-foreground"
+                    >
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <p className="text-sm leading-6 text-muted-foreground">{t("hero.note")}</p>
+            </div>
+          </motion.aside>
         </motion.div>
       </div>
     </section>

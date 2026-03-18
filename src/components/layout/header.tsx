@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
 import { useLocale } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const navKeys = [
   { href: "/", key: "nav.home" },
@@ -20,15 +22,26 @@ export function Header() {
   const { t } = useLocale();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4">
+      <nav className="page-shell surface-panel flex min-h-16 items-center justify-between gap-3 px-4 py-3 sm:px-5">
         <Link
           href="/"
-          className="font-semibold text-foreground no-underline hover:text-foreground/80"
+          className="group flex min-w-0 items-center gap-3 no-underline"
         >
-          {t("brand")}
+          <span className="flex size-10 items-center justify-center rounded-2xl border border-border/70 bg-accent/45 font-display text-lg font-semibold text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
+            AC
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              Portfolio
+            </span>
+            <span className="font-display text-lg text-foreground transition-colors group-hover:text-primary">
+              {t("brand")}
+            </span>
+          </span>
         </Link>
-        <ul className="flex items-center gap-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <ul className="hidden items-center gap-1 rounded-full border border-border/70 bg-background/65 p-1 md:flex">
           {navKeys.map(({ href, key }) => {
             const isActive =
               href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -37,7 +50,7 @@ export function Header() {
                 <Link
                   href={href}
                   className={cn(
-                    "relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "relative rounded-full px-4 py-2 text-sm font-medium transition-colors",
                     isActive
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -46,7 +59,7 @@ export function Header() {
                   {isActive && (
                     <motion.span
                       layoutId="nav-pill"
-                      className="absolute inset-0 rounded-md bg-accent"
+                      className="absolute inset-0 rounded-full bg-accent/70"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                       style={{ zIndex: -1 }}
                     />
@@ -56,11 +69,18 @@ export function Header() {
               </li>
             );
           })}
-          <li className="ml-2 flex items-center gap-1">
+          </ul>
+          <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <ThemeToggle />
-          </li>
-        </ul>
+            <Button asChild size="sm" className="hidden sm:inline-flex">
+              <Link href="/contact">
+                {t("nav.contact")}
+                <ArrowUpRight className="size-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
       </nav>
     </header>
   );

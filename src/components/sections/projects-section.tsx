@@ -5,6 +5,7 @@ import { useLocale } from "@/components/locale-provider";
 import { ProjectCard } from "./project-card";
 import { projects } from "@/data/projects";
 import { cn } from "@/lib/utils";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 export function ProjectsSection() {
   const { t } = useLocale();
@@ -25,46 +26,55 @@ export function ProjectsSection() {
   );
 
   return (
-    <section className="px-4 py-16 sm:px-6 sm:py-24">
-      <div className="mx-auto max-w-5xl">
-        <h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          {t("projects.title")}
-        </h1>
-        <p className="mb-8 max-w-2xl text-muted-foreground">
-          {t("projects.subtitle")}
-        </p>
+    <section className="section-space">
+      <div className="page-shell space-y-10">
+        <SectionHeading
+          eyebrow={t("projects.eyebrow")}
+          title={t("projects.title")}
+          description={t("projects.subtitle")}
+        />
 
-        <div className="mb-10 flex flex-wrap gap-2">
+        <div className="surface-panel space-y-5 p-5 sm:p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+            {t("projects.filtersTitle")}
+          </p>
+          <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setActiveTag(null)}
             className={cn(
-              "rounded-full border px-3 py-1 text-sm font-medium transition-colors",
+              "rounded-full border px-4 py-2 text-sm font-medium transition-all",
               activeTag === null
-                ? "border-foreground bg-foreground text-background"
-                : "border-border bg-transparent text-muted-foreground hover:border-foreground/50 hover:text-foreground"
+                ? "border-primary/70 bg-primary text-primary-foreground"
+                : "border-border/70 bg-background/60 text-muted-foreground hover:border-primary/35 hover:text-foreground"
             )}
           >
-            All
+            {t("projects.all")}
           </button>
           {allTags.map((tag) => (
             <button
               key={tag}
               onClick={() => setActiveTag(tag === activeTag ? null : tag)}
               className={cn(
-                "rounded-full border px-3 py-1 text-sm font-medium transition-colors",
+                "rounded-full border px-4 py-2 text-sm font-medium transition-all",
                 activeTag === tag
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-transparent text-muted-foreground hover:border-foreground/50 hover:text-foreground"
+                  ? "border-primary/70 bg-primary text-primary-foreground"
+                  : "border-border/70 bg-background/60 text-muted-foreground hover:border-primary/35 hover:text-foreground"
               )}
             >
               {tag}
             </button>
           ))}
         </div>
+        </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((project, index) => (
-            <ProjectCard key={project.id} project={project} index={index} />
+            <ProjectCard
+              key={project.id}
+              project={project}
+              index={index}
+              variant="standard"
+            />
           ))}
         </div>
       </div>
