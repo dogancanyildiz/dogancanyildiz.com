@@ -269,7 +269,10 @@
   .skip-link {
     @apply sr-only rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground;
   }
+  /* not-sr-only zeroes padding and margin, and this rule outranks .skip-link,
+     so the pill restates its inset once it becomes visible. */
   .skip-link:focus-visible {
     @apply not-sr-only fixed left-4 top-4 z-50 no-underline;
+    padding: 0.5rem 1rem;
   }
 }

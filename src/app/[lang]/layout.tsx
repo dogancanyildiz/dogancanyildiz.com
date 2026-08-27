@@ -81,7 +81,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
                 {t("skipToContent")}
               </a>
               <Header />
-              <main id="main" className="min-h-[calc(100vh-7rem)]">
+              <main
+                id="main"
+                tabIndex={-1}
+                className="min-h-[calc(100vh-7rem)] focus-visible:outline-none"
+              >
                 {children}
               </main>
               <Footer />

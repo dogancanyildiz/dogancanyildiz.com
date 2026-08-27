@@ -90,3 +90,19 @@ describe("theme toggle reflects the resolved theme", () => {
     expect(source).not.toMatch(/\btheme === "dark"/);
   });
 });
+
+describe("skip link", () => {
+  it("keeps its padding once it becomes visible", () => {
+    // not-sr-only resets padding to 0 and the :focus-visible rule outranks
+    // .skip-link, so the inset has to be restated inside the focus rule.
+    expect(read("src/app/globals.css")).toMatch(
+      /\.skip-link:focus-visible\s*\{[^}]*padding:\s*0\.5rem 1rem/
+    );
+  });
+
+  it("targets a main landmark that can actually receive focus", () => {
+    expect(read("src/app/[lang]/layout.tsx")).toMatch(
+      /<main[^>]*id="main"[^>]*tabIndex=\{-1\}/
+    );
+  });
+});
