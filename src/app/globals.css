@@ -283,3 +283,49 @@
     padding: 0.5rem 1rem;
   }
 }
+
+@layer components {
+  .prose-content {
+    @apply space-y-5 text-base leading-7 text-foreground/85;
+  }
+  .prose-content h2 {
+    @apply mt-10 text-2xl leading-snug text-foreground;
+  }
+  .prose-content h3 {
+    @apply mt-8 text-xl leading-snug text-foreground;
+  }
+  .prose-content a {
+    @apply text-primary underline underline-offset-4;
+  }
+  /* rehype-autolink-headings wraps every heading in an anchor; keep those
+     looking like headings, not like inline links. */
+  .prose-content h2 > a,
+  .prose-content h3 > a {
+    @apply text-foreground no-underline;
+  }
+  .prose-content ul {
+    @apply list-disc space-y-2 pl-6;
+  }
+  .prose-content ol {
+    @apply list-decimal space-y-2 pl-6;
+  }
+  .prose-content pre {
+    @apply overflow-x-auto rounded-[1.25rem] border border-border p-4 font-mono text-sm;
+  }
+  .prose-content :not(pre) > code {
+    @apply rounded border border-border px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+  /* Shiki's dual theme output (themes: { light, dark }, defaultColor: false)
+     only writes the --shiki-* custom properties inline; it leaves picking a
+     colour scheme to this stylesheet instead of inlining a fixed colour. */
+  .prose-content .shiki,
+  .prose-content .shiki span {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+  }
+  .dark .prose-content .shiki,
+  .dark .prose-content .shiki span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+}

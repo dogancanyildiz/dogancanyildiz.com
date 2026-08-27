@@ -12,6 +12,8 @@ const LANG_ROUTES = [
   "src/app/[lang]/about/page.tsx",
   "src/app/[lang]/projects/page.tsx",
   "src/app/[lang]/projects/[slug]/page.tsx",
+  "src/app/[lang]/blog/page.tsx",
+  "src/app/[lang]/blog/[slug]/page.tsx",
   "src/app/[lang]/contact/page.tsx",
   "src/app/[lang]/opengraph-image.tsx",
 ];
@@ -30,12 +32,29 @@ const REMOVED_ROUTES = [
   "src/app/opengraph-image.tsx",
 ];
 
-function proxyMatcher(): string {
+// Parses every double quoted string literal inside the `matcher: [ ... ]`
+// array in src/proxy.ts, unescaping each one with JSON.parse (the file is
+// TypeScript source, so backslashes are still escaped there).
+function proxyMatcher(): string[] {
   const source = read("src/proxy.ts");
-  const match = source.match(/matcher:\s*"([^"]+)"/);
-  if (!match) throw new Error("proxy.ts does not declare a string matcher");
-  // The file is TypeScript source, so the backslashes are still escaped.
-  return JSON.parse(`"${match[1]}"`) as string;
+  const block = source.match(/matcher:\s*\[([\s\S]*?)\]/);
+  if (!block) throw new Error("proxy.ts does not declare an array matcher");
+  const literals = block[1].match(/"(?:[^"\\]|\\.)*"/g);
+  if (!literals) {
+    throw new Error("proxy.ts matcher array has no string literals");
+  }
+  return literals.map((literal) => JSON.parse(literal) as string);
+}
+
+// Converts a matcher pattern to a JS regex and tests it against pathname.
+// :path* becomes .* (a bare locale path such as /tr still matches through
+// the generic catch-all pattern, so this simplification does not lose
+// coverage), and the whole pattern is anchored with ^ and $.
+function matchesAny(pathname: string): boolean {
+  return proxyMatcher().some((pattern) => {
+    const regexSource = pattern.replace(/:path\*/g, ".*");
+    return new RegExp(`^${regexSource}$`).test(pathname);
+  });
 }
 
 describe("proxy", () => {
@@ -52,10 +71,18 @@ describe("proxy", () => {
   });
 
   it("matches page routes and skips api, framework and file paths", () => {
-    const pattern = new RegExp(`^${proxyMatcher()}$`);
-
-    for (const pathname of ["/", "/tr", "/about", "/tr/about", "/projects/a"]) {
-      expect(pattern.test(pathname), pathname).toBe(true);
+    for (const pathname of [
+      "/",
+      "/tr",
+      "/about",
+      "/tr/about",
+      "/projects/a",
+      "/feed.xml",
+      "/tr/feed.xml",
+      "/icons",
+      "/blog/x",
+    ]) {
+      expect(matchesAny(pathname), pathname).toBe(true);
     }
 
     for (const pathname of [
@@ -66,19 +93,36 @@ describe("proxy", () => {
       "/favicon.ico",
       "/robots.txt",
       "/sitemap.xml",
-      "/cv.pdf",
+      "/cv/dogancanyildiz-cv.pdf",
       "/icon",
     ]) {
-      expect(pattern.test(pathname), pathname).toBe(false);
+      expect(matchesAny(pathname), pathname).toBe(false);
     }
   });
 
-  it("skips /icon so the app root metadata route is never rewritten to a locale prefix", () => {
-    // /icon lives outside app/[lang], so a rewrite to /en/icon or /tr/icon 404s.
-    // Regression test for the bug where GET /icon returned 404 in every build.
-    const pattern = new RegExp(`^${proxyMatcher()}$`);
-    expect(pattern.test("/icon")).toBe(false);
-    expect(pattern.test("/icon?abc123")).toBe(false);
+  it("skips exactly /icon but not /icons", () => {
+    // /icon lives outside app/[lang], so a rewrite to /en/icon or /tr/icon
+    // 404s. The icon$ anchor narrows the exclusion to the exact /icon path,
+    // so a future /icons route stays locale rewritten like any other path.
+    expect(matchesAny("/icon")).toBe(false);
+    expect(matchesAny("/icons")).toBe(true);
+  });
+
+  it("redirects the legacy favicon path to the single icon source", () => {
+    const config = read("next.config.ts");
+    expect(config).toContain('source: "/favicon.ico"');
+    expect(config).toContain('destination: "/icon"');
+  });
+});
+
+describe("rss feed route", () => {
+  it("serves a static per locale feed with the rss content type", () => {
+    expect(exists("src/app/[lang]/feed.xml/route.ts")).toBe(true);
+    const source = read("src/app/[lang]/feed.xml/route.ts");
+    expect(source).toContain('export const dynamic = "force-static"');
+    expect(source).toContain("export const dynamicParams = false");
+    expect(source).toContain("export function generateStaticParams()");
+    expect(source).toContain("application/rss+xml");
   });
 });
 
@@ -153,19 +197,22 @@ describe("application shell", () => {
     // getPathname honours localePrefix "as-needed", so the English link is
     // /about and not /en/about, which the proxy answers with a 307. Link with
     // an explicit locale prop always forces the prefix.
-    expect(source).toContain("getPathname({ locale, href: pathname })");
+    expect(source).toContain("getPathname({ locale, href: target })");
     expect(source).not.toContain("locale={locale}");
     expect(source).not.toContain("setLocale");
     expect(source).not.toContain("document.cookie");
   });
 
+  it("falls back to the section root for untranslated content", () => {
+    const source = read("src/components/layout/language-switcher.tsx");
+    expect(source).toContain(
+      'import { switchTargetPath } from "@/i18n/switch-target"'
+    );
+  });
+
   it("moved the page bodies into reusable section components", () => {
-    expect(exists("src/components/sections/about-content.tsx")).toBe(true);
     expect(exists("src/components/sections/contact-page-content.tsx")).toBe(
       true
-    );
-    expect(read("src/components/sections/about-content.tsx")).toContain(
-      "export function AboutContent()"
     );
     expect(read("src/components/sections/contact-page-content.tsx")).toContain(
       "export function ContactPageContent()"
@@ -234,16 +281,13 @@ describe("global-not-found font parity", () => {
 
 const LINK_USING_CONTENT_COMPONENTS = [
   "src/components/sections/hero.tsx",
-  "src/components/sections/featured-projects.tsx",
   "src/components/sections/project-card.tsx",
-  "src/components/sections/project-detail.tsx",
-  "src/components/sections/about-content.tsx",
+  "src/components/sections/post-list.tsx",
 ];
 
 const CONTENT_COMPONENTS = [
   ...LINK_USING_CONTENT_COMPONENTS,
   "src/components/sections/skills-strip.tsx",
-  "src/components/sections/projects-section.tsx",
   "src/components/sections/contact-form.tsx",
   "src/components/sections/contact-page-content.tsx",
 ];
@@ -262,7 +306,7 @@ describe("content components", () => {
     (component) => {
       const source = read(component);
       expect(source, component).toContain('from "next-intl"');
-      expect(source, component).toContain("useTranslations()");
+      expect(source, component).toContain("useTranslations(");
       expect(source, component).not.toContain(
         'from "@/components/locale-provider"'
       );

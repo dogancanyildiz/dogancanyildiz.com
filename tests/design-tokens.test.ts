@@ -167,20 +167,15 @@ describe("component colour hygiene", () => {
 });
 
 describe("project list layout", () => {
-  it("adds a row component that links year, title, role and stack", () => {
-    const path = "src/components/sections/project-row.tsx";
+  it("adds a project grid component that renders ProjectCard", () => {
+    const path = "src/components/sections/project-grid.tsx";
     expect(existsSync(repoPath(path))).toBe(true);
     const source = read(path);
-    expect(source).toContain("export function ProjectRow");
-    expect(source).toContain('from "@/i18n/navigation"');
-    expect(source).toContain("after:absolute after:inset-0");
-  });
-
-  it("renders the project list as rows, not a card grid", () => {
-    const source = read("src/components/sections/projects-section.tsx");
-    expect(source).toContain("ProjectRow");
-    expect(source).not.toContain("ProjectCard");
-    expect(source).toMatch(/<ul\b/);
+    expect(source).toContain("export function ProjectGrid");
+    expect(source).toContain("ProjectCard");
+    // MotionProvider already sits once in the locale layout, so the grid
+    // itself never wraps another LazyMotion instance.
+    expect(source).not.toContain("LazyMotion");
   });
 
   it("keeps ProjectCard down to a single interactive element", () => {

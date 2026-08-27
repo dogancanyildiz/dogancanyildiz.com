@@ -1,9 +1,14 @@
 {
-  "brand": "Alex Chen",
+  "brand": {
+    "name": "Doğan Can Yıldız",
+    "monogram": "DCY",
+    "role": "Full-Stack Web Developer & DevOps Engineer"
+  },
   "nav": {
     "home": "Home",
     "about": "About",
     "projects": "Projects",
+    "blog": "Blog",
     "contact": "Contact",
     "languageLabel": "Language",
     "menu": "Menu",
@@ -11,162 +16,92 @@
     "closeMenu": "Close menu"
   },
   "hero": {
-    "greeting": "Hi, I'm",
-    "name": "Alex Chen",
-    "role": "Frontend Developer",
-    "title": "Designing premium digital products with clarity, rhythm, and speed.",
-    "subtitle": "I build interface systems, product experiences, and frontend architecture for teams that care about detail.",
+    "location": "Konya, Türkiye",
+    "tagline": "I build web applications and run the infrastructure they ship on.",
+    "intro": "I'm a full-stack developer based in Konya, Türkiye. I build web applications with Next.js and Node.js, and I deploy them myself: Docker, GitHub Actions, Coolify and Linux servers. Alongside development I hold the CAPT certification and have completed the full Cisco CCNA track along with CyberOps Associate.",
     "viewProjects": "View projects",
-    "contact": "Get in touch",
-    "availableForWork": "Available for select work",
-    "downloadCV": "Download CV",
-    "eyebrow": "Independent frontend partner",
-    "summaryTitle": "A sharper way to ship",
-    "summaryBody": "From landing pages to internal tools, I turn rough product ideas into interfaces that feel editorial, modern, and easy to use.",
-    "metricYears": "Years shipping products",
-    "metricProjects": "Selected launches",
-    "metricFocus": "Focus across design and code",
-    "focus1": "Design systems",
-    "focus2": "Product websites",
-    "focus3": "Application UI",
-    "focus4": "Frontend architecture",
-    "note": "Currently based in Istanbul, collaborating remotely with product teams.",
-    "focusLabel": "Focus"
+    "downloadCv": "Download CV",
+    "getInTouch": "Get in touch"
   },
   "home": {
-    "featuredTitle": "Featured projects",
-    "featuredSubtitle": "A curated selection of launches, systems, and product work.",
-    "skillsTitle": "Technologies I work with",
-    "viewAll": "View all projects",
-    "featuredEyebrow": "Selected work",
+    "featuredTitle": "Selected work",
+    "featuredLink": "All projects",
+    "latestPostsTitle": "Latest writing",
+    "latestPostsLink": "All posts",
+    "skillsTitle": "What I work with",
     "skillsEyebrow": "Capabilities",
-    "skillsSubtitle": "A practical stack shaped by product delivery, systems thinking, and interface craft."
+    "skillsSubtitle": "Full-stack development on a networking and security foundation, shipped on infrastructure I run myself."
   },
   "footer": {
-    "copyright": "All rights reserved.",
-    "contact": "Contact",
+    "tagline": "Full-stack development, self-hosted infrastructure, security-minded engineering.",
+    "copyright": "Built and self-hosted by me.",
     "navTitle": "Pages",
+    "emailLabel": "Email",
+    "elsewhereLabel": "Elsewhere",
     "github": "GitHub",
     "linkedin": "LinkedIn",
-    "twitter": "Twitter",
-    "elsewhere": "Elsewhere",
-    "availability": "Available for select freelance and full-time collaborations.",
-    "tagline": "Crafting interfaces with a calm visual voice and strong frontend foundations.",
-    "emailLabel": "Primary email"
+    "rss": "RSS"
   },
   "about": {
     "title": "About",
-    "intro": "I build product experiences that feel polished on the surface and dependable underneath.",
-    "p1": "My work sits at the intersection of UI craft, frontend engineering, and system thinking. I care about speed, accessibility, and giving teams a visual language they can keep extending.",
-    "p2": "Over the years I've worked on design systems, dashboards, e-commerce, internal tools, and launch surfaces. The throughline is always the same: make complex things feel legible.",
-    "skillsTitle": "Skills & tools",
+    "description": "Full-stack developer in Konya, Türkiye, building web applications and running the infrastructure they ship on.",
+    "lead": "Software engineer specializing in scalable, user-friendly web applications with Next.js, Node.js/Express and MongoDB.",
+    "body1": "I don't stop at writing the code. I build and ship on self-hosted infrastructure (Docker, GitHub Actions CI/CD, Coolify, Traefik and Linux servers) and work in Agile teams, using ClickUp for sprint planning and issue tracking.",
+    "body2": "What sets my work apart is a strong networking and security foundation underneath the application layer: I'm CAPT certified, and I've completed the full Cisco CCNA track along with CyberOps Associate. This means I think about how a system is deployed, exposed and hardened, not just how it's built.",
+    "body3": "Outside of work I spent two years as a GDG Konya organizer and served on the GDG Cloud Konya core team, organizing tech talks, study jams and hands-on workshops for the local developer community.",
+    "nowLabel": "Now",
+    "now": "Full-Stack Developer at BerrSoft, studying Mathematics and Computer Science at Necmettin Erbakan University",
+    "locationLabel": "Location",
+    "location": "Konya, Türkiye",
+    "skillsTitle": "Skills",
     "experienceTitle": "Experience",
+    "communityTitle": "Community",
+    "speakingTitle": "Talks",
+    "certificatesTitle": "Certificates",
+    "certificateVerify": "Verify",
     "educationTitle": "Education",
-    "browseIntro": "You can browse my",
-    "or": " or ",
-    "projectsLink": "projects",
-    "contactLink": "get in touch",
-    "exp1Role": "Senior Frontend Developer",
-    "exp1Company": "TechCorp Inc.",
-    "exp1Period": "2021 - Present",
-    "exp1Desc": "Lead frontend for the main product. Introduced design system and improved Core Web Vitals.",
-    "exp2Role": "Frontend Developer",
-    "exp2Company": "StartupXYZ",
-    "exp2Period": "2019 - 2021",
-    "exp2Desc": "Built customer dashboard and admin panel with React. Integrated REST and GraphQL APIs.",
-    "exp3Role": "Junior Frontend Developer",
-    "exp3Company": "WebAgency",
-    "exp3Period": "2017 - 2019",
-    "exp3Desc": "Developed responsive sites and small web apps. Worked with designers and backend team.",
-    "edu1Degree": "B.Sc. Computer Science",
-    "edu1School": "State University",
-    "edu1Period": "2013 - 2017",
-    "downloadCV": "Download CV",
-    "skillsFrontend": "Frontend",
-    "skillsBackend": "Backend",
-    "skillsTools": "Tools",
-    "eyebrow": "Profile",
-    "manifestoEyebrow": "Approach",
-    "manifestoTitle": "Frontend with an editorial eye",
-    "manifestoBody": "I like products that feel deliberate: clear hierarchy, thoughtful motion, stable architecture, and just enough personality to be memorable.",
-    "capabilitiesEyebrow": "Capabilities",
-    "timelineEyebrow": "Career path",
-    "educationEyebrow": "Background"
+    "languagesTitle": "Languages",
+    "languages": "Turkish is my native language. I work in written English every day: documentation, repositories and the posts on this site.",
+    "downloadCv": "Download CV"
   },
   "projects": {
     "title": "Projects",
-    "subtitle": "A collection of product, platform, and systems work spanning commerce, analytics, design systems, and internal tooling.",
-    "backToProjects": "Back to projects",
-    "viewLive": "Live demo",
-    "viewSource": "Source code",
-    "technologies": "Technologies",
-    "notFound": "Project not found",
-    "eyebrow": "Archive",
-    "filtersTitle": "Browse by stack",
-    "all": "All",
-    "summary": "Project summary",
-    "impact": "Impact",
+    "description": "Five projects I shipped and still stand behind. Each one lists the role I held, the stack I used and what actually changed at the end.",
     "role": "Role",
-    "links": "Links",
-    "items": {
-      "1": {
-        "title": "E-commerce platform",
-        "description": "Full-stack online store with product catalog, cart, checkout, and admin panel. Built with Next.js, Stripe, and PostgreSQL. Handles thousands of SKUs and supports multiple locales."
-      },
-      "2": {
-        "title": "Analytics dashboard",
-        "description": "Real-time analytics dashboard for marketing teams. Custom charts, filters, and export to CSV/PDF. Integrates with Google Analytics and internal APIs. Used by 50+ companies."
-      },
-      "3": {
-        "title": "Design system & docs",
-        "description": "Internal design system with 40+ components, Storybook, and usage guidelines. Reduced UI inconsistency and sped up feature delivery across 5 product teams."
-      },
-      "4": {
-        "title": "Developer CLI tool",
-        "description": "Open-source CLI for scaffolding and deploying static sites. Published on npm with 10k+ weekly downloads. Written in TypeScript, supports plugins."
-      },
-      "5": {
-        "title": "Mobile-first booking app",
-        "description": "Booking flow for a service marketplace. Calendar, availability, payments, and push notifications. React Native (Expo) and Node.js backend."
-      },
-      "6": {
-        "title": "Internal HR portal",
-        "description": "Leave requests, timesheets, and org chart. SSO, role-based access, and audit logs. Built with React and .NET. Serves 500+ employees."
-      }
-    }
+    "stack": "Stack",
+    "year": "Year",
+    "outcome": "Outcome",
+    "viewLive": "Live site",
+    "viewSource": "Source",
+    "back": "All projects"
+  },
+  "blog": {
+    "title": "Writing",
+    "description": "Notes on full-stack development, self-hosted infrastructure and web security. Posts are written in Turkish first; some of them are translated into English.",
+    "readingTime": "{minutes} min read",
+    "back": "All posts",
+    "empty": "No English posts yet. The Turkish edition of this blog has more."
   },
   "contact": {
     "title": "Contact",
-    "subtitle": "If you're shaping a product, refreshing a marketing surface, or refining a frontend system, I'd be glad to hear about it.",
-    "location": "Based in Istanbul, Turkey",
-    "email": "alex@example.com",
-    "availability": "Open to full-time and freelance opportunities.",
-    "eyebrow": "Start a conversation",
-    "cardTitle": "What I can help with",
-    "cardBody": "Design-forward product UI, landing page refreshes, component systems, and frontend clean-up for teams who want a sharper interface presence.",
-    "responseTitle": "Typical response",
-    "responseBody": "Usually within 1-2 business days.",
-    "workingTitle": "Working style",
-    "workingBody": "Structured, collaborative, and detail-oriented from kickoff through polish.",
-    "availabilityTitle": "Availability",
-    "availabilityBody": "Open for select product collaborations this quarter."
-  },
-  "form": {
-    "name": "Name",
-    "email": "Email",
-    "subject": "Subject (optional)",
-    "message": "Message",
-    "placeholderName": "Your name",
-    "placeholderEmail": "you@example.com",
-    "placeholderSubject": "Subject",
-    "placeholderMessage": "Your message...",
-    "send": "Send message",
-    "sending": "Sending...",
-    "success": "Message sent. I'll get back to you soon.",
-    "errorGeneric": "Something went wrong. Please try again.",
-    "errorNetwork": "Network error. Please try again.",
-    "introTitle": "Message",
-    "introBody": "Share a little context and I'll reply with next steps."
+    "description": "Open to interesting projects and conversations. The fastest way to reach me is email.",
+    "intro": "Open to interesting projects and conversations. The fastest way to reach me is email.",
+    "emailLabel": "Email",
+    "locationLabel": "Location",
+    "location": "Konya, Türkiye",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "you@company.com",
+      "message": "Message",
+      "messagePlaceholder": "What would you like to build?",
+      "submit": "Send message",
+      "sending": "Sending",
+      "success": "Thanks, your message is on its way. I usually reply within a day.",
+      "error": "The message could not be sent. Please email me directly instead.",
+      "honeypotLabel": "Leave this field empty"
+    }
   },
   "notFound": {
     "code": "404",
@@ -175,15 +110,9 @@
     "backHome": "Back to home"
   },
   "metadata": {
-    "defaultTitle": "Alex Chen Portfolio",
-    "defaultDescription": "Premium frontend portfolio, selected projects, experience, and contact.",
-    "aboutTitle": "About",
-    "aboutDescription": "About me and my work.",
-    "projectsTitle": "Projects",
-    "projectsDescription": "A selection of projects I've worked on.",
-    "contactTitle": "Contact",
-    "contactDescription": "Get in touch.",
-    "ogAlt": "Portfolio"
+    "defaultTitle": "Doğan Can Yıldız",
+    "defaultDescription": "Full-stack developer building scalable web apps with Next.js and Node.js, shipping on self-hosted Docker infrastructure. CAPT certified. Konya, Türkiye.",
+    "ogAlt": "Doğan Can Yıldız, Full-Stack Web Developer and DevOps Engineer"
   },
   "api": {
     "invalidRequest": "Invalid request. Name, email, and message are required.",

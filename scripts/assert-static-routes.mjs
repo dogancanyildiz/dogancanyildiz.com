@@ -16,6 +16,21 @@ try {
   process.exit(1);
 }
 
+const projectsUrl = new URL("../.velite/projects.json", import.meta.url);
+const postsUrl = new URL("../.velite/posts.json", import.meta.url);
+
+let veliteProjects;
+let velitePosts;
+try {
+  veliteProjects = JSON.parse(await readFile(projectsUrl, "utf8"));
+  velitePosts = JSON.parse(await readFile(postsUrl, "utf8"));
+} catch {
+  console.error(
+    ".velite content not found. Run `npm run build:content` first."
+  );
+  process.exit(1);
+}
+
 const routes = Object.keys(manifest.routes ?? {});
 
 const required = [
@@ -25,35 +40,84 @@ const required = [
   "/tr/about",
   "/en/projects",
   "/tr/projects",
+  "/en/blog",
+  "/tr/blog",
   "/en/contact",
   "/tr/contact",
+  "/en/feed.xml",
+  "/tr/feed.xml",
 ];
 
 const missing = required.filter((route) => !routes.includes(route));
 
-const detail = (prefix) =>
-  routes.filter((route) =>
-    new RegExp(`^${prefix}/projects/[^/]+$`).test(route)
-  );
-
-const enDetail = detail("/en");
-const trDetail = detail("/tr");
-
 const apiRoutes = routes.filter((route) => route.startsWith("/api"));
+
+const locales = ["en", "tr"];
+
+// Every prerendered /<locale>/<section>/<slug> route, keyed by its slug.
+function prerenderedSlugs(locale, section) {
+  const pattern = new RegExp(`^/${locale}/${section}/([^/]+)$`);
+  return routes
+    .map((route) => route.match(pattern)?.[1])
+    .filter((slug) => slug !== undefined);
+}
+
+function setsEqual(a, b) {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  if (setA.size !== setB.size) return false;
+  for (const value of setA) {
+    if (!setB.has(value)) return false;
+  }
+  return true;
+}
+
+const projectSlugsByLocale = Object.fromEntries(
+  locales.map((locale) => [
+    locale,
+    veliteProjects
+      .filter((project) => project.locale === locale)
+      .map((project) => project.slug),
+  ])
+);
+
+const postSlugsByLocale = Object.fromEntries(
+  locales.map((locale) => [
+    locale,
+    velitePosts
+      .filter((post) => post.locale === locale && !post.draft)
+      .map((post) => post.slug),
+  ])
+);
 
 const problems = [];
 
 if (missing.length > 0) {
   problems.push(`not prerendered: ${missing.join(", ")}`);
 }
-if (enDetail.length === 0) {
-  problems.push("no prerendered project detail page for en");
+
+for (const locale of locales) {
+  const prerenderedProjects = prerenderedSlugs(locale, "projects");
+  const expectedProjects = projectSlugsByLocale[locale];
+  if (!setsEqual(prerenderedProjects, expectedProjects)) {
+    problems.push(
+      `${locale} project routes do not match content slugs: ` +
+        `prerendered=[${[...prerenderedProjects].sort().join(", ")}] ` +
+        `expected=[${[...expectedProjects].sort().join(", ")}]`
+    );
+  }
+
+  const prerenderedPosts = prerenderedSlugs(locale, "blog");
+  const expectedPosts = postSlugsByLocale[locale];
+  if (!setsEqual(prerenderedPosts, expectedPosts)) {
+    problems.push(
+      `${locale} blog routes do not match content slugs: ` +
+        `prerendered=[${[...prerenderedPosts].sort().join(", ")}] ` +
+        `expected=[${[...expectedPosts].sort().join(", ")}]`
+    );
+  }
 }
-if (enDetail.length !== trDetail.length) {
-  problems.push(
-    `project detail count differs: en=${enDetail.length} tr=${trDetail.length}`
-  );
-}
+
 if (apiRoutes.length > 0) {
   problems.push(`api routes must stay dynamic: ${apiRoutes.join(", ")}`);
 }
@@ -64,9 +128,15 @@ if (problems.length > 0) {
   process.exit(1);
 }
 
-const contentRoutes = required.length + enDetail.length + trDetail.length;
+const enProjectCount = projectSlugsByLocale.en.length;
+const trProjectCount = projectSlugsByLocale.tr.length;
+const enPostCount = postSlugsByLocale.en.length;
+const trPostCount = postSlugsByLocale.tr.length;
+
+const contentRoutes =
+  required.length + enProjectCount + trProjectCount + enPostCount + trPostCount;
 
 console.log(
   `Static route check passed: ${contentRoutes} content routes prerendered ` +
-    `(${enDetail.length} project pages per locale).`
+    `(${enProjectCount} project pages per locale, ${enPostCount} en posts, ${trPostCount} tr posts).`
 );

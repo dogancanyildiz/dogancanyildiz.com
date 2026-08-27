@@ -1,5 +1,7 @@
 # Faz 0: Güvenlik ve hijyen Implementation Plan
 
+
+> Durum: Uygulandı, PR #2 merge edildi (main). Devir notu: handoffs/faz-0.md
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Bilinen Next.js CVE'lerini kapatmak, üretime hazır bir Next yapılandırması (standalone + güvenlik başlıkları) bırakmak, contact endpoint'ini sunucu tarafında sertleştirmek ve create-next-app kalıntılarını temizlemek.

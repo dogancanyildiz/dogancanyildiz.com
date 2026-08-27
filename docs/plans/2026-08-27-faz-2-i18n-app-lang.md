@@ -1,5 +1,7 @@
 # Faz 2: i18n yeniden mimarisi (app/[lang] + next-intl) Implementation Plan
 
+
+> Durum: Uygulandı, PR #4 merge edildi (main). Devir notu: handoffs/faz-2.md
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Cookie tabanlı i18n katmanını tamamen kaldırıp EN'i kökte, TR'yi `/tr` altında ayrı ve crawl edilebilir URL'lerde sunan, tüm içerik route'ları build zamanında prerender edilen, canonical/hreflang/x-default üreten bir `app/[lang]` + next-intl mimarisi kurmak.

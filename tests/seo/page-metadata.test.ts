@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { projects } from "@/data/projects";
+import { getPostSlugs, getProjectSlugs } from "@/lib/content";
 
 // next/font/local is a build time only export: outside the Next compiler
 // (webpack or SWC) it resolves to an empty module, so calling it throws
@@ -40,6 +40,12 @@ vi.mock("next-intl/server", () => ({
       return value;
     };
   },
+  // Not exercised by any assertion in this file yet, but future blog pages
+  // import getFormatter from next-intl/server alongside getTranslations, so
+  // the mock has to keep that import from throwing.
+  getFormatter: async () => ({
+    dateTime: () => "",
+  }),
 }));
 
 beforeEach(() => {
@@ -52,7 +58,19 @@ type MetadataFn = (args: {
   params: Promise<{ lang: string; slug: string }>;
 }) => Promise<Metadata>;
 
-const PAGES = [
+interface PageCase {
+  name: string;
+  path: string;
+  extraParams?: { slug: string };
+  // Locales this page case should be exercised for. Undefined means every
+  // routed locale. A post that only exists in one locale (no translation
+  // yet) has to be scoped here, otherwise the untranslated locale calls
+  // notFound() inside generateMetadata and the test throws.
+  locales?: readonly AppLocale[];
+  load: () => Promise<{ generateMetadata: MetadataFn }>;
+}
+
+const PAGES: PageCase[] = [
   { name: "home", path: "/", load: () => import("@/app/[lang]/page") },
   {
     name: "about",
@@ -65,20 +83,40 @@ const PAGES = [
     load: () => import("@/app/[lang]/projects/page"),
   },
   {
+    name: "blog",
+    path: "/blog",
+    load: () => import("@/app/[lang]/blog/page"),
+  },
+  {
     name: "contact",
     path: "/contact",
     load: () => import("@/app/[lang]/contact/page"),
   },
-  ...projects.map((project) => ({
-    name: `projects/${project.slug}`,
-    path: `/projects/${project.slug}`,
-    extraParams: { slug: project.slug },
+  ...getProjectSlugs("en").map((slug) => ({
+    name: `projects/${slug}`,
+    path: `/projects/${slug}`,
+    extraParams: { slug },
     load: () => import("@/app/[lang]/projects/[slug]/page"),
   })),
-] as const;
+  // The locale is baked into the case name because a bilingual post (like
+  // self-hosting-with-coolify) produces one PAGES entry per locale that
+  // otherwise share the same `blog/<slug>` name, which would collapse into
+  // duplicate it.each test titles.
+  ...routing.locales.flatMap((locale) =>
+    getPostSlugs(locale).map((slug) => ({
+      name: `blog/${slug} [${locale}]`,
+      path: `/blog/${slug}`,
+      extraParams: { slug },
+      locales: [locale],
+      load: () => import("@/app/[lang]/blog/[slug]/page"),
+    }))
+  ),
+];
 
 const CASES = routing.locales.flatMap((locale) =>
-  PAGES.map((page) => ({ locale, page }))
+  PAGES.filter((page) => !page.locales || page.locales.includes(locale)).map(
+    (page) => ({ locale, page })
+  )
 );
 
 async function metadataFor(
@@ -86,7 +124,7 @@ async function metadataFor(
   locale: AppLocale
 ): Promise<Metadata> {
   const mod = (await page.load()) as { generateMetadata: MetadataFn };
-  const slug = "extraParams" in page ? page.extraParams.slug : "";
+  const slug = page.extraParams ? page.extraParams.slug : "";
   return mod.generateMetadata({
     params: Promise.resolve({ lang: locale, slug }),
   });
@@ -202,5 +240,77 @@ describe("page openGraph metadata", () => {
     expect(new Set(urls).size).toBe(routing.locales.length);
     expect(urls).toContain("https://dogancanyildiz.sh/about");
     expect(urls).toContain("https://dogancanyildiz.sh/tr/about");
+  });
+
+  it("marks the project detail page openGraph type as article", async () => {
+    const detailPage = PAGES.find((page) => page.name.startsWith("projects/"));
+    if (!detailPage) throw new Error("no project detail page case found");
+
+    const metadata = await metadataFor(detailPage, "en");
+
+    expect((metadata.openGraph as { type: string }).type).toBe("article");
+  });
+
+  it.each(CASES)(
+    "$page.name in $locale points its rss feed link at its own locale",
+    async ({ locale, page }) => {
+      const metadata = await metadataFor(page, locale);
+      const types = metadata.alternates?.types as
+        Record<string, { url: string }[]> | undefined;
+      const feedLinks = types?.["application/rss+xml"];
+
+      expect(feedLinks, `${page.name} has no rss feed alternate`).toBeTruthy();
+      expect(String(feedLinks?.[0]?.url)).toBe(
+        locale === "en"
+          ? "https://dogancanyildiz.sh/feed.xml"
+          : "https://dogancanyildiz.sh/tr/feed.xml"
+      );
+    }
+  );
+
+  it("marks the post detail page openGraph type as article with its published time", async () => {
+    const postPage = PAGES.find(
+      (page) => page.name === "blog/self-hosting-with-coolify [tr]"
+    );
+    if (!postPage) throw new Error("no post detail page case found");
+    const locale = postPage.locales?.[0] ?? "en";
+
+    const metadata = await metadataFor(postPage, locale);
+    const openGraph = metadata.openGraph as {
+      type: string;
+      publishedTime: string;
+    };
+
+    expect(openGraph.type).toBe("article");
+    expect(openGraph.publishedTime).toMatch(/^2026-08-20/);
+  });
+
+  it("gives the bilingual post both languages in its alternates on the english case", async () => {
+    const postPage = PAGES.find(
+      (page) => page.name === "blog/self-hosting-with-coolify [en]"
+    );
+    if (!postPage) throw new Error("no english case for the bilingual post");
+
+    const metadata = await metadataFor(postPage, "en");
+    const languages = metadata.alternates?.languages as
+      Record<string, string> | undefined;
+
+    expect(languages?.en).toBeTruthy();
+    expect(languages?.tr).toBeTruthy();
+  });
+
+  it("gives a turkish only post only tr and x-default in its alternates", async () => {
+    const postPage = PAGES.find(
+      (page) => page.name === "blog/capt-sinavina-hazirlik [tr]"
+    );
+    if (!postPage) {
+      throw new Error("no turkish case for the turkish only post");
+    }
+
+    const metadata = await metadataFor(postPage, "tr");
+    const languages = metadata.alternates?.languages as
+      Record<string, string> | undefined;
+
+    expect(Object.keys(languages ?? {}).sort()).toEqual(["tr", "x-default"]);
   });
 });

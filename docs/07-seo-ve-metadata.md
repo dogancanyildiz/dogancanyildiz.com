@@ -1,5 +1,5 @@
 # SEO, Metadata ve Yapılandırılmış Veri
-Durum: Öneri, site sahibinin onayını bekliyor · Tarih: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Uygulandı (Faz 2 ve Faz 4) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
 
 ## Özet
 
@@ -55,6 +55,22 @@ Her sayfa kendi dilini de `alternates.languages` içine yazar (self-referencing)
 - **`NEXT_PUBLIC_SITE_URL` eksikse sessizce `example.com`'a düşmeye izin vermek**: mevcut davranışın ta kendisi, canlıda tespit edilmesi zor bir hataya (yanlış domain'li sitemap) yol açtığı denetimde doğrulandı (bulgu B6); build'i patlatan zorunlu kontrole çevrildi.
 - **Çevirisi olmayan içerik için fallback sayfa üretip sitemap'e eklemek**: bilinen bir çok dilli SEO hatası ("fallback sayfaların indekslenmesi", miaoosi.com); [04-i18n.md](./04-i18n.md) kararıyla tutarlı biçimde reddedildi, o dilin sitemap ve `alternates.languages`'ine hiç girmiyor.
 - **`.com`'u birincil domain yapıp `.sh`'yi ikincil bırakmak**: sahip kararı `.sh` birincil; SEO açısından nötr olduğu için bu tercihi değiştirecek teknik gerekçe yok.
+
+## Uygulama durumu (2026-08-27)
+
+Kararın dokuz maddesi de uygulandı, Faz 2 (`app/[lang]` + next-intl geçişi) ve Faz 4'e (içerik + SEO detayları, PR #6) yayılmış olarak.
+
+- **`generateMetadata` cookie'den kurtuldu, `metadataBase` ve `buildPageMetadata` (Faz 4).** `src/lib/seo/page-metadata.ts`'teki `buildPageMetadata(locale, path, options)` tüm rotalı sayfalarda ortak çağrı noktası; `title`/`description`'ı `next-intl` mesaj kataloğundan alıyor, `alternates` ve tam `openGraph` nesnesini `src/lib/seo/alternates.ts`'teki `buildAlternates`/`buildOpenGraph`'a devrediyor. Kod yorumunda kararın 22. satırdaki gerekçesiyle aynı uyarı tekrarlanıyor: Next bir alt segmentin `openGraph`'ını miras almıyor, üstündekini **değiştiriyor**; bu yüzden her sayfa kendi tam `openGraph` nesnesini kuruyor (kararda öngörülmeyen ama doğrudan sonucu olan bir uygulama detayı).
+- **`alternates.canonical` + `languages` + `x-default` (Faz 2/4).** `buildAlternates` her locale için self-referencing bir `languages` girdisi üretiyor, `x-default` önce `en`'i, yoksa `availableLocales[0]`'i, o da yoksa mevcut locale'i tercih ediyor. Kararda tarif edilenden bir adım daha esnek (yalnız-TR içerikte `x-default` EN'e değil mevcut TR'ye düşebiliyor), ama satır 32'deki "yalnız TR" örnek satırıyla tutarlı: EN çevirisi yoksa `x-default` de EN'e sabit kalmıyor.
+- **`sitemap.ts` iki locale, yalnızca var olan çeviriler (Faz 4).** `src/app/sitemap.ts` statik sayfaları (`/`, `/about`, `/projects`, `/blog`, `/contact`) iki locale için, proje/yazı sayfalarını `getProjects(locale)`/`getPosts(locale)` üzerinden yalnızca gerçekten var olan çeviriyle ekliyor; her girdinin `alternates.languages`'i `getProjectLocales`/`getPostLocales`'ten geliyor, yani tek dilde çevrilmiş bir proje diğer dile 404 veren bir hreflang linki hiç almıyor. Toplam **24 URL** (5 statik sayfa x 2 locale + 5 proje x 2 locale + 1 EN yazı + 3 TR yazı). **Açık kalan tek fark**: bu sitemap girdilerinin `alternates.languages` map'inde `x-default` anahtarı hiç yok (yalnızca `buildAlternates`'teki sayfa-level `<link rel=alternate>` etiketlerinde var); bu, Faz 4'ten Faz 5'e devredilen "sitemap x-default" maddesi (`docs/plans/handoffs/faz-4-manual-checklist.md` adım 4).
+- **`robots.ts` gerçek domain (Faz 4).** `example.com` fallback'i tamamen kalktı; `src/app/robots.ts` `siteUrl()`'den okuyor (bu değişken build'de zorunlu, Faz 0'dan beri `src/lib/env.ts` bunu garantiliyor), `/api/` disallow ediliyor, `sitemap`/`host` alanları set.
+- **JSON-LD üç tip (Faz 4).** `src/components/seo/person-jsonld.tsx` (`Person`, ana sayfa), `src/app/[lang]/projects/[slug]/page.tsx` içinde `CreativeWork`, `src/app/[lang]/blog/[slug]/page.tsx` içinde `BlogPosting`; ortak `JsonLd` bileşeni (`src/components/seo/json-ld.tsx`) `<` karakterini `<`'ye kaçırarak script tag injection'ını engelliyor.
+- **`opengraph-image.tsx` ve `icon.tsx` yeniden yazıldı (Faz 3/4).** `icon.tsx` artık koyu zemin üstünde emerald `DCY` monogramı; "Alex Chen"/"P" kalıntısı kod tabanında sıfır (`tests/no-template-residue.test.ts` bunu garanti ediyor). `opengraph-image.tsx` locale başına üretiliyor (`generateImageMetadata`), gerçek isim/unvan ve `03-tasarim-ui-ux.md`'deki nötr palet + emerald aksanı kullanıyor.
+- **`.sh` birincil domain, `.com` yalnızca 301 hedefi.** `NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.sh` (`.env.example`), tüm `absoluteUrl`/`sitemap`/`robots` çıktısı bu domain'e sabit. `.com -> .sh` 301'i Cloudflare Redirect Rules'ta hazır ama henüz canlıya alınmadı (bkz. [06-devops-ve-deploy.md](./06-devops-ve-deploy.md)); iki domain'in aynı anda tam site sunması hiçbir noktada uygulanmadı/denenmedi.
+- **`NEXT_PUBLIC_SITE_URL` Coolify Build-time env.** `src/lib/env.ts` bu değişken build'de eksikse `next build`'i patlatıyor (kararda tarif edilen "build'i patlatan zorunlu kontrol" aynen uygulandı), ayrıca http(s) origin formatını doğruluyor. `.env.example`'a eklendi.
+- **Yayın öncesi elle doğrulama**: henüz yapılmadı. Search Console kaydı, sitemap gönderimi, üçüncü parti hreflang test aracı taraması ve Lighthouse SEO kontrolü `docs/plans/handoffs/faz-4-manual-checklist.md`'de sahibinin bekleyen adımları arasında; hepsi canlı URL gerektiriyor, staging/PR preview'da tam doğrulanamıyor.
+
+**RSS eklentisi (kararda yoktu, Faz 4'te eklendi).** `buildAlternates` her sayfaya kendi locale'inin `/feed.xml`'ine (TR için `/tr/feed.xml`) bir `application/rss+xml` keşif linki ekliyor; `src/app/[lang]/feed.xml/route.ts` locale başına RSS üretiyor. Bu, kararın kapsamında yazılmamış ama JSON-LD ile aynı "ucuz, doğrudan getirisi olan" mantığa uyan bir ek.
 
 ## Riskler ve tripwire'lar
 

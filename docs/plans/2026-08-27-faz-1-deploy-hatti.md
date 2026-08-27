@@ -1,5 +1,7 @@
 # Faz 1: Deploy hattı (Docker, Coolify, Cloudflare, Traefik) Implementation Plan
 
+
+> Durum: Uygulandı, PR #3 merge edildi (main); panel adımları sahibinde (handoffs/faz-1-manual-checklist.md). Devir notu: handoffs/faz-1.md
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Repoyu `main`'e atılan her commit'te kendi sunucusunda otomatik yayınlanan, PR başına preview URL üreten, Cloudflare edge'inin arkasında doğru domain yönlendirmesiyle çalışan bir uygulamaya çevirmek.

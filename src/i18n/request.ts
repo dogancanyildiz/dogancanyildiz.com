@@ -13,5 +13,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   return {
     locale,
     messages: (await import(`../../messages/${locale}.json`)).default,
+    // Velite stores dates as UTC midnight; a fixed zone keeps server and client formatting identical.
+    timeZone: "UTC",
   };
 });

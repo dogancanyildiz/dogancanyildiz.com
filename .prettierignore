@@ -11,3 +11,7 @@ docs
 .nodeterm
 .superpowers
 src/app/favicon.ico
+.velite
+content
+tests/fixtures/.velite-valid
+tests/fixtures/.velite-invalid

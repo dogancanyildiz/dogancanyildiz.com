@@ -5,46 +5,123 @@ beforeEach(() => {
 });
 
 describe("sitemap", () => {
-  it("lists every static page in both locales", async () => {
+  it("lists both locales for the static pages", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const urls = sitemap().map((entry) => entry.url);
 
     expect(urls).toContain("https://dogancanyildiz.sh/");
-    expect(urls).toContain("https://dogancanyildiz.sh/about");
-    expect(urls).toContain("https://dogancanyildiz.sh/projects");
-    expect(urls).toContain("https://dogancanyildiz.sh/contact");
     expect(urls).toContain("https://dogancanyildiz.sh/tr");
+    expect(urls).toContain("https://dogancanyildiz.sh/about");
     expect(urls).toContain("https://dogancanyildiz.sh/tr/about");
+    expect(urls).toContain("https://dogancanyildiz.sh/projects");
     expect(urls).toContain("https://dogancanyildiz.sh/tr/projects");
+    expect(urls).toContain("https://dogancanyildiz.sh/blog");
+    expect(urls).toContain("https://dogancanyildiz.sh/tr/blog");
+    expect(urls).toContain("https://dogancanyildiz.sh/contact");
     expect(urls).toContain("https://dogancanyildiz.sh/tr/contact");
   });
 
-  it("adds one detail entry per project per locale", async () => {
+  it("lists every project in both locales because all of them are translated", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
-    const { projects } = await import("@/data/projects");
+    const { getProjects } = await import("@/lib/content");
     const urls = sitemap().map((entry) => entry.url);
 
-    const en = urls.filter((url) =>
-      /^https:\/\/dogancanyildiz\.sh\/projects\/[^/]+$/.test(url)
-    );
-    const tr = urls.filter((url) =>
-      /^https:\/\/dogancanyildiz\.sh\/tr\/projects\/[^/]+$/.test(url)
-    );
-
-    expect(en).toHaveLength(projects.length);
-    expect(tr).toHaveLength(projects.length);
-  });
-
-  it("attaches language alternates to every entry", async () => {
-    const sitemap = (await import("@/app/sitemap")).default;
-
-    for (const entry of sitemap()) {
-      expect(entry.alternates?.languages).toBeDefined();
-      expect(Object.keys(entry.alternates!.languages!)).toEqual(["en", "tr"]);
+    for (const project of getProjects("en")) {
+      expect(urls).toContain(
+        `https://dogancanyildiz.sh/projects/${project.slug}`
+      );
+      expect(urls).toContain(
+        `https://dogancanyildiz.sh/tr/projects/${project.slug}`
+      );
     }
   });
 
-  it("produces no duplicate urls", async () => {
+  it("never lists a post url for a locale that has no translation", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const urls = sitemap().map((entry) => entry.url);
+    const enUrl = "https://dogancanyildiz.sh/blog/capt-sinavina-hazirlik";
+    const trUrl = "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik";
+
+    expect(urls).not.toContain(enUrl);
+    expect(urls).toContain(trUrl);
+  });
+
+  it("does not put an alternate language on an untranslated entry", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const entries = sitemap();
+    const entry = entries.find(
+      (item) =>
+        item.url === "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik"
+    );
+
+    expect(entry).toBeDefined();
+    expect(entry?.alternates?.languages?.en).toBeUndefined();
+    expect(entry?.alternates?.languages?.tr).toBe(
+      "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik"
+    );
+  });
+
+  it("lists the bilingual post at both locale urls with both languages in its alternates", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const entries = sitemap();
+    const urls = entries.map((entry) => entry.url);
+    const enUrl = "https://dogancanyildiz.sh/blog/self-hosting-with-coolify";
+    const trUrl = "https://dogancanyildiz.sh/tr/blog/self-hosting-with-coolify";
+
+    expect(urls).toContain(enUrl);
+    expect(urls).toContain(trUrl);
+
+    const enEntry = entries.find((item) => item.url === enUrl);
+    const trEntry = entries.find((item) => item.url === trUrl);
+
+    expect(enEntry?.alternates?.languages?.en).toBe(enUrl);
+    expect(enEntry?.alternates?.languages?.tr).toBe(trUrl);
+    expect(trEntry?.alternates?.languages?.en).toBe(enUrl);
+    expect(trEntry?.alternates?.languages?.tr).toBe(trUrl);
+  });
+
+  it("sets lastModified on the post entry to the post date", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const { getPost } = await import("@/lib/content");
+    const entries = sitemap();
+    const entry = entries.find(
+      (item) =>
+        item.url === "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik"
+    );
+    const post = getPost("tr", "capt-sinavina-hazirlik");
+
+    expect(post).toBeDefined();
+    expect(entry?.lastModified).toEqual(new Date(post!.date));
+  });
+
+  it("has a getPost/getProject entry for every content url the sitemap lists", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const { getPost, getProject } = await import("@/lib/content");
+    const entries = sitemap();
+
+    const pattern =
+      /^https:\/\/dogancanyildiz\.sh(\/tr)?\/(blog|projects)\/([a-z0-9-]+)$/;
+
+    let matchedAny = false;
+    for (const entry of entries) {
+      const match = entry.url.match(pattern);
+      if (!match) continue;
+      matchedAny = true;
+
+      const [, trPrefix, section, slug] = match;
+      const locale = trPrefix ? "tr" : "en";
+
+      if (section === "blog") {
+        expect(getPost(locale, slug), entry.url).toBeDefined();
+      } else {
+        expect(getProject(locale, slug), entry.url).toBeDefined();
+      }
+    }
+
+    expect(matchedAny).toBe(true);
+  });
+
+  it("has no duplicate urls", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const urls = sitemap().map((entry) => entry.url);
 

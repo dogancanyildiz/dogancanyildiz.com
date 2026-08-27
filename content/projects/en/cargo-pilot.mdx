@@ -1,0 +1,29 @@
+---
+title: Cargo Pilot
+slug: cargo-pilot
+summary: A logistics platform that digitizes cargo and load planning, and optimizes how a load is placed.
+role: DevOps Chapter Lead
+stack:
+  - Docker
+  - GitHub Actions
+  - Coolify
+  - Linux
+year: 2025
+links:
+  live: https://cargopilot.divizyon.org
+outcome: Deploys run through a Docker plus GitHub Actions pipeline on self-hosted Coolify infrastructure instead of a managed platform.
+featured: true
+order: 1
+---
+
+## What I did
+
+Cargo Pilot is a web platform built at Divizyon that digitizes cargo and load planning for logistics operations. I led the DevOps chapter: I containerized the application with Docker, wrote the GitHub Actions pipelines that build and release it, and ran the whole thing on self-hosted Coolify infrastructure instead of a managed platform. Alongside the infrastructure work I contributed to the core load planning optimization algorithm, and I coordinated a cross functional team in an Agile workflow with sprint planning and task tracking in ClickUp.
+
+## Why it was built this way
+
+Load planning is the part of the job that people were doing by hand, on paper and in spreadsheets, so the product had to make the placement decision itself instead of only recording it. On the delivery side, with a small team, the goal was a deploy step any team member could trigger and an environment that stayed reproducible instead of hand tuned. Moving the application into a container and putting the release behind a pipeline got us there.
+
+## What I learned
+
+Owning both the algorithm and the infrastructure changed how I read the system. An optimization pass that looks cheap in a local test can turn into the slowest request in production once real load data hits it, and the only way to see that early is to run the real container against real data instead of a laptop. The second lesson was about people, not machines: a pipeline is only useful when the team trusts it, so the rollback path had to be as obvious as the deploy path before anyone started shipping on a Friday.

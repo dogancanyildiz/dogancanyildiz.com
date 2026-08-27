@@ -1,5 +1,7 @@
 # Faz 5: Altyapı vitrini (Gatus status widget), Umami, bakım otomasyonu Implementation Plan
 
+
+> Durum: Başlamadı; Faz 4 devir notundaki uyarılar ve devredilen küçük işler bu plana girdi olarak okunmalı
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Yayına çıkmış siteye, kendi sunucusundaki Gatus'tan beslenen canlı bir "Systems" bölümü, self-host Umami analytics ve doğrulanmış bir bakım/otomatik-redeploy zinciri eklemek; topoloji bilgisi (hostname, port, IP, iç adres) hiçbir koşulda client'a sızmadan.
