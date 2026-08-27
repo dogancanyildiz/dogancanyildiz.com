@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import {
   Card,
@@ -40,14 +40,26 @@ export function ProjectCard({
               {project.year}
             </span>
             {project.highlight ? (
-              <span className="text-xs font-medium text-primary">{project.highlight}</span>
+              <span className="text-xs font-medium text-primary">
+                {project.highlight}
+              </span>
             ) : null}
           </div>
-          <CardTitle className={featured ? "text-3xl sm:text-4xl" : compact ? "text-xl" : "text-2xl"}>
+          <CardTitle
+            className={
+              featured
+                ? "text-3xl sm:text-4xl"
+                : compact
+                  ? "text-xl"
+                  : "text-2xl"
+            }
+          >
             {title}
           </CardTitle>
           {project.summary ? (
-            <p className="max-w-xl text-sm leading-6 text-foreground/75">{project.summary}</p>
+            <p className="max-w-xl text-sm leading-6 text-foreground/75">
+              {project.summary}
+            </p>
           ) : null}
         </div>
         <span className="flex size-11 items-center justify-center rounded-full border border-border/70 bg-background/75 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-foreground">

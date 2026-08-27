@@ -37,10 +37,7 @@ export function LocaleProvider({
     setLocaleCookie(next);
   }, []);
 
-  const t = useCallback(
-    (key: string) => translate(locale, key),
-    [locale]
-  );
+  const t = useCallback((key: string) => translate(locale, key), [locale]);
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale, t }}>

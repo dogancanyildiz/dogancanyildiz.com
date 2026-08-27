@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# dogancanyildiz.sh
 
-## Getting Started
+Personal portfolio of Doğan Can Yıldız, a full stack web developer and DevOps
+engineer. The site is a Next.js App Router application that is self hosted on a
+Coolify managed server behind Traefik and Cloudflare, without Vercel.
 
-First, run the development server:
+## Stack
+
+| Layer     | Choice                                                              |
+| --------- | ------------------------------------------------------------------- |
+| Framework | Next.js 16.3.3, App Router, `output: 'standalone'`                  |
+| UI        | React 19.2, Tailwind CSS 4, shadcn/ui, motion 13                    |
+| Email     | Resend, through `/api/contact`                                      |
+| Runtime   | Node 24, single container                                           |
+| Hosting   | Docker image built by Coolify, Traefik in front, Cloudflare proxied |
+
+## Requirements
+
+- Node 24 (`.nvmrc` pins it, `nvm use` picks it up)
+- npm 11.16.0, the lockfile is committed and must be regenerated with the same
+  major version
+
+## Local setup
 
 ```bash
+nvm use
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`NEXT_PUBLIC_SITE_URL` has no fallback. `npm run build` throws when it is
+missing, because a silent fallback would put a wrong host into `robots.txt` and
+`sitemap.xml`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script                 | What it does                                 |
+| ---------------------- | -------------------------------------------- |
+| `npm run dev`          | Development server on http://localhost:3000  |
+| `npm run build`        | Production build, writes `.next/standalone`  |
+| `npm run start`        | Serves the production build                  |
+| `npm run lint`         | ESLint with the Next.js config               |
+| `npm run typecheck`    | `tsc --noEmit`                               |
+| `npm test`             | vitest, node environment, `src/**/*.test.ts` |
+| `npm run format`       | Prettier in check mode                       |
+| `npm run format:write` | Prettier in write mode                       |
 
-## Learn More
+## Environment variables
 
-To learn more about Next.js, take a look at the following resources:
+Every variable is documented in `.env.example`. The split between Coolify build
+and runtime variables is not cosmetic, getting it wrong fails silently in both
+directions.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable                 | Coolify layer | Required          | Notes                                                                                                                                                                        |
+| ------------------------ | ------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`   | Build         | Yes               | Inlined into the client bundle by `next build`. Marking it runtime leaves it undefined in production.                                                                        |
+| `RESEND_API_KEY`         | Runtime       | Yes in production | Build variables can leak into image layers and build logs.                                                                                                                   |
+| `CONTACT_EMAIL`          | Runtime       | Yes in production | Inbox that receives form messages.                                                                                                                                           |
+| `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                                                                                                    |
+| `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after the origin is reachable from Cloudflare alone and Traefik trusts the Cloudflare ranges. `trustedIPs` by itself does not protect `CF-Connecting-IP`. |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Security posture
 
-## Deploy on Vercel
+- Security headers and a Content Security Policy are set in `next.config.ts`
+  through `headers()`. HSTS is deliberately absent from the app, Traefik owns it
+  so there is a single source of truth.
+- `poweredByHeader` is off.
+- `images.remotePatterns` is intentionally undefined. Leaving it undefined keeps
+  `next/image` on local files only and closes the AVIF decoding surface that the
+  August 2026 Next.js advisory describes. Adding a remote host reopens it and
+  needs a deliberate review.
+- `/api/contact` checks `Content-Length`, rate limits per visitor IP, validates
+  the body server side including the honeypot field, and returns a generic error
+  on every failure. Details go to the server log only.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The application is deployed by Coolify from this git repository:
+
+1. Coolify is connected through the GitHub App and uses the Dockerfile build
+   pack. Pushing to `main` triggers a build and a deploy, pull requests get a
+   preview deployment.
+2. The image runs `node server.js` from `.next/standalone` as a non root user.
+3. The container health check points at `/api/health`.
+4. Traefik terminates TLS, adds HSTS and compression, and trusts the Cloudflare
+   ranges through `forwardedHeaders.trustedIPs`.
+5. Cloudflare runs in proxied mode with SSL set to Full (strict). The redirect
+   from `dogancanyildiz.com` to `dogancanyildiz.sh` is a single hop Cloudflare
+   Redirect Rule that keeps the path.
+
+The `Dockerfile`, `.dockerignore` and the GitHub Actions gate are added in phase
+1 of the modernization plan, see `docs/10-yol-haritasi.md`.
+
+## Repository layout
+
+```
+src/app        App Router routes, api handlers, metadata routes
+src/components UI, layout and section components
+src/lib        Framework free helpers, each one unit tested
+docs           Architecture decisions and the phased roadmap
+docs/plans     Executable implementation plans, one per phase
+```
+
+## Documentation
+
+Architecture decisions live in `docs/`. Start with
+`docs/00-ozet-ve-karar.md` for the summary and `docs/10-yol-haritasi.md` for the
+phase order.

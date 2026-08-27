@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocale } from "@/components/locale-provider";
@@ -47,7 +47,9 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   {project.year ? (
                     <span className="eyebrow">{project.year}</span>
                   ) : null}
-                  <h1 className="text-4xl leading-tight sm:text-5xl">{title}</h1>
+                  <h1 className="text-4xl leading-tight sm:text-5xl">
+                    {title}
+                  </h1>
                 </div>
               </div>
 
@@ -60,7 +62,9 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.summary")}
                   </p>
-                  <p className="text-sm leading-7 text-foreground/80">{project.summary}</p>
+                  <p className="text-sm leading-7 text-foreground/80">
+                    {project.summary}
+                  </p>
                 </div>
               ) : null}
 
@@ -69,7 +73,9 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.impact")}
                   </p>
-                  <p className="text-sm leading-7 text-foreground/80">{project.impact}</p>
+                  <p className="text-sm leading-7 text-foreground/80">
+                    {project.impact}
+                  </p>
                 </div>
               ) : null}
             </div>
@@ -80,7 +86,9 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.role")}
                   </p>
-                  <p className="text-sm leading-7 text-foreground/80">{project.role}</p>
+                  <p className="text-sm leading-7 text-foreground/80">
+                    {project.role}
+                  </p>
                 </div>
               ) : null}
 

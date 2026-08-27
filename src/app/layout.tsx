@@ -6,12 +6,14 @@ import { LocaleProvider } from "@/components/locale-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { translations } from "@/lib/i18n/translations";
+import { siteUrl } from "@/lib/env";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
   const locale = cookieStore.get("NEXT_LOCALE")?.value === "tr" ? "tr" : "en";
   const m = translations[locale].metadata;
   return {
+    metadataBase: new URL(siteUrl()),
     title: { default: m.defaultTitle, template: `%s | ${m.defaultTitle}` },
     description: m.defaultDescription,
     openGraph: {
@@ -28,7 +30,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
-  const initialLocale = cookieStore.get("NEXT_LOCALE")?.value === "tr" ? "tr" : "en";
+  const initialLocale =
+    cookieStore.get("NEXT_LOCALE")?.value === "tr" ? "tr" : "en";
 
   return (
     <html lang={initialLocale === "tr" ? "tr" : "en"} suppressHydrationWarning>

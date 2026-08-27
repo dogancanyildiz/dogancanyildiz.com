@@ -19,9 +19,7 @@ export function ProjectsSection() {
 
   const filtered = useMemo(
     () =>
-      activeTag
-        ? projects.filter((p) => p.tags.includes(activeTag))
-        : projects,
+      activeTag ? projects.filter((p) => p.tags.includes(activeTag)) : projects,
     [activeTag]
   );
 
@@ -39,32 +37,32 @@ export function ProjectsSection() {
             {t("projects.filtersTitle")}
           </p>
           <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setActiveTag(null)}
-            className={cn(
-              "rounded-full border px-4 py-2 text-sm font-medium transition-all",
-              activeTag === null
-                ? "border-primary/70 bg-primary text-primary-foreground"
-                : "border-border/70 bg-background/60 text-muted-foreground hover:border-primary/35 hover:text-foreground"
-            )}
-          >
-            {t("projects.all")}
-          </button>
-          {allTags.map((tag) => (
             <button
-              key={tag}
-              onClick={() => setActiveTag(tag === activeTag ? null : tag)}
+              onClick={() => setActiveTag(null)}
               className={cn(
                 "rounded-full border px-4 py-2 text-sm font-medium transition-all",
-                activeTag === tag
+                activeTag === null
                   ? "border-primary/70 bg-primary text-primary-foreground"
                   : "border-border/70 bg-background/60 text-muted-foreground hover:border-primary/35 hover:text-foreground"
               )}
             >
-              {tag}
+              {t("projects.all")}
             </button>
-          ))}
-        </div>
+            {allTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setActiveTag(tag === activeTag ? null : tag)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-medium transition-all",
+                  activeTag === tag
+                    ? "border-primary/70 bg-primary text-primary-foreground"
+                    : "border-border/70 bg-background/60 text-muted-foreground hover:border-primary/35 hover:text-foreground"
+                )}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

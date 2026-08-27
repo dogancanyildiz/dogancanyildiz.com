@@ -2158,8 +2158,10 @@ Expected: altı komut da exit code 0. `npm ci` lockfile ile `package.json`'ın u
 
 ```bash
 cd /Users/dogancanyildiz/Dev/DCYLDZ/portfolio
-echo "--- example.com in shipped files (expect no output)"
-grep -rn "example\.com" src public README.md .env.example next.config.ts package.json renovate.json; echo "exit=$?"
+echo "--- example.com in the files this phase owns (expect no output)"
+grep -rn "example\.com" src/app public README.md .env.example next.config.ts package.json renovate.json; echo "exit=$?"
+echo "--- template persona, expected hits, phase 4 removes them"
+grep -rn "example\.com" src/components src/data src/lib; echo "exit=$?"
 echo "--- framer-motion (expect no output)"
 grep -rn "framer-motion" src package.json; echo "exit=$?"
 echo "--- edge runtime (expect no output)"
@@ -2171,8 +2173,17 @@ node -e "console.log(require('./package.json').dependencies.next, require('./pac
 Expected:
 
 ```
---- example.com in shipped files (expect no output)
+--- example.com in the files this phase owns (expect no output)
 exit=1
+--- template persona, expected hits, phase 4 removes them
+src/components/layout/footer.tsx:38:                href="mailto:alex@example.com"
+src/components/layout/footer.tsx:42:                alex@example.com
+src/lib/i18n/translations.ts:160:      email: "alex@example.com",
+src/lib/i18n/translations.ts:180:      placeholderEmail: "you@example.com",
+src/lib/i18n/translations.ts:357:      email: "alex@example.com",
+src/data/projects.ts:30:    liveUrl: "https://example.com",
+src/data/projects.ts:62:    liveUrl: "https://example.com",
+exit=0
 --- framer-motion (expect no output)
 exit=1
 --- edge runtime (expect no output)
@@ -2181,7 +2192,7 @@ exit=1
 16.3.3 13.1.1
 ```
 
-`docs/` bu grep'in dışında: karar dokümanları bulguyu kanıtlarken `example.com` string'ini kasıtlı olarak alıntılıyor.
+`docs/` bu grep'in dışında: karar dokümanları bulguyu kanıtlarken `example.com` string'ini kasıtlı olarak alıntılıyor. İkinci grep de kapı değil, envanter: Faz 0'ın hedefi `robots.ts` / `sitemap.ts` fallback'i (Task 4); `footer.tsx`, `translations.ts` ve `projects.ts` içindeki Alex Chen şablon metinleri bu planın kapsam bölümünde açıkça Faz 4'e bırakıldı ve Faz 2 bu değerleri `messages/*.json`'a birebir taşıyacağı için Faz 0'da silinmeleri sonraki fazın planını bozar. Tam temizlik Faz 4'ün launch kapısında doğrulanır (`10-yol-haritasi.md` Faz 4 kriteri).
 
 - [ ] **Step 3: Çalışan sunucuda son uçtan uca kontrol**
 
@@ -2390,7 +2401,7 @@ Faz 0 kapandığında Faz 1 ajanına aşağıdaki dört alan doldurularak aktar�
 - [ ] `curl /api/health` -> `200`, `Cache-Control: no-store`.
 - [ ] Honeypot dolu POST -> `400`; geçersiz email -> `400`; 16 KB üstü gövde -> `413`; 10 dakikada 6. istek -> `429` + `Retry-After`.
 - [ ] `NEXT_PUBLIC_SITE_URL` yokken `npm run build` hata veriyor.
-- [ ] `src`, `public`, `README.md`, `.env.example` içinde `example.com` yok.
+- [ ] `src/app`, `public`, `README.md`, `.env.example` içinde `example.com` yok (`robots.ts` / `sitemap.ts` fallback'i kalktı). Şablon persona kalıntıları (`src/components/layout/footer.tsx`, `src/lib/i18n/translations.ts`, `src/data/projects.ts`) planın kapsam bölümü gereği Faz 4'e ait, bu kriteri bloklamaz.
 
 ### Açık kaldı
 

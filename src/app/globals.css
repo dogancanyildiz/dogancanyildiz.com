@@ -50,22 +50,23 @@
 
 :root {
   --font-sans-stack: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  --font-display-stack: "Iowan Old Style", "Palatino Linotype", "Book Antiqua",
+  --font-display-stack:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua",
     "Cormorant Garamond", Georgia, serif;
-  --font-mono-stack: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono",
-    monospace;
+  --font-mono-stack:
+    "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
   --radius: 1.25rem;
   --background: oklch(0.979 0.021 166.5);
   --foreground: oklch(0.213 0.044 157.3);
-  --card: oklch(0.990 0.010 166);
+  --card: oklch(0.99 0.01 166);
   --card-foreground: oklch(0.213 0.044 157.3);
   --popover: oklch(0.993 0.006 166);
   --popover-foreground: oklch(0.213 0.044 157.3);
   --primary: oklch(0.516 0.114 157.2);
   --primary-foreground: oklch(0.979 0.021 166.5);
-  --secondary: oklch(0.960 0.044 163.9);
+  --secondary: oklch(0.96 0.044 163.9);
   --secondary-foreground: oklch(0.341 0.072 157.1);
-  --muted: oklch(0.968 0.030 166);
+  --muted: oklch(0.968 0.03 166);
   --muted-foreground: oklch(0.516 0.114 157.2);
   --accent: oklch(0.929 0.079 165.1);
   --accent-foreground: oklch(0.341 0.072 157.1);
@@ -82,27 +83,27 @@
   --sidebar-foreground: oklch(0.213 0.044 157.3);
   --sidebar-primary: oklch(0.516 0.114 157.2);
   --sidebar-primary-foreground: oklch(0.979 0.021 166.5);
-  --sidebar-accent: oklch(0.960 0.044 163.9);
+  --sidebar-accent: oklch(0.96 0.044 163.9);
   --sidebar-accent-foreground: oklch(0.341 0.072 157.1);
   --sidebar-border: oklch(0.882 0.118 163.2 / 40%);
   --sidebar-ring: oklch(0.614 0.138 157.4 / 55%);
 }
 
 .dark {
-  --background: oklch(0.180 0.038 157);
+  --background: oklch(0.18 0.038 157);
   --foreground: oklch(0.979 0.021 166.5);
-  --card: oklch(0.220 0.050 157);
+  --card: oklch(0.22 0.05 157);
   --card-foreground: oklch(0.979 0.021 166.5);
-  --popover: oklch(0.210 0.046 157);
+  --popover: oklch(0.21 0.046 157);
   --popover-foreground: oklch(0.979 0.021 166.5);
   --primary: oklch(0.826 0.151 159.8);
   --primary-foreground: oklch(0.213 0.044 157.3);
-  --secondary: oklch(0.270 0.060 157);
-  --secondary-foreground: oklch(0.960 0.044 163.9);
+  --secondary: oklch(0.27 0.06 157);
+  --secondary-foreground: oklch(0.96 0.044 163.9);
   --muted: oklch(0.248 0.054 157);
-  --muted-foreground: oklch(0.727 0.100 158);
+  --muted-foreground: oklch(0.727 0.1 158);
   --accent: oklch(0.341 0.072 157.1);
-  --accent-foreground: oklch(0.960 0.044 163.9);
+  --accent-foreground: oklch(0.96 0.044 163.9);
   --destructive: oklch(0.68 0.17 24);
   --border: oklch(0.419 0.091 156.9 / 35%);
   --input: oklch(0.341 0.072 157.1 / 65%);
@@ -111,13 +112,13 @@
   --chart-2: oklch(0.727 0.155 158.5);
   --chart-3: oklch(0.882 0.118 163.2);
   --chart-4: oklch(0.614 0.138 157.4);
-  --chart-5: oklch(0.960 0.044 163.9);
-  --sidebar: oklch(0.210 0.046 157);
+  --chart-5: oklch(0.96 0.044 163.9);
+  --sidebar: oklch(0.21 0.046 157);
   --sidebar-foreground: oklch(0.979 0.021 166.5);
   --sidebar-primary: oklch(0.826 0.151 159.8);
   --sidebar-primary-foreground: oklch(0.213 0.044 157.3);
-  --sidebar-accent: oklch(0.270 0.060 157);
-  --sidebar-accent-foreground: oklch(0.960 0.044 163.9);
+  --sidebar-accent: oklch(0.27 0.06 157);
+  --sidebar-accent-foreground: oklch(0.96 0.044 163.9);
   --sidebar-border: oklch(0.419 0.091 156.9 / 35%);
   --sidebar-ring: oklch(0.826 0.151 159.8 / 45%);
 }
@@ -132,9 +133,21 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 20%, transparent) 0, transparent 32%),
-      radial-gradient(circle at top right, color-mix(in oklab, var(--primary) 18%, transparent) 0, transparent 36%),
-      linear-gradient(180deg, color-mix(in oklab, var(--background) 92%, white) 0%, var(--background) 100%);
+      radial-gradient(
+        circle at top left,
+        color-mix(in oklab, var(--accent) 20%, transparent) 0,
+        transparent 32%
+      ),
+      radial-gradient(
+        circle at top right,
+        color-mix(in oklab, var(--primary) 18%, transparent) 0,
+        transparent 36%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--background) 92%, white) 0%,
+        var(--background) 100%
+      );
     min-height: 100vh;
     text-rendering: optimizeLegibility;
   }
@@ -144,8 +157,16 @@
     inset: 0;
     pointer-events: none;
     background-image:
-      linear-gradient(to right, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px);
+      linear-gradient(
+        to right,
+        color-mix(in oklab, var(--foreground) 6%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--foreground) 6%, transparent) 1px,
+        transparent 1px
+      );
     background-size: 48px 48px;
     mask-image: radial-gradient(circle at center, black 30%, transparent 85%);
     opacity: 0.3;

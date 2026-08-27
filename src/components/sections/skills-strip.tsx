@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useLocale } from "@/components/locale-provider";
 import { skillCategories } from "@/data/skills";
 import { SectionHeading } from "@/components/ui/section-heading";

@@ -1,70 +1,94 @@
 import { NextResponse } from "next/server";
+
+import { getClientIp } from "@/lib/client-ip";
+import { MAX_BODY_BYTES, validateBody } from "@/lib/contact-validation";
+import { contactEmail, fromEmail, trustsCloudflareHeaders } from "@/lib/env";
+import { contactRateLimiter } from "@/lib/rate-limit";
+import {
+  BodyTooLargeError,
+  parseJsonBody,
+  readBodyWithLimit,
+} from "@/lib/request-body";
 import { resend } from "@/lib/resend";
 
-const CONTACT_EMAIL = process.env.CONTACT_EMAIL ?? "onboarding@resend.dev";
-const FROM_EMAIL = process.env.FROM_EMAIL ?? "onboarding@resend.dev";
-
-function validateBody(body: unknown): {
-  name: string;
-  email: string;
-  subject?: string;
-  message: string;
-} | null {
-  if (!body || typeof body !== "object") return null;
-  const o = body as Record<string, unknown>;
-  if (
-    typeof o.name !== "string" ||
-    !o.name.trim() ||
-    typeof o.email !== "string" ||
-    !o.email.trim() ||
-    typeof o.message !== "string" ||
-    !o.message.trim()
-  ) {
-    return null;
-  }
-  return {
-    name: o.name.trim(),
-    email: o.email.trim(),
-    subject: typeof o.subject === "string" ? o.subject.trim() : undefined,
-    message: o.message.trim(),
-  };
-}
+// Client facing copy stays generic on purpose. Provider details, env problems
+// and honeypot hits are written to the server log only.
+const INVALID_MESSAGE =
+  "Invalid request. A name, a valid email address and a message are required.";
+const TOO_LARGE_MESSAGE = "Request body is too large.";
+const TOO_MANY_MESSAGE = "Too many requests. Please try again later.";
+const GENERIC_MESSAGE = "Message could not be sent. Please try again later.";
 
 export async function POST(request: Request) {
-  const parsed = validateBody(await request.json().catch(() => null));
-  if (!parsed) {
+  // Content-Length is advisory (a chunked request carries none), so this is
+  // only a cheap early exit. The real cap is enforced while the body is read.
+  const declaredLength = Number(request.headers.get("content-length") ?? "0");
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: TOO_LARGE_MESSAGE }, { status: 413 });
+  }
+
+  const ip = getClientIp(request.headers, {
+    trustCloudflare: trustsCloudflareHeaders(),
+  });
+  const limit = contactRateLimiter.check(ip);
+  if (!limit.allowed) {
     return NextResponse.json(
-      { error: "Invalid request. Name, email, and message are required." },
-      { status: 400 }
+      { error: TOO_MANY_MESSAGE },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      }
     );
+  }
+
+  let rawBody: string;
+  try {
+    rawBody = await readBodyWithLimit(request, MAX_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) {
+      return NextResponse.json({ error: TOO_LARGE_MESSAGE }, { status: 413 });
+    }
+    // A body that cannot be read (client aborted, broken transfer) is a bad
+    // request, not a server fault, so it must not surface as a 500.
+    return NextResponse.json({ error: INVALID_MESSAGE }, { status: 400 });
+  }
+
+  const parsed = validateBody(parseJsonBody(rawBody));
+  if (!parsed.ok) {
+    if (parsed.reason === "honeypot") {
+      console.warn("[contact] honeypot triggered");
+    }
+    return NextResponse.json({ error: INVALID_MESSAGE }, { status: 400 });
   }
 
   if (!resend) {
-    return NextResponse.json(
-      { error: "Email is not configured. Please set RESEND_API_KEY." },
-      { status: 503 }
-    );
+    console.error("[contact] RESEND_API_KEY is not configured");
+    return NextResponse.json({ error: GENERIC_MESSAGE }, { status: 503 });
   }
 
-  const subject = parsed.subject || `Portfolio contact from ${parsed.name}`;
+  let to: string;
+  let from: string;
+  try {
+    to = contactEmail();
+    from = fromEmail();
+  } catch (configError) {
+    console.error("[contact] email configuration error", configError);
+    return NextResponse.json({ error: GENERIC_MESSAGE }, { status: 503 });
+  }
+
+  const subject =
+    parsed.data.subject || `Portfolio contact from ${parsed.data.name}`;
   const text = [
-    `From: ${parsed.name} <${parsed.email}>`,
+    `From: ${parsed.data.name} <${parsed.data.email}>`,
     "",
-    parsed.message,
+    parsed.data.message,
   ].join("\n");
 
-  const { error } = await resend.emails.send({
-    from: FROM_EMAIL,
-    to: CONTACT_EMAIL,
-    subject,
-    text,
-  });
+  const { error } = await resend.emails.send({ from, to, subject, text });
 
   if (error) {
-    return NextResponse.json(
-      { error: error.message || "Failed to send email." },
-      { status: 500 }
-    );
+    console.error("[contact] resend rejected the message", error);
+    return NextResponse.json({ error: GENERIC_MESSAGE }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

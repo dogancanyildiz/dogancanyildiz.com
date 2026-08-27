@@ -62,7 +62,12 @@ export function Footer() {
               </div>
             </div>
             <div className="sm:col-span-2">
-              <Button asChild variant="outline" size="lg" className="w-full justify-center sm:w-auto">
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="w-full justify-center sm:w-auto"
+              >
                 <Link href="/contact">{t("footer.contact")}</Link>
               </Button>
             </div>

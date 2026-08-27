@@ -33,7 +33,7 @@ Ayrıntı: `00-ozet-ve-karar.md` genel kararın gerekçesini, `02-stack-karari.m
 - [ ] `NEXT_PUBLIC_SITE_URL` `.env.example`'a eklenir, `robots.ts` ve `sitemap.ts`'teki `example.com` fallback'i kaldırılır
 - [ ] `public/` altındaki kullanılmayan create-next-app SVG'leri silinir, README Coolify/Docker adımlarıyla yeniden yazılır
 
-Bitti sayılma kriteri: `tsc --noEmit` ve eslint hatasız geçiyor; `next build` sonrası `next start` ile `/api/health` 200 dönüyor; contact endpoint'ine curl ile doğrudan atılan honeypot dolu istek 4xx ile reddediliyor; repoda `example.com` string'i hiç geçmiyor.
+Bitti sayılma kriteri: `tsc --noEmit` ve eslint hatasız geçiyor; `next build` sonrası `next start` ile `/api/health` 200 dönüyor; contact endpoint'ine curl ile doğrudan atılan honeypot dolu istek 4xx ile reddediliyor; `robots.ts` ve `sitemap.ts`'teki `example.com` fallback'i kalkmış, `src/app`, `public`, `README.md` ve `.env.example` içinde `example.com` geçmiyor. Not: `src/components`, `src/data` ve `src/lib` içindeki şablon persona kalıntıları (`alex@example.com`, `you@example.com`, proje `liveUrl`'leri) bu fazın madde listesinde yok; onlar Faz 4'ün launch kapısına ait (aşağıdaki Faz 4 kriteri) ve Faz 0'ı bloklamaz.
 
 Büyüklük: M. Çok sayıda küçük ve mekanik değişiklik, ama hiçbiri mimari değil.
 

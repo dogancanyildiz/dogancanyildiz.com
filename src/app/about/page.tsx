@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useLocale } from "@/components/locale-provider";
 import { skillCategories } from "@/data/skills";
 import { Download } from "lucide-react";
@@ -34,7 +34,9 @@ export default function AboutPage() {
         >
           <span className="eyebrow">{t("about.manifestoEyebrow")}</span>
           <div className="space-y-4">
-            <h2 className="text-3xl sm:text-4xl">{t("about.manifestoTitle")}</h2>
+            <h2 className="text-3xl sm:text-4xl">
+              {t("about.manifestoTitle")}
+            </h2>
             <p className="section-copy">{t("about.manifestoBody")}</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -54,7 +56,10 @@ export default function AboutPage() {
           transition={{ delay: 0.05 }}
           className="space-y-6"
         >
-          <SectionHeading eyebrow={t("about.capabilitiesEyebrow")} title={t("about.skillsTitle")} />
+          <SectionHeading
+            eyebrow={t("about.capabilitiesEyebrow")}
+            title={t("about.skillsTitle")}
+          />
           {skillCategories.map((category) => (
             <div key={category.labelKey} className="surface-panel p-6">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground/70">
@@ -74,7 +79,10 @@ export default function AboutPage() {
           ))}
         </motion.div>
 
-        <SectionHeading eyebrow={t("about.timelineEyebrow")} title={t("about.experienceTitle")} />
+        <SectionHeading
+          eyebrow={t("about.timelineEyebrow")}
+          title={t("about.experienceTitle")}
+        />
         <ul className="space-y-5">
           <motion.li
             initial={{ opacity: 0, x: -8 }}
@@ -83,11 +91,15 @@ export default function AboutPage() {
             className="surface-panel relative overflow-hidden p-6"
           >
             <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
-            <span className="font-semibold text-foreground">{t("about.exp1Role")}</span>
+            <span className="font-semibold text-foreground">
+              {t("about.exp1Role")}
+            </span>
             <span className="text-sm text-muted-foreground">
               {t("about.exp1Company")} · {t("about.exp1Period")}
             </span>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">{t("about.exp1Desc")}</p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">
+              {t("about.exp1Desc")}
+            </p>
           </motion.li>
           <motion.li
             initial={{ opacity: 0, x: -8 }}
@@ -96,11 +108,15 @@ export default function AboutPage() {
             className="surface-panel relative overflow-hidden p-6"
           >
             <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
-            <span className="font-semibold text-foreground">{t("about.exp2Role")}</span>
+            <span className="font-semibold text-foreground">
+              {t("about.exp2Role")}
+            </span>
             <span className="text-sm text-muted-foreground">
               {t("about.exp2Company")} · {t("about.exp2Period")}
             </span>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">{t("about.exp2Desc")}</p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">
+              {t("about.exp2Desc")}
+            </p>
           </motion.li>
           <motion.li
             initial={{ opacity: 0, x: -8 }}
@@ -109,15 +125,22 @@ export default function AboutPage() {
             className="surface-panel relative overflow-hidden p-6"
           >
             <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
-            <span className="font-semibold text-foreground">{t("about.exp3Role")}</span>
+            <span className="font-semibold text-foreground">
+              {t("about.exp3Role")}
+            </span>
             <span className="text-sm text-muted-foreground">
               {t("about.exp3Company")} · {t("about.exp3Period")}
             </span>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">{t("about.exp3Desc")}</p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">
+              {t("about.exp3Desc")}
+            </p>
           </motion.li>
         </ul>
 
-        <SectionHeading eyebrow={t("about.educationEyebrow")} title={t("about.educationTitle")} />
+        <SectionHeading
+          eyebrow={t("about.educationEyebrow")}
+          title={t("about.educationTitle")}
+        />
         <motion.div
           initial={{ opacity: 0, x: -8 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -125,9 +148,15 @@ export default function AboutPage() {
           className="surface-panel relative overflow-hidden p-6"
         >
           <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
-          <span className="font-semibold text-foreground">{t("about.edu1Degree")}</span>
-          <span className="block text-sm text-muted-foreground">{t("about.edu1School")}</span>
-          <span className="block text-sm text-muted-foreground">{t("about.edu1Period")}</span>
+          <span className="font-semibold text-foreground">
+            {t("about.edu1Degree")}
+          </span>
+          <span className="block text-sm text-muted-foreground">
+            {t("about.edu1School")}
+          </span>
+          <span className="block text-sm text-muted-foreground">
+            {t("about.edu1Period")}
+          </span>
         </motion.div>
 
         <motion.div
@@ -154,11 +183,17 @@ export default function AboutPage() {
           className="text-muted-foreground"
         >
           {t("about.browseIntro")}{" "}
-          <Link href="/projects" className="text-primary underline-offset-4 hover:underline">
+          <Link
+            href="/projects"
+            className="text-primary underline-offset-4 hover:underline"
+          >
             {t("about.projectsLink")}
           </Link>
           {t("about.or")}
-          <Link href="/contact" className="text-primary underline-offset-4 hover:underline">
+          <Link
+            href="/contact"
+            className="text-primary underline-offset-4 hover:underline"
+          >
             {t("about.contactLink")}
           </Link>
           .

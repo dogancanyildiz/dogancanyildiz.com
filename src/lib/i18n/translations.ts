@@ -13,7 +13,8 @@ export const translations = {
       greeting: "Hi, I'm",
       name: "Alex Chen",
       role: "Frontend Developer",
-      title: "Designing premium digital products with clarity, rhythm, and speed.",
+      title:
+        "Designing premium digital products with clarity, rhythm, and speed.",
       subtitle:
         "I build interface systems, product experiences, and frontend architecture for teams that care about detail.",
       viewProjects: "View projects",
@@ -36,7 +37,8 @@ export const translations = {
     },
     home: {
       featuredTitle: "Featured projects",
-      featuredSubtitle: "A curated selection of launches, systems, and product work.",
+      featuredSubtitle:
+        "A curated selection of launches, systems, and product work.",
       skillsTitle: "Technologies I work with",
       viewAll: "View all projects",
       featuredEyebrow: "Selected work",
@@ -51,8 +53,10 @@ export const translations = {
       linkedin: "LinkedIn",
       twitter: "Twitter",
       elsewhere: "Elsewhere",
-      availability: "Available for select freelance and full-time collaborations.",
-      tagline: "Crafting interfaces with a calm visual voice and strong frontend foundations.",
+      availability:
+        "Available for select freelance and full-time collaborations.",
+      tagline:
+        "Crafting interfaces with a calm visual voice and strong frontend foundations.",
       emailLabel: "Primary email",
     },
     about: {
@@ -71,15 +75,18 @@ export const translations = {
       exp1Role: "Senior Frontend Developer",
       exp1Company: "TechCorp Inc.",
       exp1Period: "2021 – Present",
-      exp1Desc: "Lead frontend for the main product. Introduced design system and improved Core Web Vitals.",
+      exp1Desc:
+        "Lead frontend for the main product. Introduced design system and improved Core Web Vitals.",
       exp2Role: "Frontend Developer",
       exp2Company: "StartupXYZ",
       exp2Period: "2019 – 2021",
-      exp2Desc: "Built customer dashboard and admin panel with React. Integrated REST and GraphQL APIs.",
+      exp2Desc:
+        "Built customer dashboard and admin panel with React. Integrated REST and GraphQL APIs.",
       exp3Role: "Junior Frontend Developer",
       exp3Company: "WebAgency",
       exp3Period: "2017 – 2019",
-      exp3Desc: "Developed responsive sites and small web apps. Worked with designers and backend team.",
+      exp3Desc:
+        "Developed responsive sites and small web apps. Worked with designers and backend team.",
       edu1Degree: "B.Sc. Computer Science",
       edu1School: "State University",
       edu1Period: "2013 – 2017",
@@ -159,7 +166,8 @@ export const translations = {
       responseTitle: "Typical response",
       responseBody: "Usually within 1–2 business days.",
       workingTitle: "Working style",
-      workingBody: "Structured, collaborative, and detail-oriented from kickoff through polish.",
+      workingBody:
+        "Structured, collaborative, and detail-oriented from kickoff through polish.",
       availabilityTitle: "Availability",
       availabilityBody: "Open for select product collaborations this quarter.",
     },
@@ -182,7 +190,8 @@ export const translations = {
     },
     metadata: {
       defaultTitle: "Alex Chen Portfolio",
-      defaultDescription: "Premium frontend portfolio — selected projects, experience, and contact.",
+      defaultDescription:
+        "Premium frontend portfolio — selected projects, experience, and contact.",
       aboutTitle: "About",
       aboutDescription: "About me and my work.",
       projectsTitle: "Projects",
@@ -226,7 +235,8 @@ export const translations = {
     },
     home: {
       featuredTitle: "Öne çıkan projeler",
-      featuredSubtitle: "Yayına aldığım ürünler, sistemler ve arayüz çalışmalarından seçki.",
+      featuredSubtitle:
+        "Yayına aldığım ürünler, sistemler ve arayüz çalışmalarından seçki.",
       skillsTitle: "Çalıştığım teknolojiler",
       viewAll: "Tüm projeleri gör",
       featuredEyebrow: "Seçili işler",
@@ -242,7 +252,8 @@ export const translations = {
       twitter: "Twitter",
       elsewhere: "Bağlantılar",
       availability: "Seçili freelance ve tam zamanlı iş birliklerine açığım.",
-      tagline: "Sakin bir görsel dil ve güçlü frontend temelleriyle arayüzler geliştiriyorum.",
+      tagline:
+        "Sakin bir görsel dil ve güçlü frontend temelleriyle arayüzler geliştiriyorum.",
       emailLabel: "Birincil e-posta",
     },
     about: {
@@ -261,15 +272,18 @@ export const translations = {
       exp1Role: "Kıdemli Frontend Geliştirici",
       exp1Company: "TechCorp Inc.",
       exp1Period: "2021 – Günümüz",
-      exp1Desc: "Ana ürünün frontend'ine liderlik. Tasarım sistemi kuruldu, Core Web Vitals iyileştirildi.",
+      exp1Desc:
+        "Ana ürünün frontend'ine liderlik. Tasarım sistemi kuruldu, Core Web Vitals iyileştirildi.",
       exp2Role: "Frontend Geliştirici",
       exp2Company: "StartupXYZ",
       exp2Period: "2019 – 2021",
-      exp2Desc: "React ile müşteri paneli ve admin arayüzü geliştirildi. REST ve GraphQL API entegrasyonları.",
+      exp2Desc:
+        "React ile müşteri paneli ve admin arayüzü geliştirildi. REST ve GraphQL API entegrasyonları.",
       exp3Role: "Junior Frontend Geliştirici",
       exp3Company: "WebAgency",
       exp3Period: "2017 – 2019",
-      exp3Desc: "Duyarlı siteler ve küçük web uygulamaları. Tasarımcılar ve backend ekibiyle çalışıldı.",
+      exp3Desc:
+        "Duyarlı siteler ve küçük web uygulamaları. Tasarımcılar ve backend ekibiyle çalışıldı.",
       edu1Degree: "B.Sc. Bilgisayar Mühendisliği",
       edu1School: "Devlet Üniversitesi",
       edu1Period: "2013 – 2017",
@@ -349,7 +363,8 @@ export const translations = {
       responseTitle: "Yanıt süresi",
       responseBody: "Genelde 1–2 iş günü içinde.",
       workingTitle: "Çalışma tarzı",
-      workingBody: "Kickoff'tan son polish aşamasına kadar yapılandırılmış, iş birlikçi ve detay odaklı.",
+      workingBody:
+        "Kickoff'tan son polish aşamasına kadar yapılandırılmış, iş birlikçi ve detay odaklı.",
       availabilityTitle: "Uygunluk",
       availabilityBody: "Bu çeyrekte seçili ürün iş birliklerine açığım.",
     },
@@ -368,11 +383,13 @@ export const translations = {
       errorGeneric: "Bir şeyler yanlış gitti. Lütfen tekrar deneyin.",
       errorNetwork: "Ağ hatası. Lütfen tekrar deneyin.",
       introTitle: "Mesaj",
-      introBody: "Biraz bağlam paylaşın, sonraki adımlarla birlikte dönüş yapayım.",
+      introBody:
+        "Biraz bağlam paylaşın, sonraki adımlarla birlikte dönüş yapayım.",
     },
     metadata: {
       defaultTitle: "Alex Chen Portfolyo",
-      defaultDescription: "Premium frontend portfolyosu — seçili projeler, deneyim ve iletişim.",
+      defaultDescription:
+        "Premium frontend portfolyosu — seçili projeler, deneyim ve iletişim.",
       aboutTitle: "Hakkımda",
       aboutDescription: "Ben ve çalışmalarım hakkında.",
       projectsTitle: "Projeler",
@@ -400,5 +417,9 @@ function getNested(
 
 export function translate(locale: Locale, key: string): string {
   const obj = translations[locale] as Record<string, unknown>;
-  return getNested(obj, key) ?? getNested(translations.en as Record<string, unknown>, key) ?? key;
+  return (
+    getNested(obj, key) ??
+    getNested(translations.en as Record<string, unknown>, key) ??
+    key
+  );
 }

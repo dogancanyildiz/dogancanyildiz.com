@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+build
+coverage
+package-lock.json
+next-env.d.ts
+public
+docs
+.local
+.nodeterm
+.superpowers
+src/app/favicon.ico
