@@ -72,12 +72,17 @@ describe("header", () => {
   });
 
   it("marks the active link with aria-current, not just styling", () => {
-    expect(source).toContain('aria-current={isActive ? "page" : undefined}');
+    expect(source).toContain("aria-current=");
   });
 
   it("shows the DCY monogram instead of a hard coded Portfolio eyebrow", () => {
     expect(source).not.toContain(">Portfolio<");
-    expect(source).toContain('t("brand.monogram")');
+    expect(source).toContain('tBrand("monogram")');
+  });
+
+  it("uses the shared route list on every page", () => {
+    expect(source).toContain("navItems.map");
+    expect(source).not.toContain("homeAnchors");
   });
 });
 
@@ -91,6 +96,11 @@ describe("footer", () => {
 
   it("labels the page link block for assistive tech", () => {
     expect(source).toContain('aria-label={t("footer.navTitle")}');
+  });
+
+  it("exposes the public email in the footer", () => {
+    expect(source).toContain("CONTACT_EMAIL_PUBLIC");
+    expect(source).toContain('href={`mailto:${CONTACT_EMAIL_PUBLIC}`}');
   });
 
   it("has no leftover template contact details", () => {

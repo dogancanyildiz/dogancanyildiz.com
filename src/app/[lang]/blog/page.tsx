@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ContactCta } from "@/components/sections/contact-cta";
 import { PostList } from "@/components/sections/post-list";
+import { PageSection } from "@/components/layout/page-section";
+import { PageHeader } from "@/components/ui/page-header";
 import { routing } from "@/i18n/routing";
 import { getPosts, toPostCardData, type Locale } from "@/lib/content";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
@@ -40,18 +43,18 @@ export default async function BlogPage({
   const posts = getPosts(lang as Locale).map(toPostCardData);
 
   return (
-    <section className="section-space">
-      <div className="page-shell-reading space-y-10">
-        <header className="space-y-4">
-          <h1 className="text-4xl leading-tight sm:text-5xl">{t("title")}</h1>
-          <p className="section-copy">{t("description")}</p>
-        </header>
-        {posts.length > 0 ? (
-          <PostList posts={posts} />
-        ) : (
-          <p className="section-copy">{t("empty")}</p>
-        )}
-      </div>
-    </section>
+    <PageSection>
+      <PageHeader
+        as="h1"
+        title={t("title")}
+        description={t("description")}
+      />
+      {posts.length > 0 ? (
+        <PostList posts={posts} />
+      ) : (
+        <p className="section-copy">{t("empty")}</p>
+      )}
+      <ContactCta />
+    </PageSection>
   );
 }

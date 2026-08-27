@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { fadeUp } from "@/lib/motion";
+import { fadeUp, MOTION_ITEM_CLASS } from "@/lib/motion";
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -68,7 +68,7 @@ export function ContactForm() {
       animate="show"
       custom={0}
       onSubmit={handleSubmit}
-      className="surface-panel relative mx-auto w-full max-w-2xl space-y-6 p-6 sm:p-8"
+      className={`w-full max-w-2xl space-y-6 ${MOTION_ITEM_CLASS}`}
     >
       <div className="grid gap-2">
         <Label htmlFor="name">{t("name")}</Label>

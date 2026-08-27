@@ -19,19 +19,29 @@ describe("typography tokens", () => {
     expect(css).toMatch(
       /--font-mono-stack:\s*var\(--font-mono-latin\),\s*var\(--font-mono-ext\)/
     );
+  });
+
+  it("aliases display to the sans stack for a single modern typeface", () => {
     expect(css).toMatch(
-      /--font-display-stack:\s*var\(--font-display-latin\),\s*var\(--font-display-ext\)/
+      /--font-display-stack:\s*var\(--font-sans-latin\),\s*var\(--font-sans-ext\)/
     );
   });
 
-  it("reserves the serif display face for h1 and the pull quote", () => {
+  it("uses Geist Sans for every heading level and the pull quote", () => {
     expect(css).toMatch(
-      /h1\s*\{[^}]*font-family:\s*var\(--font-display-stack\)/
-    );
-    expect(css).toMatch(
-      /h2,\s*\n\s*h3,\s*\n\s*h4\s*\{[^}]*font-family:\s*var\(--font-sans-stack\)/
+      /h1,\s*\n\s*h2,\s*\n\s*h3,\s*\n\s*h4\s*\{[^}]*font-family:\s*var\(--font-sans-stack\)/
     );
     expect(css).toContain(".pull-quote");
+    expect(css).toContain(".page-title");
+    expect(css).toContain(".prose-measure");
+    expect(css).toContain(".meta-label");
+    expect(css).toContain(".info-tile");
+    expect(css).toContain(".inset-panel");
+    expect(css).toContain(".display-hero");
+    expect(css).toContain(".display-section");
+    expect(css).toContain(".section-label");
+    expect(css).toContain(".section-space-lg");
+    expect(css).toContain("max-w-6xl");
   });
 });
 
@@ -167,27 +177,24 @@ describe("component colour hygiene", () => {
 });
 
 describe("project list layout", () => {
-  it("adds a project grid component that renders ProjectCard", () => {
-    const path = "src/components/sections/project-grid.tsx";
+  it("adds a project list component with indexed editorial rows", () => {
+    const path = "src/components/sections/project-list.tsx";
     expect(existsSync(repoPath(path))).toBe(true);
     const source = read(path);
-    expect(source).toContain("export function ProjectGrid");
-    expect(source).toContain("ProjectCard");
-    // MotionProvider already sits once in the locale layout, so the grid
-    // itself never wraps another LazyMotion instance.
+    expect(source).toContain("export function ProjectList");
+    expect(source).toContain("content-stack");
+    expect(source).toContain("content-entry");
+    expect(source).toContain("after:absolute after:inset-0");
     expect(source).not.toContain("LazyMotion");
   });
 
-  it("keeps ProjectCard down to a single interactive element", () => {
-    const source = read("src/components/sections/project-card.tsx");
-    // The whole card used to sit inside <Link className="block h-full">,
-    // which made the accessible name of that one link the entire card's
-    // text (title, summary, impact, every tag). The title link's own
-    // ::after overlay now carries the click area instead.
-    expect(source).not.toMatch(/<Link[^>]*className="block h-full"/);
-    expect(source).toContain("after:absolute after:inset-0");
-    expect(source).not.toContain("hover:-translate-y-1");
-    expect(source).not.toContain("border-primary/30");
+  it("does not ship a card grid wrapper for project lists", () => {
+    expect(existsSync(repoPath("src/components/sections/project-grid.tsx"))).toBe(
+      false
+    );
+    expect(existsSync(repoPath("src/components/sections/project-card.tsx"))).toBe(
+      false
+    );
   });
 });
 
@@ -199,13 +206,12 @@ describe("panel shadow", () => {
     expect(dark).toMatch(/--shadow-color:\s*oklch\(0 0 0\)/);
   });
 
-  it("mixes surface-panel and Card shadows from the token, not --foreground", () => {
-    for (const source of [css, read("src/components/ui/card.tsx")]) {
-      expect(source).toContain(
-        "color-mix(in_oklab,var(--shadow-color)_35%,transparent)"
-      );
-      expect(source).not.toContain("var(--foreground)_35%");
-    }
+  it("mixes Card shadows from the token, not --foreground", () => {
+    const card = read("src/components/ui/card.tsx");
+    expect(card).toContain(
+      "color-mix(in_oklab,var(--shadow-color)_35%,transparent)"
+    );
+    expect(card).not.toContain("var(--foreground)_35%");
   });
 });
 

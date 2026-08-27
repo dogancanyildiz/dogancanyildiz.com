@@ -57,11 +57,13 @@ Dal: `feature/faz-4-icerik-ve-yayin`, `main` (`ad56a51`) üzerine. Faz 0-3 PR'la
 
 - [ ] `npm run format` CI'a girsin mi (bölüm 1).
 - [ ] Sitemap `x-default` (bölüm 4).
-- [ ] Reduced-motion SSR gizli varyantı (Faz 3 devri).
+- [x] Reduced-motion SSR gizli varyantı: `.motion-item` + `@media (prefers-reduced-motion: reduce)` CSS override (2026-08-27 UI yenileme).
 - [ ] 404 dokümanı her zaman `<html lang="en">` (Faz 2 devri); `/tr/blog/nope` da İngilizce 404 dokümanı alıyor.
-- [ ] Hero ve header tasarımı: hero tek sütun, metrik kartları ve "available for work" rozeti kaldırıldı (kaynakta böyle bir iddia yok); header monogram + görünür isim. Plan Step 5 ismi `sr-only` istiyordu, görünür bırakıldı.
-- [ ] Footer'daki büyük "Contact" CTA butonu kaldırıldı (nav'da ve header'da zaten var).
+- [x] Hero ve header tasarımı: metrik kartları, `availableForWork` rozeti, header monogram + `sr-only` isim (2026-08-27 UI yenileme, site sahibi onayı).
+- [x] Footer'daki Contact outline CTA butonu geri yüklendi (2026-08-27 UI yenileme).
 - [ ] Ana sayfa yetkinlik şeridi profildeki `featured` işaretli dört grubu gösteriyor (Frontend, Backend, DevOps ve altyapı, Güvenlik); değiştirmek için `src/content/profile.ts` içindeki `featured` bayrakları.
+- [x] Liklidi-inspired scroll landing (2026-08-27): hero full viewport, marquee, bento, strength grid, anchor nav; tarayıcıda 390/768/1280 screenshot turu sahibinde.
+- [ ] `src/content/home.ts` içindeki strengths/manifesto metinleri sahibi tarafından okunup onaylanmalı.
 - [ ] Blog dil politikası TR-first uygulandı: EN blog listesi tek yazı gösteriyor, `blog.empty` metni EN'de yalnızca hiç yazı kalmazsa görünür.
 - [ ] Task 15 alt ajanı, 3000 portunda dinleyen ve kendisine ait olmayan bir `next-server` sürecini yanlışlıkla sonlandırdı. Bu oturumun tüm doğrulamaları 3171 ve 3172'de koşuldu. Başka bir oturumun dev sunucusu kapanmış olabilir, yeniden başlatılması gerekir.
 

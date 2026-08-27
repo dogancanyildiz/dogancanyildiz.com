@@ -19,6 +19,13 @@
     "location": "Konya, Türkiye",
     "tagline": "I build web applications and run the infrastructure they ship on.",
     "intro": "I'm a full-stack developer based in Konya, Türkiye. I build web applications with Next.js and Node.js, and I deploy them myself: Docker, GitHub Actions, Coolify and Linux servers. Alongside development I hold the CAPT certification and have completed the full Cisco CCNA track along with CyberOps Associate.",
+    "availableForWork": "Available for select work",
+    "metricYearsLabel": "Years shipping",
+    "metricYearsValue": "5",
+    "metricProjectsLabel": "Case studies",
+    "metricProjectsValue": "5",
+    "metricFocusLabel": "Focus",
+    "metricFocusValue": "Full-stack + DevOps",
     "viewProjects": "View projects",
     "downloadCv": "Download CV",
     "getInTouch": "Get in touch"
@@ -35,12 +42,16 @@
   "footer": {
     "tagline": "Full-stack development, self-hosted infrastructure, security-minded engineering.",
     "copyright": "Built and self-hosted by me.",
+    "availability": "Open to work",
     "navTitle": "Pages",
     "emailLabel": "Email",
     "elsewhereLabel": "Elsewhere",
     "github": "GitHub",
     "linkedin": "LinkedIn",
-    "rss": "RSS"
+    "rss": "RSS",
+    "selfHosted": "Self-hosted on Coolify.",
+    "healthLink": "API health",
+    "lastUpdated": "Last updated {date}"
   },
   "about": {
     "title": "About",
@@ -62,7 +73,8 @@
     "educationTitle": "Education",
     "languagesTitle": "Languages",
     "languages": "Turkish is my native language. I work in written English every day: documentation, repositories and the posts on this site.",
-    "downloadCv": "Download CV"
+    "downloadCv": "Download CV",
+    "testimonialsTitle": "References"
   },
   "projects": {
     "title": "Projects",
@@ -84,11 +96,17 @@
   },
   "contact": {
     "title": "Contact",
-    "description": "Open to interesting projects and conversations. The fastest way to reach me is email.",
+    "description": "Open to interesting projects and conversations.",
     "intro": "Open to interesting projects and conversations. The fastest way to reach me is email.",
+    "ctaTitle": "Have a project in mind?",
+    "ctaBody": "Tell me what you are building. I usually reply within a day.",
+    "ctaButton": "Send a message",
     "emailLabel": "Email",
     "locationLabel": "Location",
     "location": "Konya, Türkiye",
+    "trustTitle": "Privacy",
+    "trustBody": "Form data is sent only by email to me. It is not sold or shared with third parties.",
+    "responseExpectation": "I usually reply within two to three business days.",
     "form": {
       "name": "Name",
       "namePlaceholder": "Your name",

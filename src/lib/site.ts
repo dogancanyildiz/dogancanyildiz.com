@@ -26,3 +26,6 @@ export const CONTACT_EMAIL_PUBLIC = "me@dogancanyildiz.com";
  * node:fs into the browser bundle.
  */
 export const CV_PATH = "/cv/dogancanyildiz-cv.pdf";
+
+/** Public path stem for the optional profile photo (see lib/profile-image.ts). */
+export const PROFILE_IMAGE_PATH = siteConfig.person.profileImagePath;
