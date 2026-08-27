@@ -109,4 +109,17 @@ describe("colour tokens", () => {
     expect(css.match(/--status-down:/g)).toHaveLength(2);
     expect(css).toContain("--color-status-up: var(--status-up);");
   });
+
+  it("uses a solid focus ring colour, no alpha suffix", () => {
+    const ringValues = [...css.matchAll(/--ring:\s*([^;]+);/g)].map(
+      (m) => m[1]
+    );
+    expect(ringValues.length).toBeGreaterThanOrEqual(2);
+    for (const value of ringValues) {
+      expect(
+        value,
+        `--ring still carries an alpha channel: ${value}`
+      ).not.toContain("/");
+    }
+  });
 });
