@@ -62,3 +62,7 @@ Thumbs.db
 .claude/
 .cursor/
 .cursorrules
+
+# ─── Next.js agent rules (rewritten by `next dev` on every start) ─────────────
+AGENTS.md
+CLAUDE.md
