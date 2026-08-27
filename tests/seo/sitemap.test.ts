@@ -21,7 +21,7 @@ describe("sitemap", () => {
 
   it("adds one detail entry per project per locale", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
-    const { projects } = await import("@/data/projects");
+    const { getProjects } = await import("@/lib/content");
     const urls = sitemap().map((entry) => entry.url);
 
     const en = urls.filter((url) =>
@@ -31,8 +31,8 @@ describe("sitemap", () => {
       /^https:\/\/dogancanyildiz\.sh\/tr\/projects\/[^/]+$/.test(url)
     );
 
-    expect(en).toHaveLength(projects.length);
-    expect(tr).toHaveLength(projects.length);
+    expect(en).toHaveLength(getProjects("en").length);
+    expect(tr).toHaveLength(getProjects("tr").length);
   });
 
   it("attaches language alternates to every entry", async () => {

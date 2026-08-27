@@ -234,16 +234,13 @@ describe("global-not-found font parity", () => {
 
 const LINK_USING_CONTENT_COMPONENTS = [
   "src/components/sections/hero.tsx",
-  "src/components/sections/featured-projects.tsx",
   "src/components/sections/project-card.tsx",
-  "src/components/sections/project-detail.tsx",
   "src/components/sections/about-content.tsx",
 ];
 
 const CONTENT_COMPONENTS = [
   ...LINK_USING_CONTENT_COMPONENTS,
   "src/components/sections/skills-strip.tsx",
-  "src/components/sections/projects-section.tsx",
   "src/components/sections/contact-form.tsx",
   "src/components/sections/contact-page-content.tsx",
 ];
@@ -262,7 +259,7 @@ describe("content components", () => {
     (component) => {
       const source = read(component);
       expect(source, component).toContain('from "next-intl"');
-      expect(source, component).toContain("useTranslations()");
+      expect(source, component).toContain("useTranslations(");
       expect(source, component).not.toContain(
         'from "@/components/locale-provider"'
       );

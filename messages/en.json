@@ -34,11 +34,9 @@
     "focusLabel": "Focus"
   },
   "home": {
-    "featuredTitle": "Featured projects",
-    "featuredSubtitle": "A curated selection of launches, systems, and product work.",
+    "featuredTitle": "Selected work",
+    "featuredLink": "All projects",
     "skillsTitle": "Technologies I work with",
-    "viewAll": "View all projects",
-    "featuredEyebrow": "Selected work",
     "skillsEyebrow": "Capabilities",
     "skillsSubtitle": "A practical stack shaped by product delivery, systems thinking, and interface craft."
   },
@@ -95,45 +93,14 @@
   },
   "projects": {
     "title": "Projects",
-    "subtitle": "A collection of product, platform, and systems work spanning commerce, analytics, design systems, and internal tooling.",
-    "backToProjects": "Back to projects",
-    "viewLive": "Live demo",
-    "viewSource": "Source code",
-    "technologies": "Technologies",
-    "notFound": "Project not found",
-    "eyebrow": "Archive",
-    "filtersTitle": "Browse by stack",
-    "all": "All",
-    "summary": "Project summary",
-    "impact": "Impact",
+    "description": "Five projects I shipped and still stand behind. Each one lists the role I held, the stack I used and what actually changed at the end.",
     "role": "Role",
-    "links": "Links",
-    "items": {
-      "1": {
-        "title": "E-commerce platform",
-        "description": "Full-stack online store with product catalog, cart, checkout, and admin panel. Built with Next.js, Stripe, and PostgreSQL. Handles thousands of SKUs and supports multiple locales."
-      },
-      "2": {
-        "title": "Analytics dashboard",
-        "description": "Real-time analytics dashboard for marketing teams. Custom charts, filters, and export to CSV/PDF. Integrates with Google Analytics and internal APIs. Used by 50+ companies."
-      },
-      "3": {
-        "title": "Design system & docs",
-        "description": "Internal design system with 40+ components, Storybook, and usage guidelines. Reduced UI inconsistency and sped up feature delivery across 5 product teams."
-      },
-      "4": {
-        "title": "Developer CLI tool",
-        "description": "Open-source CLI for scaffolding and deploying static sites. Published on npm with 10k+ weekly downloads. Written in TypeScript, supports plugins."
-      },
-      "5": {
-        "title": "Mobile-first booking app",
-        "description": "Booking flow for a service marketplace. Calendar, availability, payments, and push notifications. React Native (Expo) and Node.js backend."
-      },
-      "6": {
-        "title": "Internal HR portal",
-        "description": "Leave requests, timesheets, and org chart. SSO, role-based access, and audit logs. Built with React and .NET. Serves 500+ employees."
-      }
-    }
+    "stack": "Stack",
+    "year": "Year",
+    "outcome": "Outcome",
+    "viewLive": "Live site",
+    "viewSource": "Source",
+    "back": "All projects"
   },
   "contact": {
     "title": "Contact",
@@ -179,8 +146,6 @@
     "defaultDescription": "Premium frontend portfolio, selected projects, experience, and contact.",
     "aboutTitle": "About",
     "aboutDescription": "About me and my work.",
-    "projectsTitle": "Projects",
-    "projectsDescription": "A selection of projects I've worked on.",
     "contactTitle": "Contact",
     "contactDescription": "Get in touch.",
     "ogAlt": "Portfolio"

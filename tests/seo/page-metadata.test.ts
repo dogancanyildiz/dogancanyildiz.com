@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { projects } from "@/data/projects";
+import { getProjectSlugs } from "@/lib/content";
 
 // next/font/local is a build time only export: outside the Next compiler
 // (webpack or SWC) it resolves to an empty module, so calling it throws
@@ -40,6 +40,12 @@ vi.mock("next-intl/server", () => ({
       return value;
     };
   },
+  // Not exercised by any assertion in this file yet, but future blog pages
+  // import getFormatter from next-intl/server alongside getTranslations, so
+  // the mock has to keep that import from throwing.
+  getFormatter: async () => ({
+    dateTime: () => "",
+  }),
 }));
 
 beforeEach(() => {
@@ -69,10 +75,10 @@ const PAGES = [
     path: "/contact",
     load: () => import("@/app/[lang]/contact/page"),
   },
-  ...projects.map((project) => ({
-    name: `projects/${project.slug}`,
-    path: `/projects/${project.slug}`,
-    extraParams: { slug: project.slug },
+  ...getProjectSlugs("en").map((slug) => ({
+    name: `projects/${slug}`,
+    path: `/projects/${slug}`,
+    extraParams: { slug },
     load: () => import("@/app/[lang]/projects/[slug]/page"),
   })),
 ] as const;
@@ -202,5 +208,14 @@ describe("page openGraph metadata", () => {
     expect(new Set(urls).size).toBe(routing.locales.length);
     expect(urls).toContain("https://dogancanyildiz.sh/about");
     expect(urls).toContain("https://dogancanyildiz.sh/tr/about");
+  });
+
+  it("marks the project detail page openGraph type as article", async () => {
+    const detailPage = PAGES.find((page) => page.name.startsWith("projects/"));
+    if (!detailPage) throw new Error("no project detail page case found");
+
+    const metadata = await metadataFor(detailPage, "en");
+
+    expect((metadata.openGraph as { type: string }).type).toBe("article");
   });
 });

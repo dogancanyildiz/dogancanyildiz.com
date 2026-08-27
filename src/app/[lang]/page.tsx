@@ -5,9 +5,15 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo/alternates";
 import { Hero } from "@/components/sections/hero";
-import { FeaturedProjects } from "@/components/sections/featured-projects";
+import { ProjectGrid } from "@/components/sections/project-grid";
 import { SkillsStrip } from "@/components/sections/skills-strip";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
+import { Link } from "@/i18n/navigation";
+import {
+  getFeaturedProjects,
+  toProjectCardData,
+  type Locale,
+} from "@/lib/content";
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
@@ -45,11 +51,27 @@ export default async function HomePage({
   if (!hasLocale(routing.locales, lang)) notFound();
   setRequestLocale(lang);
 
+  const tHome = await getTranslations({ locale: lang, namespace: "home" });
+  const featured = getFeaturedProjects(lang as Locale).map(toProjectCardData);
+
   return (
     <>
       <PersonJsonLd locale={lang} />
       <Hero />
-      <FeaturedProjects />
+      <section className="section-space">
+        <div className="page-shell space-y-8">
+          <div className="flex flex-wrap items-baseline justify-between gap-4">
+            <h2 className="text-3xl sm:text-4xl">{tHome("featuredTitle")}</h2>
+            <Link
+              href="/projects"
+              className="text-sm text-primary underline-offset-4 hover:underline"
+            >
+              {tHome("featuredLink")}
+            </Link>
+          </div>
+          <ProjectGrid projects={featured} />
+        </div>
+      </section>
       <SkillsStrip />
     </>
   );

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/content";
 import { absoluteUrl } from "@/lib/seo/alternates";
 import { localesForProject } from "@/lib/content/project-locales";
 
@@ -45,7 +45,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       });
     }
 
-    for (const project of projects) {
+    for (const project of getProjects(locale)) {
       const path = `/projects/${project.slug}`;
       const availableLocales = localesForProject(project.slug);
 

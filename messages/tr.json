@@ -34,11 +34,9 @@
     "focusLabel": "Odak alanları"
   },
   "home": {
-    "featuredTitle": "Öne çıkan projeler",
-    "featuredSubtitle": "Yayına aldığım ürünler, sistemler ve arayüz çalışmalarından seçki.",
+    "featuredTitle": "Seçilmiş işler",
+    "featuredLink": "Tüm projeler",
     "skillsTitle": "Çalıştığım teknolojiler",
-    "viewAll": "Tüm projeleri gör",
-    "featuredEyebrow": "Seçili işler",
     "skillsEyebrow": "Yetenekler",
     "skillsSubtitle": "Ürün teslimi, sistem yaklaşımı ve arayüz kalitesi etrafında şekillenmiş pratik bir teknoloji seti."
   },
@@ -95,45 +93,14 @@
   },
   "projects": {
     "title": "Projeler",
-    "subtitle": "E-ticaret, analitik, tasarım sistemleri ve dahili araçlar arasında uzanan ürün ve platform işleri.",
-    "backToProjects": "Projelere dön",
-    "viewLive": "Canlıya bak",
-    "viewSource": "Kaynak kodu",
-    "technologies": "Teknolojiler",
-    "notFound": "Proje bulunamadı",
-    "eyebrow": "Arşiv",
-    "filtersTitle": "Teknolojiye göre filtrele",
-    "all": "Tümü",
-    "summary": "Proje özeti",
-    "impact": "Etkisi",
+    "description": "Yayına aldığım ve hâlâ arkasında durduğum beş proje. Her biri üstlendiğim rolü, kullandığım yığını ve sonunda gerçekten neyin değiştiğini gösteriyor.",
     "role": "Rol",
-    "links": "Bağlantılar",
-    "items": {
-      "1": {
-        "title": "E-ticaret platformu",
-        "description": "Ürün kataloğu, sepet, ödeme ve admin paneli olan tam yığın mağaza. Next.js, Stripe ve PostgreSQL. Binlerce SKU, çoklu dil desteği."
-      },
-      "2": {
-        "title": "Analitik dashboard",
-        "description": "Pazarlama ekipleri için gerçek zamanlı analitik. Özel grafikler, filtreler, CSV/PDF dışa aktarma. Google Analytics ve dahili API entegrasyonu. 50+ şirket tarafından kullanılıyor."
-      },
-      "3": {
-        "title": "Tasarım sistemi ve dokümantasyon",
-        "description": "40+ bileşenli dahili tasarım sistemi, Storybook ve kullanım kılavuzu. UI tutarlılığı artırıldı, 5 ürün ekibinde teslimat hızlandı."
-      },
-      "4": {
-        "title": "Geliştirici CLI aracı",
-        "description": "Statik siteleri iskeletleyen ve yayınlayan açık kaynak CLI. npm'de haftalık 10k+ indirme. TypeScript, eklenti desteği."
-      },
-      "5": {
-        "title": "Mobil öncelikli rezervasyon uygulaması",
-        "description": "Hizmet pazarı için rezervasyon akışı. Takvim, müsaitlik, ödemeler, push bildirimleri. React Native (Expo) ve Node.js backend."
-      },
-      "6": {
-        "title": "Dahili İK portalı",
-        "description": "İzin talepleri, zaman çizelgeleri, organizasyon şeması. SSO, rol tabanlı erişim, denetim kayıtları. React ve .NET. 500+ çalışan."
-      }
-    }
+    "stack": "Stack",
+    "year": "Yıl",
+    "outcome": "Sonuç",
+    "viewLive": "Canlı site",
+    "viewSource": "Kaynak kod",
+    "back": "Tüm projeler"
   },
   "contact": {
     "title": "İletişim",
@@ -179,8 +146,6 @@
     "defaultDescription": "Premium frontend portfolyosu, seçili projeler, deneyim ve iletişim.",
     "aboutTitle": "Hakkımda",
     "aboutDescription": "Ben ve çalışmalarım hakkında.",
-    "projectsTitle": "Projeler",
-    "projectsDescription": "Üzerinde çalıştığım projelerden bir seçki.",
     "contactTitle": "İletişim",
     "contactDescription": "İletişime geçin.",
     "ogAlt": "Portfolyo"

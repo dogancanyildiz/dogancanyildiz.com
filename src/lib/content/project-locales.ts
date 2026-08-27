@@ -1,18 +1,13 @@
-import { routing, type AppLocale } from "@/i18n/routing";
-import { projects } from "@/data/projects";
+import { getProjectLocales } from "@/lib/content";
+import type { AppLocale } from "@/i18n/routing";
 
 /**
  * Locales a project detail page exists in.
  *
- * Today every project is a single locale independent record in
- * src/data/projects.ts whose title and description are translated in
- * messages/{en,tr}.json, so a known slug exists in both locales. Faz 4 swaps
- * the body of this function for a Velite lookup over
- * content/projects/{en,tr}/<slug>.mdx; sitemap and hreflang callers do not
- * change when that happens.
+ * Delegates to the Velite backed content layer: a slug exists in a locale
+ * when content/projects/<locale>/<slug>.mdx exists for it. Sitemap and
+ * hreflang callers do not change when the underlying content source does.
  */
 export function localesForProject(slug: string): AppLocale[] {
-  const project = projects.find((item) => item.slug === slug);
-  if (!project) return [];
-  return [...routing.locales];
+  return getProjectLocales(slug);
 }
