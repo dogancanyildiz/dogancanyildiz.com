@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useLocale } from "@/components/locale-provider";
 
 type Status = "idle" | "loading" | "success" | "error";
 
 export function ContactForm() {
-  const { t } = useLocale();
+  const t = useTranslations();
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
 

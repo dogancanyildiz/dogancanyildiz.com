@@ -1,12 +1,12 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useLocale } from "@/components/locale-provider";
+import { useTranslations } from "next-intl";
 import { skillCategories } from "@/data/skills";
 import { SectionHeading } from "@/components/ui/section-heading";
 
 export function SkillsStrip() {
-  const { t } = useLocale();
+  const t = useTranslations();
 
   return (
     <section className="section-space pt-8">

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useLocale } from "@/components/locale-provider";
+import { useTranslations } from "next-intl";
 import { ProjectCard } from "./project-card";
 import { projects } from "@/data/projects";
 import { cn } from "@/lib/utils";
 import { SectionHeading } from "@/components/ui/section-heading";
 
 export function ProjectsSection() {
-  const { t } = useLocale();
+  const t = useTranslations();
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
   const allTags = useMemo(() => {

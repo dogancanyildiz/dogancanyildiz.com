@@ -6,7 +6,6 @@ import "../globals.css";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import { ThemeProvider } from "@/components/theme-provider";
-import { LocaleProvider } from "@/components/locale-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -64,12 +63,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
           disableTransitionOnChange
         >
           <NextIntlClientProvider>
-            {/* Transitional: removed in Task 3 once every component reads from next-intl. */}
-            <LocaleProvider initialLocale={lang}>
-              <Header />
-              <main className="min-h-[calc(100vh-7rem)]">{children}</main>
-              <Footer />
-            </LocaleProvider>
+            <Header />
+            <main className="min-h-[calc(100vh-7rem)]">{children}</main>
+            <Footer />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

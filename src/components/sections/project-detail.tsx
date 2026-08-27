@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { useLocale } from "@/components/locale-provider";
 import type { Project } from "@/data/projects";
 
 interface ProjectDetailProps {
@@ -12,7 +12,7 @@ interface ProjectDetailProps {
 }
 
 export function ProjectDetail({ project }: ProjectDetailProps) {
-  const { t } = useLocale();
+  const t = useTranslations();
   const title = t(`projects.items.${project.id}.title`);
   const description = t(`projects.items.${project.id}.description`);
 

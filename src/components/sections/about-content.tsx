@@ -1,15 +1,15 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
 import { motion } from "motion/react";
-import { useLocale } from "@/components/locale-provider";
-import { skillCategories } from "@/data/skills";
 import { Download } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { skillCategories } from "@/data/skills";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/ui/section-heading";
 
 export function AboutContent() {
-  const { t } = useLocale();
+  const t = useTranslations();
 
   return (
     <section className="section-space">

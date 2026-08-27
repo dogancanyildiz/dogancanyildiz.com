@@ -191,3 +191,54 @@ describe("404 pages", () => {
     expect(keys("tr")).toEqual(keys("en"));
   });
 });
+
+const LINK_USING_CONTENT_COMPONENTS = [
+  "src/components/sections/hero.tsx",
+  "src/components/sections/featured-projects.tsx",
+  "src/components/sections/project-card.tsx",
+  "src/components/sections/project-detail.tsx",
+  "src/components/sections/about-content.tsx",
+];
+
+const CONTENT_COMPONENTS = [
+  ...LINK_USING_CONTENT_COMPONENTS,
+  "src/components/sections/skills-strip.tsx",
+  "src/components/sections/projects-section.tsx",
+  "src/components/sections/contact-form.tsx",
+  "src/components/sections/contact-page-content.tsx",
+];
+
+describe("content components", () => {
+  it.each(CONTENT_COMPONENTS)("reads messages through next-intl in %s", (component) => {
+    const source = read(component);
+    expect(source, component).toContain('from "next-intl"');
+    expect(source, component).toContain("useTranslations()");
+    expect(source, component).not.toContain(
+      'from "@/components/locale-provider"'
+    );
+    expect(source, component).not.toContain("useLocale");
+  });
+
+  it.each(LINK_USING_CONTENT_COMPONENTS)(
+    "routes through the locale aware Link in %s",
+    (component) => {
+      const source = read(component);
+      expect(source, component).toContain('from "@/i18n/navigation"');
+      expect(source, component).not.toContain('from "next/link"');
+    }
+  );
+
+  it("drops the transitional LocaleProvider from the root layout", () => {
+    const layout = read("src/app/[lang]/layout.tsx");
+    expect(layout).not.toContain(
+      'from "@/components/locale-provider"'
+    );
+    expect(layout).not.toContain("LocaleProvider");
+  });
+
+  it("removes the cookie based dictionary layer entirely", () => {
+    expect(exists("src/lib/i18n/translations.ts")).toBe(false);
+    expect(exists("src/lib/i18n/use-translation.ts")).toBe(false);
+    expect(exists("src/components/locale-provider.tsx")).toBe(false);
+  });
+});

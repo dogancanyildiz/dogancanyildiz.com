@@ -2,12 +2,12 @@
 
 import { motion } from "motion/react";
 import { Mail, MapPin, Briefcase, Clock3 } from "lucide-react";
-import { useLocale } from "@/components/locale-provider";
+import { useTranslations } from "next-intl";
 import { ContactForm } from "@/components/sections/contact-form";
 import { SectionHeading } from "@/components/ui/section-heading";
 
 export function ContactPageContent() {
-  const { t } = useLocale();
+  const t = useTranslations();
 
   return (
     <section className="section-space relative">
