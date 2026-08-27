@@ -75,6 +75,25 @@ describe("createRateLimiter", () => {
   });
 });
 
+describe("createRateLimiter eviction", () => {
+  it("evicts the least recently active key when the budget is full of fresh keys", () => {
+    const limiter = createRateLimiter({
+      limit: 1,
+      windowMs: 10_000,
+      maxKeys: 2,
+    });
+    limiter.check("a", 0);
+    limiter.check("b", 1);
+    // "a" and "b" are still inside the window, so "c" only fits by evicting
+    // the least recently active key, which is "a".
+    expect(limiter.check("c", 2).allowed).toBe(true);
+    // "b" survived and is still rate limited.
+    expect(limiter.check("b", 3).allowed).toBe(false);
+    // "a" was evicted, so it starts from a clean budget.
+    expect(limiter.check("a", 4).allowed).toBe(true);
+  });
+});
+
 describe("CONTACT_RATE_LIMIT", () => {
   it("allows five submissions per ten minutes", () => {
     expect(CONTACT_RATE_LIMIT.limit).toBe(5);

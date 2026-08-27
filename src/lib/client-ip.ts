@@ -1,26 +1,26 @@
-/**
- * Resolves the real visitor IP for rate limiting.
- *
- * CF-Connecting-IP is a plain HTTP header, a client can forge it. It is only
- * trustworthy when the request provably came from a Cloudflare range, which is
- * enforced one layer down by Traefik forwardedHeaders.trustedIPs. The caller
- * passes that decision in through trustCloudflare, this module never guesses.
- */
+import { isIP } from "node:net";
 
-const IPV4 =
-  /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
-const IPV6 = /^[0-9a-f]{0,4}(:[0-9a-f]{0,4}){2,7}$/i;
+/**
+ * Resolves the visitor IP that keys the rate limiter.
+ *
+ * CF-Connecting-IP is a plain HTTP header that any client can set, and Traefik
+ * forwardedHeaders.trustedIPs does not touch it (that setting only governs the
+ * X-Forwarded-* family). The header is only trustworthy once the origin accepts
+ * connections from Cloudflare alone (Traefik ipAllowList or the host firewall,
+ * phase 1). The caller passes that decision in through trustCloudflare, this
+ * module never guesses.
+ *
+ * The X-Forwarded-For fallback is a best effort interim: the leftmost entry is
+ * whatever the client sent when the chain is forwarded, and the Cloudflare edge
+ * address when Traefik rewrites the header. Until trustCloudflare is on, the
+ * Cloudflare rate limiting rule in front of /api/contact is the layer that
+ * actually holds.
+ */
 
 export const UNKNOWN_IP = "unknown";
 
 export function isIpAddress(value: string): boolean {
-  if (!value) {
-    return false;
-  }
-  if (IPV4.test(value)) {
-    return true;
-  }
-  return value.includes(":") && IPV6.test(value);
+  return isIP(value) !== 0;
 }
 
 export type ClientIpOptions = {

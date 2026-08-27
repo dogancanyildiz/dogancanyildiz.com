@@ -5,6 +5,11 @@
  * a process local Map is consistent. State is lost on restart, which is an
  * accepted trade off. Cloudflare Rate Limiting sits in front of /api/contact
  * as the outer layer.
+ *
+ * maxKeys is a hard cap on the Map: stale keys are pruned first and, when the
+ * budget is still full, the least recently active key is evicted. A client
+ * that forges a fresh key per request can therefore push other keys out, but
+ * it can never grow memory or the per request scan past maxKeys entries.
  */
 
 export type RateLimitResult = {
@@ -41,13 +46,12 @@ export function createRateLimiter(options: RateLimiterOptions): RateLimiter {
 
   return {
     check(key: string, now: number = Date.now()): RateLimitResult {
-      if (hits.size >= maxKeys) {
-        prune(now);
-      }
-
       const stamps = (hits.get(key) ?? []).filter(
         (stamp) => now - stamp < windowMs
       );
+      // Deleting before re-inserting moves the key to the end of the Map, so
+      // insertion order doubles as a least recently active order.
+      hits.delete(key);
 
       if (stamps.length >= limit) {
         hits.set(key, stamps);
@@ -63,6 +67,16 @@ export function createRateLimiter(options: RateLimiterOptions): RateLimiter {
       }
 
       stamps.push(now);
+      if (hits.size >= maxKeys) {
+        prune(now);
+        while (hits.size >= maxKeys) {
+          const leastRecent = hits.keys().next().value;
+          if (leastRecent === undefined) {
+            break;
+          }
+          hits.delete(leastRecent);
+        }
+      }
       hits.set(key, stamps);
       return {
         allowed: true,

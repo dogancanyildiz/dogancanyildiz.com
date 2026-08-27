@@ -4,6 +4,11 @@ import { getClientIp } from "@/lib/client-ip";
 import { MAX_BODY_BYTES, validateBody } from "@/lib/contact-validation";
 import { contactEmail, fromEmail, trustsCloudflareHeaders } from "@/lib/env";
 import { contactRateLimiter } from "@/lib/rate-limit";
+import {
+  BodyTooLargeError,
+  parseJsonBody,
+  readBodyWithLimit,
+} from "@/lib/request-body";
 import { resend } from "@/lib/resend";
 
 // Client facing copy stays generic on purpose. Provider details, env problems
@@ -15,6 +20,8 @@ const TOO_MANY_MESSAGE = "Too many requests. Please try again later.";
 const GENERIC_MESSAGE = "Message could not be sent. Please try again later.";
 
 export async function POST(request: Request) {
+  // Content-Length is advisory (a chunked request carries none), so this is
+  // only a cheap early exit. The real cap is enforced while the body is read.
   const declaredLength = Number(request.headers.get("content-length") ?? "0");
   if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
     return NextResponse.json({ error: TOO_LARGE_MESSAGE }, { status: 413 });
@@ -34,7 +41,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const parsed = validateBody(await request.json().catch(() => null));
+  let rawBody: string;
+  try {
+    rawBody = await readBodyWithLimit(request, MAX_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) {
+      return NextResponse.json({ error: TOO_LARGE_MESSAGE }, { status: 413 });
+    }
+    throw error;
+  }
+
+  const parsed = validateBody(parseJsonBody(rawBody));
   if (!parsed.ok) {
     if (parsed.reason === "honeypot") {
       console.warn("[contact] honeypot triggered");

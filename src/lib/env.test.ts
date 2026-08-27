@@ -27,6 +27,30 @@ describe("resolveSiteUrl", () => {
   it("throws when the variable is blank", () => {
     expect(() => resolveSiteUrl("   ")).toThrow(/NEXT_PUBLIC_SITE_URL/);
   });
+
+  it("throws when the scheme is missing", () => {
+    expect(() => resolveSiteUrl("dogancanyildiz.sh")).toThrow(
+      /not an absolute URL/
+    );
+  });
+
+  it("throws for a scheme other than http or https", () => {
+    expect(() => resolveSiteUrl("ftp://dogancanyildiz.sh")).toThrow(
+      /http or https/
+    );
+  });
+
+  it("throws when a path is present", () => {
+    expect(() => resolveSiteUrl("https://dogancanyildiz.sh/blog")).toThrow(
+      /without a path/
+    );
+  });
+
+  it("accepts a local http origin with a port", () => {
+    expect(resolveSiteUrl("http://localhost:3000/")).toBe(
+      "http://localhost:3000"
+    );
+  });
 });
 
 describe("resolveRequiredEmail", () => {

@@ -4,9 +4,11 @@ const isProduction = process.env.NODE_ENV === "production";
 
 // script-src keeps 'unsafe-inline' on purpose. The App Router streams its RSC
 // payload through inline script tags, and the nonce based alternative forces
-// every route into dynamic rendering, which would break the "only /api/* is
-// dynamic" requirement. 'unsafe-eval' and ws: are development only, they are
-// needed by React Refresh and the HMR socket.
+// every route into dynamic rendering. Today the root layout still reads
+// cookies, so every page is dynamic anyway, but phase 2 removes that and
+// requires that only /api/* stays dynamic; a nonce would block that goal.
+// 'unsafe-eval' and ws: are development only, they are needed by React
+// Refresh and the HMR socket.
 const scriptSrc = isProduction
   ? "script-src 'self' 'unsafe-inline'"
   : "script-src 'self' 'unsafe-inline' 'unsafe-eval'";

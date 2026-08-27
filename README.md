@@ -52,13 +52,13 @@ Every variable is documented in `.env.example`. The split between Coolify build
 and runtime variables is not cosmetic, getting it wrong fails silently in both
 directions.
 
-| Variable                 | Coolify layer | Required          | Notes                                                                                                 |
-| ------------------------ | ------------- | ----------------- | ----------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`   | Build         | Yes               | Inlined into the client bundle by `next build`. Marking it runtime leaves it undefined in production. |
-| `RESEND_API_KEY`         | Runtime       | Yes in production | Build variables can leak into image layers and build logs.                                            |
-| `CONTACT_EMAIL`          | Runtime       | Yes in production | Inbox that receives form messages.                                                                    |
-| `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                             |
-| `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after Traefik trusts the Cloudflare ranges.                                        |
+| Variable                 | Coolify layer | Required          | Notes                                                                                                                                                                        |
+| ------------------------ | ------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`   | Build         | Yes               | Inlined into the client bundle by `next build`. Marking it runtime leaves it undefined in production.                                                                        |
+| `RESEND_API_KEY`         | Runtime       | Yes in production | Build variables can leak into image layers and build logs.                                                                                                                   |
+| `CONTACT_EMAIL`          | Runtime       | Yes in production | Inbox that receives form messages.                                                                                                                                           |
+| `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                                                                                                    |
+| `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after the origin is reachable from Cloudflare alone and Traefik trusts the Cloudflare ranges. `trustedIPs` by itself does not protect `CF-Connecting-IP`. |
 
 ## Security posture
 

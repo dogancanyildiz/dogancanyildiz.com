@@ -15,6 +15,14 @@ describe("isIpAddress", () => {
     expect(isIpAddress("2001:db8::1")).toBe(true);
   });
 
+  it("accepts an ipv4 mapped ipv6 address", () => {
+    expect(isIpAddress("::ffff:203.0.113.9")).toBe(true);
+  });
+
+  it("rejects a colon only string", () => {
+    expect(isIpAddress(":::")).toBe(false);
+  });
+
   it("rejects octets above 255", () => {
     expect(isIpAddress("999.0.0.1")).toBe(false);
   });
