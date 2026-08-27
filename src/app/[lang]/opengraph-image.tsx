@@ -1,7 +1,10 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { siteConfig } from "@/lib/site-config";
 import {
   OG_IMAGE_CONTENT_TYPE,
   OG_IMAGE_ID,
@@ -11,99 +14,132 @@ import {
 export const size = OG_IMAGE_SIZE;
 export const contentType = OG_IMAGE_CONTENT_TYPE;
 
+// Palette: 03-tasarim-ui-ux.md dark column.
+const GROUND = "#0a0c0f";
+const SURFACE = "#14171b";
+const TEXT = "#f1f3f4";
+const MUTED = "#999fa6";
+const ACCENT = "#4fcc8d";
+const HAIRLINE = "#2a2e33";
+
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
 }
 
 // Next calls this once with empty params to enumerate the image ids, then once
 // per locale while prerendering, so `lang` has to fall back to the default
-// locale instead of being handed to next-intl as undefined.
+// locale instead of being handed to next-intl as undefined. This is the same
+// fallback Faz 2 already needed for the same reason, do not drop it.
+async function resolveLocale(paramsPromise: Promise<{ lang: string }>) {
+  const { lang } = await paramsPromise;
+  return hasLocale(routing.locales, lang) ? lang : routing.defaultLocale;
+}
+
 export async function generateImageMetadata({
   params,
 }: {
   params: Promise<{ lang: string }>;
 }) {
-  const { lang } = await params;
-  const locale = hasLocale(routing.locales, lang)
-    ? lang
-    : routing.defaultLocale;
+  const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "metadata" });
   return [{ id: OG_IMAGE_ID, size, contentType, alt: t("ogAlt") }];
 }
 
-export default function OGImage() {
+// satori cannot parse woff2, so these are the woff copies vendored under
+// public/, which the standalone build always ships. Two subsets are passed
+// because the latin file has no g-breve or dotted capital I.
+async function loadDisplayFonts() {
+  const base = join(process.cwd(), "public", "fonts", "og");
+  const [latin, latinExt] = await Promise.all([
+    readFile(join(base, "instrument-serif-latin.woff")),
+    readFile(join(base, "instrument-serif-latin-ext.woff")),
+  ]);
+  return [
+    { name: "Instrument Serif", data: latin, weight: 400 as const, style: "normal" as const },
+    { name: "Instrument Serif", data: latinExt, weight: 400 as const, style: "normal" as const },
+  ];
+}
+
+export default async function OGImage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const locale = await resolveLocale(params);
+  const { person } = siteConfig;
+  const fonts = await loadDisplayFonts();
+
   return new ImageResponse(
-    <div
-      style={{
-        background: "#09090b",
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "sans-serif",
-        padding: "80px",
-      }}
-    >
+    (
       <div
         style={{
+          width: "100%",
+          height: "100%",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "64px",
-          height: "64px",
-          borderRadius: "50%",
-          background: "#27272a",
-          marginBottom: "32px",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          background: GROUND,
+          fontFamily: "Instrument Serif",
+          padding: "72px",
         }}
       >
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "72px",
+              height: "72px",
+              borderRadius: "20px",
+              background: SURFACE,
+              border: `1px solid ${HAIRLINE}`,
+              color: TEXT,
+              fontSize: "26px",
+              letterSpacing: "0.04em",
+            }}
+          >
+            DCY
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div
+              style={{
+                width: "10px",
+                height: "10px",
+                borderRadius: "9999px",
+                background: ACCENT,
+              }}
+            />
+            <div style={{ fontSize: "22px", color: MUTED, letterSpacing: "0.14em" }}>
+              dogancanyildiz.sh
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div style={{ fontSize: "86px", color: TEXT, lineHeight: 1.05 }}>
+            {person.name}
+          </div>
+          <div style={{ fontSize: "34px", color: MUTED, lineHeight: 1.3 }}>
+            {person.jobTitle[locale]}
+          </div>
+        </div>
+
         <div
           style={{
-            width: "24px",
-            height: "24px",
-            borderRadius: "50%",
-            background: "#a1a1aa",
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            borderTop: `1px solid ${HAIRLINE}`,
+            paddingTop: "28px",
+            fontSize: "24px",
+            color: MUTED,
           }}
-        />
+        >
+          {person.location.city}, Türkiye
+        </div>
       </div>
-      <p
-        style={{
-          fontSize: "20px",
-          color: "#71717a",
-          margin: "0 0 16px",
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-        }}
-      >
-        Portfolio
-      </p>
-      <h1
-        style={{
-          fontSize: "64px",
-          fontWeight: 700,
-          color: "#fafafa",
-          margin: "0 0 24px",
-          textAlign: "center",
-          lineHeight: 1.1,
-        }}
-      >
-        Building clean, fast
-        <br />
-        experiences for the web
-      </h1>
-      <p
-        style={{
-          fontSize: "22px",
-          color: "#71717a",
-          margin: 0,
-          textAlign: "center",
-          maxWidth: "700px",
-        }}
-      >
-        React · Next.js · TypeScript
-      </p>
-    </div>,
-    { ...size }
+    ),
+    { ...size, fonts }
   );
 }
