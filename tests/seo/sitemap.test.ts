@@ -24,8 +24,12 @@ describe("sitemap", () => {
     const { projects } = await import("@/data/projects");
     const urls = sitemap().map((entry) => entry.url);
 
-    const en = urls.filter((url) => /^https:\/\/dogancanyildiz\.sh\/projects\/[^/]+$/.test(url));
-    const tr = urls.filter((url) => /^https:\/\/dogancanyildiz\.sh\/tr\/projects\/[^/]+$/.test(url));
+    const en = urls.filter((url) =>
+      /^https:\/\/dogancanyildiz\.sh\/projects\/[^/]+$/.test(url)
+    );
+    const tr = urls.filter((url) =>
+      /^https:\/\/dogancanyildiz\.sh\/tr\/projects\/[^/]+$/.test(url)
+    );
 
     expect(en).toHaveLength(projects.length);
     expect(tr).toHaveLength(projects.length);
