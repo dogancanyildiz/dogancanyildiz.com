@@ -1,18 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
+import * as m from "motion/react-m";
+import { useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { fadeUp } from "@/lib/motion";
 
 type Status = "idle" | "loading" | "success" | "error";
 
 export function ContactForm() {
   const t = useTranslations();
   const locale = useLocale();
+  const reduced = useReducedMotion() ?? false;
+  const variants = fadeUp(reduced);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -59,10 +63,11 @@ export function ContactForm() {
   }
 
   return (
-    <motion.form
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+    <m.form
+      variants={variants}
+      initial="hidden"
+      animate="show"
+      custom={0}
       onSubmit={handleSubmit}
       className="surface-panel relative mx-auto w-full max-w-2xl space-y-6 p-6 sm:p-8"
     >
@@ -132,6 +137,6 @@ export function ContactForm() {
       <Button type="submit" size="lg" disabled={status === "loading"}>
         {status === "loading" ? t("form.sending") : t("form.send")}
       </Button>
-    </motion.form>
+    </m.form>
   );
 }

@@ -1,11 +1,13 @@
 "use client";
 
-import { motion } from "motion/react";
+import * as m from "motion/react-m";
+import { useReducedMotion } from "motion/react";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import type { Project } from "@/data/projects";
+import { fadeUp } from "@/lib/motion";
 
 interface ProjectDetailProps {
   project: Project;
@@ -13,17 +15,15 @@ interface ProjectDetailProps {
 
 export function ProjectDetail({ project }: ProjectDetailProps) {
   const t = useTranslations();
+  const reduced = useReducedMotion() ?? false;
+  const variants = fadeUp(reduced);
   const title = t(`projects.items.${project.id}.title`);
   const description = t(`projects.items.${project.id}.description`);
 
   return (
     <section className="section-space">
       <div className="page-shell-reading space-y-10">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-        >
+        <m.div variants={variants} initial="hidden" animate="show" custom={0}>
           <Link
             href="/projects"
             className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -31,12 +31,13 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             <ArrowLeft className="size-4" />
             {t("projects.backToProjects")}
           </Link>
-        </motion.div>
+        </m.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.05 }}
+        <m.div
+          variants={variants}
+          initial="hidden"
+          animate="show"
+          custom={1}
           className="surface-panel space-y-8 overflow-hidden p-6 sm:p-8"
         >
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
@@ -142,7 +143,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               </div>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

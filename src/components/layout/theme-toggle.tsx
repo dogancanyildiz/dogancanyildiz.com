@@ -2,7 +2,6 @@
 
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
-import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { useSyncExternalStore } from "react";
 
@@ -27,20 +26,18 @@ export function ThemeToggle() {
   }
 
   return (
-    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        className="border border-border/60 bg-background/60"
-        aria-label="Toggle theme"
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      >
-        {theme === "dark" ? (
-          <Sun className="size-4" />
-        ) : (
-          <Moon className="size-4" />
-        )}
-      </Button>
-    </motion.div>
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      className="tap-target border border-border bg-background"
+      aria-label="Toggle theme"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    >
+      {theme === "dark" ? (
+        <Sun className="size-4" />
+      ) : (
+        <Moon className="size-4" />
+      )}
+    </Button>
   );
 }

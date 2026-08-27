@@ -8,6 +8,7 @@ import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import { buildOpenGraph } from "@/lib/seo/locale-url";
 import { ThemeProvider } from "@/components/theme-provider";
+import { MotionProvider } from "@/components/motion-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -73,9 +74,13 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
           disableTransitionOnChange
         >
           <NextIntlClientProvider>
-            <Header />
-            <main className="min-h-[calc(100vh-7rem)]">{children}</main>
-            <Footer />
+            <MotionProvider>
+              <Header />
+              <main id="main" className="min-h-[calc(100vh-7rem)]">
+                {children}
+              </main>
+              <Footer />
+            </MotionProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

@@ -1,35 +1,38 @@
 "use client";
 
-import { motion } from "motion/react";
+import * as m from "motion/react-m";
+import { useReducedMotion } from "motion/react";
 import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { skillCategories } from "@/data/skills";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { fadeUp, staggerContainer, staggerItem } from "@/lib/motion";
 
 export function AboutContent() {
   const t = useTranslations();
+  const reduced = useReducedMotion() ?? false;
+  const variants = fadeUp(reduced);
+  const listContainer = staggerContainer(reduced);
+  const listItem = staggerItem(reduced);
 
   return (
     <section className="section-space">
       <div className="page-shell-narrow space-y-12">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
+        <m.div variants={variants} initial="hidden" animate="show" custom={0}>
           <SectionHeading
             eyebrow={t("about.eyebrow")}
             title={t("about.title")}
             description={t("about.intro")}
           />
-        </motion.div>
+        </m.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.05 }}
+        <m.div
+          variants={variants}
+          initial="hidden"
+          animate="show"
+          custom={1}
           className="surface-panel space-y-6 p-6 sm:p-8"
         >
           <span className="eyebrow">{t("about.manifestoEyebrow")}</span>
@@ -47,13 +50,13 @@ export function AboutContent() {
               {t("about.p2")}
             </p>
           </div>
-        </motion.div>
+        </m.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.05 }}
+        <m.div
+          variants={variants}
+          initial="hidden"
+          animate="show"
+          custom={2}
           className="space-y-6"
         >
           <SectionHeading
@@ -77,17 +80,20 @@ export function AboutContent() {
               </ul>
             </div>
           ))}
-        </motion.div>
+        </m.div>
 
         <SectionHeading
           eyebrow={t("about.timelineEyebrow")}
           title={t("about.experienceTitle")}
         />
-        <ul className="space-y-5">
-          <motion.li
-            initial={{ opacity: 0, x: -8 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+        <m.ul
+          variants={listContainer}
+          initial="hidden"
+          animate="show"
+          className="space-y-5"
+        >
+          <m.li
+            variants={listItem}
             className="surface-panel relative overflow-hidden p-6"
           >
             <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
@@ -100,11 +106,9 @@ export function AboutContent() {
             <p className="mt-2 text-sm leading-7 text-muted-foreground">
               {t("about.exp1Desc")}
             </p>
-          </motion.li>
-          <motion.li
-            initial={{ opacity: 0, x: -8 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+          </m.li>
+          <m.li
+            variants={listItem}
             className="surface-panel relative overflow-hidden p-6"
           >
             <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
@@ -117,11 +121,9 @@ export function AboutContent() {
             <p className="mt-2 text-sm leading-7 text-muted-foreground">
               {t("about.exp2Desc")}
             </p>
-          </motion.li>
-          <motion.li
-            initial={{ opacity: 0, x: -8 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+          </m.li>
+          <m.li
+            variants={listItem}
             className="surface-panel relative overflow-hidden p-6"
           >
             <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
@@ -134,17 +136,17 @@ export function AboutContent() {
             <p className="mt-2 text-sm leading-7 text-muted-foreground">
               {t("about.exp3Desc")}
             </p>
-          </motion.li>
-        </ul>
+          </m.li>
+        </m.ul>
 
         <SectionHeading
           eyebrow={t("about.educationEyebrow")}
           title={t("about.educationTitle")}
         />
-        <motion.div
-          initial={{ opacity: 0, x: -8 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
+        <m.div
+          variants={listItem}
+          initial="hidden"
+          animate="show"
           className="surface-panel relative overflow-hidden p-6"
         >
           <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
@@ -157,12 +159,13 @@ export function AboutContent() {
           <span className="block text-sm text-muted-foreground">
             {t("about.edu1Period")}
           </span>
-        </motion.div>
+        </m.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+        <m.div
+          variants={variants}
+          initial="hidden"
+          animate="show"
+          custom={3}
           className="flex flex-wrap items-center gap-4"
         >
           <Button asChild variant="outline" size="lg">
@@ -174,12 +177,13 @@ export function AboutContent() {
           <Button asChild size="lg">
             <Link href="/projects">{t("about.projectsLink")}</Link>
           </Button>
-        </motion.div>
+        </m.div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+        <m.p
+          variants={variants}
+          initial="hidden"
+          animate="show"
+          custom={4}
           className="text-muted-foreground"
         >
           {t("about.browseIntro")}{" "}
@@ -197,7 +201,7 @@ export function AboutContent() {
             {t("about.contactLink")}
           </Link>
           .
-        </motion.p>
+        </m.p>
       </div>
     </section>
   );

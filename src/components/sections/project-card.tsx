@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
+import * as m from "motion/react-m";
+import { useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -12,6 +13,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import type { Project } from "@/data/projects";
+import { fadeUp } from "@/lib/motion";
 
 interface ProjectCardProps {
   project: Project;
@@ -25,6 +27,8 @@ export function ProjectCard({
   variant = "standard",
 }: ProjectCardProps) {
   const t = useTranslations();
+  const reduced = useReducedMotion() ?? false;
+  const variants = fadeUp(reduced);
   const title = t(`projects.items.${project.id}.title`);
   const description = t(`projects.items.${project.id}.description`);
   const compact = variant === "compact";
@@ -93,20 +97,16 @@ export function ProjectCard({
       : "";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{
-        duration: 0.4,
-        delay: index * 0.08,
-        ease: "easeOut",
-      }}
+    <m.div
+      variants={variants}
+      initial="hidden"
+      animate="show"
+      custom={index}
       className={wrapperClassName}
     >
       <Link href={`/projects/${project.slug}`} className="block h-full">
         {content}
       </Link>
-    </motion.div>
+    </m.div>
   );
 }

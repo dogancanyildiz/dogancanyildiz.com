@@ -1,12 +1,14 @@
 "use client";
 
-import { motion } from "motion/react";
+import * as m from "motion/react-m";
+import { useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ProjectCard } from "./project-card";
 import { projects, featuredProjectIds } from "@/data/projects";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { fadeUp } from "@/lib/motion";
 
 const featured = featuredProjectIds
   .map((id) => projects.find((p) => p.id === id))
@@ -14,16 +16,14 @@ const featured = featuredProjectIds
 
 export function FeaturedProjects() {
   const t = useTranslations();
+  const reduced = useReducedMotion() ?? false;
+  const variants = fadeUp(reduced);
   const [lead, ...rest] = featured;
 
   return (
     <section className="section-space">
       <div className="page-shell space-y-10">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
+        <m.div variants={variants} initial="hidden" animate="show" custom={0}>
           <SectionHeading
             eyebrow={t("home.featuredEyebrow")}
             title={t("home.featuredTitle")}
@@ -34,7 +34,7 @@ export function FeaturedProjects() {
               </Button>
             }
           />
-        </motion.div>
+        </m.div>
         <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
           {lead ? (
             <ProjectCard project={lead} index={0} variant="featured" />
