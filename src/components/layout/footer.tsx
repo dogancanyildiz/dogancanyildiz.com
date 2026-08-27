@@ -80,6 +80,7 @@ export function Footer() {
                 </a>
                 <Link
                   href="/feed.xml"
+                  prefetch={false}
                   aria-label={t("footer.rss")}
                   className="tap-target flex items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:text-foreground"
                 >

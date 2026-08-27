@@ -22,7 +22,7 @@ const messageKeys = (locale: string, namespace: string) => {
 };
 
 describe("shared nav list", () => {
-  it("exports the four top level routes as a const tuple", () => {
+  it("exports the five top level routes as a const tuple", () => {
     expect(exists("src/lib/nav.ts")).toBe(true);
     const source = read("src/lib/nav.ts");
     expect(source).toContain("export const navItems");
@@ -30,6 +30,7 @@ describe("shared nav list", () => {
     expect(source).toContain('{ href: "/", key: "nav.home" }');
     expect(source).toContain('{ href: "/about", key: "nav.about" }');
     expect(source).toContain('{ href: "/projects", key: "nav.projects" }');
+    expect(source).toContain('{ href: "/blog", key: "nav.blog" }');
     expect(source).toContain('{ href: "/contact", key: "nav.contact" }');
     expect(source).toMatch(/\]\s*as const/);
   });

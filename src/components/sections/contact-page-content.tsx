@@ -18,7 +18,7 @@ export function ContactPageContent() {
     <section className="section-space relative">
       <div className="page-shell grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-6">
-          <SectionHeading title={t("title")} description={t("intro")} />
+          <SectionHeading as="h1" title={t("title")} description={t("intro")} />
 
           <m.div
             variants={variants}

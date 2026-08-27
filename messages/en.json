@@ -33,7 +33,7 @@
     "skillsSubtitle": "Full-stack development on a networking and security foundation, shipped on infrastructure I run myself."
   },
   "footer": {
-    "tagline": "Full-stack development, self-hosted infrastructure, security minded engineering.",
+    "tagline": "Full-stack development, self-hosted infrastructure, security-minded engineering.",
     "copyright": "Built and self-hosted by me.",
     "navTitle": "Pages",
     "emailLabel": "Email",
@@ -45,7 +45,7 @@
   "about": {
     "title": "About",
     "description": "Full-stack developer in Konya, Türkiye, building web applications and running the infrastructure they ship on.",
-    "lead": "Software engineer specializing in scalable, user friendly web applications with Next.js, Node.js/Express and MongoDB.",
+    "lead": "Software engineer specializing in scalable, user-friendly web applications with Next.js, Node.js/Express and MongoDB.",
     "body1": "I don't stop at writing the code. I build and ship on self-hosted infrastructure (Docker, GitHub Actions CI/CD, Coolify, Traefik and Linux servers) and work in Agile teams, using ClickUp for sprint planning and issue tracking.",
     "body2": "What sets my work apart is a strong networking and security foundation underneath the application layer: I'm CAPT certified, and I've completed the full Cisco CCNA track along with CyberOps Associate. This means I think about how a system is deployed, exposed and hardened, not just how it's built.",
     "body3": "Outside of work I spent two years as a GDG Konya organizer and served on the GDG Cloud Konya core team, organizing tech talks, study jams and hands-on workshops for the local developer community.",

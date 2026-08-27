@@ -105,7 +105,13 @@ export function ContactForm() {
       </div>
       <div className="absolute -left-[9999px] top-0" aria-hidden="true">
         <Label htmlFor="website">{t("honeypotLabel")}</Label>
-        <Input id="website" name="website" type="text" tabIndex={-1} />
+        <Input
+          id="website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
       </div>
       {/* The status paragraphs are conditionally rendered, so the role has to
           sit on the element that appears: role=alert is assertive for the
