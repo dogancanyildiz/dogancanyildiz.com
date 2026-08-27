@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo/alternates";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { ContactPageContent } from "@/components/sections/contact-page-content";
 
 export function generateStaticParams() {
@@ -18,19 +18,13 @@ export async function generateMetadata({
   const { lang } = await params;
   if (!hasLocale(routing.locales, lang)) notFound();
 
-  const t = await getTranslations({ locale: lang, namespace: "metadata" });
+  const t = await getTranslations({ locale: lang, namespace: "contact" });
 
-  return {
-    title: t("contactTitle"),
-    description: t("contactDescription"),
-    openGraph: buildOpenGraph(lang, "/contact", {
-      title: t("contactTitle"),
-      description: t("contactDescription"),
-      siteName: t("defaultTitle"),
-      imageAlt: t("ogAlt"),
-    }),
-    alternates: buildAlternates(lang, "/contact", [...routing.locales]),
-  };
+  return buildPageMetadata(lang, "/contact", {
+    title: t("title"),
+    description: t("description"),
+    availableLocales: [...routing.locales],
+  });
 }
 
 export default async function ContactPage({

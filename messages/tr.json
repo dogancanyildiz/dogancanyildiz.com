@@ -1,5 +1,9 @@
 {
-  "brand": "Alex Chen",
+  "brand": {
+    "name": "Doğan Can Yıldız",
+    "monogram": "DCY",
+    "role": "Full-Stack Web Geliştirici ve DevOps Mühendisi"
+  },
   "nav": {
     "home": "Ana Sayfa",
     "about": "Hakkımda",
@@ -12,27 +16,13 @@
     "closeMenu": "Menüyü kapat"
   },
   "hero": {
-    "greeting": "Merhaba, ben",
-    "name": "Alex Chen",
-    "role": "Frontend Geliştirici",
-    "title": "Netlik, ritim ve hızla premium dijital ürünler tasarlıyorum.",
-    "subtitle": "Detaya önem veren ekipler için arayüz sistemleri, ürün deneyimleri ve frontend mimarisi geliştiriyorum.",
+    "location": "Konya, Türkiye",
+    "title": "Full-Stack Web Geliştirici ve DevOps Mühendisi",
+    "tagline": "Web uygulamaları geliştiriyorum ve yayına aldıkları altyapıyı kendim işletiyorum.",
+    "intro": "Konya'da yaşayan bir full-stack geliştiriciyim. Next.js ve Node.js ile web uygulamaları geliştiriyorum ve bunları kendim yayına alıyorum: Docker, GitHub Actions, Coolify ve Linux sunucular. Geliştirmenin yanında CAPT sertifikasına sahibim, Cisco CCNA hattını ve CyberOps Associate eğitimini tamamladım.",
     "viewProjects": "Projeleri gör",
-    "contact": "İletişime geç",
-    "availableForWork": "Seçili işler için uygunum",
-    "downloadCV": "CV İndir",
-    "eyebrow": "Bağımsız frontend partneri",
-    "summaryTitle": "Daha rafine teslimatlar",
-    "summaryBody": "Landing page'lerden dahili araçlara kadar ham ürün fikirlerini editoryal, modern ve kullanımı kolay arayüzlere dönüştürüyorum.",
-    "metricYears": "Yıllık ürün teslim deneyimi",
-    "metricProjects": "Seçili lansman",
-    "metricFocus": "Tasarım ve kod odağı",
-    "focus1": "Tasarım sistemleri",
-    "focus2": "Ürün siteleri",
-    "focus3": "Uygulama arayüzleri",
-    "focus4": "Frontend mimarisi",
-    "note": "Şu anda İstanbul merkezli, ürün ekipleriyle uzaktan çalışıyorum.",
-    "focusLabel": "Odak alanları"
+    "downloadCv": "CV'yi indir",
+    "getInTouch": "İletişime geç"
   },
   "home": {
     "featuredTitle": "Seçilmiş işler",
@@ -42,16 +32,14 @@
     "skillsSubtitle": "Ağ ve güvenlik temeli üstünde full-stack geliştirme; altyapısını kendim işlettiğim sistemlerde yayına alıyorum."
   },
   "footer": {
-    "copyright": "Tüm hakları saklıdır.",
-    "contact": "İletişim",
+    "tagline": "Full-stack geliştirme, kendi sunucusunda barındırma, güvenlik odaklı mühendislik.",
+    "copyright": "Kendim geliştirdim, kendi sunucumda barındırıyorum.",
     "navTitle": "Sayfalar",
+    "emailLabel": "E-posta",
+    "elsewhereLabel": "Diğer kanallar",
     "github": "GitHub",
     "linkedin": "LinkedIn",
-    "twitter": "Twitter",
-    "elsewhere": "Bağlantılar",
-    "availability": "Seçili freelance ve tam zamanlı iş birliklerine açığım.",
-    "tagline": "Sakin bir görsel dil ve güçlü frontend temelleriyle arayüzler geliştiriyorum.",
-    "emailLabel": "Birincil e-posta"
+    "rss": "RSS"
   },
   "about": {
     "title": "Hakkımda",
@@ -95,36 +83,24 @@
   },
   "contact": {
     "title": "İletişim",
-    "subtitle": "Bir ürün şekillendiriyor, landing page yeniliyor ya da frontend sisteminizi rafine etmek istiyorsanız detayları duymaktan memnun olurum.",
-    "location": "İstanbul, Türkiye",
-    "email": "alex@example.com",
-    "availability": "Tam zamanlı ve serbest çalışma fırsatlarına açığım.",
-    "eyebrow": "Konuşmayı başlatalım",
-    "cardTitle": "Destek olabileceğim alanlar",
-    "cardBody": "Tasarım odaklı ürün arayüzleri, landing page yenilemeleri, component sistemleri ve daha güçlü bir arayüz varlığı isteyen ekipler için frontend iyileştirmeleri.",
-    "responseTitle": "Yanıt süresi",
-    "responseBody": "Genelde 1-2 iş günü içinde.",
-    "workingTitle": "Çalışma tarzı",
-    "workingBody": "Kickoff'tan son polish aşamasına kadar yapılandırılmış, iş birlikçi ve detay odaklı.",
-    "availabilityTitle": "Uygunluk",
-    "availabilityBody": "Bu çeyrekte seçili ürün iş birliklerine açığım."
-  },
-  "form": {
-    "name": "Ad",
-    "email": "E-posta",
-    "subject": "Konu (isteğe bağlı)",
-    "message": "Mesaj",
-    "placeholderName": "Adınız",
-    "placeholderEmail": "siz@ornek.com",
-    "placeholderSubject": "Konu",
-    "placeholderMessage": "Mesajınız...",
-    "send": "Gönder",
-    "sending": "Gönderiliyor...",
-    "success": "Mesaj gönderildi. En kısa sürede dönüş yapacağım.",
-    "errorGeneric": "Bir şeyler yanlış gitti. Lütfen tekrar deneyin.",
-    "errorNetwork": "Ağ hatası. Lütfen tekrar deneyin.",
-    "introTitle": "Mesaj",
-    "introBody": "Biraz bağlam paylaşın, sonraki adımlarla birlikte dönüş yapayım."
+    "description": "İlginç projelere ve sohbetlere açığım. Bana en hızlı ulaşma yolu e-posta.",
+    "intro": "İlginç projelere ve sohbetlere açığım. Bana en hızlı ulaşma yolu e-posta.",
+    "emailLabel": "E-posta",
+    "locationLabel": "Konum",
+    "location": "Konya, Türkiye",
+    "form": {
+      "name": "Ad",
+      "namePlaceholder": "Adınız",
+      "email": "E-posta",
+      "emailPlaceholder": "siz@sirket.com",
+      "message": "Mesaj",
+      "messagePlaceholder": "Ne geliştirmek istiyorsunuz?",
+      "submit": "Mesajı gönder",
+      "sending": "Gönderiliyor",
+      "success": "Teşekkürler, mesajınız yola çıktı. Genellikle bir gün içinde yanıtlıyorum.",
+      "error": "Mesaj gönderilemedi. Lütfen doğrudan e-posta gönderin.",
+      "honeypotLabel": "Bu alanı boş bırakın"
+    }
   },
   "notFound": {
     "code": "404",
@@ -133,11 +109,9 @@
     "backHome": "Ana sayfaya dön"
   },
   "metadata": {
-    "defaultTitle": "Alex Chen Portfolyo",
-    "defaultDescription": "Premium frontend portfolyosu, seçili projeler, deneyim ve iletişim.",
-    "contactTitle": "İletişim",
-    "contactDescription": "İletişime geçin.",
-    "ogAlt": "Portfolyo"
+    "defaultTitle": "Doğan Can Yıldız",
+    "defaultDescription": "Next.js ve Node.js ile ölçeklenebilir web uygulamaları geliştiren, bunları kendi Docker altyapısında yayına alan full-stack geliştirici. CAPT sertifikalı. Konya, Türkiye.",
+    "ogAlt": "Doğan Can Yıldız, Full-Stack Web Geliştirici ve DevOps Mühendisi"
   },
   "api": {
     "invalidRequest": "Geçersiz istek. Ad, e-posta ve mesaj alanları zorunlu.",

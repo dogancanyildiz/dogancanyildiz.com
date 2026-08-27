@@ -73,6 +73,11 @@ describe("header", () => {
   it("marks the active link with aria-current, not just styling", () => {
     expect(source).toContain('aria-current={isActive ? "page" : undefined}');
   });
+
+  it("shows the DCY monogram instead of a hard coded Portfolio eyebrow", () => {
+    expect(source).not.toContain(">Portfolio<");
+    expect(source).toContain('t("brand.monogram")');
+  });
 });
 
 describe("footer", () => {
@@ -91,7 +96,13 @@ describe("footer", () => {
     expect(source).not.toContain("alex@example.com");
     expect(source).not.toContain("Twitter");
     expect(source).not.toContain("twitter.com");
-    expect(source).toContain('t("contact.email")');
+  });
+
+  it("sources contact details and social links from lib/site, not hard coded strings", () => {
+    expect(source).toContain('from "@/lib/site"');
+    expect(source).toContain("CONTACT_EMAIL_PUBLIC");
+    expect(source).toContain("SOCIAL");
+    expect(source).not.toContain("github.com/");
   });
 });
 
@@ -108,6 +119,13 @@ describe("new message keys", () => {
   it("adds footer.navTitle to both catalogs", () => {
     for (const locale of ["en", "tr"]) {
       expect(messageKeys(locale, "footer"), locale).toContain("navTitle");
+    }
+  });
+
+  it("turns brand into an object with name, monogram and role in both catalogs", () => {
+    for (const locale of ["en", "tr"]) {
+      const keys = messageKeys(locale, "brand");
+      expect(keys, locale).toEqual(["monogram", "name", "role"]);
     }
   });
 

@@ -13,7 +13,7 @@ import { fadeUp } from "@/lib/motion";
 type Status = "idle" | "loading" | "success" | "error";
 
 export function ContactForm() {
-  const t = useTranslations();
+  const t = useTranslations("contact.form");
   const locale = useLocale();
   const reduced = useReducedMotion() ?? false;
   const variants = fadeUp(reduced);
@@ -40,7 +40,6 @@ export function ContactForm() {
         body: JSON.stringify({
           name: formData.get("name"),
           email: formData.get("email"),
-          subject: formData.get("subject") || "Portfolio contact",
           message: formData.get("message"),
           locale,
         }),
@@ -50,7 +49,7 @@ export function ContactForm() {
 
       if (!res.ok) {
         setStatus("error");
-        setErrorMessage(data.error || t("form.errorGeneric"));
+        setErrorMessage(data.error || t("error"));
         return;
       }
 
@@ -58,7 +57,7 @@ export function ContactForm() {
       form.reset();
     } catch {
       setStatus("error");
-      setErrorMessage(t("form.errorNetwork"));
+      setErrorMessage(t("error"));
     }
   }
 
@@ -71,57 +70,41 @@ export function ContactForm() {
       onSubmit={handleSubmit}
       className="surface-panel relative mx-auto w-full max-w-2xl space-y-6 p-6 sm:p-8"
     >
-      <div className="space-y-2">
-        <span className="eyebrow">{t("form.introTitle")}</span>
-        <p className="text-sm leading-7 text-muted-foreground">
-          {t("form.introBody")}
-        </p>
-      </div>
       <div className="grid gap-2">
-        <Label htmlFor="name">{t("form.name")}</Label>
+        <Label htmlFor="name">{t("name")}</Label>
         <Input
           id="name"
           name="name"
           type="text"
-          placeholder={t("form.placeholderName")}
+          placeholder={t("namePlaceholder")}
           required
           disabled={status === "loading"}
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="email">{t("form.email")}</Label>
+        <Label htmlFor="email">{t("email")}</Label>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder={t("form.placeholderEmail")}
+          placeholder={t("emailPlaceholder")}
           required
           disabled={status === "loading"}
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="subject">{t("form.subject")}</Label>
-        <Input
-          id="subject"
-          name="subject"
-          type="text"
-          placeholder={t("form.placeholderSubject")}
-          disabled={status === "loading"}
-        />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="message">{t("form.message")}</Label>
+        <Label htmlFor="message">{t("message")}</Label>
         <Textarea
           id="message"
           name="message"
-          placeholder={t("form.placeholderMessage")}
+          placeholder={t("messagePlaceholder")}
           rows={5}
           required
           disabled={status === "loading"}
         />
       </div>
       <div className="absolute -left-[9999px] top-0" aria-hidden="true">
-        <Label htmlFor="website">Website</Label>
+        <Label htmlFor="website">{t("honeypotLabel")}</Label>
         <Input id="website" name="website" type="text" tabIndex={-1} />
       </div>
       {/* The status paragraphs are conditionally rendered, so the role has to
@@ -140,7 +123,7 @@ export function ContactForm() {
           role="status"
           className="rounded-2xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-primary"
         >
-          {t("form.success")}
+          {t("success")}
         </p>
       )}
       <Button
@@ -149,7 +132,7 @@ export function ContactForm() {
         disabled={status === "loading"}
         aria-busy={status === "loading"}
       >
-        {status === "loading" ? t("form.sending") : t("form.send")}
+        {status === "loading" ? t("sending") : t("submit")}
       </Button>
     </m.form>
   );

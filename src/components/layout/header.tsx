@@ -32,15 +32,10 @@ export function Header({ untranslated }: HeaderProps) {
           className="group flex min-w-0 items-center gap-3 no-underline"
         >
           <span className="flex size-10 items-center justify-center rounded-2xl border border-border bg-muted font-mono text-[0.7rem] font-semibold tracking-[0.06em] text-foreground">
-            DCY
+            {t("brand.monogram")}
           </span>
-          <span className="min-w-0">
-            <span className="block truncate font-mono text-[0.65rem] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              Portfolio
-            </span>
-            <span className="text-lg text-foreground transition-colors group-hover:text-primary">
-              {t("brand")}
-            </span>
+          <span className="truncate text-lg text-foreground transition-colors group-hover:text-primary">
+            {t("brand.name")}
           </span>
         </Link>
         <div className="flex min-w-0 items-center gap-2">

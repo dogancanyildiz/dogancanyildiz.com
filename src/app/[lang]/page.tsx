@@ -10,6 +10,7 @@ import { SkillsStrip } from "@/components/sections/skills-strip";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
 import { Link } from "@/i18n/navigation";
 import { skills } from "@/content/profile";
+import { hasCv } from "@/lib/cv";
 import {
   getFeaturedProjects,
   toProjectCardData,
@@ -58,7 +59,7 @@ export default async function HomePage({
   return (
     <>
       <PersonJsonLd locale={lang} />
-      <Hero />
+      <Hero showCv={hasCv()} />
       <section className="section-space">
         <div className="page-shell space-y-8">
           <div className="flex flex-wrap items-baseline justify-between gap-4">

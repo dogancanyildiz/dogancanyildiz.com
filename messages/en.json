@@ -1,5 +1,9 @@
 {
-  "brand": "Alex Chen",
+  "brand": {
+    "name": "Doğan Can Yıldız",
+    "monogram": "DCY",
+    "role": "Full-Stack Web Developer & DevOps Engineer"
+  },
   "nav": {
     "home": "Home",
     "about": "About",
@@ -12,27 +16,13 @@
     "closeMenu": "Close menu"
   },
   "hero": {
-    "greeting": "Hi, I'm",
-    "name": "Alex Chen",
-    "role": "Frontend Developer",
-    "title": "Designing premium digital products with clarity, rhythm, and speed.",
-    "subtitle": "I build interface systems, product experiences, and frontend architecture for teams that care about detail.",
+    "location": "Konya, Türkiye",
+    "title": "Full-Stack Web Developer & DevOps Engineer",
+    "tagline": "I build web applications and run the infrastructure they ship on.",
+    "intro": "I'm a full-stack developer based in Konya, Türkiye. I build web applications with Next.js and Node.js, and I deploy them myself: Docker, GitHub Actions, Coolify and Linux servers. Alongside development I hold the CAPT certification and have completed the full Cisco CCNA track along with CyberOps Associate.",
     "viewProjects": "View projects",
-    "contact": "Get in touch",
-    "availableForWork": "Available for select work",
-    "downloadCV": "Download CV",
-    "eyebrow": "Independent frontend partner",
-    "summaryTitle": "A sharper way to ship",
-    "summaryBody": "From landing pages to internal tools, I turn rough product ideas into interfaces that feel editorial, modern, and easy to use.",
-    "metricYears": "Years shipping products",
-    "metricProjects": "Selected launches",
-    "metricFocus": "Focus across design and code",
-    "focus1": "Design systems",
-    "focus2": "Product websites",
-    "focus3": "Application UI",
-    "focus4": "Frontend architecture",
-    "note": "Currently based in Istanbul, collaborating remotely with product teams.",
-    "focusLabel": "Focus"
+    "downloadCv": "Download CV",
+    "getInTouch": "Get in touch"
   },
   "home": {
     "featuredTitle": "Selected work",
@@ -42,16 +32,14 @@
     "skillsSubtitle": "Full-stack development on a networking and security foundation, shipped on infrastructure I run myself."
   },
   "footer": {
-    "copyright": "All rights reserved.",
-    "contact": "Contact",
+    "tagline": "Full-stack development, self-hosted infrastructure, security minded engineering.",
+    "copyright": "Built and self-hosted by me.",
     "navTitle": "Pages",
+    "emailLabel": "Email",
+    "elsewhereLabel": "Elsewhere",
     "github": "GitHub",
     "linkedin": "LinkedIn",
-    "twitter": "Twitter",
-    "elsewhere": "Elsewhere",
-    "availability": "Available for select freelance and full-time collaborations.",
-    "tagline": "Crafting interfaces with a calm visual voice and strong frontend foundations.",
-    "emailLabel": "Primary email"
+    "rss": "RSS"
   },
   "about": {
     "title": "About",
@@ -95,36 +83,24 @@
   },
   "contact": {
     "title": "Contact",
-    "subtitle": "If you're shaping a product, refreshing a marketing surface, or refining a frontend system, I'd be glad to hear about it.",
-    "location": "Based in Istanbul, Turkey",
-    "email": "alex@example.com",
-    "availability": "Open to full-time and freelance opportunities.",
-    "eyebrow": "Start a conversation",
-    "cardTitle": "What I can help with",
-    "cardBody": "Design-forward product UI, landing page refreshes, component systems, and frontend clean-up for teams who want a sharper interface presence.",
-    "responseTitle": "Typical response",
-    "responseBody": "Usually within 1-2 business days.",
-    "workingTitle": "Working style",
-    "workingBody": "Structured, collaborative, and detail-oriented from kickoff through polish.",
-    "availabilityTitle": "Availability",
-    "availabilityBody": "Open for select product collaborations this quarter."
-  },
-  "form": {
-    "name": "Name",
-    "email": "Email",
-    "subject": "Subject (optional)",
-    "message": "Message",
-    "placeholderName": "Your name",
-    "placeholderEmail": "you@example.com",
-    "placeholderSubject": "Subject",
-    "placeholderMessage": "Your message...",
-    "send": "Send message",
-    "sending": "Sending...",
-    "success": "Message sent. I'll get back to you soon.",
-    "errorGeneric": "Something went wrong. Please try again.",
-    "errorNetwork": "Network error. Please try again.",
-    "introTitle": "Message",
-    "introBody": "Share a little context and I'll reply with next steps."
+    "description": "Open to interesting projects and conversations. The fastest way to reach me is email.",
+    "intro": "Open to interesting projects and conversations. The fastest way to reach me is email.",
+    "emailLabel": "Email",
+    "locationLabel": "Location",
+    "location": "Konya, Türkiye",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "you@company.com",
+      "message": "Message",
+      "messagePlaceholder": "What would you like to build?",
+      "submit": "Send message",
+      "sending": "Sending",
+      "success": "Thanks, your message is on its way. I usually reply within a day.",
+      "error": "The message could not be sent. Please email me directly instead.",
+      "honeypotLabel": "Leave this field empty"
+    }
   },
   "notFound": {
     "code": "404",
@@ -133,11 +109,9 @@
     "backHome": "Back to home"
   },
   "metadata": {
-    "defaultTitle": "Alex Chen Portfolio",
-    "defaultDescription": "Premium frontend portfolio, selected projects, experience, and contact.",
-    "contactTitle": "Contact",
-    "contactDescription": "Get in touch.",
-    "ogAlt": "Portfolio"
+    "defaultTitle": "Doğan Can Yıldız",
+    "defaultDescription": "Full-stack developer building scalable web apps with Next.js and Node.js, shipping on self-hosted Docker infrastructure. CAPT certified. Konya, Türkiye.",
+    "ogAlt": "Doğan Can Yıldız, Full-Stack Web Developer and DevOps Engineer"
   },
   "api": {
     "invalidRequest": "Invalid request. Name, email, and message are required.",
