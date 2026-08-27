@@ -51,3 +51,14 @@ Thumbs.db
 # ─── Claude Code ─────────────────────────────────────────────────────────────
 .claude/worktrees/
 .claude/settings.local.json
+
+# ─── Local-only files (content drafts, CV, private notes) ────────────────────
+.local/
+
+# ─── Nodeterm canvas state ───────────────────────────────────────────────────
+.nodeterm/
+
+# ─── AI Tools ────────────────────────────────────────────────────────────────
+.claude/
+.cursor/
+.cursorrules

@@ -1,0 +1,158 @@
+# İçerik Stratejisi ve Sektör Araştırması
+Durum: Öneri, site sahibinin onayını bekliyor · Tarih: 2026-08-27 · Kapsam: dogancanyildiz.sh
+
+## Özet
+
+Site şu an tamamen şablon içerik taşıyor (translations.ts'te 6 yerde "Alex Chen", src/data/projects.ts'te 6 sahte proje, public/'ta gerçek görsel yok); bu doküman şablonun yerine ne konacağına ve hangi formatta konacağına karar veriyor, kod/i18n/SEO tarafındaki uygulama detayları için ilgili dokümanlara link veriyor. 2025-2026 sektör araştırması, işe alımcıların düz proje listesi yerine derin case study ve canlı demo aradığını, sertifikaları doğrulama linkiyle görmek istediğini ve Türkiye'de online varlığın işe alım kararını etkilediğini gösteriyor; buna karşılık Blind/Reddit tartışmaları portfolyonun ilk elemeyi tek başına geçirmediğini, asıl işlevinin mülakat sonrası güven inşa etmek olduğunu hatırlatıyor. Dört yön (sade CV, case study ağırlıklı, blog ağırlıklı, homelab vitrini) karşılaştırıldığında karma bir yapı çıkıyor: omurga case study (4-5 proje, Cargo Pilot ve Bilet Satın Alma öncelikli), üstüne düşük hacimli bir blog ve zaten context'te istenen homelab/status vitrini eklenir. İçerik kararları placeholder'ı tamamen reddediyor: görseli olmayan proje kapaksız yayınlanır, gerçek CV PDF'i geldiğinde Download CV butonu kalır, Speaking içeriği (etkinlik, konu, tarih) About içinde kompakt bir blok olarak gösterilir (2026-08-27, site sahibinin cevapları: [11-acik-sorular.md](./11-acik-sorular.md)).
+
+## Kararlar
+
+1. İçerik omurgası karma: case study ağırlıklı (4-5 proje) + ince bir homelab/status vitrini + düşük hacimli blog (açılış 3-4 yazı, sonrası ayda 1). Sade CV formatı tek başına kullanılmaz.
+2. Tüm Divizyon projeleri (Cargo Pilot, Wikonya, Sportlink, Hubit) public gösterilebilir ve canlı/repo linkleri mevcut (site sahibinin 2026-08-27 cevabı); proje sayısı yine 6 sahte kayıttan 4-5 gerçek case study'ye düşer, Cargo Pilot ve Bilet Satın Alma öncelikli. Ekran görüntüleri sonradan eklenecek; Velite şemasında her projede `liveUrl`/`repoUrl` alanı bulunur. Her case study'de üstte 4 hücreli mono künye (Rol / Stack / Yıl / Sonuç) ve en az 1 gerçek ekran görüntüsü bulunur; görsel gelene kadar proje kapaksız yayınlanır, CSS gradyan veya stok görsel placeholder olarak kullanılmaz (bu kural aynen geçerli).
+3. Blog açılışta 3-4 yazıyla başlar, sonrasında ayda 1 yazı hedeflenir.
+4. Speaking, ayrı bir sayfa değil, About içinde kompakt bir "Konuşmalar" bloğu olarak gösterilir (etkinlik adı · konu · tarih); slayt/video linki henüz yok, medya alanı eklenmez. GDG Konya ve GDG Cloud Konya rolleri de About içinde kalır. Önceki "Speaking bölümü tamamen çıkar" kararı, sahibinin etkinlik/konu/tarih bilgisi verebilmesi üzerine bu şekilde revize edildi (2026-08-27).
+5. Sertifikalar About içinde ayrı bir blokta listelenir; doğrulama linki alanı (`verifyUrl`, Velite/JSON şemasında opsiyonel) her sertifika kaydında modellenir. Linkler henüz gelmedi, sahibi sonra iletecek; link gelene kadar alan boş bırakılır, satır kaldırılmaz.
+6. Harp Okulu satırı "(not completed)" ifadesi olmadan, yalnızca yıl aralığı ve program adıyla nötr yazılır (sahibi tarafından 2026-08-27'de onaylandı).
+7. İngilizce CEFR kırılımı (B1/A2) siteden çıkar (sahibi tarafından 2026-08-27'de onaylandı).
+8. Gerçek bir CV PDF'i var (site sahibinin 2026-08-27 cevabı); Download CV butonu **kalır**. Dosya `public/cv/dogancanyildiz-cv.pdf` yoluna konur; sahibi teslim edene kadar `.local/` altında tutulur, Faz 4'te `public/`'e taşınır. hero.tsx:73 ve about/page.tsx:140'taki `/cv.pdf` linki bu yola güncellenir.
+9. Logo monogramı DCY olur; public/ altındaki kullanılmayan create-next-app SVG'leri (file.svg, globe.svg, next.svg, vercel.svg, window.svg) silinir.
+10. Blog dili TR-first: yazılar öncelikle Türkçe yazılır, uluslararası ilgi görecek olanlar (ör. Coolify self-host yazısı, pentest -> fix döngüsü) sonradan EN'e çevrilir. Çekirdek sayfalar (Home, About, Projects case study'leri, Contact) EN ve TR ikisinde de eksiksiz kalır. Tek dilli blog yazısı serbesttir ve diğer dilin sitemap/hreflang'ına hiç girmez (mevcut fallback-yok politikasıyla tutarlı). Detay: [04-i18n.md](./04-i18n.md).
+
+## Gerekçe
+
+### Sektör bulguları
+
+- **Portfolyo, mükemmel CV'den daha önemli görülüyor.** Stack Overflow Developer Survey 2024'e göre işe alımcıların %73'ü güçlü bir portfolyoyu mükemmel bir CV'den üstün buluyor, %70'i mülakat öncesi portfolyoya bakıyor (hakia.com).
+- **Canlı demo şart.** İşverenlerin %84'ü yalnızca repo değil, çalışan bir demo görmek istiyor (hakia.com). Mümkün olduğu yerde canlı link korunmalı: Cargo Pilot (cargopilot.divizyon.org), Wikonya (wikonya.vercel.app), GPA (dogancanyildiz.github.io/gpa).
+- **Case study, listeden daha ikna edici.** dev.to, slategit.com ve proxify.io kaynaklarının ortak önerisi: 3-6 proje, her biri "ne yaptım, neden, ne öğrendim" formatında derin case study; "tutorial takip" projeleri değil gerçek sorun çözen özgün projeler tercih ediliyor.
+- **Blind karşıt görüşü, dengeleyici bir uyarı.** teamblind.com'daki tartışmalar işe alımcıların CV'yi ilk 20 saniyede eleyip kişisel siteye çoğu zaman bakmadığını, portfolyonun asıl değerinin mülakat sonrası teknik derinlik göstermekte olduğunu belirtiyor. Bu, case study derinliğinin gerekçesini değiştirmiyor: portfolyo "kapıyı açan" değil "kapıdan geçtikten sonra güven inşa eden" araç, dolayısıyla derinlik yine önemli ama site tek başına başvuru hunisi değil, aktif başvuru ve LinkedIn/GitHub ile birlikte çalışması gereken bir kanıt katmanı.
+- **Sertifikalar doğrulama linkiyle kanıt değeri kazanıyor.** Rozetleri düz metin listelemek yerine Credly/ilgili platformun doğrulama URL'sine link vermek önerilen pratik (dev.to/abpanic, support.credly.com); şu an portfolio-content.md bölüm 7'de yedi sertifika de linksiz düz metin.
+- **Türkiye'de online varlık işe alım kararını etkiliyor.** Cross-Tab araştırmasına göre işe alım yöneticilerinin yarısından fazlası adayın online varlığının kararı etkilediğini söylüyor, büyük şirketlerde teknik ekip mülakat öncesi GitHub ve portfolyoyu inceliyor (patika.dev, yenibiris.com). Bu, Türkçe içeriğin gerçek bir yerel karşılığı olduğunu gösteriyor; ancak mevcut cookie tabanlı i18n (bkz. 04-i18n.md, 07-seo-ve-metadata.md) Türkçe sayfaları Google'a ayrı indekslemediği için bu değer şu an SEO üzerinden gerçekleşmiyor, URL tabanlı i18n (Faz 2) devreye girene kadar blog'un TR ayağı yalnızca doğrudan URL ile gelen ziyaretçiye ulaşıyor.
+- **Ham metrikler somut örneğe bağlanmalı.** portfolio-content.md bölüm 4'teki "5 production applications", "10+ custom WordPress theme" gibi rakamlar tek başına iddia düzeyinde kalıyor; case study'ler (özellikle Cargo Pilot ve Bilet Satın Alma) bu rakamlardan en az birini somut örnekle destekleyen kanıt görevi görüyor. Experience bölümünün metni değişmez, Projects bölümü ona referans/gerekçe olur.
+- **Freelance tarafında testimonial/case study güven inşa ediyor.** Testimonial içeren portfolyolar %45 daha fazla lead üretiyor (wethos.co); şu an sitede testimonial yok, bu doküman kapsamında yeni bir karar alınmıyor ama case study formatı proje bazında benzer bir güven mekanizması sağlıyor.
+
+### Dört yön karşılaştırması
+
+| Yön | fitScore | Güçlü yanı | Zayıf yanı |
+|---|---|---|---|
+| Sade CV sitesi | 3 | Hızlı üretilir, bakım yükü düşük | Canlı demo/derin anlatım beklentisini karşılamaz, DevOps+security farkını düz liste olarak gömer |
+| Case study ağırlıklı | 8 | 2025-2026 kaynaklarının tutarlı önerisi, Cargo Pilot ve Bilet Satın Alma zaten hikaye barındırıyor | Görsel/yazım emeği yüksek, şu an gerçek proje görseli yok |
+| Blog ağırlıklı | 6 | GDG Konya/GDG Cloud Konya geçmişiyle örtüşüyor, Türkçe içerik boşluğu dolduruyor | Speaking bölümünün hâlâ boş şablon olması sürdürülebilirlik riskini gösteriyor, tek başına kısa vadeli dönüşüm sağlamıyor |
+| Homelab/infra vitrini | 7 | Sitenin kendisi zaten Coolify/Docker/Traefik üstünde self-hosted, meta-kanıt oluşturuyor | Tek başına yeterli değil, dikkatsiz tasarlanırsa port/servis bilgisi sızdırma riski taşıyor |
+
+Homelab satırının gerekçesi, altyapıyı bizzat barındırmayı deneyen geliştiricilerin (Medium: "Hosting My First Portfolio Website in My Homelab") ve "her geliştirici self-host denemeli" tarzı içeriklerin (noted.lol, beingdevops.com) altyapıyı yalnızca metinle anlatmak yerine canlı gösterimin daha güçlü bir sinyal olduğunu ortaya koymasına dayanıyor; site zaten Coolify üstünde self-hosted olacağı için bu ek bir iddia değil, mevcut kurulumun doğal bir uzantısı.
+
+Karma karar: omurga case study (4-5 proje, Cargo Pilot ve Bilet Satın Alma öncelikli), üstüne homelab/status vitrini (context'te zaten istenen widget, uygulama detayı 05-backend-icerik-ve-servisler.md'de) ve düşük hacimli blog eklenir. Sade CV bu profil için tek başına yetersiz kalıyor, blog tek başına omurga olamıyor.
+
+## Reddedilen alternatifler
+
+- **Sade CV sitesi (tek yön olarak):** Doğan'ın farkı (network + security + DevOps üstüne kurulu full-stack) tam olarak derinlemesine anlatımla ortaya çıkan bir farklılaşma; düz CV formatı bunu resmeder ama kanıtlamaz.
+- **Blog ağırlıklı thought leadership (tek yön olarak):** GDG geçmişiyle örtüşüyor ama sürdürülebilirlik riski yüksek, Speaking bölümünün hâlâ placeholder olması düzenli içerik üretiminin bugüne kadar önceliklendirilmediğinin sinyali; kısa vadeli iş/freelance dönüşümüne katkısı diğer yönlere göre daha yavaş.
+- **6 projenin tamamını korumak:** kalite miktardan önemli, 4-5 derin case study düz proje listesinden daha ikna edici; zayıf hikayeli projeleri de zorla case study formatına sokmak formatı sulandırır.
+- **Temsili/örnek ekran görüntüsü üretmek:** dürüstlük problemi taşıyor ve fark edilmesi an meselesi; bu yüzden görseli olmayan proje kapaksız yayınlanıyor, placeholder görsel üretilmiyor.
+- **Speaking bölümünü placeholder ile yayınlamak:** köşeli parantez placeholder metni ("[Etkinlik adı], [Konu], [Tarih]") production'a sızarsa şablon izlenimini güçlendirir; translations.ts'teki "Alex Chen" kalıntısı bu riskin zaten somut örneği.
+- **CEFR seviyesini olduğu gibi bırakmak:** uluslararası/uzaktan roller genelde B2/C1 arıyor, A2 çoğu işveren için yetersiz görülüyor (preply.com, globalenglishtest.com); seviyeyi öne çıkarmak öz-elemeyi artırıyor, İngilizce dokümantasyon/repo/blog yazılarının kendisi zaten kanıt.
+- **Harp Okulu satırını gizlemek:** referans kontrolünde ortaya çıkma riski taşır, dürüstlükten ödün vermeden nötr çerçeveleme (yıl aralığı + program adı, "not completed" ifadesi olmadan) tercih edildi (resumonk.com, zety.com).
+
+## Riskler ve tripwire'lar
+
+- **Görsel izni artık açık soru değil, teslimat konusu.** Tüm Divizyon projeleri (Cargo Pilot, Wikonya, Sportlink, Hubit) public gösterilebilir, izin sorunu yok (2026-08-27 cevabı); ekran görüntüleri yalnızca sonradan teslim edilecek. Tripwire: görsel gelene kadar proje kapaksız yayınlanır, asla placeholder görselle değil. Detay: 11-acik-sorular.md soru 4.
+- **4-5 proje seçimi henüz kesinleşmedi.** Cargo Pilot ve Bilet Satın Alma öncelik olarak sabit; geri kalan 2-3 proje seçimi artık izin değil yalnızca hikaye derinliğine bağlı (aşağıdaki tabloya bakın, tüm adaylar zaten public gösterilebilir). Tripwire: seçim netleşmeden Faz 4 içerik yazımı başlamamalı.
+- **Blog sürdürülebilirliği kanıtlanmamış.** Speaking bölümünün bugüne kadar boş şablon kalması, düzenli içerik üretiminin önceliklendirilmediğinin sinyali. Tripwire: açılış 3-4 yazıdan sonra 2 ay üst üste yeni yazı gelmezse blog'un ayda 1 hedefi gözden geçirilmeli, homepage'de blog linkinin görünürlüğü küçültülebilir.
+- **Sertifika doğrulama linki henüz teslim edilmedi.** CAPT (Hackviser), CCNA ve CyberOps için doğrulanabilir URL var, sahibi sonradan iletecek (2026-08-27 cevabı). Tripwire: link gelene kadar `verifyUrl` alanı boş bırakılır, satır listeden çıkmaz.
+- **Harp Okulu ve İngilizce çerçevelemesi onaylandı.** Nötr yeniden yazım (yıl aralığı + program adı, "not completed" yok) ve CEFR kırılımının kaldırılması sahibi tarafından 2026-08-27'de onaylandı; nihai metin bu doküman kapsamında yazılır. Detay: 11-acik-sorular.md soru 10.
+- **Blog dil politikası netleşti: TR-first.** Yazılar önce Türkçe yazılır, uluslararası ilgi görecek olanlar sonradan EN'e çevrilir; çekirdek sayfalar EN+TR eksiksiz kalır. Tek dilli blog yazısı diğer dilin sitemap ve hreflang alternates'ine hiç girmez (11-acik-sorular.md soru 9, 04-i18n.md).
+- **Homelab/status vitrini içerik sınırı.** Widget'ta yalnızca takma ad, up/down durumu, 24 saatlik uptime yüzdesi, son deploy zamanı, commit SHA ve stack satırı gösterilir; hostname, port ve iç servis topolojisi asla gösterilmez (uygulama detayı 05-backend-icerik-ve-servisler.md).
+
+## Uygulama notları
+
+### Case study yazım formatı
+
+Araştırma kaynaklarının (dev.to, slategit.com, proxify.io) ortak önerdiği "ne yaptım, neden, ne öğrendim" yapısı, karar 2'deki mono künye ile birleşince her proje sayfası için şu iskeleti veriyor:
+
+1. **Mono künye (üst blok, 4 hücre):** Rol / Stack / Yıl / Sonuç. Tek satırda taranabilir olmalı, uzun cümle içermez (örnek: Rol "DevOps Chapter Lead", Sonuç "3 haftalık deploy döngüsü tek günlük CI/CD hattına indirildi" gibi ölçülebilir bir ifade, ölçüm yoksa somut kapsam cümlesi).
+2. **Gövde metin sırası:** Ne yaptım (görev ve kapsam) -> Neden (problem/karar bağlamı) -> Ne öğrendim veya sonuç (varsa metrik, yoksa gözlemlenebilir çıktı). Bilet Satın Alma için bu sıra doğal: pentest bulguları -> hangi güvenlik açığı neden önemliydi -> hangi hardening adımı uygulandı.
+3. **Görsel kuralı:** en az 1, ideal 2-3 gerçek ekran görüntüsü (genel görünüm + öne çıkan bir özellik/ekran). Stok görsel, mockup şablonu veya CSS gradyan kapak kullanılmaz; görsel yoksa proje kapaksız yayınlanır (karar 2). Görsel optimizasyonu ve `next/image` kullanımı için 03-tasarim-ui-ux.md.
+4. **Canlı link:** varsa üstte, mono künyenin hemen altında; yoksa alan boş bırakılır, "coming soon" gibi ifadeler kullanılmaz.
+5. **Ton:** ilk şahıs, somut fiil ve mümkünse ölçülebilir sonuç ("optimize ettim" yerine "deploy döngüsünü 3 haftadan 1 güne indirdim" gibi); pazarlama dilinden ve abartılı sıfatlardan kaçınılır. portfolio-content.md bölüm 5'teki mevcut ton (Cargo Pilot, Bilet Satın Alma metinleri) referans alınır, sadece görsel ve künye eklenir.
+
+### Proje adayları ve case study hazırlığı
+
+| Proje | Hikaye derinliği | Canlı link / görsel durumu | Öncelik |
+|---|---|---|---|
+| Cargo Pilot | Yüksek: DevOps Chapter Lead + optimizasyon algoritması | cargopilot.divizyon.org var, ekran görüntüsü izni teyit gerekiyor | 1 (sabit) |
+| Bilet Satın Alma | Yüksek: pentest, fix, hardened deploy döngüsü | Canlı link yok, görsel kendi ortamından alınabilir (izin sorunu yok) | 1 (sabit) |
+| Wikonya | Orta: açık kaynak, öğrenci topluluk platformu | wikonya.vercel.app + GitHub repo public, görsel almak kolay | 2 (öneri) |
+| Sportlink | Orta: QA süreç sahipliği, sprint bazlı test | Canlı link yok, Divizyon izni gerekiyor | 3 (öneri, izne bağlı) |
+| Hubit | Orta: Three.js ile 3D render | Canlı link yok, Divizyon izni gerekiyor | 3 (öneri, izne bağlı) |
+| GPA | Düşük: basit araç, gerçek kullanıcı | dogancanyildiz.github.io/gpa public, görsel almak kolay | 4 (öneri, doldurucu) |
+
+Cargo Pilot ve Bilet Satın Alma dışındaki 2-3 slot için Wikonya (public link, düşük efor) ilk sıra öneri; Sportlink ve Hubit görsel izni gelirse eklenir, gelmezse GPA doldurucu olarak kalır. Nihai liste, sahibin onayı ve görsel izni netleştikten sonra 10-yol-haritasi.md'deki Faz 4 görevine bağlanır.
+
+### İlk blog yazısı fikirleri
+
+Açılışta 3-4 yazı, sonrasında ayda 1 hedefi:
+
+1. **Coolify ve Traefik ile kendi sunucusunda self-host etmek**: sitenin kendi deploy hattını anlatan meta-yazı, homelab vitrinini destekler.
+2. **CAPT sınavına hazırlık**: Hackviser pentest sertifikasyon sürecinin pratik anlatımı, sertifika bölümüne derinlik katar.
+3. **Cargo Pilot'ta DevOps Chapter Lead olmak**: altyapı kararları, CI/CD kurulumu ve ekip koordinasyonu; ilgili case study'nin uzun formatlı versiyonu.
+4. **CCNA'dan web güvenliğine**: network temelinin full-stack geliştirmeye kattığı bakış açısı, Bilet Satın Alma pentest yazısına köprü.
+
+### portfolio-content.md -> site haritalama
+
+| Bölüm (portfolio-content.md) | Site hedefi | Not |
+|---|---|---|
+| 0. Meta/SEO | generateMetadata (her sayfa), Person JSON-LD, OG image route | Uygulama: 07-seo-ve-metadata.md |
+| 1. Hero | Home hero bileşeni | Download CV butonu **kalır**, link `public/cv/dogancanyildiz-cv.pdf`'e güncellenir (karar 8) |
+| 2. About | About sayfası ana metin + "Şu anda" / "Konum" satırları | Değişiklik yok, doğrudan taşınır |
+| 3. Skills | About sayfası skill grupları | Mevcut kategori yapısı korunur |
+| 4. Experience | About sayfası deneyim zaman çizelgesi | Değişiklik yok, doğrudan taşınır |
+| 5. Projects | Projects sayfası + proje detay case study'leri (content/projects/{en,tr}) | 6 projeden 4-5'i seçilir (tüm Divizyon projeleri public, linkli), karar 2 |
+| 6. Community & Speaking | GDG satırları About içinde kalır; Speaking, About içinde medyasız kompakt bir "Konuşmalar" bloğu olur | Karar 4 |
+| 7. Certificates | About içinde ayrı blok, `verifyUrl` alanıyla (link gelene kadar boş) | Karar 5 |
+| 8. Education | About sayfası eğitim satırları | Harp Okulu satırı nötr yeniden yazılır, karar 6 (onaylandı) |
+| 9. Languages | Ayrı bölüm olarak gösterilmez veya CEFR'siz tek satır ("working proficiency in written English" gibi) | Karar 7 (onaylandı) |
+| 10. Contact | Contact sayfası + footer | E-posta `me@dogancanyildiz.com` kesinleşti; domain (dogancanyildiz.sh ana, .com 301) sahibinin son onayını bekliyor, 11-acik-sorular.md soru 5 |
+| 11. Notlar | Bu doküman + 06-devops-ve-deploy.md (Cloudflare Redirect Rules, e-posta domain doğrulaması) | Telefon numarası yok kararı zaten uygulanıyor |
+
+### Yayın öncesi içerik kontrol listesi
+
+Bu doküman kapsamındaki kararların uygulandığını doğrulamak için, 10-yol-haritasi.md'deki Faz 4 teknik kontrol listesine (Lighthouse, hreflang, Search Console) ek olarak:
+
+- Site genelinde "Alex Chen" ve "alex@example.com" kalıntısı kalmamalı (grep ile doğrula: translations.ts, footer, meta title).
+- Yayınlanan her case study'de en az 1 gerçek görsel var; placeholder, stok görsel veya CSS gradyan kapak yok.
+- About içindeki "Konuşmalar" bloğu gerçek etkinlik/konu/tarih içeriyor; köşeli parantez placeholder metin sitede geçmiyor.
+- Sertifika satırlarında `verifyUrl` varsa link çalışıyor, link henüz gelmediyse satırın kendisi kaldırılmadı.
+- Download CV linki yalnızca gerçek dosya `public/cv/dogancanyildiz-cv.pdf`'e konduysa mevcut; dosya gelmeden buton yayına çıkmıyor.
+- CEFR ifadesi (B1/A2 gibi) ve Harp Okulu satırında "(not completed)" metni sitede geçmiyor.
+
+## İlgili dokümanlar
+
+- [00-ozet-ve-karar.md](./00-ozet-ve-karar.md)
+- [04-i18n.md](./04-i18n.md) (URL tabanlı i18n, çeviri kapsamı)
+- [05-backend-icerik-ve-servisler.md](./05-backend-icerik-ve-servisler.md) (Velite içerik pipeline'ı, status widget veri kaynağı)
+- [06-devops-ve-deploy.md](./06-devops-ve-deploy.md) (Resend domain doğrulaması, e-posta kararı)
+- [07-seo-ve-metadata.md](./07-seo-ve-metadata.md) (Person JSON-LD, hreflang, sitemap)
+- [10-yol-haritasi.md](./10-yol-haritasi.md) (Faz 4: içerik ve yayın)
+- [11-acik-sorular.md](./11-acik-sorular.md) (görsel izni, sertifika doğrulama linkleri, Harp Okulu/İngilizce çerçevelemesi, e-posta adresi, blog dil kapsamı)
+
+## Kaynaklar
+
+- https://hakia.com/skills/building-portfolio/
+- https://slategit.com/blog/how-many-projects-to-feature-on-a-developer-portfolio
+- https://proxify.io/knowledge-base/developer-types/how-do-developer-portfolios-differ-from-case-studies
+- https://dev.to/_d7eb1c1703182e3ce1782/best-developer-portfolio-examples-2026-2d8m
+- https://www.teamblind.com/post/do-portfolio-projects-actually-help-developers-get-jobs-yvtvuwcq
+- https://www.wethos.co/blog/elements-to-include-in-your-freelance-portfolio-to-attract-clients
+- https://fueler.io/blog/best-portfolio-websites-for-freelancers
+- https://dev.to/abpanic/how-to-add-a-credly-badge-page-to-your-site-cbo
+- https://support.credly.com/hc/en-us/articles/5079101828891-Credly-FAQ-s
+- https://www.patika.dev/blog/tecrubeniz-yoksa-yazilimci-portfolyosu-var-peki-nasil-olacak
+- https://www.yenibiris.com/blog/portfolyo-nedir-etkili-portfolyo-nasil-hazirlanir/
+- https://www.resumonk.com/articles/unfinished-degree-on-resume
+- https://zety.com/blog/unfinished-college-on-resume
+- https://preply.com/en/blog/b2b-level-of-english-required-to-work-in-an-international-company/
+- https://globalenglishtest.com/english-skills-for-remote-work-success/
+- https://noted.lol/every-developer-should-try-self-hosting/
+- https://www.beingdevops.com/blog/homelab-why-how-must-have-services-beingdevops/
+- https://jddemonteverde.medium.com/hosting-my-first-portfolio-website-in-my-homelab-6fa42148e78a
