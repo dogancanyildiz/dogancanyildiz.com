@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 beforeEach(() => {
-  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://dogancanyildiz.sh");
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://dogancanyildiz.com");
 });
 
 describe("sitemap", () => {
@@ -9,16 +9,16 @@ describe("sitemap", () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const urls = sitemap().map((entry) => entry.url);
 
-    expect(urls).toContain("https://dogancanyildiz.sh/");
-    expect(urls).toContain("https://dogancanyildiz.sh/tr");
-    expect(urls).toContain("https://dogancanyildiz.sh/about");
-    expect(urls).toContain("https://dogancanyildiz.sh/tr/about");
-    expect(urls).toContain("https://dogancanyildiz.sh/projects");
-    expect(urls).toContain("https://dogancanyildiz.sh/tr/projects");
-    expect(urls).toContain("https://dogancanyildiz.sh/blog");
-    expect(urls).toContain("https://dogancanyildiz.sh/tr/blog");
-    expect(urls).toContain("https://dogancanyildiz.sh/contact");
-    expect(urls).toContain("https://dogancanyildiz.sh/tr/contact");
+    expect(urls).toContain("https://dogancanyildiz.com/");
+    expect(urls).toContain("https://dogancanyildiz.com/tr");
+    expect(urls).toContain("https://dogancanyildiz.com/about");
+    expect(urls).toContain("https://dogancanyildiz.com/tr/about");
+    expect(urls).toContain("https://dogancanyildiz.com/projects");
+    expect(urls).toContain("https://dogancanyildiz.com/tr/projects");
+    expect(urls).toContain("https://dogancanyildiz.com/blog");
+    expect(urls).toContain("https://dogancanyildiz.com/tr/blog");
+    expect(urls).toContain("https://dogancanyildiz.com/contact");
+    expect(urls).toContain("https://dogancanyildiz.com/tr/contact");
   });
 
   it("lists every project in both locales because all of them are translated", async () => {
@@ -28,10 +28,10 @@ describe("sitemap", () => {
 
     for (const project of getProjects("en")) {
       expect(urls).toContain(
-        `https://dogancanyildiz.sh/projects/${project.slug}`
+        `https://dogancanyildiz.com/projects/${project.slug}`
       );
       expect(urls).toContain(
-        `https://dogancanyildiz.sh/tr/projects/${project.slug}`
+        `https://dogancanyildiz.com/tr/projects/${project.slug}`
       );
     }
   });
@@ -39,8 +39,8 @@ describe("sitemap", () => {
   it("never lists a post url for a locale that has no translation", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const urls = sitemap().map((entry) => entry.url);
-    const enUrl = "https://dogancanyildiz.sh/blog/capt-sinavina-hazirlik";
-    const trUrl = "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik";
+    const enUrl = "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik";
+    const trUrl = "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik";
 
     expect(urls).not.toContain(enUrl);
     expect(urls).toContain(trUrl);
@@ -51,13 +51,13 @@ describe("sitemap", () => {
     const entries = sitemap();
     const entry = entries.find(
       (item) =>
-        item.url === "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik"
+        item.url === "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik"
     );
 
     expect(entry).toBeDefined();
     expect(entry?.alternates?.languages?.en).toBeUndefined();
     expect(entry?.alternates?.languages?.tr).toBe(
-      "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik"
+      "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik"
     );
   });
 
@@ -65,8 +65,9 @@ describe("sitemap", () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const entries = sitemap();
     const urls = entries.map((entry) => entry.url);
-    const enUrl = "https://dogancanyildiz.sh/blog/self-hosting-with-coolify";
-    const trUrl = "https://dogancanyildiz.sh/tr/blog/self-hosting-with-coolify";
+    const enUrl = "https://dogancanyildiz.com/blog/self-hosting-with-coolify";
+    const trUrl =
+      "https://dogancanyildiz.com/tr/blog/self-hosting-with-coolify";
 
     expect(urls).toContain(enUrl);
     expect(urls).toContain(trUrl);
@@ -86,7 +87,7 @@ describe("sitemap", () => {
     const entries = sitemap();
     const entry = entries.find(
       (item) =>
-        item.url === "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik"
+        item.url === "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik"
     );
     const post = getPost("tr", "capt-sinavina-hazirlik");
 
@@ -140,7 +141,7 @@ describe("robots", () => {
     const robots = (await import("@/app/robots")).default;
     const result = robots();
 
-    expect(result.sitemap).toBe("https://dogancanyildiz.sh/sitemap.xml");
+    expect(result.sitemap).toBe("https://dogancanyildiz.com/sitemap.xml");
     expect(result.rules).toEqual([
       { userAgent: "*", allow: "/", disallow: "/api/" },
     ]);

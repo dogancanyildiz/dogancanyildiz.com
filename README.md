@@ -1,4 +1,4 @@
-# dogancanyildiz.sh
+# dogancanyildiz.com
 
 Personal portfolio of Doğan Can Yıldız, a full stack web developer and DevOps
 engineer. The site is a Next.js App Router application that is self hosted on a
@@ -102,7 +102,7 @@ The application is deployed by Coolify from this git repository:
 4. Traefik terminates TLS, adds HSTS and compression, and trusts the Cloudflare
    ranges through `forwardedHeaders.trustedIPs`.
 5. Cloudflare runs in proxied mode with SSL set to Full (strict). The redirect
-   from `dogancanyildiz.com` to `dogancanyildiz.sh` is a single hop Cloudflare
+   from `dogancanyildiz.sh` to `dogancanyildiz.com` is a single hop Cloudflare
    Redirect Rule that keeps the path.
 
 The `Dockerfile`, `.dockerignore` and the GitHub Actions gate live in this

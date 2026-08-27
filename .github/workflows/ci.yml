@@ -34,7 +34,7 @@ jobs:
         env:
           # Build time only. The value never has to be a secret, it is inlined
           # into the client bundle anyway.
-          NEXT_PUBLIC_SITE_URL: https://dogancanyildiz.sh
+          NEXT_PUBLIC_SITE_URL: https://dogancanyildiz.com
       - run: npm run verify:routes
 
   docker:
@@ -47,4 +47,4 @@ jobs:
       - name: Build the production image
         # No registry login and no push on purpose. Coolify builds and keeps
         # the image on the server, this job is only a gate.
-        run: docker build --build-arg NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.sh -t portfolio-ci:${{ github.sha }} .
+        run: docker build --build-arg NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.com -t portfolio-ci:${{ github.sha }} .

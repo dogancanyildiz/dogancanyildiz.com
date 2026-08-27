@@ -49,7 +49,7 @@ vi.mock("next-intl/server", () => ({
 }));
 
 beforeEach(() => {
-  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://dogancanyildiz.sh");
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://dogancanyildiz.com");
 });
 
 // The slug page takes one more param than the others; a single signature that
@@ -194,8 +194,8 @@ describe("page openGraph metadata", () => {
       expect(images).toHaveLength(1);
       expect(images[0].url).toBe(
         locale === "en"
-          ? "https://dogancanyildiz.sh/opengraph-image/default"
-          : "https://dogancanyildiz.sh/tr/opengraph-image/default"
+          ? "https://dogancanyildiz.com/opengraph-image/default"
+          : "https://dogancanyildiz.com/tr/opengraph-image/default"
       );
       expect(images[0].width).toBe(1200);
       expect(images[0].alt).toBeTruthy();
@@ -225,7 +225,7 @@ describe("page openGraph metadata", () => {
     });
 
     expect((metadata.openGraph as { url: string }).url).toBe(
-      "https://dogancanyildiz.sh/tr"
+      "https://dogancanyildiz.com/tr"
     );
   });
 
@@ -238,8 +238,8 @@ describe("page openGraph metadata", () => {
     );
 
     expect(new Set(urls).size).toBe(routing.locales.length);
-    expect(urls).toContain("https://dogancanyildiz.sh/about");
-    expect(urls).toContain("https://dogancanyildiz.sh/tr/about");
+    expect(urls).toContain("https://dogancanyildiz.com/about");
+    expect(urls).toContain("https://dogancanyildiz.com/tr/about");
   });
 
   it("marks the project detail page openGraph type as article", async () => {
@@ -262,8 +262,8 @@ describe("page openGraph metadata", () => {
       expect(feedLinks, `${page.name} has no rss feed alternate`).toBeTruthy();
       expect(String(feedLinks?.[0]?.url)).toBe(
         locale === "en"
-          ? "https://dogancanyildiz.sh/feed.xml"
-          : "https://dogancanyildiz.sh/tr/feed.xml"
+          ? "https://dogancanyildiz.com/feed.xml"
+          : "https://dogancanyildiz.com/tr/feed.xml"
       );
     }
   );

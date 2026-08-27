@@ -25,11 +25,11 @@ describe("localePath", () => {
 
 describe("absoluteUrl", () => {
   it("joins the site url with the locale path", () => {
-    expect(siteUrl()).toBe("https://dogancanyildiz.sh");
+    expect(siteUrl()).toBe("https://dogancanyildiz.com");
     expect(absoluteUrl("tr", "/blog")).toBe(
-      "https://dogancanyildiz.sh/tr/blog"
+      "https://dogancanyildiz.com/tr/blog"
     );
-    expect(absoluteUrl("en", "/")).toBe("https://dogancanyildiz.sh/");
+    expect(absoluteUrl("en", "/")).toBe("https://dogancanyildiz.com/");
   });
 });
 
@@ -40,15 +40,15 @@ describe("buildAlternates", () => {
       "tr",
     ]);
     expect(result.canonical).toBe(
-      "https://dogancanyildiz.sh/tr/blog/self-hosting-with-coolify"
+      "https://dogancanyildiz.com/tr/blog/self-hosting-with-coolify"
     );
     expect(result.languages).toEqual({
-      en: "https://dogancanyildiz.sh/blog/self-hosting-with-coolify",
-      tr: "https://dogancanyildiz.sh/tr/blog/self-hosting-with-coolify",
-      "x-default": "https://dogancanyildiz.sh/blog/self-hosting-with-coolify",
+      en: "https://dogancanyildiz.com/blog/self-hosting-with-coolify",
+      tr: "https://dogancanyildiz.com/tr/blog/self-hosting-with-coolify",
+      "x-default": "https://dogancanyildiz.com/blog/self-hosting-with-coolify",
     });
     expect(result.types["application/rss+xml"][0].url).toBe(
-      "https://dogancanyildiz.sh/tr/feed.xml"
+      "https://dogancanyildiz.com/tr/feed.xml"
     );
   });
 
@@ -57,15 +57,15 @@ describe("buildAlternates", () => {
       "tr",
     ]);
     expect(result.canonical).toBe(
-      "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik"
+      "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik"
     );
     expect(result.languages).toEqual({
-      tr: "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik",
-      "x-default": "https://dogancanyildiz.sh/tr/blog/capt-sinavina-hazirlik",
+      tr: "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik",
+      "x-default": "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik",
     });
     expect(result.languages.en).toBeUndefined();
     expect(result.types["application/rss+xml"][0].url).toBe(
-      "https://dogancanyildiz.sh/tr/feed.xml"
+      "https://dogancanyildiz.com/tr/feed.xml"
     );
   });
 });
@@ -84,12 +84,12 @@ describe("buildOpenGraph", () => {
       siteName: "Portfolyo",
       title: "Tasarim sistemi",
       description: "Aciklama",
-      url: "https://dogancanyildiz.sh/tr/projects/design-system",
+      url: "https://dogancanyildiz.com/tr/projects/design-system",
       locale: "tr_TR",
       alternateLocale: ["en_US"],
       images: [
         {
-          url: "https://dogancanyildiz.sh/tr/opengraph-image/default",
+          url: "https://dogancanyildiz.com/tr/opengraph-image/default",
           type: "image/png",
           width: 1200,
           height: 630,
