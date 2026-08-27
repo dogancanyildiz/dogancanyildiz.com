@@ -4,29 +4,31 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 
 ## 1. DNS kayıtları
 
+**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir. Aşağıdaki iki zone tanımı sahibinin son kararına göre; tarihsel kurulum bunun tersini (`.sh` origin'e işaret eden asıl zone, `.com` yalnızca redirect) tarif ediyordu.
+
 `ORIGIN_IPV4` yerine sunucunun statik IPv4 adresi yazılır.
 
-### Zone: dogancanyildiz.sh
+### Zone: dogancanyildiz.com (ana domain, origin'e işaret eder)
 
 | Tip | Ad | İçerik | Proxy |
 |---|---|---|---|
 | A | `@` | `ORIGIN_IPV4` | Proxied (turuncu bulut) |
-| CNAME | `www` | `dogancanyildiz.sh` | Proxied (turuncu bulut) |
+| CNAME | `www` | `dogancanyildiz.com` | Proxied (turuncu bulut) |
 | A | `*.preview` | `ORIGIN_IPV4` | **DNS only (gri bulut)** |
 
 - [ ] `*.preview` bilerek gri bulut: ücretsiz planda wildcard DNS kayıtları proxy'lenemez. Preview'lar bu yüzden TLS'siz `http` üzerinden ve yalnızca origin firewall'unda allowlist'e alınmış admin IP'sinden erişilebilir, bkz. `docs/deploy/traefik-ve-origin.md`.
-- [ ] Resend'in ekleyeceği MX ve TXT kayıtları (`send`, `resend._domainkey`, `_dmarc`) proxy'lenemez ve proxy'lenmemeli, bkz. `docs/deploy/resend-domain.md`.
+- [ ] Resend'in ekleyeceği MX ve TXT kayıtları (`send`, `resend._domainkey`, `_dmarc`) proxy'lenemez ve proxy'lenmemeli, bkz. `docs/deploy/resend-domain.md`. `FROM_EMAIL` artık bu domain üzerinde (`contact@dogancanyildiz.com`), Resend doğrulaması da bu zone'a eklenir.
+- [ ] **Uyarı:** `me@dogancanyildiz.com` alıcı adresini taşıyan MX kayıtlarına dokunulmaz; A/CNAME kayıtlarının eklenmesi mevcut postayı etkilemez.
+- [ ] `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi bu zone'daki bir Redirect Rule ile yapılır (bölüm 3), Coolify'ın dahili www ayarı kullanılmaz.
 
-### Zone: dogancanyildiz.com
+### Zone: dogancanyildiz.sh (yalnızca redirect, origin'e ulaşmaz)
 
 | Tip | Ad | İçerik | Proxy |
 |---|---|---|---|
 | A | `@` | `192.0.2.1` | Proxied (turuncu bulut) |
-| CNAME | `www` | `dogancanyildiz.com` | Proxied (turuncu bulut) |
+| CNAME | `www` | `dogancanyildiz.sh` | Proxied (turuncu bulut) |
 
 `192.0.2.1` RFC 5737 dokümantasyon aralığından bir adres. Redirect Rule istek origin'e hiç gitmeden edge'de cevaplandığı için gerçek bir sunucuya işaret etmesi gerekmiyor; proxied bir kaydın var olması yeterli, olmazsa Rules hiç çalışmaz.
-
-- [ ] **Uyarı:** `.com` zone'undaki MX kayıtlarına dokunulmaz. İletişim adresi `me@dogancanyildiz.com` ve HTTP yönlendirmesi e-postayı etkilemez, ama MX kayıtları silinirse posta durur.
 
 ## 2. SSL/TLS
 
@@ -35,42 +37,44 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 - [ ] Origin sertifikası Traefik'in Let's Encrypt HTTP-01 akışıyla kalır. Cloudflare proxied modda `/.well-known/acme-challenge` yolunu geçirir, "Always Use HTTPS" bu yolu engellemez.
 - [ ] HSTS Cloudflare'da **açılmaz**. Tek kaynak Traefik'teki `security-headers` middleware'i, bkz. `docs/deploy/traefik-ve-origin.md`. İki yerde tanımlamak tutarsızlık riski taşır.
 
-## 3. Redirect Rule: `com to sh`
+## 3. Redirect Rule: `sh to com`
 
 Rules -> Redirect Rules -> Create rule.
 
-- [ ] Rule name: `com to sh`
+- [ ] Rule name: `sh to com`
 - [ ] Custom filter expression:
 
 ```
-(http.host eq "dogancanyildiz.com" or http.host eq "www.dogancanyildiz.com")
+(http.host eq "dogancanyildiz.sh" or http.host eq "www.dogancanyildiz.sh")
 ```
 
 - [ ] Then: URL redirect -> Type: **Dynamic**
 - [ ] Expression:
 
 ```
-concat("https://dogancanyildiz.sh", http.request.uri.path)
+concat("https://dogancanyildiz.com", http.request.uri.path)
 ```
 
 - [ ] Status code: **301**
 - [ ] Preserve query string: **açık**
-- [ ] Hedef bilerek `https://dogancanyildiz.sh` köküne gidiyor, `/en` değil. Zincirli yönlendirme (`.com -> .sh -> .sh/en`) yasak, EN zaten kökte servis ediliyor.
+- [ ] Hedef bilerek `https://dogancanyildiz.com` köküne gidiyor, `/en` değil. Zincirli yönlendirme (`.sh -> .com -> .com/en`) yasak, EN zaten kökte servis ediliyor.
+
+Ayrıca `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi için ikinci, ayrı bir Redirect Rule eklenir (rule name: `www to apex`, filter: `http.host eq "www.dogancanyildiz.com"`, hedef: `concat("https://dogancanyildiz.com", http.request.uri.path)`, 301, path korunur); Coolify'ın dahili www/non-www ayarı bunun için kullanılmaz, tek kaynak burasıdır.
 
 Doğrulama:
 
 ```bash
-curl -sI https://dogancanyildiz.com/projects | grep -i -E '^(HTTP|location)'
-curl -sI 'https://www.dogancanyildiz.com/tr/about?utm_source=x' | grep -i -E '^(HTTP|location)'
+curl -sI https://dogancanyildiz.sh/projects | grep -i -E '^(HTTP|location)'
+curl -sI 'https://www.dogancanyildiz.sh/tr/about?utm_source=x' | grep -i -E '^(HTTP|location)'
 ```
 
 Beklenen:
 
 ```
 HTTP/2 301
-location: https://dogancanyildiz.sh/projects
+location: https://dogancanyildiz.com/projects
 HTTP/2 301
-location: https://dogancanyildiz.sh/tr/about?utm_source=x
+location: https://dogancanyildiz.com/tr/about?utm_source=x
 ```
 
 Tek atlama şartı: ikinci bir `301` veya `location` satırı çıkmamalı.
@@ -95,9 +99,9 @@ Next.js `/_next/static/` altına zaten `cache-control: public, max-age=31536000,
 Doğrulama (build sonrası gerçek bir asset yolu ile, ikinci istekte `HIT` beklenir):
 
 ```bash
-ASSET=$(curl -s https://dogancanyildiz.sh/ | grep -o '/_next/static/[^"]*\.js' | head -1)
-curl -sI "https://dogancanyildiz.sh${ASSET}" | grep -i -E '^(cf-cache-status|cache-control)'
-curl -sI "https://dogancanyildiz.sh${ASSET}" | grep -i '^cf-cache-status'
+ASSET=$(curl -s https://dogancanyildiz.com/ | grep -o '/_next/static/[^"]*\.js' | head -1)
+curl -sI "https://dogancanyildiz.com${ASSET}" | grep -i -E '^(cf-cache-status|cache-control)'
+curl -sI "https://dogancanyildiz.com${ASSET}" | grep -i '^cf-cache-status'
 ```
 
 Beklenen: ilk çağrıda `cf-cache-status: MISS` ve `cache-control: public, max-age=31536000, immutable`, ikinci çağrıda `cf-cache-status: HIT`.
@@ -125,7 +129,7 @@ Doğrulama:
 
 ```bash
 for i in 1 2 3 4 5 6; do
-  curl -s -o /dev/null -w "$i: %{http_code}\n" -X POST https://dogancanyildiz.sh/api/contact \
+  curl -s -o /dev/null -w "$i: %{http_code}\n" -X POST https://dogancanyildiz.com/api/contact \
     -H 'content-type: application/json' -d '{}'
 done
 ```

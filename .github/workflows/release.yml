@@ -1,0 +1,167 @@
+name: release
+
+# Every merge into main cuts a version. The version itself comes from the
+# Conventional Commits made since the last v* tag, so a batch that only carries
+# chore, docs, ci or test commits finishes without tagging anything.
+#
+# Two repository settings this workflow depends on:
+#   - Settings > Actions > General > "Allow GitHub Actions to create and
+#     approve pull requests" must be on, otherwise the sync pull request step
+#     fails with a 403.
+#   - A pull request opened with GITHUB_TOKEN does not start other workflows,
+#     so the sync pull request arrives without the ci checks. Close and reopen
+#     it once to make the required checks run before merging it into dev.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Exact version to release, for example 1.0.0. Leave empty to derive it from the commits since the last tag."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Releases must not overlap: a cancelled run could leave a pushed tag without
+# its GitHub Release or its sync pull request.
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    name: tag and publish
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The whole history and every tag: the version is derived from the
+          # range between the last v* tag and this commit.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Decide the next version
+        id: decide
+        env:
+          # Through the environment rather than inline, so the input can never
+          # be spliced into the shell command.
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          notes="$RUNNER_TEMP/release-notes.md"
+          result="$RUNNER_TEMP/release.json"
+          args=(--notes-out "$notes")
+          if [ -n "${VERSION_INPUT:-}" ]; then
+            args+=(--version "$VERSION_INPUT")
+          fi
+          node scripts/release-version.mjs "${args[@]}" > "$result"
+          cat "$result"
+
+          should_release=$(jq -r '.shouldRelease' "$result")
+          version=$(jq -r '.version // ""' "$result")
+          tag=$(jq -r '.tag // ""' "$result")
+          previous_tag=$(jq -r '.previousTag // ""' "$result")
+
+          if [ "$should_release" = "true" ] && git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+            echo "::notice::$tag already exists, nothing to release."
+            should_release=false
+          fi
+          if [ "$should_release" != "true" ]; then
+            echo "::notice::No releasable commits since ${previous_tag:-the start of the history}."
+          fi
+
+          {
+            echo "should-release=$should_release"
+            echo "version=$version"
+            echo "tag=$tag"
+            echo "previous-tag=$previous_tag"
+            echo "notes=$notes"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Tag the released commit
+        if: steps.decide.outputs.should-release == 'true'
+        env:
+          TAG: ${{ steps.decide.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "$TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG"
+
+      - name: Publish the GitHub Release
+        if: steps.decide.outputs.should-release == 'true'
+        env:
+          TAG: ${{ steps.decide.outputs.tag }}
+          NOTES: ${{ steps.decide.outputs.notes }}
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes-file "$NOTES" \
+            --verify-tag \
+            --latest
+
+      - name: Open the version sync pull request against dev
+        if: steps.decide.outputs.should-release == 'true'
+        env:
+          TAG: ${{ steps.decide.outputs.tag }}
+          VERSION: ${{ steps.decide.outputs.version }}
+          PREVIOUS_TAG: ${{ steps.decide.outputs.previous-tag }}
+          NOTES: ${{ steps.decide.outputs.notes }}
+        run: |
+          set -euo pipefail
+          branch="release/sync-$TAG"
+          git fetch origin "+refs/heads/dev:refs/remotes/origin/dev"
+          git switch --force-create "$branch" "origin/dev"
+
+          # npm keeps package.json and package-lock.json in step; the tag and
+          # the commit are this workflow's job, not npm's.
+          npm version "$VERSION" --no-git-tag-version --allow-same-version > /dev/null
+          node scripts/release-version.mjs \
+            --write-changelog \
+            --version "$VERSION" \
+            --notes-in "$NOTES" \
+            --previous-tag "$PREVIOUS_TAG" > /dev/null
+
+          git add package.json package-lock.json CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "::notice::dev already carries $TAG, no sync pull request needed."
+            exit 0
+          fi
+          git commit -m "chore(release): sync version $TAG"
+          git push --force-with-lease origin "$branch"
+
+          body="$RUNNER_TEMP/sync-pr-body.md"
+          {
+            printf '%s\n\n' "$TAG is tagged on main and published as a GitHub Release."
+            printf '%s\n\n' "This pull request carries the version metadata back to dev so the two branches do not drift:"
+            printf '%s\n' "- \`package.json\` and \`package-lock.json\` set to $VERSION"
+            printf '%s\n\n' "- the $VERSION entry prepended to \`CHANGELOG.md\`"
+            printf '%s\n' "Opened by the release workflow with GITHUB_TOKEN, so the ci checks did not start on their own. Close and reopen this pull request once to run them."
+          } > "$body"
+
+          existing=$(gh pr list --head "$branch" --base dev --state open --json number --jq '.[0].number // ""')
+          if [ -n "$existing" ]; then
+            echo "::notice::Pull request #$existing already tracks $branch."
+          else
+            gh pr create \
+              --base dev \
+              --head "$branch" \
+              --title "chore(release): sync version $TAG" \
+              --body-file "$body"
+          fi

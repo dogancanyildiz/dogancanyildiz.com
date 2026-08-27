@@ -87,7 +87,7 @@ Beklenen: `ClientHost` kendi genel adresinizi gösteriyor. `104.x`, `172.6x.x` g
 for i in $(seq 1 6); do
   curl -s -D "/tmp/cl-h.$i" -o "/tmp/cl-b.$i" -w "$i: %{http_code}\n" -X POST \
     -H 'content-type: application/json' -d '{}' \
-    https://dogancanyildiz.sh/api/contact
+    https://dogancanyildiz.com/api/contact
   sleep 6
 done
 cat /tmp/cl-b.6; grep -i '^retry-after' /tmp/cl-h.6
@@ -143,18 +143,20 @@ http:
           - 2a06:98c0::/29
           - 2c0f:f248::/32
 
-    # Backup path only. The live com to sh redirect lives in Cloudflare
+    # Backup path only. The live sh to com redirect lives in Cloudflare
     # Redirect Rules. This middleware exists so the redirect survives a
     # temporary switch back to DNS only mode.
-    redirect-to-sh:
+    redirect-to-com:
       redirectRegex:
-        regex: "^https://(www\\.)?dogancanyildiz\\.com/(.*)"
-        replacement: "https://dogancanyildiz.sh/${2}"
+        regex: "^https://(www\\.)?dogancanyildiz\\.sh/(.*)"
+        replacement: "https://dogancanyildiz.com/${2}"
         permanent: true
 ```
 
+**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; middleware adı ve regex yönü sahibinin son kararına göre güncellendi (tarihsel kurulum tersini tarif ediyordu).
+
 - [ ] Dosya kaydedilir, proxy yeniden başlatılır.
-- [ ] `${2}` ikinci yakalama grubudur, `(www\.)?` birinci grubu tüketir. Hedef doğrudan `https://dogancanyildiz.sh/` köküne gider, `/en`'e değil; zincirli yönlendirme yasağı burada da geçerli.
+- [ ] `${2}` ikinci yakalama grubudur, `(www\.)?` birinci grubu tüketir. Hedef doğrudan `https://dogancanyildiz.com/` köküne gider, `/en`'e değil; zincirli yönlendirme yasağı burada da geçerli.
 
 ## 4. Uygulamaya middleware etiketleri
 
@@ -181,8 +183,8 @@ Doğrulama:
 docker inspect "$(docker ps --format '{{.Names}}' | grep -i portfolio | head -1)" \
   --format '{{json .Config.Labels}}' | tr ',' '\n' | grep -i middlewares
 
-curl -sI https://dogancanyildiz.sh/ | grep -i -E '^(strict-transport-security|content-encoding|x-powered-by)'
-curl -sI -H 'accept-encoding: br' https://dogancanyildiz.sh/ | grep -i '^content-encoding'
+curl -sI https://dogancanyildiz.com/ | grep -i -E '^(strict-transport-security|content-encoding|x-powered-by)'
+curl -sI -H 'accept-encoding: br' https://dogancanyildiz.com/ | grep -i '^content-encoding'
 ```
 
 Beklenen: middlewares etiketi `https-0-<uuid>` ve `http-0-<uuid>` router adlarını taşıyor; `strict-transport-security: max-age=31536000; includeSubDomains` var, `x-powered-by` hiç yok, `content-encoding` `br` veya `zstd`. HSTS başlığı yoksa ilk şüpheli router adıdır: yanlış ada yazılan etiket hata vermez, sessizce hiçbir şey yapmaz.
@@ -240,7 +242,7 @@ Doğrulama, Cloudflare'ı bypass edip origin'e doğrudan bağlanmayı dene:
 ```bash
 # ORIGIN_IPV4 yerine sunucunun gerçek adresi. Bu komut allowlist'te olmayan
 # bir ağdan (ör. mobil veri) çalıştırılır.
-curl -sS --max-time 8 --resolve dogancanyildiz.sh:443:ORIGIN_IPV4 https://dogancanyildiz.sh/api/health
+curl -sS --max-time 8 --resolve dogancanyildiz.com:443:ORIGIN_IPV4 https://dogancanyildiz.com/api/health
 ```
 
 Beklenen: `curl: (28) Connection timed out` veya `curl: (7) Failed to connect`. Bir JSON gövdesi dönerse kısıt çalışmıyordur. Bu tek geçerli kanıttır, ufw çıktısındaki kural listesi kanıt değildir. Test Cloudflare'ı baypas ettiği için sonucu edge'deki hiçbir kural etkilemez.
@@ -258,6 +260,6 @@ traefik.http.routers.https-0-<uuid>.middlewares=<mevcut değer>,cloudflare-only@
 
 ## 6. Preview deployment erişimi
 
-- [ ] `*.preview.dogancanyildiz.sh` Cloudflare'da DNS-only (gri bulut), bkz. `docs/deploy/cloudflare-kurulum.md` bölüm 1.
+- [ ] `*.preview.dogancanyildiz.com` Cloudflare'da DNS-only (gri bulut), bkz. `docs/deploy/cloudflare-kurulum.md` bölüm 1.
 - [ ] Preview'lar `http` üzerinden servis edilir, TLS yok: gri bulutta Let's Encrypt HTTP-01 doğrulaması origin'e doğrudan ulaşmak zorunda kalır ve bölüm 5b'deki `DOCKER-USER` DROP kuralı bunu keser.
 - [ ] Erişim yalnızca bölüm 5b'de allowlist'e alınmış `ADMIN_IPV4` adresinden mümkündür. Bu bilerek seçilmiş bir kısıt: preview'lar herkese açık değildir.

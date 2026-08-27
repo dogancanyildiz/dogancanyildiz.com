@@ -1,5 +1,5 @@
 # İçerik Stratejisi ve Sektör Araştırması
-Durum: Uygulandı (Faz 4, PR #6), sahibinin teslimatı bekleniyor · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Uygulandı (Faz 4, PR #6), sahibinin teslimatı bekleniyor · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -131,7 +131,7 @@ Açılışta 3-4 yazı, sonrasında ayda 1 hedefi:
 | 7. Certificates | About içinde ayrı blok, `verifyUrl` alanıyla (link gelene kadar boş) | Karar 5 |
 | 8. Education | About sayfası eğitim satırları | Harp Okulu satırı nötr yeniden yazılır, karar 6 (onaylandı) |
 | 9. Languages | Ayrı bölüm olarak gösterilmez veya CEFR'siz tek satır ("working proficiency in written English" gibi) | Karar 7 (onaylandı) |
-| 10. Contact | Contact sayfası + footer | E-posta `me@dogancanyildiz.com` kesinleşti; domain (dogancanyildiz.sh ana, .com 301) sahibinin son onayını bekliyor, 11-acik-sorular.md soru 5 |
+| 10. Contact | Contact sayfası + footer | E-posta `me@dogancanyildiz.com` kesinleşti; domain (dogancanyildiz.com ana, .sh 301) sahibinin 2026-08-27 kararıyla cevaplandı, 11-acik-sorular.md soru 5 |
 | 11. Notlar | Bu doküman + 06-devops-ve-deploy.md (Cloudflare Redirect Rules, e-posta domain doğrulaması) | Telefon numarası yok kararı zaten uygulanıyor |
 
 ### Yayın öncesi içerik kontrol listesi

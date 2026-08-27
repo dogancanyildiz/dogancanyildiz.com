@@ -1,5 +1,5 @@
 # Tasarım Yönü, UI/UX ve Frontend
-Durum: Uygulandı (Faz 3, PR #5; içerik ve hero Faz 4, PR #6) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Uygulandı (Faz 3, PR #5; içerik ve hero Faz 4, PR #6) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 

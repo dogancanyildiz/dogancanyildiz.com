@@ -9,14 +9,14 @@ import {
 
 describe("resolveSiteUrl", () => {
   it("returns the value untouched when it has no trailing slash", () => {
-    expect(resolveSiteUrl("https://dogancanyildiz.sh")).toBe(
-      "https://dogancanyildiz.sh"
+    expect(resolveSiteUrl("https://dogancanyildiz.com")).toBe(
+      "https://dogancanyildiz.com"
     );
   });
 
   it("strips trailing slashes so joined paths never double up", () => {
-    expect(resolveSiteUrl("https://dogancanyildiz.sh//")).toBe(
-      "https://dogancanyildiz.sh"
+    expect(resolveSiteUrl("https://dogancanyildiz.com//")).toBe(
+      "https://dogancanyildiz.com"
     );
   });
 
@@ -29,19 +29,19 @@ describe("resolveSiteUrl", () => {
   });
 
   it("throws when the scheme is missing", () => {
-    expect(() => resolveSiteUrl("dogancanyildiz.sh")).toThrow(
+    expect(() => resolveSiteUrl("dogancanyildiz.com")).toThrow(
       /not an absolute URL/
     );
   });
 
   it("throws for a scheme other than http or https", () => {
-    expect(() => resolveSiteUrl("ftp://dogancanyildiz.sh")).toThrow(
+    expect(() => resolveSiteUrl("ftp://dogancanyildiz.com")).toThrow(
       /http or https/
     );
   });
 
   it("throws when a path is present", () => {
-    expect(() => resolveSiteUrl("https://dogancanyildiz.sh/blog")).toThrow(
+    expect(() => resolveSiteUrl("https://dogancanyildiz.com/blog")).toThrow(
       /without a path/
     );
   });

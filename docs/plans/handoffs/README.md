@@ -2,6 +2,8 @@
 
 Bu dizin, portfolio modernizasyon projesinin her fazından sonra teslim edilen devir notlarını ve manuel checklist'lerini içerir. Dosyalar faz lideri ve/veya doğrulayıcı tarafından yazılır ve bir sonraki faz başlamadan önce site sahibinin okuma ve onaylama sorumluluğudur.
 
+**Domain varsayımı notu (2026-08-27):** bu dizindeki devir notları ve checklist'ler 2026-08-27'de ana domain `.sh` varsayımıyla yazıldı; aynı günün akşamı karar `.com` oldu, metinler tarihsel kayıt olarak değiştirilmedi, fiili uygulama `.com` ile yapıldı (ayrıntı: [../README.md](../README.md) "Domain varsayımı notu").
+
 ## Dosya dizini
 
 | Dosya | Faz | İçerik | Durum |

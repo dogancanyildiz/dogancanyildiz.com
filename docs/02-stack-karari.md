@@ -1,5 +1,5 @@
 # Stack Kararı: Next.js mi, Astro mu, başka bir şey mi
-Durum: Uygulandı (Next.js'te kalındı, Faz 0-4) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Uygulandı (Next.js'te kalındı, Faz 0-4) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 

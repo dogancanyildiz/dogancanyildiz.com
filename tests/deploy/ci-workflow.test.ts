@@ -6,10 +6,16 @@ const workflow = () =>
   readFileSync(join(process.cwd(), ".github/workflows/ci.yml"), "utf8");
 
 describe("ci workflow", () => {
-  it("runs on pull requests and on pushes to main", () => {
+  it("runs on pull requests and on pushes to dev and main", () => {
     const content = workflow();
-    expect(content).toMatch(/pull_request:\s*\n\s*branches: \[main\]/);
-    expect(content).toMatch(/push:\s*\n\s*branches: \[main\]/);
+    expect(content).toMatch(/pull_request:\s*\n\s*branches: \[dev, main\]/);
+    expect(content).toMatch(/push:\s*\n\s*branches: \[dev, main\]/);
+  });
+
+  it("keeps the job names branch protection binds its required checks to", () => {
+    const content = workflow();
+    expect(content).toContain("name: lint, typecheck, test, build");
+    expect(content).toContain("name: hadolint and image build");
   });
 
   it("pins the node version through .nvmrc", () => {

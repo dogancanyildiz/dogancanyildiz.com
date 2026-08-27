@@ -23,7 +23,7 @@ vi.mock("next-intl/server", () => ({
 function probe(): Request {
   // The shape the deploy checklist sends: a deliberately invalid body, so the
   // request consumes a rate limit slot without sending any mail.
-  return new Request("https://dogancanyildiz.sh/api/contact", {
+  return new Request("https://dogancanyildiz.com/api/contact", {
     method: "POST",
     headers: {
       "content-type": "application/json",

@@ -1,6 +1,6 @@
 # Yayın öncesi kontrol listesi (Faz 4 launch gate)
 
-Bu listenin tamamı geçmeden `dogancanyildiz.com -> dogancanyildiz.sh` 301 yönlendirmesi
+Bu listenin tamamı geçmeden `dogancanyildiz.sh -> dogancanyildiz.com` 301 yönlendirmesi
 canlıya alınmaz (bkz. `docs/00-ozet-ve-karar.md`, Uygulama notları).
 
 Durum (2026-08-27, Faz 4 HEAD `8b4fe40`, PR #6 açık): bölüm 1'in tamamı ve bölüm 2'nin
@@ -14,7 +14,7 @@ ya sahibinin teslimatını ya da canlı URL/tarayıcı gerektiren manuel kontrol
 - [x] `npm test` tüm testler geçiyor (şema, içerik katmanı, sitemap, profil, kalıntı):
       32 dosya / 458 test
 - [x] `npm run format` hatasız
-- [x] `NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.sh npm run build` başarılı ve build
+- [x] `NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.com npm run build` başarılı ve build
       çıktısında dynamic (ƒ) yalnızca `/api/*` altında (`/api/contact`, `/api/health`);
       `npm run verify:routes` 26 içerik route'unu statik doğruluyor
 
@@ -42,7 +42,7 @@ ya sahibinin teslimatını ya da canlı URL/tarayıcı gerektiren manuel kontrol
 
 ## 3. SEO ve i18n
 
-- [ ] `https://dogancanyildiz.sh/sitemap.xml` Search Console'a gönderildi ve hatasız işlendi
+- [ ] `https://dogancanyildiz.com/sitemap.xml` Search Console'a gönderildi ve hatasız işlendi
 - [ ] Search Console'da hem `/` hem `/tr` kapsamı doğrulandı
 - [ ] Search Console URL inceleme aracıyla yalnız Türkçe olan bir blog yazısının
       `/tr/blog/<slug>` adresi tek tek incelendi, dizinlenebilir çıktı
@@ -65,7 +65,7 @@ ya sahibinin teslimatını ya da canlı URL/tarayıcı gerektiren manuel kontrol
 - [ ] Production'da contact formu uçtan uca test edildi, gerçek e-posta `me@dogancanyildiz.com`
       adresine ulaştı
 - [ ] Honeypot alanı dolu bir `curl` isteği 4xx ile reddediliyor
-- [ ] `curl -I https://dogancanyildiz.com/tr/about` tek atlamada
-      `https://dogancanyildiz.sh/tr/about` adresine 301 dönüyor (site sahibinin domain
-      onayı alındıktan sonra, bkz. `docs/11-acik-sorular.md` soru 5)
+- [ ] `curl -I https://dogancanyildiz.sh/tr/about` tek atlamada
+      `https://dogancanyildiz.com/tr/about` adresine 301 dönüyor (site sahibinin
+      2026-08-27 kararıyla domain yönü tersine döndü, bkz. `docs/11-acik-sorular.md` soru 5)
 - [ ] Coolify sağlık kontrolü yeşil, `/api/health` 200 dönüyor
