@@ -89,8 +89,9 @@ The application is deployed by Coolify from this git repository:
    from `dogancanyildiz.com` to `dogancanyildiz.sh` is a single hop Cloudflare
    Redirect Rule that keeps the path.
 
-The `Dockerfile`, `.dockerignore` and the GitHub Actions gate are added in phase
-1 of the modernization plan, see `docs/10-yol-haritasi.md`.
+The `Dockerfile`, `.dockerignore` and the GitHub Actions gate live in this
+repository, see the Deploy section below for the local verification commands and
+for the panel side checklists.
 
 ## Repository layout
 
