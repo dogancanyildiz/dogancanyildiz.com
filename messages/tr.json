@@ -17,7 +17,6 @@
   },
   "hero": {
     "location": "Konya, Türkiye",
-    "title": "Full-Stack Web Geliştirici ve DevOps Mühendisi",
     "tagline": "Web uygulamaları geliştiriyorum ve yayına aldıkları altyapıyı kendim işletiyorum.",
     "intro": "Konya'da yaşayan bir full-stack geliştiriciyim. Next.js ve Node.js ile web uygulamaları geliştiriyorum ve bunları kendim yayına alıyorum: Docker, GitHub Actions, Coolify ve Linux sunucular. Geliştirmenin yanında CAPT sertifikasına sahibim, Cisco CCNA hattını ve CyberOps Associate eğitimini tamamladım.",
     "viewProjects": "Projeleri gör",

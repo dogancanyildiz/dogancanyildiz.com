@@ -17,7 +17,6 @@
   },
   "hero": {
     "location": "Konya, Türkiye",
-    "title": "Full-Stack Web Developer & DevOps Engineer",
     "tagline": "I build web applications and run the infrastructure they ship on.",
     "intro": "I'm a full-stack developer based in Konya, Türkiye. I build web applications with Next.js and Node.js, and I deploy them myself: Docker, GitHub Actions, Coolify and Linux servers. Alongside development I hold the CAPT certification and have completed the full Cisco CCNA track along with CyberOps Associate.",
     "viewProjects": "View projects",

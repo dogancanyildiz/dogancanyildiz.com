@@ -37,8 +37,9 @@ missing, because a silent fallback would put a wrong host into `robots.txt` and
 
 | Script                  | What it does                                                                                                           |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`           | Development server on http://localhost:3000                                                                            |
+| `npm run dev`           | Development server on http://localhost:3000, velite runs alongside it in watch mode                                    |
 | `npm run build`         | Production build, writes `.next/standalone`                                                                            |
+| `npm run build:content` | Runs velite once in strict mode, validates every content file against its schema                                       |
 | `npm run start`         | Serves the production build                                                                                            |
 | `npm run lint`          | ESLint with the Next.js config                                                                                         |
 | `npm run typecheck`     | `tsc --noEmit`                                                                                                         |
@@ -151,3 +152,37 @@ down as step by step checklists:
 - `docs/deploy/cloudflare-kurulum.md` - DNS, TLS, redirect, cache, rate limiting
 - `docs/deploy/traefik-ve-origin.md` - trusted proxy headers, HSTS, origin lockdown
 - `docs/deploy/resend-domain.md` - SPF, DKIM, DMARC for the sender domain
+
+## Adding content
+
+Projects and blog posts are MDX files under `content/`, compiled by Velite at
+build time and dev time against the schemas in `velite.config.ts`.
+
+- Project: `content/projects/<locale>/<slug>.mdx`. Required front matter:
+  `title`, `slug`, `summary`, `role`, `stack` (a non empty list), `year`,
+  `outcome`. `links.live`, `links.repo`, `cover`, `featured` and `order` are
+  optional.
+- Blog post: `content/blog/<locale>/<slug>.mdx`. Required front matter:
+  `title`, `slug`, `date`, `summary`. `tags`, `cover` and `draft` are
+  optional.
+- `<locale>` is derived from the folder name and can only be `en` or `tr`,
+  there is no `locale` field to set by hand.
+- The same piece of content must use the SAME `slug` value in both locale
+  folders, the hreflang pair between the English and Turkish page is built
+  from that match. If a piece of content has not been translated yet, do not
+  create a placeholder file for the other locale: an untranslated slug never
+  appears in that locale's routes, sitemap or hreflang alternates, there is
+  no fallback page.
+- A cover image is optional. Place it under `content/images/` and reference
+  it with a relative path from the frontmatter, for example
+  `cover: ../../images/<slug>-cover.png`. Content with no `cover` field is
+  published without a cover, it does not fall back to a CSS gradient or a
+  stock image.
+- Front matter values are YAML: a value containing `": "` (a colon followed
+  by a space), such as a title with a subtitle, must be wrapped in quotes or
+  the parser misreads it as a nested key.
+
+`npm run dev` runs Velite in watch mode alongside the Next.js dev server, so
+content changes are picked up without a restart. `npm run build:content`
+runs Velite once in strict mode and is the fastest way to check that new
+front matter matches the schema before running the full build.
