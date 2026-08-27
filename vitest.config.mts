@@ -22,7 +22,7 @@ export default defineConfig({
     include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
     watch: false,
     env: {
-      NEXT_PUBLIC_SITE_URL: "https://dogancanyildiz.sh",
+      NEXT_PUBLIC_SITE_URL: "https://dogancanyildiz.com",
     },
     server: {
       deps: {

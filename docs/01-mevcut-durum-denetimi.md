@@ -1,6 +1,6 @@
 # Mevcut Durum Denetimi
 
-Durum: Uygulandı (Faz 0-4, PR #2-#6) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Uygulandı (Faz 0-4, PR #2-#6) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 

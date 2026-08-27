@@ -1,16 +1,16 @@
 # Resend domain doğrulaması (el ile checklist)
 
-Amaç: contact formunun gönderdiği postanın spam'e düşmemesi. Alıcı adres `me@dogancanyildiz.com` olarak kesinleşti (`docs/11-acik-sorular.md` soru 5); gönderici adres doğrulanmış bir domain üzerinde olmak zorunda, bu yüzden `contact@dogancanyildiz.sh` kullanılıyor.
+Amaç: contact formunun gönderdiği postanın spam'e düşmemesi. Alıcı adres `me@dogancanyildiz.com` olarak kesinleşti (`docs/11-acik-sorular.md` soru 5); gönderici adres doğrulanmış bir domain üzerinde olmak zorunda, bu yüzden `contact@dogancanyildiz.com` kullanılıyor. **Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com olduğu için doğrulanacak domain de bu; tarihsel kurulum burada `dogancanyildiz.sh` tarif ediyordu, gönderici ve alıcı artık aynı domain'de.
 
 ## 1. Resend'de domain ekle
 
-- [ ] Resend -> Domains -> "Add Domain" -> `dogancanyildiz.sh`
+- [ ] Resend -> Domains -> "Add Domain" -> `dogancanyildiz.com`
 - [ ] Region: `eu-west-1` (Türkiye'ye en yakın Resend bölgesi). Seçilen bölge MX kaydının hedefini belirler.
 - [ ] Resend üç kayıt üretir. Değerler panelden kopyalanır, buraya yazılan `p=...` ve host adları örnektir.
 
 ## 2. Cloudflare DNS kayıtları
 
-`dogancanyildiz.sh` zone'una eklenir. Üçü de **DNS only (gri bulut)**; MX ve TXT kayıtları zaten proxy'lenemez.
+`dogancanyildiz.com` zone'una eklenir. Üçü de **DNS only (gri bulut)**; MX ve TXT kayıtları zaten proxy'lenemez.
 
 | Tip | Ad | İçerik | Öncelik |
 |---|---|---|---|
@@ -32,10 +32,10 @@ DMARC kaydı Resend tarafından üretilmiyor, elle eklenir:
 - [ ] Komut satırından:
 
 ```bash
-dig +short TXT send.dogancanyildiz.sh
-dig +short MX send.dogancanyildiz.sh
-dig +short TXT resend._domainkey.dogancanyildiz.sh
-dig +short TXT _dmarc.dogancanyildiz.sh
+dig +short TXT send.dogancanyildiz.com
+dig +short MX send.dogancanyildiz.com
+dig +short TXT resend._domainkey.dogancanyildiz.com
+dig +short TXT _dmarc.dogancanyildiz.com
 ```
 
 Beklenen: sırasıyla `"v=spf1 include:amazonses.com ~all"`, `10 feedback-smtp.<region>.amazonses.com.`, `"p=MIGfMA0GCSq..."` ile başlayan DKIM değeri ve `"v=DMARC1; p=none; ..."`.
@@ -45,7 +45,7 @@ Beklenen: sırasıyla `"v=spf1 include:amazonses.com ~all"`, `10 feedback-smtp.<
 Coolify'da `RESEND_API_KEY`, `CONTACT_EMAIL` ve `FROM_EMAIL` Runtime değişkeni olarak set edildikten ve uygulama yeniden deploy edildikten sonra:
 
 ```bash
-curl -s -X POST https://dogancanyildiz.sh/api/contact \
+curl -s -X POST https://dogancanyildiz.com/api/contact \
   -H 'content-type: application/json' \
   -d '{"name":"Deploy check","email":"me@dogancanyildiz.com","subject":"faz 1 smoke test","message":"Deploy pipeline verification message."}'
 ```
@@ -56,5 +56,5 @@ Beklenen: `{"ok":true}` ve `me@dogancanyildiz.com` kutusuna postanın ulaşması
 
 ## 5. Sık yapılan hata
 
-- [ ] `dogancanyildiz.com` zone'undaki MX kayıtlarına dokunulmadı. `.com` HTTP tarafında `.sh`'a 301 yönleniyor ama posta akışı bundan tamamen bağımsız; MX silinirse `me@dogancanyildiz.com` adresine posta ulaşmaz.
+- [ ] `dogancanyildiz.com` zone'undaki mevcut MX kaydına (apex, `me@dogancanyildiz.com` alıcı postası) dokunulmadı; Resend'in eklediği `send.` alt alan adındaki MX ile çakışmaz, ikisi farklı host adlarında durur. `.sh` HTTP tarafında `.com`'a 301 yönleniyor ama posta akışı bundan tamamen bağımsız; apex MX silinirse `me@dogancanyildiz.com` adresine posta ulaşmaz.
 - [ ] `RESEND_API_KEY` Coolify'da Build Variable olarak işaretlenmedi.

@@ -128,7 +128,7 @@ export default async function OGImage({
           <div
             style={{ fontSize: "22px", color: MUTED, letterSpacing: "0.14em" }}
           >
-            dogancanyildiz.sh
+            dogancanyildiz.com
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-# dogancanyildiz.sh
+# dogancanyildiz.com
 
 Personal portfolio of Doğan Can Yıldız, a full stack web developer and DevOps
 engineer. The site is a Next.js App Router application that is self hosted on a
@@ -47,6 +47,7 @@ missing, because a silent fallback would put a wrong host into `robots.txt` and
 | `npm run format`        | Prettier in check mode                                                                                                 |
 | `npm run format:write`  | Prettier in write mode                                                                                                 |
 | `npm run verify:routes` | Reads `.next/prerender-manifest.json` after a build: every content route prerendered in both locales, `/api/*` dynamic |
+| `npm run release:check` | Dry run of `scripts/release-version.mjs`: prints the version the next merge to `main` would cut, writes nothing        |
 | `npm run vendor:fonts`  | Copies the woff2 and woff font files from the @fontsource packages into src/fonts and public/fonts/og                  |
 
 ## Environment variables
@@ -102,7 +103,7 @@ The application is deployed by Coolify from this git repository:
 4. Traefik terminates TLS, adds HSTS and compression, and trusts the Cloudflare
    ranges through `forwardedHeaders.trustedIPs`.
 5. Cloudflare runs in proxied mode with SSL set to Full (strict). The redirect
-   from `dogancanyildiz.com` to `dogancanyildiz.sh` is a single hop Cloudflare
+   from `dogancanyildiz.sh` to `dogancanyildiz.com` is a single hop Cloudflare
    Redirect Rule that keeps the path.
 
 The `Dockerfile`, `.dockerignore` and the GitHub Actions gate live in this
@@ -124,6 +125,45 @@ docs/plans     Executable implementation plans, one per phase
 Architecture decisions live in `docs/`. Start with
 `docs/00-ozet-ve-karar.md` for the summary and `docs/10-yol-haritasi.md` for the
 phase order.
+
+## Branching and releases
+
+```
+feature/*  --PR-->  dev  --PR-->  main  --push-->  release workflow
+```
+
+- `feature/*` branches off `dev`. `dev` is the integration branch, `main` is
+  the released state and only moves through a pull request from `dev`.
+- `.github/workflows/ci.yml` runs on pull requests to and pushes on both `dev`
+  and `main`. Its two jobs, `lint, typecheck, test, build` and
+  `hadolint and image build`, are the required checks in branch protection, so
+  their names must not change.
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+  They are the only input the version comes from.
+
+Every merge into `main` runs `.github/workflows/release.yml`, which:
+
+1. derives the next version from the commits since the last `v*` tag,
+2. pushes an annotated tag and publishes a GitHub Release with grouped notes,
+3. opens a `chore(release): sync version vX.Y.Z` pull request against `dev`
+   that carries `package.json`, `package-lock.json` and `CHANGELOG.md` forward.
+
+| Commit type                                           | Version bump |
+| ----------------------------------------------------- | ------------ |
+| `feat`                                                | minor        |
+| `fix`, `perf`, `refactor`                             | patch        |
+| `!:` in the subject or `BREAKING CHANGE:` in the body | major        |
+| `chore`, `docs`, `ci`, `test`, `style`, `build`       | none         |
+
+A batch that only carries release neutral commits finishes without a tag.
+`npm run release:check` prints the decision locally without writing anything.
+
+The project is pre release at `0.x`. `1.0.0` is cut by hand, by running the
+release workflow through `workflow_dispatch` with `version: 1.0.0`; after that
+the table above governs on its own. `CHANGELOG.md` follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and is written by the
+release workflow. The full flow, including the branch protection settings and
+the Coolify staging option, is in `docs/06-devops-ve-deploy.md`.
 
 ## Deploy
 

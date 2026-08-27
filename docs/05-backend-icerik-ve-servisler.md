@@ -1,5 +1,5 @@
 # Backend, İçerik Pipeline ve Servisler
-Durum: Kısmen uygulandı: içerik pipeline ve contact (Faz 0, Faz 4); status widget ve Umami Faz 5'te · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Kısmen uygulandı: içerik pipeline ve contact (Faz 0, Faz 4); status widget ve Umami Faz 5'te · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -51,7 +51,7 @@ Mevcut `src/app/api/contact/route.ts` ve `src/lib/resend.ts` korunur, Resend de�
 3. **Uzunluk sınırları + email regex**: `name<=100`, `email<=200`, `message<=5000` karakter, aşımda `400`; ayrıca `Content-Length` kontrolü ile body boyutu sınırlanır (App Router route handler'larında Next.js kendiliğinden bir sınır uygulamıyor).
 4. **Jenerik hata mesajı**: `resend.emails.send()` hatası şu an `error.message` olarak ham haliyle client'a dönüyor (env/domain doğrulama detaylarını sızdırabilir); bundan sonra client'a sabit bir mesaj döner, detay yalnızca `console.error`'a yazılır.
 
-**Env zorunluluğu**: `CONTACT_EMAIL` ve `FROM_EMAIL` prod'da set edilmezse Resend'in paylaşılan test alanına (`onboarding@resend.dev`) sessizce düşüyor; istek `200` dönebilir ama mesaj hiç ulaşmayabilir. Prod build/start aşamasında bu iki değişken zorunlu kılınır, fallback yalnızca development'ta geçerli olur. `FROM_EMAIL` için `dogancanyildiz.sh` üzerinde doğrulanmış domain kullanılır. **`CONTACT_EMAIL` (alıcı adresi) `me@dogancanyildiz.com` olarak kesinleşti** (site sahibinin 2026-08-27 cevabı, bkz. [11-acik-sorular.md](11-acik-sorular.md) soru 5); yeni domain'e taşınmıyor.
+**Env zorunluluğu**: `CONTACT_EMAIL` ve `FROM_EMAIL` prod'da set edilmezse Resend'in paylaşılan test alanına (`onboarding@resend.dev`) sessizce düşüyor; istek `200` dönebilir ama mesaj hiç ulaşmayabilir. Prod build/start aşamasında bu iki değişken zorunlu kılınır, fallback yalnızca development'ta geçerli olur. `FROM_EMAIL` için `dogancanyildiz.com` üzerinde doğrulanmış domain kullanılır. **`CONTACT_EMAIL` (alıcı adresi) `me@dogancanyildiz.com` olarak kesinleşti** (site sahibinin 2026-08-27 cevabı, bkz. [11-acik-sorular.md](11-acik-sorular.md) soru 5); yeni domain'e taşınmıyor.
 
 **Turnstile ertelendi (YAGNI), ama ekleme maliyeti düştü**: Cloudflare Turnstile şimdilik eklenmiyor. Kanıtlanmış bir spam problemi yokken üçüncü taraf bağımlılığı eklemek gerekçesiz; honeypot + rate limit + uzunluk sınırı kişisel bir portfolyo formunda basit botların büyük kısmını eler. Route'ta doğrulama seam'i açık bırakılır: gerçek spam gelirse tek bir `siteverify` çağrısıyla birkaç satırla eklenir. Cloudflare zaten proxied mod ile bir bağımlılık olduğu için (bkz. [06-devops-ve-deploy.md](06-devops-ve-deploy.md) bölüm 8) Turnstile'ı sonradan eklemenin maliyeti düştü; "gerçek spam görülürse ilk adım Turnstile" notu bu yüzden güçleniyor.
 
@@ -105,7 +105,7 @@ Umami, self-hosted, çerezsiz ve gizlilik dostu bir web analytics aracı; Coolif
 |---|---|---|---|
 | `RESEND_API_KEY` | Runtime | Prod'da evet | .env.example:1-9'da mevcut |
 | `CONTACT_EMAIL` | Runtime | Prod'da evet | Fallback yalnızca development |
-| `FROM_EMAIL` | Runtime | Prod'da evet | `dogancanyildiz.sh` doğrulanmış domain |
+| `FROM_EMAIL` | Runtime | Prod'da evet | `dogancanyildiz.com` doğrulanmış domain |
 | `GATUS_URL` | Runtime | Status widget için evet | Client'a sızmaz, yalnızca sunucu tarafı çeker |
 | `NEXT_PUBLIC_SITE_URL` | Build | Evet | Şu an `.env.example`'da yok, eklenecek; `robots.ts`/`sitemap.ts` fallback'i `example.com`'dan kaldırılacak |
 | Umami script/site ID | Runtime, Faz 5 | Faz 5'te evet | CSP ile uyumlu script tag'i |

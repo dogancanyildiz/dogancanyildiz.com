@@ -1,10 +1,10 @@
 # DevOps, Docker, Coolify ve Deploy Hattı
 
-Durum: Kısmen uygulandı: kod ve checklist'ler (Faz 1, PR #3), panel adımları sahibinde · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Kısmen uygulandı: kod ve checklist'ler (Faz 1, PR #3), panel adımları sahibinde · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
-Repo şu an Docker'a hiç hazır değil: Dockerfile, .dockerignore, .github/workflows ve health-check route'u yok, next.config.ts boş bir NextConfig nesnesi (bkz. [01-mevcut-durum-denetimi.md](01-mevcut-durum-denetimi.md)). Bu doküman yayın hattını sıfırdan tanımlıyor: Coolify'ın GitHub App'i üzerinden git tabanlı Dockerfile build pack'i, çok aşamalı bir Dockerfile (deps, builder, runner), yalnızca PR kapısı olarak çalışan bir GitHub Actions workflow'u ve Cloudflare edge'inde tanımlanan dogancanyildiz.com -> dogancanyildiz.sh 301 yönlendirmesi (Traefik'teki karşılığı yalnızca yedek yol, bkz. bölüm 7-8). Karar, PR başına önizleme URL'i isteğinin Coolify'da yalnızca GitHub App + git tabanlı build ile çalışması (Deploy Key veya GHCR pull ile çalışmıyor) üzerine kuruluyor; bu tek koşul tek başına dört build yolundan birini eliyor. Health check ve rolling update tarafında bilinen, kapanmamış bir Coolify bug'ı (coollabsio/coolify#7500) var ve staging'de ayrıca doğrulanması gerekiyor. Sunucunun RAM/CPU kapasitesi yeterli olduğu ve darboğaz olmadığı site sahibi tarafından 2026-08-27'de doğrulandı (bkz. [11-acik-sorular.md](11-acik-sorular.md) soru 7); build doğrudan sunucu üstünde alınıyor, GHCR pull yolu yalnızca ileride bir yükseltme kapısı olarak dokümante kalıyor.
+Repo şu an Docker'a hiç hazır değil: Dockerfile, .dockerignore, .github/workflows ve health-check route'u yok, next.config.ts boş bir NextConfig nesnesi (bkz. [01-mevcut-durum-denetimi.md](01-mevcut-durum-denetimi.md)). Bu doküman yayın hattını sıfırdan tanımlıyor: Coolify'ın GitHub App'i üzerinden git tabanlı Dockerfile build pack'i, çok aşamalı bir Dockerfile (deps, builder, runner), yalnızca PR kapısı olarak çalışan bir GitHub Actions workflow'u ve Cloudflare edge'inde tanımlanan dogancanyildiz.sh -> dogancanyildiz.com 301 yönlendirmesi (Traefik'teki karşılığı yalnızca yedek yol, bkz. bölüm 7-8). Karar, PR başına önizleme URL'i isteğinin Coolify'da yalnızca GitHub App + git tabanlı build ile çalışması (Deploy Key veya GHCR pull ile çalışmıyor) üzerine kuruluyor; bu tek koşul tek başına dört build yolundan birini eliyor. Health check ve rolling update tarafında bilinen, kapanmamış bir Coolify bug'ı (coollabsio/coolify#7500) var ve staging'de ayrıca doğrulanması gerekiyor. Sunucunun RAM/CPU kapasitesi yeterli olduğu ve darboğaz olmadığı site sahibi tarafından 2026-08-27'de doğrulandı (bkz. [11-acik-sorular.md](11-acik-sorular.md) soru 7); build doğrudan sunucu üstünde alınıyor, GHCR pull yolu yalnızca ileride bir yükseltme kapısı olarak dokümante kalıyor.
 
 ## Kararlar
 
@@ -146,17 +146,19 @@ Bu workflow image push etmiyor ve Coolify'a deploy tetiklemiyor; tek işi lint +
 
 ### 7. Traefik: redirect (yedek yol), HSTS/compress, buffering
 
+**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir. Tarihsel karar metni bu yönün tersini (dogancanyildiz.sh ana domain, .com 301) tarif ediyordu; aşağıdaki middleware/router adları ve regex örnekleri sahibinin son kararına göre güncellendi.
+
 Bu bölümdeki redirectregex artık ana yönlendirme yolu değil. Ana yol Cloudflare Redirect Rules'tır (bölüm 8a); aşağıdaki Traefik middleware'i yalnızca Cloudflare proxied modu bir nedenle devre dışı kalırsa (ör. geçici DNS-only geçişi) devreye giren bir yedek olarak Coolify'da tanımlı tutuluyor, günlük akışta tetiklenmiyor.
 
 ```
-# dogancanyildiz.com -> dogancanyildiz.sh, tek atlama, dil prefix'ine dokunmadan (yedek yol)
-traefik.http.middlewares.redirect-to-sh.redirectregex.regex=^https://dogancanyildiz\.com/(.*)
-traefik.http.middlewares.redirect-to-sh.redirectregex.replacement=https://dogancanyildiz.sh/$${1}
-traefik.http.middlewares.redirect-to-sh.redirectregex.permanent=true
+# dogancanyildiz.sh -> dogancanyildiz.com, tek atlama, dil prefix'ine dokunmadan (yedek yol)
+traefik.http.middlewares.redirect-to-com.redirectregex.regex=^https://dogancanyildiz\.sh/(.*)
+traefik.http.middlewares.redirect-to-com.redirectregex.replacement=https://dogancanyildiz.com/$${1}
+traefik.http.middlewares.redirect-to-com.redirectregex.permanent=true
 
-traefik.http.routers.redirect-com.rule=Host(`dogancanyildiz.com`)
-traefik.http.routers.redirect-com.middlewares=redirect-to-sh
-traefik.http.routers.redirect-com.tls.certresolver=letsencrypt
+traefik.http.routers.redirect-sh.rule=Host(`dogancanyildiz.sh`)
+traefik.http.routers.redirect-sh.middlewares=redirect-to-com
+traefik.http.routers.redirect-sh.tls.certresolver=letsencrypt
 
 # HSTS + sıkıştırma, Coolify'da "Readonly labels" kapatılıp eklenir
 traefik.http.middlewares.security-headers.headers.stsSeconds=31536000
@@ -164,13 +166,13 @@ traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true
 traefik.http.middlewares.compress.compress=true
 ```
 
-Bu 301 (yedek yolda), hedefi doğrudan `https://dogancanyildiz.sh/$1` yapıyor, `/en`'e değil; yanlış sırayla kurulursa com -> sh -> sh/en gibi zincirli bir redirect oluşur ve bu SEO'ya zarar verir, aynı yasak Cloudflare Redirect Rules için de geçerli (bölüm 8a). dogancanyildiz.sh apex ile www arasındaki yönlendirme ise Coolify'ın dahili www/non-www ayarıyla çözülüyor, elle middleware gerekmiyor; cross-domain 301 için Coolify'da böyle bir ayar yok, docs'tan doğrulanan redirectregex + ayrı router/TLS deseni gerekiyor (yalnızca yedek yol olarak). compress middleware'i gzip/brotli/zstd'yi Accept-Encoding ile negotiate ediyor. React'ın streaming SSR yanıtlarını Traefik'in buffering middleware'i (mem/maxResponseBodyBytes) geciktirebiliyor; bu middleware ana router'a eklenmeden bırakılıyor, gerekirse staging'de streaming davranışı gözlemlenip ayarlanacak.
+Bu 301 (yedek yolda), hedefi doğrudan `https://dogancanyildiz.com/$1` yapıyor, `/en`'e değil; yanlış sırayla kurulursa sh -> com -> com/en gibi zincirli bir redirect oluşur ve bu SEO'ya zarar verir, aynı yasak Cloudflare Redirect Rules için de geçerli (bölüm 8a). dogancanyildiz.com apex ile www arasındaki yönlendirme Coolify'ın dahili www/non-www ayarıyla değil, yine Cloudflare Redirect Rules'ta tek yerden çözülüyor (bkz. bölüm 8a); dogancanyildiz.sh apex ve www kayıtları origin'e hiç ulaşmaz, yalnızca Cloudflare'da proxied birer kayıt olarak durur ve edge'de .com'a yönlenir. Cross-domain 301 için Coolify'da böyle bir ayar yok, docs'tan doğrulanan redirectregex + ayrı router/TLS deseni gerekiyor (yalnızca yedek yol olarak). compress middleware'i gzip/brotli/zstd'yi Accept-Encoding ile negotiate ediyor. React'ın streaming SSR yanıtlarını Traefik'in buffering middleware'i (mem/maxResponseBodyBytes) geciktirebiliyor; bu middleware ana router'a eklenmeden bırakılıyor, gerekirse staging'de streaming davranışı gözlemlenip ayarlanacak.
 
 ### 8. DNS/Cloudflare: proxied mod açık
 
 Sunucu kendi statik IP'sine sahip ve NAT arkasında değil; Coolify, Traefik ile 80/443'ü doğrudan dinliyor. DNS Cloudflare'da yönetiliyor ve **proxied mod (turuncu bulut) açık** tutuluyor; SSL modu Full (strict), site sahibinin diğer projelerinde zaten kullandığı ayarla aynı (bkz. [11-acik-sorular.md](11-acik-sorular.md) soru 8, 2026-08-27 cevabı). Bu, önceki "DNS-only, proxied kapalı" varsayımını tersine çeviriyor ve aşağıdaki sekiz alt karara yol açıyor.
 
-**a) Domain yönlendirmesi Cloudflare Redirect Rules'ta.** `dogancanyildiz.com -> dogancanyildiz.sh` 301'i artık Traefik'te değil, Cloudflare edge'inde **Redirect Rules** ile tanımlanıyor: tek atlama, path korunuyor (`https://dogancanyildiz.sh/${path}`), www dahil. Traefik'teki redirectregex (bölüm 7) artık ana yol değil, yalnızca Cloudflare devre dışı kalırsa devreye giren bir yedek. Zincir redirect yasağı (`.com -> .sh -> .sh/tr` gibi üçüncü bir atlama olmaması) burada da aynen geçerli.
+**a) Domain yönlendirmesi Cloudflare Redirect Rules'ta.** **Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com; tarihsel karar metni ".sh ana domain, .com 301" idi, sahibinin son kararıyla yönü tersine döndü. `dogancanyildiz.sh -> dogancanyildiz.com` 301'i Traefik'te değil, Cloudflare edge'inde **Redirect Rules** ile tanımlanıyor: tek atlama, path korunuyor (`https://dogancanyildiz.com/${path}`), www dahil. Aynı Redirect Rules katmanı `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesini de tek yerden çözüyor; Coolify'ın dahili www/non-www ayarı bunun için kullanılmıyor. Traefik'teki redirectregex (bölüm 7) artık ana yol değil, yalnızca Cloudflare devre dışı kalırsa devreye giren bir yedek. Zincir redirect yasağı (`.sh -> .com -> .com/tr` gibi üçüncü bir atlama olmaması) burada da aynen geçerli.
 
 **b) Gerçek ziyaretçi IP'si `CF-Connecting-IP` header'ından.** Proxied modda Traefik'in gördüğü bağlantı IP'si Cloudflare'ın edge IP'sidir, gerçek ziyaretçi IP'si `CF-Connecting-IP` header'ında gelir. Bu header **yalnızca** istek gerçekten Cloudflare IP aralıklarından geliyorsa güvenilir; bu yüzden Traefik entrypoint'inde `forwardedHeaders.trustedIPs`, Cloudflare'ın yayınladığı IPv4/IPv6 listesiyle set edilir (Coolify'da proxy config üzerinden). Contact formunun rate limit anahtarı bu doğrulanmış IP olur (detay: [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md)); `trustedIPs` set edilmezse tüm istekler Cloudflare'ın kendi IP'sinden geliyormuş gibi görünür ve tek bir rate-limit kovasına düşer, meşru ziyaretçiler birbirine karışır.
 
@@ -178,13 +180,13 @@ Sunucu kendi statik IP'sine sahip ve NAT arkasında değil; Coolify, Traefik ile
 
 **d) Ek katmanlar (ücretsiz plan).** Cloudflare cache'i `_next/static/*` ve `public/` altındaki görseller için açılıyor (Next zaten immutable cache header'ı veriyor, Cloudflare bunu edge'de tekrar cache'liyor); `/api/contact` için Cloudflare Rate Limiting kuralı dış katman olarak ekleniyor, uygulama içi in-memory limit iç katman olarak aynen kalıyor (detay: [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md)); Bot Fight Mode açık. HSTS Cloudflare'dan da açılabilir ama tek yerden yönetiliyor: Traefik/Next `headers()`; Cloudflare'da ayrıca tanımlanmıyor, çift tanım tutarsızlık riski taşır.
 
-**e) Origin'e doğrudan erişim kapatılır (önerilir, Faz 1).** Sunucu güvenlik duvarı (ufw) veya Traefik `ipAllowList` ile origin yalnızca Cloudflare IP aralıklarından erişilebilir kılınır; böylece `.sh`'a IP üzerinden doğrudan bağlanıp Cloudflare'ı bypass etmek mümkün olmaz. Zorunlu değil ama güçlü tavsiye olarak Faz 1'e ekleniyor.
+**e) Origin'e doğrudan erişim kapatılır (önerilir, Faz 1).** Sunucu güvenlik duvarı (ufw) veya Traefik `ipAllowList` ile origin yalnızca Cloudflare IP aralıklarından erişilebilir kılınır; böylece `.com`'a IP üzerinden doğrudan bağlanıp Cloudflare'ı bypass etmek mümkün olmaz. Zorunlu değil ama güçlü tavsiye olarak Faz 1'e ekleniyor.
 
 **f) Turnstile: bağımlılık maliyeti düştü, hâlâ ertelendi.** Cloudflare zaten proxied mod ile bir bağımlılık olduğu için Turnstile eklemenin ek maliyeti önemli ölçüde düştü. Yine de YAGNI gereği şimdi eklenmiyor; ama "gerçek spam görülürse ilk adım Turnstile" notu bu kararla güçleniyor, çünkü altyapı zaten hazır (detay: [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md)).
 
 **g) HTTP/3 ve Brotli: Traefik'te açmaya gerek yok.** Cloudflare proxied modda HTTP/3 ve Brotli zaten edge'de sağlanıyor; Traefik static config'inde bunları ayrıca açma konusu "gerekmez" olarak kapatılıyor.
 
-**h) Yan servisler de Cloudflare proxied alt domain'lerde.** Umami ve Gatus gibi yan servisler (ör. `status.dogancanyildiz.sh`) Cloudflare proxied alt domain'ler üzerinden çalışır. Gatus'un public gösterilecek endpoint'leri yine yalnızca sunucu tarafında okunur, client'a hiçbir zaman doğrudan Gatus URL'i sızmaz (detay: [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md), [09-guvenlik.md](09-guvenlik.md)).
+**h) Yan servisler de Cloudflare proxied alt domain'lerde.** Umami ve Gatus gibi yan servisler (ör. `status.dogancanyildiz.com`) Cloudflare proxied alt domain'ler üzerinden çalışır. Gatus'un public gösterilecek endpoint'leri yine yalnızca sunucu tarafında okunur, client'a hiçbir zaman doğrudan Gatus URL'i sızmaz (detay: [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md), [09-guvenlik.md](09-guvenlik.md)).
 
 ### 9. Yedek/rollback
 
@@ -213,9 +215,9 @@ Bu setin merkezinde tek bir zorunlu koşul var: PR önizlemesi. Coolify'da bu ö
 
 **Traefik router adı bağlama.** Coolify router adlarını `traefik.http.routers.https-0-<uuid>` / `http-0-<uuid>` şeklinde uygulama UUID'sinden üretiyor; `portfolio` gibi sabit bir router adı hiç oluşmuyor. Kuralı olmayan bir isme yazılan `middlewares` etiketi Traefik tarafından sessizce yok sayılıyor (`coollabsio/coolify#9886`), bu yüzden HSTS/compress etiketleri Custom Labels alanındaki gerçek `<uuid>`'den kopyalanarak eklenmeli, uydurulmamalı. Bu da henüz panelde uygulanmadı.
 
-**Cloudflare (kod değil, panel checklist, `docs/deploy/cloudflare-kurulum.md`).** Rate limiting kuralı ücretsiz planın sert sınırlarına göre netleşti: `/api/contact` yoluna **3 istek / 10 saniye**, `Block` aksiyonu 10 saniye (ücretsiz planda periyot/timeout üst sınırı zaten 10 sn, HTTP metoduna göre filtre yok). PR preview'ları (`*.preview.dogancanyildiz.sh`) **DNS-only (gri bulut)** kalıyor çünkü ücretsiz planda wildcard DNS kaydı proxy'lenemiyor; bu yüzden yalnızca origin firewall'unda allowlist'e alınmış admin IP'sinden, TLS'siz `http` üzerinden erişilebiliyor. Panel adımları (DNS kayıtları, Redirect Rules, rate limiting kuralı, Bot Fight Mode) henüz Cloudflare'da uygulanmadı, doküman bir checklist.
+**Cloudflare (kod değil, panel checklist, `docs/deploy/cloudflare-kurulum.md`).** Rate limiting kuralı ücretsiz planın sert sınırlarına göre netleşti: `/api/contact` yoluna **3 istek / 10 saniye**, `Block` aksiyonu 10 saniye (ücretsiz planda periyot/timeout üst sınırı zaten 10 sn, HTTP metoduna göre filtre yok). PR preview'ları (`*.preview.dogancanyildiz.com`) **DNS-only (gri bulut)** kalıyor çünkü ücretsiz planda wildcard DNS kaydı proxy'lenemiyor; bu yüzden yalnızca origin firewall'unda allowlist'e alınmış admin IP'sinden, TLS'siz `http` üzerinden erişilebiliyor. Panel adımları (DNS kayıtları, Redirect Rules, rate limiting kuralı, Bot Fight Mode) henüz Cloudflare'da uygulanmadı, doküman bir checklist.
 
-**`FROM_EMAIL`**: `.env.example`'da `contact@dogancanyildiz.sh` olarak set, alıcı (`CONTACT_EMAIL`) ise `me@dogancanyildiz.com`: kararda tarif edilen ayrım (gönderen yeni domain, alıcı eski) aynen uygulandı.
+**`FROM_EMAIL`**: `.env.example`'da `contact@dogancanyildiz.com` olarak set, alıcı (`CONTACT_EMAIL`) de `me@dogancanyildiz.com`. **Karar değişikliği (2026-08-27):** ana domain .com olduğu için gönderen ve alıcı artık aynı domain'de; kararda tarif edilen eski ayrım (gönderen yeni .sh domaini, alıcı eski .com) sahibinin son kararıyla geçersiz kaldı.
 
 **Panel adımları henüz uygulanmadı.** Coolify GitHub App kurulumu, Preview Deployments, health check bağlama, rolling update doğrulaması, DNS/Cloudflare kayıtları, origin kilidi (yukarıdaki DOCKER-USER): hepsi `docs/plans/handoffs/faz-1-manual-checklist.md`'de sahibinin manuel listesi olarak duruyor, kod tarafı (Dockerfile/CI/compose/docs) tamamlandı ama sunucuda/Coolify panelinde/Cloudflare panelinde henüz koşulmadı.
 
@@ -234,10 +236,121 @@ Bu setin merkezinde tek bir zorunlu koşul var: PR önizlemesi. Coolify'da bu ö
 ## Uygulama notları
 
 - Dosya sırası önemli: önce `next.config.ts`'e `output: "standalone"` eklenir (Faz 0), sonra Dockerfile/.dockerignore/GitHub Actions eklenir (Faz 1). Tersi sırayla Dockerfile ilk denemede başarısız olur.
-- `.github/workflows/ci.yml` yalnızca PR'larda çalışır (`on: pull_request`), main push'unda tekrar koşmaz; Coolify'ın kendi build'i main push'unu zaten kapsıyor.
+- `.github/workflows/ci.yml` 2026-08-27'den beri `dev` ve `main` için hem `pull_request` hem `push` olaylarında koşuyor (bkz. aşağıdaki "Dallanma ve sürüm akışı"); yukarıdaki 5. karardaki "yalnızca PR kapısı" başlığı o tarihten öncesini anlatıyor. Coolify'ın kendi build'i bundan bağımsız çalışmayı sürdürüyor.
 - Health check route'u (`src/app/api/health/route.ts`) Faz 0'da, Dockerfile'dan önce eklenmeli ki Coolify'da health check ayarı Faz 1'de doğrudan bağlanabilsin.
 - Traefik label'larını eklemeden önce Coolify'da "Readonly labels" kapatılmalı, aksi halde elle eklenen middleware'ler UI tarafından ezilir.
 - Detaylı faz sıralaması için bkz. [10-yol-haritasi.md](10-yol-haritasi.md) (Faz 0: Güvenlik ve hijyen, Faz 1: Deploy hattı).
+
+## Dallanma ve sürüm akışı (2026-08-27)
+
+Sahibi 2026-08-27'de ana domaini `dogancanyildiz.com` olarak sabitledi ve
+dallanmayı üç kademeye ayırdı. `dogancanyildiz.sh` yalnızca 301 ile .com'a
+yönlenen ikincil domain olarak duruyor.
+
+### Dal hiyerarşisi
+
+```
+feature/*  --PR-->  dev  --PR-->  main  --push-->  release.yml
+```
+
+- **feature/\***: tek bir iş için açılır, tabanı `dev`'dir.
+- **dev**: entegrasyon dalı. Bütün feature PR'ları buraya iner, CI burada da
+  zorunlu koşar.
+- **main**: yayınlanan durum. Yalnızca `dev`'den gelen PR ile ilerler.
+- `main`'e her merge `release.yml`'i tetikler: tag, GitHub Release ve `dev`'e
+  geri dönen sürüm senkron PR'ı.
+
+`.github/workflows/ci.yml` artık hem `dev` hem `main` için `pull_request` ve
+`push` olaylarında koşuyor; iki job adı (`lint, typecheck, test, build` ve
+`hadolint and image build`) branch protection'a bağlandığı için sabit
+tutulmalı, yeniden adlandırmak korumayı sessizce boşa düşürür.
+
+### release.yml ne yapıyor
+
+`.github/workflows/release.yml`, `main`'e push ve `workflow_dispatch` ile
+çalışır. `workflow_dispatch` isteğe bağlı bir `version` girdisi alır; 1.0.0
+gibi bir sürümü sahibi bu girdiyle elle keser.
+
+1. `actions/checkout@v7` ile `fetch-depth: 0`, tüm geçmiş ve tag'ler alınır.
+2. `actions/setup-node@v7`, `.nvmrc` (Node 24).
+3. `scripts/release-version.mjs` son `v*` tag'ini bulur (yoksa taban
+   `package.json`'daki 0.1.0), o tag'den beri gelen commit'leri Conventional
+   Commits'e göre sınıflandırır ve sonraki sürümü JSON olarak yazar.
+4. Sürüm çıkıyorsa annotated tag `main`'in HEAD'ine atılır ve push edilir.
+5. `gh release create vX.Y.Z --title vX.Y.Z --notes-file` ile Release yayınlanır;
+   notlar Features / Fixes / Other başlıkları altında kısa sha ve commit mesajı
+   ile gruplanır, sonunda karşılaştırma linki durur.
+6. `package.json`, `package-lock.json` ve `CHANGELOG.md` güncellenir, ama
+   `main`'e doğrudan push edilmez: `release/sync-vX.Y.Z` dalından `dev`'e
+   `chore(release): sync version vX.Y.Z` başlıklı bir PR açılır. Böylece `main`
+   korumalı kalır, sürüm bilgisi bir sonraki `dev -> main` PR'ı ile geri döner.
+
+Git kimliği `github-actions[bot]`. Notlarda ve commit'lerde yapay zeka atfı yok.
+
+**Sürüm bumpu nasıl karar veriliyor:**
+
+| Commit tipi | Etki |
+|---|---|
+| `feat` | minor |
+| `fix`, `perf`, `refactor` | patch |
+| `BREAKING CHANGE:` gövdede veya `!:` konu satırında | major |
+| `chore`, `docs`, `ci`, `test`, `style`, `build` | sürüm yok |
+
+Aralıkta yalnızca sürümsüz tipler varsa iş akışı tag atmadan temiz çıkar.
+Yerelde denemek için `npm run release:check` (dry run, hiçbir şey yazmaz).
+
+### İki bilinen kısıt
+
+- **GITHUB_TOKEN ile açılan PR başka workflow tetiklemez.** Sürüm senkron PR'ı
+  bu yüzden ci check'leri olmadan açılır. `dev` korumalı olduğu için merge
+  edilemez; PR bir kez kapatılıp yeniden açıldığında check'ler koşar. Kalıcı
+  çözüm bir makine hesabı PAT'i veya GitHub App token'ı olur, şimdilik gerekli
+  değil.
+- **Actions'ın PR açma izni ayrı bir ayar.** Settings > Actions > General >
+  "Allow GitHub Actions to create and approve pull requests" kapalıysa senkron
+  PR adımı 403 ile düşer.
+
+### Coolify tarafı
+
+- **Production**: `main` dalını izler, her merge sonrası otomatik deploy.
+  Domain `dogancanyildiz.com`.
+- **Preview Deployments**: PR başına ayrı URL, GitHub App üzerinden.
+- **Staging (opsiyonel, önerilir)**: `dev` dalını izleyen ikinci bir Coolify
+  uygulaması, `dev.dogancanyildiz.com` alt alan adıyla. Bu uygulamada
+  `NEXT_PUBLIC_SITE_URL` staging alan adına ayarlanır ve Cloudflare tarafında
+  alt alan adı arama motorlarına kapatılır (`X-Robots-Tag: noindex` ya da
+  Cloudflare Transform Rule). Şimdilik zorunlu değil, PR preview'ları çoğu
+  doğrulama için yetiyor; `dev` uzun süre `main`'in önünde kalmaya başlarsa
+  kurulmalı.
+
+### Branch protection kuralları
+
+Ana oturum `gh api` ile uygular, iki dalda da aynı iskelet:
+
+| Ayar | `main` | `dev` |
+|---|---|---|
+| Pull request zorunlu | evet | evet |
+| Zorunlu status check: `lint, typecheck, test, build` | evet | evet |
+| Zorunlu status check: `hadolint and image build` | evet | evet |
+| Check'ler güncel dal üzerinde koşsun (strict) | evet | evet |
+| Force push | kapalı | kapalı |
+| Dal silme | kapalı | kapalı |
+| Yönetici muafiyeti | kapalı tutulması önerilir | açık kalabilir |
+
+`release.yml`'in tag push edebilmesi için tag koruması eklenmemeli, ya da
+eklenirse `github-actions[bot]` muaf tutulmalı.
+
+### Sürüm politikası
+
+- **0.x**: yayın öncesi. İlk otomatik sürüm 0.2.0 olacak, çünkü `package.json`
+  0.1.0'da duruyor ve `dev`'de biriken commit'ler arasında `feat` var.
+- **1.0.0**: launch sürümü. Otomatik bumpla değil, sahibinin `workflow_dispatch`
+  üzerinden `version: 1.0.0` girmesiyle kesilir.
+- **1.0.0 sonrası**: tamamen Conventional Commits'e göre, yukarıdaki tabloyla.
+
+`CHANGELOG.md` Keep a Changelog biçiminde tutuluyor; 0.1.0 girdisi Faz 0 ile 4
+arasını (PR #2 ile #6) özetleyen taban girdisidir, sonraki her sürümü
+`scripts/release-version.mjs --write-changelog` dosyanın başına ekler.
 
 ## İlgili dokümanlar
 
