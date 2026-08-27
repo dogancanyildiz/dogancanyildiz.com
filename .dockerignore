@@ -1,0 +1,43 @@
+# Dependencies and build output, always reinstalled or regenerated in the image
+node_modules
+.next
+out
+coverage
+
+# Version control and CI metadata
+.git
+.gitignore
+.github
+
+# Local only. .local holds the real portfolio content draft and the CV PDF,
+# .nodeterm holds canvas state, .superpowers holds agent scratch files.
+# None of them belongs in an image layer.
+.local
+.nodeterm
+.superpowers
+.claude
+.vscode
+.idea
+
+# Secrets. Runtime values are injected by Coolify, never baked into the image.
+.env
+.env.*
+
+# Docs and root level markdown. This pattern is root only on purpose:
+# a recursive **/*.md would also drop content/**/*.md, which Velite needs
+# in Faz 4.
+docs
+*.md
+!README.md
+LICENSE
+
+# Local verification helper, Coolify builds straight from the Dockerfile
+docker-compose.yml
+
+# TypeScript incremental build cache
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# OS noise
+.DS_Store
+Thumbs.db

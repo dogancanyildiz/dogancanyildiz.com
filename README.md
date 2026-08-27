@@ -49,16 +49,17 @@ missing, because a silent fallback would put a wrong host into `robots.txt` and
 ## Environment variables
 
 Every variable is documented in `.env.example`. The split between Coolify build
-and runtime variables is not cosmetic, getting it wrong fails silently in both
-directions.
+and runtime variables is not cosmetic. Marking the build variable as runtime
+only fails the build outright, and marking a secret as a build variable leaks it
+into image layers and build logs.
 
-| Variable                 | Coolify layer | Required          | Notes                                                                                                                                                                        |
-| ------------------------ | ------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`   | Build         | Yes               | Inlined into the client bundle by `next build`. Marking it runtime leaves it undefined in production.                                                                        |
-| `RESEND_API_KEY`         | Runtime       | Yes in production | Build variables can leak into image layers and build logs.                                                                                                                   |
-| `CONTACT_EMAIL`          | Runtime       | Yes in production | Inbox that receives form messages.                                                                                                                                           |
-| `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                                                                                                    |
-| `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after the origin is reachable from Cloudflare alone and Traefik trusts the Cloudflare ranges. `trustedIPs` by itself does not protect `CF-Connecting-IP`. |
+| Variable                 | Coolify layer | Required          | Notes                                                                                                                                                                                                                    |
+| ------------------------ | ------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_SITE_URL`   | Build         | Yes               | Inlined into the client bundle by `next build`. The Dockerfile `ARG` has no default, so a build without this argument fails in `resolveSiteUrl` while prerendering `/robots.txt` instead of shipping an undefined value. |
+| `RESEND_API_KEY`         | Runtime       | Yes in production | Build variables can leak into image layers and build logs.                                                                                                                                                               |
+| `CONTACT_EMAIL`          | Runtime       | Yes in production | Inbox that receives form messages.                                                                                                                                                                                       |
+| `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                                                                                                                                                |
+| `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after the origin is reachable from Cloudflare alone and Traefik trusts the Cloudflare ranges. `trustedIPs` by itself does not protect `CF-Connecting-IP`.                                             |
 
 ## Security posture
 
@@ -89,8 +90,9 @@ The application is deployed by Coolify from this git repository:
    from `dogancanyildiz.com` to `dogancanyildiz.sh` is a single hop Cloudflare
    Redirect Rule that keeps the path.
 
-The `Dockerfile`, `.dockerignore` and the GitHub Actions gate are added in phase
-1 of the modernization plan, see `docs/10-yol-haritasi.md`.
+The `Dockerfile`, `.dockerignore` and the GitHub Actions gate live in this
+repository, see the Deploy section below for the local verification commands and
+for the panel side checklists.
 
 ## Repository layout
 
@@ -107,3 +109,32 @@ docs/plans     Executable implementation plans, one per phase
 Architecture decisions live in `docs/`. Start with
 `docs/00-ozet-ve-karar.md` for the summary and `docs/10-yol-haritasi.md` for the
 phase order.
+
+## Deploy
+
+Production runs on a self hosted Coolify instance behind Cloudflare and
+Traefik. The image is built on the server from the Dockerfile in this repo,
+GitHub Actions only gates pull requests and does not push any image.
+
+Local verification of the production image:
+
+```bash
+docker compose up --build -d
+curl -s http://127.0.0.1:3000/api/health   # {"status":"ok", ...}
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3000/   # 200
+docker compose down
+```
+
+Lint the Dockerfile the same way CI does:
+
+```bash
+docker run --rm -i hadolint/hadolint:v2.15.1-alpine hadolint --failure-threshold warning - < Dockerfile
+```
+
+The parts that live in a control panel rather than in this repo are written
+down as step by step checklists:
+
+- `docs/deploy/coolify-kurulum.md` - GitHub App, build pack, env layers, health check
+- `docs/deploy/cloudflare-kurulum.md` - DNS, TLS, redirect, cache, rate limiting
+- `docs/deploy/traefik-ve-origin.md` - trusted proxy headers, HSTS, origin lockdown
+- `docs/deploy/resend-domain.md` - SPF, DKIM, DMARC for the sender domain
