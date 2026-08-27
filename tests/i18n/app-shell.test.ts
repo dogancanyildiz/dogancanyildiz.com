@@ -12,6 +12,7 @@ const LANG_ROUTES = [
   "src/app/[lang]/about/page.tsx",
   "src/app/[lang]/projects/page.tsx",
   "src/app/[lang]/projects/[slug]/page.tsx",
+  "src/app/[lang]/blog/page.tsx",
   "src/app/[lang]/contact/page.tsx",
   "src/app/[lang]/opengraph-image.tsx",
 ];
@@ -236,6 +237,7 @@ const LINK_USING_CONTENT_COMPONENTS = [
   "src/components/sections/hero.tsx",
   "src/components/sections/project-card.tsx",
   "src/components/sections/about-content.tsx",
+  "src/components/sections/post-list.tsx",
 ];
 
 const CONTENT_COMPONENTS = [

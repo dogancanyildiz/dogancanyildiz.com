@@ -34,6 +34,8 @@ describe("scripts/assert-static-routes.mjs", () => {
       "/tr/about",
       "/en/projects",
       "/tr/projects",
+      "/en/blog",
+      "/tr/blog",
       "/en/contact",
       "/tr/contact",
     ]) {

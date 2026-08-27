@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  getPost,
   getPostLocales,
   getPosts,
   getProject,
   getProjectLocales,
   getProjectSlugs,
   getProjects,
+  toPostCardData,
   toProjectCardData,
 } from "@/lib/content";
 
@@ -52,12 +54,30 @@ describe("project content layer", () => {
 });
 
 describe("post content layer", () => {
-  it("returns no posts yet for either locale", () => {
+  it("has exactly one turkish post and no english posts yet", () => {
+    const trPosts = getPosts("tr");
+    expect(trPosts).toHaveLength(1);
+    expect(trPosts[0]?.slug).toBe("self-hosting-with-coolify");
     expect(getPosts("en")).toEqual([]);
-    expect(getPosts("tr")).toEqual([]);
+  });
+
+  it("lists tr as the only locale for the first post", () => {
+    expect(getPostLocales("self-hosting-with-coolify")).toEqual(["tr"]);
   });
 
   it("lists no locales for a slug that does not exist", () => {
     expect(getPostLocales("nothing")).toEqual([]);
+  });
+
+  it("finds no english translation of the turkish only post", () => {
+    expect(getPost("en", "self-hosting-with-coolify")).toBeUndefined();
+  });
+
+  it("builds a locale neutral href and reading time in the card dto", () => {
+    const post = getPost("tr", "self-hosting-with-coolify")!;
+    const card = toPostCardData(post);
+    expect(card.href).toBe("/blog/self-hosting-with-coolify");
+    expect(card.readingTime).toBeGreaterThanOrEqual(1);
+    expect(card.date.startsWith("2026-08-20")).toBe(true);
   });
 });

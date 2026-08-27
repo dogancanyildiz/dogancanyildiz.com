@@ -1,0 +1,26 @@
+---
+title: Kendi sunucumda Coolify ve Traefik ile yayına almak
+slug: self-hosting-with-coolify
+date: 2026-08-20
+summary: Bu siteyi Vercel yerine kendi sunucumda çalıştırıyorum. Coolify, Traefik ve Docker ile kurduğum hattın nasıl çalıştığını ve nerede tökezlediğimi anlatıyorum.
+tags:
+  - devops
+  - coolify
+  - docker
+---
+
+## Neden kendi sunucum
+
+Bu siteyi yönetilen bir platformda barındırmak on dakikalık bir iş olurdu. Kendi sunucumda çalıştırmak ise sitenin kendisini bir iddianın kanıtına çeviriyor: DevOps yaptığını söyleyen bir portfolyonun, üstünde durduğu altyapıyı da göstermesi gerektiğini düşünüyorum.
+
+## Hat nasıl çalışıyor
+
+Uygulama çok aşamalı bir Dockerfile ile derleniyor; `deps`, `builder` ve `runner` aşamaları ayrı, çalışan konteyner root olmayan bir kullanıcıya düşüyor ve yalnızca `.next/standalone`, `.next/static` ve `public` klasörlerini taşıyor. Coolify, GitHub App entegrasyonu üzerinden depoyu izliyor: main dalına giden her commit otomatik bir yayın tetikliyor, açılan her pull request kendi önizleme adresini alıyor. Önde Traefik duruyor, TLS sonlandırma ve yönlendirme orada.
+
+## Nerede tökezledim
+
+İlk tökezleme sağlık kontrolüydü. Node tabanlı konteynerlerde Coolify'ın sağlık kontrolünün bağlantı reddi vermesi bilinen bir sorun, bu yüzden kontrolü production'a bağlamadan önce staging'de doğrulamak gerekiyor. İkincisi ortam değişkenlerinin katmanıydı: `NEXT_PUBLIC_` ile başlayan değerler derleme sırasında paket içine gömülüyor, yalnızca çalışma zamanı olarak işaretlenirse üretimde sessizce tanımsız kalıyorlar. Bunun tersi daha kötü: bir API anahtarını derleme değişkeni yapmak onu imaj katmanlarına ve derleme günlüklerine sızdırabiliyor.
+
+## Ne kazandım
+
+Yayın adımının tamamı bir komuta indi ve altyapının her parçası depoda duruyor. Karşılığında ödediğim bedel bakım: sunucu, sertifika ve güncellemeler artık benim işim. Kişisel bir site için bu değişim bana değdi, çünkü öğrenmek istediğim şey tam olarak buydu.

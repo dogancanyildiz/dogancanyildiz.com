@@ -4,6 +4,7 @@
     "home": "Home",
     "about": "About",
     "projects": "Projects",
+    "blog": "Blog",
     "contact": "Contact",
     "languageLabel": "Language",
     "menu": "Menu",
@@ -101,6 +102,13 @@
     "viewLive": "Live site",
     "viewSource": "Source",
     "back": "All projects"
+  },
+  "blog": {
+    "title": "Writing",
+    "description": "Notes on full-stack development, self-hosted infrastructure and web security. Posts are written in Turkish first; some of them are translated into English.",
+    "readingTime": "{minutes} min read",
+    "back": "All posts",
+    "empty": "No English posts yet. The Turkish edition of this blog has more."
   },
   "contact": {
     "title": "Contact",

@@ -71,6 +71,11 @@ const PAGES = [
     load: () => import("@/app/[lang]/projects/page"),
   },
   {
+    name: "blog",
+    path: "/blog",
+    load: () => import("@/app/[lang]/blog/page"),
+  },
+  {
     name: "contact",
     path: "/contact",
     load: () => import("@/app/[lang]/contact/page"),

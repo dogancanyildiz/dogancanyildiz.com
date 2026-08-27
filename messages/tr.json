@@ -4,6 +4,7 @@
     "home": "Ana Sayfa",
     "about": "Hakkımda",
     "projects": "Projeler",
+    "blog": "Blog",
     "contact": "İletişim",
     "languageLabel": "Dil",
     "menu": "Menü",
@@ -101,6 +102,13 @@
     "viewLive": "Canlı site",
     "viewSource": "Kaynak kod",
     "back": "Tüm projeler"
+  },
+  "blog": {
+    "title": "Yazılar",
+    "description": "Full-stack geliştirme, kendi sunucusunda barındırma ve web güvenliği üzerine notlar. Yazılar önce Türkçe yazılıyor, bir kısmı İngilizceye çevriliyor.",
+    "readingTime": "{minutes} dakikalık okuma",
+    "back": "Tüm yazılar",
+    "empty": "Henüz yazı yok."
   },
   "contact": {
     "title": "İletişim",
