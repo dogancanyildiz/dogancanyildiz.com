@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
 import { getClientIp } from "@/lib/client-ip";
 import { MAX_BODY_BYTES, validateBody } from "@/lib/contact-validation";
@@ -10,14 +11,21 @@ import {
   readBodyWithLimit,
 } from "@/lib/request-body";
 import { resend } from "@/lib/resend";
+import { routing, type AppLocale } from "@/i18n/routing";
 
 // Client facing copy stays generic on purpose. Provider details, env problems
 // and honeypot hits are written to the server log only.
-const INVALID_MESSAGE =
-  "Invalid request. A name, a valid email address and a message are required.";
 const TOO_LARGE_MESSAGE = "Request body is too large.";
-const TOO_MANY_MESSAGE = "Too many requests. Please try again later.";
-const GENERIC_MESSAGE = "Message could not be sent. Please try again later.";
+
+/**
+ * Route Handlers do not receive the [lang] root param, so the client sends the
+ * locale in the request body. Anything unexpected falls back to the default.
+ */
+function resolveLocale(value: unknown): AppLocale {
+  return routing.locales.includes(value as AppLocale)
+    ? (value as AppLocale)
+    : routing.defaultLocale;
+}
 
 export async function POST(request: Request) {
   // Content-Length is advisory (a chunked request carries none), so this is
@@ -32,8 +40,12 @@ export async function POST(request: Request) {
   });
   const limit = contactRateLimiter.check(ip);
   if (!limit.allowed) {
+    const t = await getTranslations({
+      locale: routing.defaultLocale,
+      namespace: "api",
+    });
     return NextResponse.json(
-      { error: TOO_MANY_MESSAGE },
+      { error: t("tooManyRequests") },
       {
         status: 429,
         headers: { "Retry-After": String(limit.retryAfterSeconds) },
@@ -50,20 +62,38 @@ export async function POST(request: Request) {
     }
     // A body that cannot be read (client aborted, broken transfer) is a bad
     // request, not a server fault, so it must not surface as a 500.
-    return NextResponse.json({ error: INVALID_MESSAGE }, { status: 400 });
+    const t = await getTranslations({
+      locale: routing.defaultLocale,
+      namespace: "api",
+    });
+    return NextResponse.json(
+      { error: t("invalidRequest") },
+      { status: 400 }
+    );
   }
 
-  const parsed = validateBody(parseJsonBody(rawBody));
+  const body = parseJsonBody(rawBody);
+  const locale = resolveLocale(
+    body && typeof body === "object"
+      ? (body as Record<string, unknown>).locale
+      : undefined
+  );
+  const t = await getTranslations({ locale, namespace: "api" });
+
+  const parsed = validateBody(body);
   if (!parsed.ok) {
     if (parsed.reason === "honeypot") {
       console.warn("[contact] honeypot triggered");
     }
-    return NextResponse.json({ error: INVALID_MESSAGE }, { status: 400 });
+    return NextResponse.json({ error: t("invalidRequest") }, { status: 400 });
   }
 
   if (!resend) {
     console.error("[contact] RESEND_API_KEY is not configured");
-    return NextResponse.json({ error: GENERIC_MESSAGE }, { status: 503 });
+    return NextResponse.json(
+      { error: t("emailNotConfigured") },
+      { status: 503 }
+    );
   }
 
   let to: string;
@@ -73,7 +103,10 @@ export async function POST(request: Request) {
     from = fromEmail();
   } catch (configError) {
     console.error("[contact] email configuration error", configError);
-    return NextResponse.json({ error: GENERIC_MESSAGE }, { status: 503 });
+    return NextResponse.json(
+      { error: t("emailNotConfigured") },
+      { status: 503 }
+    );
   }
 
   const subject =
@@ -88,7 +121,7 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error("[contact] resend rejected the message", error);
-    return NextResponse.json({ error: GENERIC_MESSAGE }, { status: 500 });
+    return NextResponse.json({ error: t("sendFailed") }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
