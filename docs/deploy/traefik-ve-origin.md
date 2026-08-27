@@ -5,6 +5,7 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 7 ve 8b/8e, `docs/09-guve
 ## 0. Ön koşul: readonly labels kapatılır
 
 - [ ] Coolify -> uygulama -> Advanced -> "Readonly labels" **kapatılır**. Aksi halde elle eklenen middleware etiketleri UI tarafından ezilir.
+- [ ] Kapatıldığı anda Custom Labels alanındaki üretilmiş etiketlerin bakımı sahibe geçer. Bu etiketler router `rule`'unu, entrypoint'ini ve TLS ayarını taşıyor: hiçbiri silinmez, yalnızca bölüm 4'teki `middlewares` satırına ekleme yapılır. Alanın kapatmadan önceki halini bir yere kopyalamak, yanlış bir düzenlemeden dönmenin en hızlı yolu.
 
 ## 1. Cloudflare IP aralıkları (2026-08-27)
 
@@ -142,10 +143,16 @@ http:
 
 ## 4. Uygulamaya middleware etiketleri
 
-Coolify -> uygulama -> Advanced -> Custom Labels:
+Coolify router adlarını uygulamanın UUID'sinden üretir: `http-0-<uuid>` (entrypoint 80) ve `https-0-<uuid>` (entrypoint 443); ek domain tanımlanırsa sıra numarası artar ve servis adı eklenir (`https-1-<uuid>-<service>`). `portfolio` adında bir router hiçbir zaman oluşmaz. Kuralı olmayan bir router adına yazılan `middlewares` etiketini Traefik sessizce yok sayar, yani HSTS ve compress hiç uygulanmaz. Kaynak: Coolify "Custom middlewares" dokümanı ve `coollabsio/coolify#9886`.
+
+- [ ] Coolify -> uygulama -> Advanced -> Custom Labels alanını aç. Bölüm 0'da readonly labels kapatıldığı için bu alandaki üretilmiş etiketler artık elle yönetiliyor: **var olan satırlar silinmez**. Alan tek bir middleware satırına indirilirse router `rule`, `entrypoints` ve TLS etiketleri de düşer ve uygulama tamamen erişilemez hale gelir.
+- [ ] `<uuid>` uydurulmaz: alandaki mevcut `traefik.http.routers.https-0-<uuid>.rule=Host(...)` satırından kopyalanır.
+- [ ] Alandaki `traefik.http.routers.https-0-<uuid>.middlewares=...` satırını bul ve mevcut değeri koruyarak sonuna `,security-headers@file,compress@file` ekle. Böyle bir satır yoksa aynı router adıyla yeni bir satır yaz.
+- [ ] Aynı ekleme `http-0-<uuid>` router'ı için de yapılır, yoksa 80'den gelen istekler bu middleware'leri görmez.
 
 ```
-traefik.http.routers.portfolio.middlewares=security-headers@file,compress@file
+traefik.http.routers.https-0-<uuid>.middlewares=<mevcut değer>,security-headers@file,compress@file
+traefik.http.routers.http-0-<uuid>.middlewares=<mevcut değer>,security-headers@file,compress@file
 ```
 
 - [ ] `@file` eki dinamik dosyadan gelen middleware'lere referans verir.
@@ -155,11 +162,15 @@ traefik.http.routers.portfolio.middlewares=security-headers@file,compress@file
 Doğrulama:
 
 ```bash
+# Etiketin gerçekten var olan router'a bağlandığını gör
+docker inspect "$(docker ps --format '{{.Names}}' | grep -i portfolio | head -1)" \
+  --format '{{json .Config.Labels}}' | tr ',' '\n' | grep -i middlewares
+
 curl -sI https://dogancanyildiz.sh/ | grep -i -E '^(strict-transport-security|content-encoding|x-powered-by)'
 curl -sI -H 'accept-encoding: br' https://dogancanyildiz.sh/ | grep -i '^content-encoding'
 ```
 
-Beklenen: `strict-transport-security: max-age=31536000; includeSubDomains` var, `x-powered-by` hiç yok, `content-encoding` `br` veya `zstd`.
+Beklenen: middlewares etiketi `https-0-<uuid>` ve `http-0-<uuid>` router adlarını taşıyor; `strict-transport-security: max-age=31536000; includeSubDomains` var, `x-powered-by` hiç yok, `content-encoding` `br` veya `zstd`. HSTS başlığı yoksa ilk şüpheli router adıdır: yanlış ada yazılan etiket hata vermez, sessizce hiçbir şey yapmaz.
 
 ## 5. Origin'i Cloudflare IP'lerine kısıtlamak
 
@@ -201,10 +212,10 @@ Beklenen: `curl: (28) Connection timed out` veya `curl: (7) Failed to connect`. 
 
 ### 5b. Traefik ipAllowList (alternatif)
 
-ufw kullanılamıyorsa (ör. sağlayıcı tarafında yönetilen bir firewall varsa) bölüm 3'teki `cloudflare-only` middleware'i uygulamanın etiketlerine eklenir:
+ufw kullanılamıyorsa (ör. sağlayıcı tarafında yönetilen bir firewall varsa) bölüm 3'teki `cloudflare-only` middleware'i uygulamanın etiketlerine eklenir. Router adı yine bölüm 4'teki kurala uyar, mevcut satırın değeri korunur:
 
 ```
-traefik.http.routers.portfolio.middlewares=cloudflare-only@file,security-headers@file,compress@file
+traefik.http.routers.https-0-<uuid>.middlewares=<mevcut değer>,cloudflare-only@file,security-headers@file,compress@file
 ```
 
 - [ ] Bu yol seçilirse preview router'ına `cloudflare-only` **eklenmez**, aksi halde DNS-only preview'lar hiç açılmaz.

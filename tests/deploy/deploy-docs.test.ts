@@ -51,4 +51,32 @@ describe("deploy checklists match the shipped behaviour", () => {
       expect(doc).toMatch(/timestamp/);
     });
   });
+
+  describe("Traefik middleware labels", () => {
+    // Coolify derives router names from the application uuid (http-0-<uuid>,
+    // https-0-<uuid>). A label written on a router that has no rule is
+    // silently ignored by Traefik, which would ship the site without HSTS.
+    const TRAEFIK = "docs/deploy/traefik-ve-origin.md";
+    const CHECKLIST = "docs/plans/handoffs/faz-1-manual-checklist.md";
+
+    it.each([TRAEFIK, CHECKLIST])(
+      "%s never targets a router named portfolio",
+      (path) => {
+        expect(readDoc(path)).not.toMatch(/routers\.portfolio/);
+      }
+    );
+
+    it.each([TRAEFIK, CHECKLIST])(
+      "%s uses the generated router name and keeps the existing value",
+      (path) => {
+        const doc = readDoc(path);
+        expect(doc).toMatch(/routers\.https-0-<uuid>\.middlewares/);
+        expect(doc).toMatch(/security-headers@file,compress@file/);
+      }
+    );
+
+    it("the Traefik checklist warns against deleting generated labels", () => {
+      expect(readDoc(TRAEFIK)).toMatch(/silinmez/);
+    });
+  });
 });
