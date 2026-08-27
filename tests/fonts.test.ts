@@ -14,8 +14,9 @@ const VENDORED_WOFF2 = [
 ];
 
 const VENDORED_OG_WOFF = [
-  "public/fonts/og/instrument-serif-latin.woff",
-  "public/fonts/og/instrument-serif-latin-ext.woff",
+  "public/fonts/og/geist-latin.woff",
+  "public/fonts/og/geist-latin-ext.woff",
+  "public/fonts/og/geist-mono-latin.woff",
 ];
 
 describe("vendored fonts", () => {

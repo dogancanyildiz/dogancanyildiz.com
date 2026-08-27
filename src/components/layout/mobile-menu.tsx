@@ -18,7 +18,7 @@ export function MobileMenu() {
         <Button
           variant="ghost"
           size="icon-sm"
-          className="tap-target border border-border bg-background md:hidden"
+          className="tap-target md:hidden"
           aria-label={t("nav.openMenu")}
         >
           <Menu className="size-4" />
@@ -28,7 +28,7 @@ export function MobileMenu() {
         <Dialog.Overlay className="fixed inset-0 z-50 bg-background/85 backdrop-blur-sm" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-x-3 top-3 z-50 rounded-3xl border border-border bg-card p-5 outline-none sm:inset-x-4"
+          className="fixed inset-x-0 top-14 z-50 border-b border-border bg-background p-4 outline-none sm:inset-x-4 sm:rounded-none"
         >
           <div className="flex items-center justify-between gap-4">
             <Dialog.Title className="font-mono text-[0.7rem] font-medium uppercase tracking-[0.2em] text-muted-foreground">
@@ -38,7 +38,7 @@ export function MobileMenu() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="tap-target border border-border bg-background"
+                className="tap-target"
                 aria-label={t("nav.closeMenu")}
               >
                 <X className="size-4" />

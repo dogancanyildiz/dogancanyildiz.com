@@ -20,6 +20,7 @@ export interface ProjectCardData {
   role: string;
   stack: string[];
   year: number;
+  outcome: string;
   href: string;
   cover: CoverImage | null;
 }
@@ -145,6 +146,7 @@ export function toProjectCardData(project: Project): ProjectCardData {
     role: project.role,
     stack: project.stack,
     year: project.year,
+    outcome: project.outcome,
     href: `/projects/${project.slug}`,
     cover: toCover(project.cover),
   };

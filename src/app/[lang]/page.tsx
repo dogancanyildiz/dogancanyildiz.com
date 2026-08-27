@@ -6,12 +6,16 @@ import { routing } from "@/i18n/routing";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo/alternates";
 import { Hero } from "@/components/sections/hero";
 import { PostList } from "@/components/sections/post-list";
-import { ProjectGrid } from "@/components/sections/project-grid";
+import { ProjectList } from "@/components/sections/project-list";
 import { SkillsStrip } from "@/components/sections/skills-strip";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
+import { PageSection } from "@/components/layout/page-section";
+import { PageHeader } from "@/components/ui/page-header";
 import { Link } from "@/i18n/navigation";
 import { skills } from "@/content/profile";
 import { hasCv } from "@/lib/cv";
+import { featuredSkillGroups } from "@/lib/skills";
+import { profileImagePath } from "@/lib/profile-image";
 import {
   getFeaturedProjects,
   getPosts,
@@ -56,51 +60,50 @@ export default async function HomePage({
   if (!hasLocale(routing.locales, lang)) notFound();
   setRequestLocale(lang);
 
-  const tHome = await getTranslations({ locale: lang, namespace: "home" });
-  const featured = getFeaturedProjects(lang as Locale).map(toProjectCardData);
-  const latestPosts = getPosts(lang as Locale)
-    .slice(0, 3)
-    .map(toPostCardData);
+  const locale = lang as Locale;
+  const tHome = await getTranslations({ locale, namespace: "home" });
+  const featured = getFeaturedProjects(locale).map(toProjectCardData);
+  const latestPosts = getPosts(locale).slice(0, 3).map(toPostCardData);
 
   return (
     <>
       <PersonJsonLd locale={lang} />
-      <Hero showCv={hasCv()} />
-      <section className="section-space">
-        <div className="page-shell space-y-8">
-          <div className="flex flex-wrap items-baseline justify-between gap-4">
-            <h2 className="text-3xl sm:text-4xl">{tHome("featuredTitle")}</h2>
-            <Link
-              href="/projects"
-              className="text-sm text-primary underline-offset-4 hover:underline"
-            >
-              {tHome("featuredLink")}
-            </Link>
-          </div>
-          <ProjectGrid projects={featured} />
-        </div>
-      </section>
-      {latestPosts.length > 0 ? (
-        <section className="section-space">
-          <div className="page-shell-reading space-y-8">
-            <div className="flex flex-wrap items-baseline justify-between gap-4">
-              <h2 className="text-3xl sm:text-4xl">
-                {tHome("latestPostsTitle")}
-              </h2>
+      <Hero showCv={hasCv()} profileImageSrc={profileImagePath()} />
+      <PageSection innerClassName="space-y-12">
+        <div className="space-y-8">
+          <PageHeader
+            as="h2"
+            title={tHome("featuredTitle")}
+            action={
               <Link
-                href="/blog"
+                href="/projects"
                 className="text-sm text-primary underline-offset-4 hover:underline"
               >
-                {tHome("latestPostsLink")}
+                {tHome("featuredLink")}
               </Link>
-            </div>
+            }
+          />
+          <ProjectList projects={featured} headingLevel="h3" />
+        </div>
+        {latestPosts.length > 0 ? (
+          <div className="space-y-8">
+            <PageHeader
+              as="h2"
+              title={tHome("latestPostsTitle")}
+              action={
+                <Link
+                  href="/blog"
+                  className="text-sm text-primary underline-offset-4 hover:underline"
+                >
+                  {tHome("latestPostsLink")}
+                </Link>
+              }
+            />
             <PostList posts={latestPosts} headingLevel="h3" />
           </div>
-        </section>
-      ) : null}
-      <SkillsStrip
-        groups={skills[lang as Locale].filter((group) => group.featured)}
-      />
+        ) : null}
+        <SkillsStrip groups={featuredSkillGroups(skills[locale])} />
+      </PageSection>
     </>
   );
 }

@@ -120,6 +120,4 @@ export const fontVariables = [
   geistSansExt.variable,
   geistMono.variable,
   geistMonoExt.variable,
-  instrumentSerif.variable,
-  instrumentSerifExt.variable,
 ].join(" ");

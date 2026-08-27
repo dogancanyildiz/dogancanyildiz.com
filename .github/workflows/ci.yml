@@ -35,7 +35,10 @@ jobs:
           # Build time only. The value never has to be a secret, it is inlined
           # into the client bundle anyway.
           NEXT_PUBLIC_SITE_URL: https://dogancanyildiz.com
+          NEXT_PUBLIC_BUILD_SHA: ${{ github.sha }}
+          NEXT_PUBLIC_BUILD_DATE: ${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}
       - run: npm run verify:routes
+      - run: npm run verify:links
 
   docker:
     name: hadolint and image build

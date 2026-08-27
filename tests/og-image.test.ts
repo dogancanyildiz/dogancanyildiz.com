@@ -43,9 +43,9 @@ describe("opengraph image", () => {
     expect(source).not.toContain("#27272a");
   });
 
-  it("loads both Instrument Serif subsets so Turkish glyphs render", () => {
-    expect(source).toContain("instrument-serif-latin.woff");
-    expect(source).toContain("instrument-serif-latin-ext.woff");
+  it("loads both Geist Sans subsets so Turkish glyphs render", () => {
+    expect(source).toContain("geist-latin.woff");
+    expect(source).toContain("geist-latin-ext.woff");
     expect(source).not.toContain(".woff2");
   });
 
@@ -56,29 +56,34 @@ describe("opengraph image", () => {
     // even though the woff file has them. Giving the extended subset a
     // distinct name, and chaining it in the fontFamily fallback list below,
     // is what makes satori actually try both files per character.
-    expect(source).toContain('name: "Instrument Serif Ext"');
-    const nameOccurrences = source.match(/name:\s*"Instrument Serif"/g) ?? [];
+    expect(source).toContain('name: "Geist Sans Ext"');
+    const nameOccurrences = source.match(/name:\s*"Geist Sans"/g) ?? [];
     expect(nameOccurrences).toHaveLength(1);
   });
 
   it("chains both font family names so per-character fallback can reach the ext subset", () => {
-    expect(source).toContain(
-      'fontFamily: "Instrument Serif, Instrument Serif Ext"'
-    );
+    expect(source).toContain('fontFamily: "Geist Sans, Geist Sans Ext"');
   });
 
   it("stays off the edge runtime", () => {
     expect(source).not.toContain('runtime = "edge"');
   });
+
+  it("uses the readable text badge for the DCY mark", () => {
+    expect(source).toContain("BrandMarkText");
+  });
 });
 
 describe("icon", () => {
   const source = read("src/app/icon.tsx");
+  const mark = read("src/lib/brand-mark.tsx");
 
   it("renders the DCY monogram on the new palette", () => {
-    expect(source).toContain("DCY");
-    expect(source).toContain("#0a0c0f");
-    expect(source).toContain("#4fcc8d");
+    expect(source).toContain("BrandMarkImage");
+    expect(mark).toContain("BrandMarkText");
+    expect(mark).toContain(">C<");
+    expect(mark).toContain("#0a0c0f");
+    expect(mark).toContain("#4fcc8d");
     expect(source).not.toContain('background: "black"');
   });
 

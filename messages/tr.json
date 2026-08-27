@@ -19,12 +19,19 @@
     "location": "Konya, Türkiye",
     "tagline": "Web uygulamaları geliştiriyorum, çalıştıkları altyapıyı da kendim işletiyorum.",
     "intro": "Konya'da yaşayan bir full-stack geliştiriciyim. Next.js ve Node.js ile web uygulamaları geliştiriyorum ve bunları kendim yayına alıyorum: Docker, GitHub Actions, Coolify ve Linux sunucular. Geliştirmenin yanında CAPT sertifikasına sahibim, Cisco CCNA hattını ve CyberOps Associate eğitimini tamamladım.",
+    "availableForWork": "Seçili işler için uygunum",
+    "metricYearsLabel": "Yıllık teslim",
+    "metricYearsValue": "5",
+    "metricProjectsLabel": "Case study",
+    "metricProjectsValue": "5",
+    "metricFocusLabel": "Odak",
+    "metricFocusValue": "Full-stack + DevOps",
     "viewProjects": "Projeleri gör",
     "downloadCv": "CV'yi indir",
     "getInTouch": "İletişime geç"
   },
   "home": {
-    "featuredTitle": "Seçilmiş işler",
+    "featuredTitle": "Seçili işler",
     "featuredLink": "Tüm projeler",
     "latestPostsTitle": "Son yazılar",
     "latestPostsLink": "Tüm yazılar",
@@ -35,12 +42,16 @@
   "footer": {
     "tagline": "Full-stack geliştirme, kendi sunucusunda barındırma, güvenlik odaklı mühendislik.",
     "copyright": "Kendim geliştirdim, kendi sunucumda barındırıyorum.",
+    "availability": "İş tekliflerine açık",
     "navTitle": "Sayfalar",
     "emailLabel": "E-posta",
     "elsewhereLabel": "Diğer kanallar",
     "github": "GitHub",
     "linkedin": "LinkedIn",
-    "rss": "RSS"
+    "rss": "RSS",
+    "selfHosted": "Coolify üzerinde self-host.",
+    "healthLink": "API sağlık",
+    "lastUpdated": "Son güncelleme {date}"
   },
   "about": {
     "title": "Hakkımda",
@@ -62,7 +73,8 @@
     "educationTitle": "Eğitim",
     "languagesTitle": "Diller",
     "languages": "Ana dilim Türkçe. Yazılı İngilizceyi her gün kullanıyorum: dokümantasyon, depolar ve bu sitedeki yazılar.",
-    "downloadCv": "CV'yi indir"
+    "downloadCv": "CV'yi indir",
+    "testimonialsTitle": "Referanslar"
   },
   "projects": {
     "title": "Projeler",
@@ -84,11 +96,17 @@
   },
   "contact": {
     "title": "İletişim",
-    "description": "İlginç projelere ve sohbetlere açığım. Bana en hızlı ulaşma yolu e-posta.",
+    "description": "İlginç projelere ve sohbetlere açığım.",
     "intro": "İlginç projelere ve sohbetlere açığım. Bana en hızlı ulaşma yolu e-posta.",
+    "ctaTitle": "Bir proje mi düşünüyorsunuz?",
+    "ctaBody": "Ne geliştirmek istediğinizi yazın. Genellikle bir gün içinde yanıtlıyorum.",
+    "ctaButton": "Mesaj gönder",
     "emailLabel": "E-posta",
     "locationLabel": "Konum",
     "location": "Konya, Türkiye",
+    "trustTitle": "Gizlilik",
+    "trustBody": "Form verileri yalnızca bana e-posta ile iletilir; üçüncü taraflarla satılmaz veya paylaşılmaz.",
+    "responseExpectation": "Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
     "form": {
       "name": "Ad",
       "namePlaceholder": "Adınız",

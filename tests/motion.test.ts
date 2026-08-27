@@ -105,5 +105,12 @@ describe("motion imports", () => {
       "utf8"
     );
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
+    expect(css).toContain(".motion-item");
+  });
+
+  it("exports a motion item class for the CSS fallback", () => {
+    expect(readFileSync(join(process.cwd(), "src/lib/motion.ts"), "utf8")).toContain(
+      'MOTION_ITEM_CLASS = "motion-item"'
+    );
   });
 });

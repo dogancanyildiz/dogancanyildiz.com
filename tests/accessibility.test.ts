@@ -70,6 +70,8 @@ describe("target size", () => {
       "src/components/layout/mobile-menu.tsx",
       "src/components/layout/theme-toggle.tsx",
       "src/components/layout/footer.tsx",
+      "src/components/layout/language-switcher.tsx",
+      "src/components/layout/header.tsx",
     ]) {
       expect(read(file), `${file} has no tap-target`).toContain("tap-target");
     }

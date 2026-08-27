@@ -22,6 +22,9 @@ const FORBIDDEN = [
 describe("profile data", () => {
   it("has the same number of entries in both locales", () => {
     expect(skills.en.length).toBe(skills.tr.length);
+    expect(skills.en.map((group) => group.id)).toEqual(
+      skills.tr.map((group) => group.id)
+    );
     expect(experience.en.length).toBe(experience.tr.length);
     expect(community.en.length).toBe(community.tr.length);
     expect(certificates.en.length).toBe(certificates.tr.length);
