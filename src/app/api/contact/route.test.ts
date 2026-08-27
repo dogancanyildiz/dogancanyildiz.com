@@ -10,8 +10,7 @@ vi.mock("next-intl/server", () => ({
       api: {
         invalidRequest:
           "Invalid request. Name, email, and message are required.",
-        emailNotConfigured:
-          "Email is not configured on the server.",
+        emailNotConfigured: "Email is not configured on the server.",
         sendFailed: "The message could not be sent. Please try again later.",
         tooManyRequests:
           "Too many requests. Please try again in a few minutes.",

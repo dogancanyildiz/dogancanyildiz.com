@@ -66,10 +66,7 @@ export async function POST(request: Request) {
       locale: routing.defaultLocale,
       namespace: "api",
     });
-    return NextResponse.json(
-      { error: t("invalidRequest") },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: t("invalidRequest") }, { status: 400 });
   }
 
   const body = parseJsonBody(rawBody);
