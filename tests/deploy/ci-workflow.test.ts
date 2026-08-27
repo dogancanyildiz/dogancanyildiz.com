@@ -24,6 +24,7 @@ describe("ci workflow", () => {
       "npm run typecheck",
       "npm run test",
       "npm run build",
+      "npm run verify:routes",
     ]) {
       expect(content).toContain(`run: ${command}`);
     }

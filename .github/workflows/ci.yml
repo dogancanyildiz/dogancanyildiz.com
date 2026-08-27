@@ -32,6 +32,7 @@ jobs:
           # Build time only. The value never has to be a secret, it is inlined
           # into the client bundle anyway.
           NEXT_PUBLIC_SITE_URL: https://dogancanyildiz.sh
+      - run: npm run verify:routes
 
   docker:
     name: hadolint and image build
