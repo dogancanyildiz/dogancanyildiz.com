@@ -43,8 +43,12 @@ export default async function GlobalNotFound() {
   const secondary = secondaryLocale ? await messages(secondaryLocale) : null;
 
   return (
-    <html lang={routing.defaultLocale} suppressHydrationWarning>
-      <body className={`${fontVariables} font-sans antialiased`}>
+    <html
+      lang={routing.defaultLocale}
+      className={fontVariables}
+      suppressHydrationWarning
+    >
+      <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

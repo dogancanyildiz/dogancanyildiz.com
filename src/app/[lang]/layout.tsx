@@ -64,8 +64,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   setRequestLocale(lang);
 
   return (
-    <html lang={lang} suppressHydrationWarning>
-      <body className={`${fontVariables} font-sans antialiased`}>
+    <html lang={lang} className={fontVariables} suppressHydrationWarning>
+      <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

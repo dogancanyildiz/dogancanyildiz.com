@@ -103,6 +103,18 @@ describe("app/[lang] route tree", () => {
     expect(layout).toContain("metadataBase: new URL(siteUrl())");
   });
 
+  it("puts the vendored font className on <html>, not <body>", () => {
+    // fontVariables carries the CSS custom properties (--font-sans-latin
+    // etc.) that globals.css's :root font stacks consume. :root sits above
+    // <body> in the tree, so a copy of the class on <body> leaves those
+    // properties undefined at :root and every stack falls through to its
+    // system fallback. See docs/plans/handoffs/faz-3.md.
+    const layout = read("src/app/[lang]/layout.tsx");
+    expect(layout).toContain('import { fontVariables } from "@/fonts"');
+    expect(layout).toMatch(/<html\b[^>]*className=\{fontVariables\}/);
+    expect(layout).not.toMatch(/<body\b[^>]*fontVariables/);
+  });
+
   it("keeps the og image off the edge runtime", () => {
     expect(read("src/app/[lang]/opengraph-image.tsx")).not.toMatch(
       /\bruntime\b/
@@ -157,7 +169,7 @@ describe("404 pages", () => {
     // The root layout lives under [lang], so nothing wraps a path that never
     // resolves to a locale. global-not-found.tsx has to bring its own document.
     const source = read("src/app/global-not-found.tsx");
-    expect(source).toContain("<html lang=");
+    expect(source).toMatch(/<html\b[^>]*\blang=/);
     expect(source).toContain('import "./globals.css"');
     expect(source).toContain('namespace: "notFound"');
   });
@@ -182,7 +194,14 @@ describe("global-not-found font parity", () => {
   it("carries the same vendored font className the [lang] layout uses", () => {
     const source = read("src/app/global-not-found.tsx");
     expect(source).toContain('import { fontVariables } from "@/fonts"');
-    expect(source).toMatch(/className=\{`\$\{fontVariables\}/);
+    // The vendored font variable classes have to sit on <html>: that is the
+    // element the CSS custom properties they define are computed on, and
+    // globals.css's :root font stacks consume those properties. A copy on
+    // <body> instead leaves --font-sans-latin etc. undefined at :root, so
+    // every stack falls straight through to its system fallback. See
+    // docs/plans/handoffs/faz-3.md.
+    expect(source).toMatch(/<html\b[^>]*className=\{fontVariables\}/);
+    expect(source).not.toMatch(/<body\b[^>]*fontVariables/);
   });
 
   it("has a localized boundary for notFound() thrown inside a locale", () => {
