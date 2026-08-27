@@ -210,12 +210,8 @@ describe("application shell", () => {
   });
 
   it("moved the page bodies into reusable section components", () => {
-    expect(exists("src/components/sections/about-content.tsx")).toBe(true);
     expect(exists("src/components/sections/contact-page-content.tsx")).toBe(
       true
-    );
-    expect(read("src/components/sections/about-content.tsx")).toContain(
-      "export function AboutContent()"
     );
     expect(read("src/components/sections/contact-page-content.tsx")).toContain(
       "export function ContactPageContent()"
@@ -285,7 +281,6 @@ describe("global-not-found font parity", () => {
 const LINK_USING_CONTENT_COMPONENTS = [
   "src/components/sections/hero.tsx",
   "src/components/sections/project-card.tsx",
-  "src/components/sections/about-content.tsx",
   "src/components/sections/post-list.tsx",
 ];
 

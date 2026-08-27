@@ -9,6 +9,7 @@ import { ProjectGrid } from "@/components/sections/project-grid";
 import { SkillsStrip } from "@/components/sections/skills-strip";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
 import { Link } from "@/i18n/navigation";
+import { skills } from "@/content/profile";
 import {
   getFeaturedProjects,
   toProjectCardData,
@@ -72,7 +73,9 @@ export default async function HomePage({
           <ProjectGrid projects={featured} />
         </div>
       </section>
-      <SkillsStrip />
+      <SkillsStrip
+        groups={skills[lang as Locale].filter((group) => group.featured)}
+      />
     </>
   );
 }
