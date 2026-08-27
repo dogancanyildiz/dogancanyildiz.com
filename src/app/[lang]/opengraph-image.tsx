@@ -1,8 +1,30 @@
 import { ImageResponse } from "next/og";
+import { hasLocale } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 
-export const alt = "Portfolio";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+export function generateStaticParams() {
+  return routing.locales.map((lang) => ({ lang }));
+}
+
+// Next calls this once with empty params to enumerate the image ids, then once
+// per locale while prerendering, so `lang` has to fall back to the default
+// locale instead of being handed to next-intl as undefined.
+export async function generateImageMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const locale = hasLocale(routing.locales, lang)
+    ? lang
+    : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return [{ id: "default", size, contentType, alt: t("ogAlt") }];
+}
 
 export default function OGImage() {
   return new ImageResponse(

@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
-import { useLocale } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -19,7 +18,7 @@ const navKeys = [
 
 export function Header() {
   const pathname = usePathname();
-  const { t } = useLocale();
+  const t = useTranslations();
 
   return (
     <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4">

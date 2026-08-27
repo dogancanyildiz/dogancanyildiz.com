@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { motion } from "motion/react";
 import { useLocale } from "@/components/locale-provider";
 import { skillCategories } from "@/data/skills";
@@ -8,7 +8,7 @@ import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/ui/section-heading";
 
-export default function AboutPage() {
+export function AboutContent() {
   const { t } = useLocale();
 
   return (
