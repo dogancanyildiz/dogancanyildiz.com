@@ -11,7 +11,8 @@
     "test": "vitest run",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
-    "verify:routes": "node scripts/assert-static-routes.mjs"
+    "verify:routes": "node scripts/assert-static-routes.mjs",
+    "vendor:fonts": "node scripts/vendor-fonts.mjs"
   },
   "engines": {
     "node": ">=20.9"
@@ -31,6 +32,9 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0",
+    "@fontsource/instrument-serif": "5.3.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
