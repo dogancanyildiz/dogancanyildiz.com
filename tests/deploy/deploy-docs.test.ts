@@ -109,4 +109,27 @@ describe("deploy checklists match the shipped behaviour", () => {
       expect(doc).toMatch(/netfilter-persistent/);
     });
   });
+
+  describe("TRUST_CF_CONNECTING_IP gate", () => {
+    // A loop that sends CF-Connecting-IP through Cloudflare cannot fail: the
+    // edge overwrites the header and the edge rate limiting rule answers 429
+    // on its own. It proved nothing while gating the flag that decides
+    // whether the contact rate limit can be bypassed.
+    const TRAEFIK = "docs/deploy/traefik-ve-origin.md";
+    const CHECKLIST = "docs/plans/handoffs/faz-1-manual-checklist.md";
+
+    it.each([TRAEFIK, CHECKLIST])(
+      "%s does not send a spoofed header through Cloudflare as proof",
+      (path) => {
+        expect(readDoc(path)).not.toMatch(/-H "CF-Connecting-IP: 203\.0\.113/);
+      }
+    );
+
+    it("the Traefik checklist explains why the edge answers 429 by itself", () => {
+      const doc = readDoc(TRAEFIK);
+      expect(doc).toMatch(/rate limiting kuralı \(10 saniyede 3 istek\)/);
+      expect(doc).toMatch(/ClientHost/);
+      expect(doc).toMatch(/retry-after/);
+    });
+  });
 });

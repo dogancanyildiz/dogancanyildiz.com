@@ -66,19 +66,34 @@ docker inspect coolify-proxy --format '{{range .Config.Cmd}}{{println .}}{{end}}
 Beklenen: yukarıdaki iki satırın karşılığı çıktıda görünür.
 
 - [ ] **Ancak bu doğrulama geçtikten VE bölüm 5'teki origin kısıtı uygulandıktan sonra**: Coolify -> uygulama -> Environment Variables -> `TRUST_CF_CONNECTING_IP` değeri `false`'tan `true`'ya çevrilir ve uygulama redeploy edilir. Bu, Faz 0'ın `trustsCloudflareHeaders()` kapısını açar ve contact rate limit anahtarı `CF-Connecting-IP`'den türemeye başlar. Sıra ters çevrilirse (`true` önce, `trustedIPs` veya origin kısıtı sonra) herhangi bir peer uydurma bir başlıkla istek başına yeni kova açabilir ve rate limit tamamen atlanabilir hale gelir; `trustedIPs` yalnızca `X-Forwarded-*` ailesini yönetir, `CF-Connecting-IP`'yi korumaz.
-- [ ] Doğrulama: uydurma bir başlıkla atılan istek limiti atlayamıyor.
+- [ ] Doğrulama üç ayrı kanıttan oluşur ve hiçbiri diğerinin yerine geçmez. Cloudflare üzerinden atılan `CF-Connecting-IP` başlıklı bir döngü bu kanıtlardan biri **değildir**: edge, istemcinin gönderdiği başlığı kendi değeriyle ezer, üstelik `docs/deploy/cloudflare-kurulum.md` bölüm 5'teki rate limiting kuralı (10 saniyede 3 istek) dördüncü istekten itibaren zaten `429` döndürür. Böyle bir döngü `trustedIPs` de origin kısıtı da hiç yapılandırılmamışken bile "geçti" verir.
+
+**Kanıt 1, origin kısıtı.** Bölüm 5b'deki `--resolve` testi. Cloudflare'ı baypas ettiği için edge kuralları sonucu etkileyemez; `CF-Connecting-IP`'nin taklit edilemez olduğunun tek dayanağı budur.
+
+**Kanıt 2, gerçek istemci IP'si Traefik'e ulaşıyor.** Proxy access log'una bakılır:
+
+```bash
+# Access log kapalıysa Traefik command listesine geçici olarak
+# --accesslog=true ve --accesslog.format=json eklenip proxy restart edilir.
+docker logs coolify-proxy --tail 20 | grep -o '"ClientHost":"[^"]*"'
+curl -s https://api.ipify.org   # karşılaştırma için kendi genel adresiniz
+```
+
+Beklenen: `ClientHost` kendi genel adresinizi gösteriyor. `104.x`, `172.6x.x` gibi bir Cloudflare edge adresi görünüyorsa `trustedIPs` uygulanmamıştır.
+
+**Kanıt 3, uygulamanın kendi limiti çalışıyor.** Döngü, edge kuralının altında kalacak hızda koşar (istek başına 6 saniye), böylece dönen `429` Cloudflare'ın değil uygulamanındır. Gövde bilerek geçersiz: rate limit kontrolü gövde doğrulamasından önce çalıştığı için kova tüketilir ama hiç e-posta gönderilmez.
 
 ```bash
 for i in $(seq 1 6); do
-  curl -s -o /dev/null -w "%{http_code}\n" \
-    -H "Content-Type: application/json" \
-    -H "CF-Connecting-IP: 203.0.113.$i" \
-    -d '{"name":"t","email":"t@example.org","message":"rate limit probe"}' \
+  curl -s -D "/tmp/cl-h.$i" -o "/tmp/cl-b.$i" -w "$i: %{http_code}\n" -X POST \
+    -H 'content-type: application/json' -d '{}' \
     https://dogancanyildiz.sh/api/contact
+  sleep 6
 done
+cat /tmp/cl-b.6; grep -i '^retry-after' /tmp/cl-h.6
 ```
 
-Beklenen: son satır `429`. Cloudflare edge, istemcinin gönderdiği `CF-Connecting-IP` başlığını kendi değeriyle ezdiği için altı istek de aynı kovaya düşer; `429` görülmüyorsa `trustedIPs` veya origin kısıtlaması eksiktir.
+Beklenen: ilk beş istek `400` (geçersiz gövde, limit tüketildi), altıncı `429`, gövdesi JSON ve yanıtta `retry-after` başlığı var (`src/lib/rate-limit.ts`, limit 5 / 600000 ms). Altıncı yanıt HTML ise o `429` Cloudflare'ın block sayfasıdır, `sleep` süresi artırılıp tekrar denenir. Alternatif: Cloudflare rate limiting kuralı test süresince geçici olarak devre dışı bırakılır.
 
 ## 3. Dinamik middleware'ler
 
