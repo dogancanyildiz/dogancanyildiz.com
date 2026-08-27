@@ -28,7 +28,8 @@ describe("Dockerfile", () => {
 
   it("accepts NEXT_PUBLIC_SITE_URL as a build argument", () => {
     const content = dockerfile();
-    expect(content).toMatch(/ARG NEXT_PUBLIC_SITE_URL=/);
+    expect(content).toMatch(/^ARG NEXT_PUBLIC_SITE_URL$/m);
+    expect(content).not.toMatch(/ARG NEXT_PUBLIC_SITE_URL=/);
     expect(content).toMatch(/ENV NEXT_PUBLIC_SITE_URL=\$NEXT_PUBLIC_SITE_URL/);
   });
 

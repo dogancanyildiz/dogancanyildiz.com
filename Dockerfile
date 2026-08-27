@@ -20,10 +20,13 @@ RUN npm ci --no-audit --no-fund
 # NEXT_PUBLIC_SITE_URL must arrive as a build argument: next build inlines it
 # into the client bundle, a runtime only value would stay undefined in the
 # browser.
+# There is no default on purpose: a build that forgets the argument fails in
+# resolveSiteUrl instead of silently inlining the production url into a
+# preview bundle. CI, docker compose and Coolify all pass it explicitly.
 # ---------------------------------------------------------------------------
 FROM node:24-alpine AS builder
 WORKDIR /app
-ARG NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.sh
+ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
@@ -56,6 +59,7 @@ EXPOSE 3000
 # health checks in Dockerfile built Node containers, and node:24-alpine ships
 # no curl at all. The 30 second start period covers the standalone cold start.
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
-  CMD ["node", "-e", "fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+# PORT is read back so an override at run time keeps the probe on the right port.
+  CMD ["node", "-e", "fetch(`http://127.0.0.1:${process.env.PORT || 3000}/api/health`).then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
 
 CMD ["node", "server.js"]
