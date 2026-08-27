@@ -389,3 +389,10 @@ arasını (PR #2 ile #6) özetleyen taban girdisidir, sonraki her sürümü
 - [Backup and Restore Coolify | Coolify Docs](https://coolify.io/docs/knowledge-base/how-to/backup-restore-coolify)
 - [next.js/examples/with-docker · vercel/next.js](https://github.com/vercel/next.js/tree/canary/examples/with-docker)
 - [serverExternalPackages not traced with Turbopack standalone output · Issue #88844 · vercel/next.js](https://github.com/vercel/next.js/issues/88844)
+
+### Depo ayarları ve ilk sürüm kaydı (2026-08-27)
+
+- GitHub varsayılan dalı `dev`; `main` ve `dev` korumalı: PR zorunlu, "lint, typecheck, test, build" ve "hadolint and image build" kontrolleri güncel ve yeşil olmalı, force push ve silme kapalı (`gh api repos/.../branches/<dal>/protection`).
+- Actions izinleri: workflow varsayılan token'ı salt okunur (`default_workflow_permissions: read`), iş akışları ihtiyaç duydukları izni kendi `permissions` bloğunda ister; "Allow GitHub Actions to create and approve pull requests" AÇIK, aksi halde release.yml'in dev'e açtığı sürüm senkron PR'ı "GitHub Actions is not permitted to create or approve pull requests" hatasıyla düşer. İlk sürümde (v0.2.0) tam bu oldu: tag ve Release oluştu, PR elle açıldı (#9), ayar sonra açıldı.
+- v0.1.0 tag'i Faz 0-4'ün merge commit'ine (`12a14f3`) elle atıldı; böylece v0.2.0 notları yalnızca sonraki 8 commit'i taşıdı.
+- GITHUB_TOKEN ile açılan PR'larda CI kendiliğinden başlamaz; senkron PR'ını bir kez kapatıp açmak veya boş bir commit atmak kontrolleri tetikler. Alternatif (PAT veya GitHub App token'ı) bilinçli olarak kullanılmadı, sırlar yönetimi eklemek istenmedi.
