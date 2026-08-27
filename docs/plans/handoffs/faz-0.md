@@ -251,3 +251,37 @@ Kodla yapılamayan, site sahibinin uygulaması gereken adımlar `docs/plans/hand
 
 - Güvenlik incelemesi (`security-review` skill'inin kriterleriyle, alt görev yerine doğrudan okuma): HIGH veya MEDIUM bulgu yok. İncelenip elenen maddeler: contact gövdesi (tip, uzunluk, e-posta deseni; düz metin e-posta, HTML sink yok), cross-site POST (kimliksiz public endpoint, kurban durumu yok), hata loglama (API anahtarı loglanmıyor), IP başlıkları (yalnızca rate-limit anahtarı, CF başlığı env bayrağına bağlı), health payload'ı (topoloji yok), CSP `'unsafe-inline'` (sertleştirme eksiği, somut açık değil), `.env.example` (sır yok), Renovate automerge (süreç tercihi, yukarıda not edildi).
 - Kod incelemesi (`code-review` skill, main..HEAD, high; alt ajan bulunmadığı için tek geçişli, 3 bulgusu curl ile doğrulanmış): 10 bulgu. Düzeltme dalgaları `58bc79e` (fork) ve `4a987eb` (sonnet alt ajanı) ile 8'i kapatıldı: (1) chunked gövdenin 413 sınırını atlaması -> `request-body.ts`; (2) CF-Connecting-IP güven koşulunun yanlış anlatılması -> yorum, `.env.example`, README; (3) X-Forwarded-For en sol girdisinin taklit edilebilirliği -> `4a987eb` ile anahtar Traefik'in eklediği son hop oldu (sahtelenemez, CF bayrağına kadar kaba); (4) `maxKeys`'in gerçek bir sınır olmaması -> en az aktif anahtar tahliyesi; (5) `metadataBase` eksikliği, og:image'in localhost'a çözülmesi -> `layout.tsx`; (6) elle yazılmış IP regex'leri -> `node:net` `isIP`; (7) `NEXT_PUBLIC_SITE_URL`'in şemasız/path'li değerleri kabul etmesi -> origin doğrulaması; (8) CSP yorumundaki gerekçenin bugünkü build'de geçersiz olması -> yorum düzeltildi, nonce plan gereği alınmadı. Park edilenler: (9) Renovate automerge/velite kuralı, (10) `translations.ts` uzun çizgileri (Açık kalanlar'da). Düzeltme sonrası yeniden inceleme (`b5e87bb..4a987eb`, düzeltme turunda diff'in doğrudan okunmasıyla): sekiz düzeltmenin her biri diff'te doğrulandı, yeni kırılma görülmedi. `readBodyWithLimit` sınırı aşan chunked gövdede stream'i iptal edip `BodyTooLargeError` ile 413'e düşüyor; rate limiter'da `hits.delete` + yeniden ekleme Map insertion order'ını en az aktif sırasına çeviriyor ve tahliye döngüsü `maxKeys`'i gerçek tavan yapıyor; `getClientIp` son hop'u okuyor ve iki yeni test bunu assert ediyor; `resolveSiteUrl` yalnızca http(s) origin kabul ediyor. Kapılar düzeltme turunda yeniden koşuldu: typecheck, lint, test 60/60 (6 dosya), format, build -> hepsi rc 0.
+
+## Düzeltme turu
+
+Bağımsız doğrulayıcıların iki bloklayan bulgusu, düzeltme turunda kapatıldı. İkisi de kod davranışı değil, plan metni ile diskteki durumun uyuşmamasıydı; bu turda `src/` altında tek satır kod değişmedi.
+
+| Commit | Bulgu | Ne yapıldı |
+|---|---|---|
+| `a75c6c9` | Dal commit'li değil: çalışma ağacında commit edilmemiş değişiklik vardı ve devir notu kodun tersini anlatıyordu | Kod tarafı zaten `4a987eb` ile commit edilmişti; ağaçta kalan devir notu ve manuel kontrol listesi düzenlemeleri commit edildi, içlerindeki çözülmemiş yer tutucu (`REREVIEW_PLACEHOLDER`) yeniden inceleme sonucuyla dolduruldu, `getClientIp` anlatımı koda göre düzeltildi. `git status --porcelain` artık boş |
+| `d42008b` | Bitti kriteri 7 karşılanmıyor: `example.com` hâlâ `src/` içinde 7 yerde | Kriter metni düzeltildi (aşağıdaki gerekçe). `docs/10-yol-haritasi.md` Faz 0 kriteri, Faz 0 planının Task 11 Step 2 grep'i ve Bitti kriteri 7 artık `src/app`, `public`, `README.md`, `.env.example` kapsamını ölçüyor; şablon persona kalıntıları Faz 4'ün launch kapısına bırakıldı, planın envanter grep'iyle görünür tutuldu |
+
+Kriter neden daraltıldı, persona neden silinmedi (seçenek b, gerekçe):
+
+- Kriterin eski hali kendi planıyla çelişiyordu. Hem `10-yol-haritasi.md`'nin Faz 0 madde listesi hem de Faz 0 planının "kapsam dışında" bölümü yalnızca `robots.ts` / `sitemap.ts` fallback'ini Faz 0'a veriyor, gerçek içeriği açıkça Faz 4'e bırakıyor. Tek satırlık bitiş cümlesi ise tüm repoyu istiyordu.
+- Persona'yı Faz 0'da silmek gerçek içerik yazmayı gerektirirdi; gerçek içeriğin kaynağı `.local/content/portfolio-content.md` ve o iş Faz 4'ün kapsamı. Uydurma isim/e-posta yazmak plan kurallarına aykırı.
+- Faz 2 planı (`docs/plans/2026-08-27-faz-2-i18n-app-lang.md`, satır 48 ve 291-650) bu değerlerin `messages/en.json` ve `messages/tr.json`'a **birebir** taşınmasını şart koşuyor. Faz 0'da silinirlerse sonraki fazın plan metni diskteki koda uymaz.
+- Tam temizlik kaybolmadı: `10-yol-haritasi.md`'deki Faz 4 launch kapısı `grep -ri "alex chen\|techcorp\|startupxyz\|example.com"` sıfır sonuç istiyor ve o kriter olduğu gibi duruyor.
+
+Bu bir kapsam kararıdır, site sahibi aksini isterse persona temizliği Faz 0'a çekilebilir; o durumda Faz 2 planının 48. satırı ve mesaj dosyası örnekleri de birlikte güncellenmelidir.
+
+Düzeltme turu kapıları (repo kökü, `4a987eb..d42008b` sonrası):
+
+```
+$ npm run typecheck                                  rc=0
+$ npm run lint                                       rc=0
+$ npm test        Test Files 6 passed, Tests 60 passed (60)   rc=0
+$ npm run format  All matched files use Prettier code style!  rc=0
+$ NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.sh npm run build  rc=0
+$ grep -rn "example\.com" src/app public README.md .env.example next.config.ts package.json renovate.json
+exit=1   (çıktı yok)
+$ git status --porcelain
+(boş)
+```
+
+Kapsam dışı bırakılan: bu turda push, PR ve main'e commit yapılmadı; hepsi site sahibinin kararı.
