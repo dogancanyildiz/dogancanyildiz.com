@@ -100,7 +100,10 @@ describe("colour tokens", () => {
       const muted = source.match(/--muted-foreground:\s*([^;]+);/)?.[1].trim();
       expect(primary).toBeDefined();
       expect(muted).toBeDefined();
-      expect(primary, `${block}: primary and muted-foreground collide`).not.toBe(muted);
+      expect(
+        primary,
+        `${block}: primary and muted-foreground collide`
+      ).not.toBe(muted);
     }
   });
 
