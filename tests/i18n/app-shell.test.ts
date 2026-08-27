@@ -67,9 +67,18 @@ describe("proxy", () => {
       "/robots.txt",
       "/sitemap.xml",
       "/cv.pdf",
+      "/icon",
     ]) {
       expect(pattern.test(pathname), pathname).toBe(false);
     }
+  });
+
+  it("skips /icon so the app root metadata route is never rewritten to a locale prefix", () => {
+    // /icon lives outside app/[lang], so a rewrite to /en/icon or /tr/icon 404s.
+    // Regression test for the bug where GET /icon returned 404 in every build.
+    const pattern = new RegExp(`^${proxyMatcher()}$`);
+    expect(pattern.test("/icon")).toBe(false);
+    expect(pattern.test("/icon?abc123")).toBe(false);
   });
 });
 
