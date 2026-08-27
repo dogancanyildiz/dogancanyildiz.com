@@ -148,47 +148,34 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image:
-      radial-gradient(
-        circle at top left,
-        color-mix(in oklab, var(--accent) 20%, transparent) 0,
-        transparent 32%
-      ),
-      radial-gradient(
-        circle at top right,
-        color-mix(in oklab, var(--primary) 18%, transparent) 0,
-        transparent 36%
-      ),
-      linear-gradient(
-        180deg,
-        color-mix(in oklab, var(--background) 92%, white) 0%,
-        var(--background) 100%
-      );
     min-height: 100vh;
     text-rendering: optimizeLegibility;
   }
+  /* One very quiet hairline grid, no colour gradients. The editorial direction
+     wants the type to carry the page, not the background. */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
+    z-index: -1;
     pointer-events: none;
     background-image:
       linear-gradient(
         to right,
-        color-mix(in oklab, var(--foreground) 6%, transparent) 1px,
+        color-mix(in oklab, var(--foreground) 4%, transparent) 1px,
         transparent 1px
       ),
       linear-gradient(
         to bottom,
-        color-mix(in oklab, var(--foreground) 6%, transparent) 1px,
+        color-mix(in oklab, var(--foreground) 4%, transparent) 1px,
         transparent 1px
       );
-    background-size: 48px 48px;
-    mask-image: radial-gradient(circle at center, black 30%, transparent 85%);
-    opacity: 0.3;
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 45%);
+    opacity: 0.5;
   }
   ::selection {
-    background: color-mix(in oklab, var(--primary) 40%, white);
+    background: var(--primary);
     color: var(--primary-foreground);
   }
   /* Instrument Serif is a single weight display face: it only holds up at h1
@@ -232,11 +219,11 @@
   }
 
   .surface-panel {
-    @apply rounded-3xl border border-border/70 bg-card/75 backdrop-blur-xl;
+    @apply rounded-3xl border border-border bg-card/80 shadow-[0_24px_80px_-48px_color-mix(in_oklab,var(--foreground)_35%,transparent)] backdrop-blur-xl;
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground;
+    @apply inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 font-mono text-[0.7rem] font-medium uppercase tracking-[0.2em] text-muted-foreground;
   }
 
   .section-title {

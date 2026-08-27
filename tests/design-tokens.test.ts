@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -124,5 +124,44 @@ describe("colour tokens", () => {
         `--ring still carries an alpha channel: ${value}`
       ).not.toContain("/");
     }
+  });
+});
+
+function collectTsxFiles(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...collectTsxFiles(full));
+    else if (entry.name.endsWith(".tsx") || entry.name.endsWith(".ts"))
+      out.push(full);
+  }
+  return out;
+}
+
+const sourceFiles = collectTsxFiles(join(process.cwd(), "src")).map((file) => ({
+  file,
+  body: readFileSync(file, "utf8"),
+}));
+
+describe("component colour hygiene", () => {
+  it("has no Tailwind emerald utility left in src", () => {
+    const offenders = sourceFiles
+      .filter(({ body }) => /\bemerald-/.test(body))
+      .map(({ file }) => file);
+    expect(offenders).toEqual([]);
+  });
+
+  it("has no hard coded rgba() literal left in src", () => {
+    const offenders = sourceFiles
+      .filter(({ body }) => /rgba\(/.test(body))
+      .map(({ file }) => file);
+    expect(offenders).toEqual([]);
+  });
+
+  it("ships no CSS gradient stand-in for a missing project cover", () => {
+    const offenders = sourceFiles
+      .filter(({ body }) => /radial-gradient/.test(body))
+      .map(({ file }) => file);
+    expect(offenders).toEqual([]);
   });
 });

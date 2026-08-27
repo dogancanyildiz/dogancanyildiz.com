@@ -39,7 +39,6 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           transition={{ duration: 0.4, delay: 0.05 }}
           className="surface-panel space-y-8 overflow-hidden p-6 sm:p-8"
         >
-          <div className="h-32 rounded-[1.75rem] bg-[radial-gradient(circle_at_top_left,_color-mix(in_oklab,var(--primary)_22%,transparent),transparent_55%),linear-gradient(135deg,color-mix(in_oklab,var(--accent)_42%,transparent),transparent)]" />
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -58,7 +57,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               </p>
 
               {project.summary ? (
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+                <div className="rounded-[1.5rem] border border-border bg-background p-5">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.summary")}
                   </p>
@@ -69,7 +68,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               ) : null}
 
               {project.impact ? (
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+                <div className="rounded-[1.5rem] border border-border bg-background p-5">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.impact")}
                   </p>
@@ -82,7 +81,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
 
             <div className="space-y-5">
               {project.role ? (
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+                <div className="rounded-[1.5rem] border border-border bg-background p-5">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.role")}
                   </p>
@@ -93,7 +92,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               ) : null}
 
               {(project.githubUrl || project.liveUrl) && (
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+                <div className="rounded-[1.5rem] border border-border bg-background p-5">
                   <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.links")}
                   </p>
@@ -126,7 +125,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                 </div>
               )}
 
-              <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+              <div className="rounded-[1.5rem] border border-border bg-background p-5">
                 <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                   {t("projects.technologies")}
                 </p>
@@ -134,7 +133,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   {project.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-border/70 bg-accent/45 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/85"
+                      className="rounded-full border border-border bg-muted px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/85"
                     >
                       {tag}
                     </span>

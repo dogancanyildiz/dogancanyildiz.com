@@ -32,7 +32,6 @@ export function ProjectCard({
 
   const content = (
     <Card className="group h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-primary/30">
-      <div className="h-28 bg-[radial-gradient(circle_at_top_left,_color-mix(in_oklab,var(--primary)_20%,transparent),transparent_55%),linear-gradient(135deg,color-mix(in_oklab,var(--accent)_50%,transparent),transparent)] sm:h-32" />
       <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">

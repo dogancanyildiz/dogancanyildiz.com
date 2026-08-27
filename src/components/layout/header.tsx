@@ -27,8 +27,8 @@ export function Header() {
           href="/"
           className="group flex min-w-0 items-center gap-3 no-underline"
         >
-          <span className="flex size-10 items-center justify-center rounded-2xl border border-border/70 bg-accent/45 font-display text-lg font-semibold text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
-            AC
+          <span className="flex size-10 items-center justify-center rounded-2xl border border-border bg-muted font-mono text-[0.7rem] font-semibold tracking-[0.06em] text-foreground">
+            DCY
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">

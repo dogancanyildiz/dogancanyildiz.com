@@ -43,7 +43,7 @@ export function LanguageSwitcher() {
             className={cn(
               "inline-flex h-8 items-center rounded-full px-3 text-[0.72rem] font-semibold uppercase tracking-[0.2em] no-underline transition-colors",
               isActive
-                ? "bg-accent/70 text-foreground"
+                ? "bg-muted text-foreground"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
