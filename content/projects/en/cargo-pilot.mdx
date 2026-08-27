@@ -11,7 +11,7 @@ stack:
 year: 2025
 links:
   live: https://cargopilot.divizyon.org
-outcome: Manual releases were replaced by a Docker plus GitHub Actions pipeline running on self-hosted Coolify infrastructure.
+outcome: Deploys run through a Docker plus GitHub Actions pipeline on self-hosted Coolify infrastructure instead of a managed platform.
 featured: true
 order: 1
 ---
@@ -22,7 +22,7 @@ Cargo Pilot is a web platform built at Divizyon that digitizes cargo and load pl
 
 ## Why it was built this way
 
-Load planning is the part of the job that people were doing by hand, on paper and in spreadsheets, so the product had to make the placement decision itself instead of only recording it. On the delivery side the team was small and the release step was the bottleneck: every deploy needed someone who knew the server. Moving the application into a container and putting the release behind a pipeline made the deploy step something any team member could trigger, and made the environment reproducible instead of hand tuned.
+Load planning is the part of the job that people were doing by hand, on paper and in spreadsheets, so the product had to make the placement decision itself instead of only recording it. On the delivery side, with a small team, the goal was a deploy step any team member could trigger and an environment that stayed reproducible instead of hand tuned. Moving the application into a container and putting the release behind a pipeline got us there.
 
 ## What I learned
 

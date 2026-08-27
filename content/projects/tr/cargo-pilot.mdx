@@ -11,7 +11,7 @@ stack:
 year: 2025
 links:
   live: https://cargopilot.divizyon.org
-outcome: Elle yapılan yayınların yerini, kendi sunucumuzdaki Coolify altyapısında çalışan Docker ve GitHub Actions hattı aldı.
+outcome: Yayınlar, yönetilen bir platform yerine kendi sunucumuzdaki Coolify altyapısında çalışan Docker ve GitHub Actions hattı üzerinden çıkıyor.
 featured: true
 order: 1
 ---
@@ -22,8 +22,8 @@ Cargo Pilot, Divizyon'da geliştirdiğimiz, lojistik operasyonlarında kargo ve 
 
 ## Neden böyle kurgulandı
 
-Yük planlama, işin insanlar tarafından kağıt ve tablo üstünde yapılan kısmıydı; bu yüzden ürünün yerleşimi yalnızca kaydetmesi değil, kararı kendisinin vermesi gerekiyordu. Teslimat tarafında ise ekip küçüktü ve yayın adımı darboğazdı: her deploy sunucuyu tanıyan birini gerektiriyordu. Uygulamayı konteynere taşımak ve yayını bir hattın arkasına almak, deploy'u ekipteki herkesin tetikleyebileceği bir adıma çevirdi ve ortamı elle ayarlanan bir şey olmaktan çıkarıp tekrar üretilebilir hale getirdi.
+Yük planlama, işin insanlar tarafından kağıt ve hesap tablosu üstünde yapılan kısmıydı; bu yüzden ürünün, yerleşimi yalnızca kaydetmesi değil, yerleşim kararını kendisinin vermesi gerekiyordu. Teslimat tarafında ise ekip küçüktü; hedef, deploy'u ekipteki herkesin tetikleyebileceği bir adım ve ortamı elle ayarlanan bir şey olmaktan çıkarıp tekrar üretilebilir hale getirmekti. Uygulamayı konteynere taşımak ve yayını bir hattın arkasına almak bunu sağladı.
 
 ## Ne öğrendim
 
-Hem algoritmayı hem altyapıyı üstlenmek sistemi okuma biçimimi değiştirdi. Yerel testte ucuz görünen bir optimizasyon adımı, gerçek yük verisi geldiğinde üretimdeki en yavaş istek haline gelebiliyor; bunu erken görmenin tek yolu dizüstü bilgisayar yerine gerçek konteyneri gerçek veriyle çalıştırmak. İkinci ders makinelerle değil insanlarla ilgiliydi: bir hat ancak ekip ona güvendiğinde işe yarıyor, bu yüzden kimse cuma günü yayın almaya başlamadan önce geri alma yolunun deploy yolu kadar açık olması gerekiyordu.
+Hem algoritmayı hem altyapıyı üstlenmek sistemi okuma biçimimi değiştirdi. Yerel testte ucuz görünen bir optimizasyon adımı, gerçek yük verisi geldiğinde canlıdaki en yavaş istek haline gelebiliyor; bunu erken görmenin tek yolu dizüstü bilgisayar yerine gerçek konteyneri gerçek veriyle çalıştırmak. İkinci ders makinelerle değil insanlarla ilgiliydi: bir hat ancak ekip ona güvendiğinde işe yarıyor, bu yüzden kimse cuma günü yayın almaya başlamadan önce geri alma yolunun deploy yolu kadar açık olması gerekiyordu.
