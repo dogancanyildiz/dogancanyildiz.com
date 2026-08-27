@@ -2,7 +2,7 @@
 
 Tarih: 2026-08-27 · Dal: `feature/faz-1-deploy-hatti` · HEAD: bu commit (`513d853` üzerine) · Base: `feature/faz-0-guvenlik-ve-hijyen` @ `bc42737` · Plan: `docs/plans/2026-08-27-faz-1-deploy-hatti.md`
 
-Durum: kod tarafı tamam ve yerelde doğrulandı. Dalda 10 task commit'i, 1 inceleme düzeltmesi (`fc470e0`), 1 manuel checklist (`56c3694`), 1 iş akışı script'i (`8328bc8`, uygulama kodu değil), 1 belge düzeltmesi (`513d853`) ve bu devir notu var. Panel tarafı (Coolify, Cloudflare, Traefik, Resend, GitHub) uygulanmadı; dal push edilmedi, PR açılmadı, canlı site bu fazda yayına alınmadı. Bitti sayılma kriterlerinin 1-4'ü yerelde geçti, 5-12 site sahibinin panel adımlarına bağlı ve `docs/plans/handoffs/faz-1-manual-checklist.md` içinde bekliyor.
+Durum: kod tarafı tamam ve yerelde doğrulandı. Dalda 10 task commit'i, 1 inceleme düzeltmesi (`fc470e0`), 1 manuel checklist (`56c3694`), 1 iş akışı script'i (`8328bc8`, uygulama kodu değil), 1 belge düzeltmesi (`513d853`) ve bu devir notu var. Panel tarafı (Coolify, Cloudflare, Traefik, Resend, GitHub) uygulanmadı; dal push edilmedi, PR açılmadı, canlı site bu fazda yayına alınmadı. Bitti sayılma kriterlerinin 1-4'ü yerelde geçti, 5-12 site sahibinin panel adımlarına bağlı ve `docs/plans/handoffs/faz-1-manual-checklist.md` içinde bekliyor. Bağımsız doğrulamadan sonra beş `fix:` commit'i daha eklendi, bkz. "Düzeltme turu" bölümü; panel checklist'lerini uygulamadan önce o bölüm okunmalı.
 
 ## Süreç notu
 
@@ -150,6 +150,34 @@ URL kararı: `.sh` ana domain, `.com` tek atlama 301. `NEXT_PUBLIC_SITE_URL` yal
 - Yeni test dosyaları `tests/` altına konursa vitest include'u zaten kapsıyor; `src/` altına konursa da kapsıyor. Ayrıca CI'daki `npm run test` tüm dosyaları koşar, ayrı bir adım eklemek gerekmez.
 - `.dockerignore` kök `*.md` dosyalarını dışarıda tutuyor ama `content/**/*.md` bilerek kapsam dışı: Faz 4 Velite içeriği build context'te kalmalı. Faz 2 yeni bir üst düzey dizin eklerse (`messages/`, `locales/`) build context'e girdiğinden emin olmalı, `.dockerignore`'da recursive bir desen yok.
 - Faz 2'nin PR'ı `lint, typecheck, test, build` ve `hadolint and image build` check'lerinden geçmek zorunda; Dockerfile'a dokunulursa hadolint `--failure-threshold warning` seviyesinde koşar.
+
+## Düzeltme turu (2026-08-27, doğrulama sonrası)
+
+Bağımsız doğrulama beş bloklayan bulgu çıkardı; hepsi sahibin panelde takip edeceği checklist metinlerindeydi, uygulama kodunda değil. Beşi de düzeltildi ve testle kilitlendi.
+
+| Commit | Bulgu | Ne değişti |
+| --- | --- | --- |
+| `914e267` | `NEXT_PUBLIC_SITE_URL` için "sessizce `undefined` kalır" iddiası, `fc470e0`'dan sonra yanlış | `docs/deploy/coolify-kurulum.md` bölüm 4 ve `README.md` env tablosu artık gerçek başarısızlığı yazıyor: arg'sız build `/robots.txt` prerender'ında `resolveSiteUrl` hatasıyla duruyor |
+| `32b6701` | Health check beklentisi olarak yalnızca `status` alanından ibaret sabit bir gövde yazılmıştı, endpoint böyle bir gövdeyi hiç dönmüyor | Sözleşme "HTTP 200 + gövdedeki `status` alanı" olarak yazıldı, `uptime` ve `timestamp` değişken alanlar olarak belirtildi; `src/app/api/health/route.test.ts` gerçek şekli, docs testi de literal gövdenin geri gelmemesini kilitliyor |
+| `a8b8111` | `traefik.http.routers.portfolio.middlewares=...` var olmayan bir router'a yazıyordu, HSTS ve compress hiç uygulanmayacaktı | Coolify'ın ürettiği `https-0-<uuid>` ve `http-0-<uuid>` router adlarına, mevcut satırın değeri korunarak ekleme yapılıyor; readonly labels kapatıldıktan sonra üretilmiş etiketlerin silinmemesi ayrı uyarı olarak yazıldı |
+| `621975f` | ufw, Docker'ın publish ettiği 80/443'ü filtrelemiyor; "origin kapandı" maddesi hiçbir şey kapatmıyordu | Bölüm 5 ikiye ayrıldı: ufw yalnızca SSH ve publish edilmemiş portlar, asıl kısıt `DOCKER-USER` zincirinde (DROP önce, Cloudflare ve admin `RETURN` üstüne, `ip6tables` dahil, `netfilter-persistent` ile kalıcı). Tek geçerli kanıt `--resolve` ile doğrudan origin testi |
+| `7611ab1` | `TRUST_CF_CONNECTING_IP` kapısının doğrulaması yapı gereği hiç başarısız olamıyordu | Sahte `CF-Connecting-IP` döngüsü kaldırıldı (edge başlığı eziyor, üstüne Cloudflare'ın 10 saniyede 3 istek kuralı zaten `429` veriyor). Yerine üç ayrık kanıt: `--resolve` origin testi, Traefik access log'unda `ClientHost`, ve edge eşiğinin altında koşan `/api/contact` probe'u |
+
+Düzeltme turunda koşan kapılar: `npm run typecheck`, `npm run lint`, `npm test` (13 dosya, 125 test), `npm run format`, `NEXT_PUBLIC_SITE_URL=... npm run build` (18 route, ek test dosyaları route ağacına girmiyor).
+
+Konteyner üzerinde yeniden ölçülen davranış (imaj ve container doğrulama sonunda silindi, port 3187 kullanıldı):
+
+```
+GET  /api/health -> 200 {"status":"ok","uptime":11,"timestamp":"2026-08-27T03:45:58.240Z"}, cache-control: no-store, health status: healthy
+POST /api/contact -d '{}' x6 -> 400 400 400 400 400 429
+6. yanıt: content-type: application/json, retry-after: 600, {"error":"Too many requests. Please try again later."}
+```
+
+Bu turda bilerek dokunulmayanlar:
+
+- `docs/plans/2026-08-27-faz-1-deploy-hatti.md` (satır 1538 ve 1597) hâlâ `routers.portfolio` etiketini, birkaç yeri de literal `{"status":"ok"}` gövdesini içeriyor. Plan dosyası uygulanmış planın kaydı, sahibin takip ettiği doküman değil; sahibin izleyeceği metinler `docs/deploy/` ve `docs/plans/handoffs/` altındakiler ve onlar düzeltildi.
+- `docs/plans/handoffs/faz-0-manual-checklist.md` satır 33 origin kısıtını hâlâ "ufw veya ipAllowList" diye anıyor. O madde bu fazın `docs/deploy/traefik-ve-origin.md` bölüm 5'i tarafından devralındı; Faz 0 devir notu başka bir fazın kaydı olduğu için değiştirilmedi, uygulanacak metin bu fazınki.
+- `docs/plans/2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md` Gatus'un `/api/health` gövdesini `{"status":"ok"}` diye anlatıyor. Faz 5 planı yazılırken gövde eşleşmesi değil, `200` ve `status` alanı kontrol edilmeli; bu uyarı yukarıdaki "Sonraki faza uyarılar" bölümünde de var.
 
 ## Manuel adımlar
 
