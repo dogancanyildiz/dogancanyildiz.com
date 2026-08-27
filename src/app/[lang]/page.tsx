@@ -7,6 +7,7 @@ import { buildAlternates } from "@/lib/seo/locale-url";
 import { Hero } from "@/components/sections/hero";
 import { FeaturedProjects } from "@/components/sections/featured-projects";
 import { SkillsStrip } from "@/components/sections/skills-strip";
+import { PersonJsonLd } from "@/components/seo/person-jsonld";
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
@@ -35,10 +36,12 @@ export default async function HomePage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
+  if (!hasLocale(routing.locales, lang)) notFound();
   setRequestLocale(lang);
 
   return (
     <>
+      <PersonJsonLd locale={lang} />
       <Hero />
       <FeaturedProjects />
       <SkillsStrip />
