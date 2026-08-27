@@ -213,3 +213,12 @@ describe("panel shadow", () => {
     }
   });
 });
+
+describe("tailwind source scanning", () => {
+  it("is scoped to src/ so class names quoted in docs and tests never compile", () => {
+    // Tailwind 4.3 extracts candidates from every non-ignored file under the
+    // project root. docs/plans quotes retired classes such as the emerald
+    // shadow; scoping the scan keeps them out of the shipped CSS.
+    expect(css).toMatch(/@import "tailwindcss" source\("\.\.\/"\);/);
+  });
+});

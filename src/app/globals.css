@@ -1,4 +1,7 @@
-@import "tailwindcss";
+/* Scope automatic source detection to src/. Without it Tailwind 4.3 also
+   scans docs/ and tests/, and class names quoted in the plan documents (the
+   retired emerald shadow among them) end up in the compiled stylesheet. */
+@import "tailwindcss" source("../");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
