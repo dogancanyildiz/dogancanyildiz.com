@@ -32,12 +32,29 @@ const REMOVED_ROUTES = [
   "src/app/opengraph-image.tsx",
 ];
 
-function proxyMatcher(): string {
+// Parses every double quoted string literal inside the `matcher: [ ... ]`
+// array in src/proxy.ts, unescaping each one with JSON.parse (the file is
+// TypeScript source, so backslashes are still escaped there).
+function proxyMatcher(): string[] {
   const source = read("src/proxy.ts");
-  const match = source.match(/matcher:\s*"([^"]+)"/);
-  if (!match) throw new Error("proxy.ts does not declare a string matcher");
-  // The file is TypeScript source, so the backslashes are still escaped.
-  return JSON.parse(`"${match[1]}"`) as string;
+  const block = source.match(/matcher:\s*\[([\s\S]*?)\]/);
+  if (!block) throw new Error("proxy.ts does not declare an array matcher");
+  const literals = block[1].match(/"(?:[^"\\]|\\.)*"/g);
+  if (!literals) {
+    throw new Error("proxy.ts matcher array has no string literals");
+  }
+  return literals.map((literal) => JSON.parse(literal) as string);
+}
+
+// Converts a matcher pattern to a JS regex and tests it against pathname.
+// :path* becomes .* (a bare locale path such as /tr still matches through
+// the generic catch-all pattern, so this simplification does not lose
+// coverage), and the whole pattern is anchored with ^ and $.
+function matchesAny(pathname: string): boolean {
+  return proxyMatcher().some((pattern) => {
+    const regexSource = pattern.replace(/:path\*/g, ".*");
+    return new RegExp(`^${regexSource}$`).test(pathname);
+  });
 }
 
 describe("proxy", () => {
@@ -54,10 +71,18 @@ describe("proxy", () => {
   });
 
   it("matches page routes and skips api, framework and file paths", () => {
-    const pattern = new RegExp(`^${proxyMatcher()}$`);
-
-    for (const pathname of ["/", "/tr", "/about", "/tr/about", "/projects/a"]) {
-      expect(pattern.test(pathname), pathname).toBe(true);
+    for (const pathname of [
+      "/",
+      "/tr",
+      "/about",
+      "/tr/about",
+      "/projects/a",
+      "/feed.xml",
+      "/tr/feed.xml",
+      "/icons",
+      "/blog/x",
+    ]) {
+      expect(matchesAny(pathname), pathname).toBe(true);
     }
 
     for (const pathname of [
@@ -68,19 +93,35 @@ describe("proxy", () => {
       "/favicon.ico",
       "/robots.txt",
       "/sitemap.xml",
-      "/cv.pdf",
+      "/cv/dogancanyildiz-cv.pdf",
       "/icon",
     ]) {
-      expect(pattern.test(pathname), pathname).toBe(false);
+      expect(matchesAny(pathname), pathname).toBe(false);
     }
   });
 
-  it("skips /icon so the app root metadata route is never rewritten to a locale prefix", () => {
-    // /icon lives outside app/[lang], so a rewrite to /en/icon or /tr/icon 404s.
-    // Regression test for the bug where GET /icon returned 404 in every build.
-    const pattern = new RegExp(`^${proxyMatcher()}$`);
-    expect(pattern.test("/icon")).toBe(false);
-    expect(pattern.test("/icon?abc123")).toBe(false);
+  it("skips exactly /icon but not /icons", () => {
+    // /icon lives outside app/[lang], so a rewrite to /en/icon or /tr/icon
+    // 404s. The icon$ anchor narrows the exclusion to the exact /icon path,
+    // so a future /icons route stays locale rewritten like any other path.
+    expect(matchesAny("/icon")).toBe(false);
+    expect(matchesAny("/icons")).toBe(true);
+  });
+
+  it("redirects the legacy favicon path to the single icon source", () => {
+    const config = read("next.config.ts");
+    expect(config).toContain('source: "/favicon.ico"');
+    expect(config).toContain('destination: "/icon"');
+  });
+});
+
+describe("rss feed route", () => {
+  it("serves a static per locale feed with the rss content type", () => {
+    expect(exists("src/app/[lang]/feed.xml/route.ts")).toBe(true);
+    const source = read("src/app/[lang]/feed.xml/route.ts");
+    expect(source).toContain('export const dynamic = "force-static"');
+    expect(source).toContain("export function generateStaticParams()");
+    expect(source).toContain("application/rss+xml");
   });
 });
 

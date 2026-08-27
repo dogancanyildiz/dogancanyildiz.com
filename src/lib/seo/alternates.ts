@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import type { Locale } from "@/lib/content";
+import { siteConfig } from "@/lib/site-config";
 import {
   OG_IMAGE_CONTENT_TYPE,
   OG_IMAGE_PATH,
@@ -91,7 +92,11 @@ export function buildAlternates(
   currentLocale: Locale,
   path: string,
   availableLocales: Locale[]
-): { canonical: string; languages: Record<string, string> } {
+): {
+  canonical: string;
+  languages: Record<string, string>;
+  types: { "application/rss+xml": { url: string; title: string }[] };
+} {
   const languages: Record<string, string> = {};
   for (const locale of availableLocales) {
     languages[locale] = absoluteUrl(locale, path);
@@ -104,5 +109,18 @@ export function buildAlternates(
   return {
     canonical: absoluteUrl(currentLocale, path),
     languages,
+    // Next replaces a child segment's alternates wholesale, so a types entry
+    // declared only on the layout never reaches pages that set their own
+    // alternates. Returning it here means every page that calls
+    // buildAlternates (directly or through buildPageMetadata) advertises the
+    // feed of its own locale.
+    types: {
+      "application/rss+xml": [
+        {
+          url: absoluteUrl(currentLocale, "/feed.xml"),
+          title: siteConfig.person.name,
+        },
+      ],
+    },
   };
 }

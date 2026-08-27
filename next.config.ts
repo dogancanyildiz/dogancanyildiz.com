@@ -57,6 +57,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  async redirects() {
+    // The phase 3 icon route replaced the static favicon file, so
+    // /favicon.ico 404s unless it is redirected to the single icon source
+    // (src/app/icon.tsx). The proxy already skips paths with a dot, and Next
+    // evaluates redirects before routing, so this runs regardless.
+    return [{ source: "/favicon.ico", destination: "/icon", permanent: true }];
+  },
 };
 
 const withNextIntl = createNextIntlPlugin();

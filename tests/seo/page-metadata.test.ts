@@ -247,6 +247,23 @@ describe("page openGraph metadata", () => {
     expect((metadata.openGraph as { type: string }).type).toBe("article");
   });
 
+  it.each(CASES)(
+    "$page.name in $locale points its rss feed link at its own locale",
+    async ({ locale, page }) => {
+      const metadata = await metadataFor(page, locale);
+      const types = metadata.alternates?.types as
+        Record<string, { url: string }[]> | undefined;
+      const feedLinks = types?.["application/rss+xml"];
+
+      expect(feedLinks, `${page.name} has no rss feed alternate`).toBeTruthy();
+      expect(String(feedLinks?.[0]?.url)).toBe(
+        locale === "en"
+          ? "https://dogancanyildiz.sh/feed.xml"
+          : "https://dogancanyildiz.sh/tr/feed.xml"
+      );
+    }
+  );
+
   it("marks the post detail page openGraph type as article with its published time", async () => {
     const postPage = PAGES.find((page) => page.name.startsWith("blog/"));
     if (!postPage) throw new Error("no post detail page case found");
