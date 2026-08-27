@@ -17,7 +17,6 @@ export const contentType = OG_IMAGE_CONTENT_TYPE;
 
 // Palette: 03-tasarim-ui-ux.md dark column.
 const GROUND = "#0a0c0f";
-const SURFACE = "#14171b";
 const TEXT = "#f1f3f4";
 const MUTED = "#999fa6";
 const ACCENT = "#4fcc8d";

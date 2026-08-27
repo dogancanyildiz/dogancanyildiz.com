@@ -5,6 +5,7 @@ import { Github, Linkedin, Mail, Rss } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { navItems } from "@/lib/nav";
+import { siteUrl } from "@/lib/env";
 import { CONTACT_EMAIL_PUBLIC, SOCIAL } from "@/lib/site";
 
 export function Footer() {
@@ -30,7 +31,7 @@ export function Footer() {
             <p>{t("footer.selfHosted")}</p>
             <p>
               <a
-                href="/api/health"
+                href={`${siteUrl()}/api/health`}
                 className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
               >
                 {t("footer.healthLink")}
