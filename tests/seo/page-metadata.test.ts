@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { getProjectSlugs } from "@/lib/content";
+import { getPostSlugs, getProjectSlugs } from "@/lib/content";
 
 // next/font/local is a build time only export: outside the Next compiler
 // (webpack or SWC) it resolves to an empty module, so calling it throws
@@ -58,7 +58,19 @@ type MetadataFn = (args: {
   params: Promise<{ lang: string; slug: string }>;
 }) => Promise<Metadata>;
 
-const PAGES = [
+interface PageCase {
+  name: string;
+  path: string;
+  extraParams?: { slug: string };
+  // Locales this page case should be exercised for. Undefined means every
+  // routed locale. A post that only exists in one locale (no translation
+  // yet) has to be scoped here, otherwise the untranslated locale calls
+  // notFound() inside generateMetadata and the test throws.
+  locales?: readonly AppLocale[];
+  load: () => Promise<{ generateMetadata: MetadataFn }>;
+}
+
+const PAGES: PageCase[] = [
   { name: "home", path: "/", load: () => import("@/app/[lang]/page") },
   {
     name: "about",
@@ -86,10 +98,21 @@ const PAGES = [
     extraParams: { slug },
     load: () => import("@/app/[lang]/projects/[slug]/page"),
   })),
-] as const;
+  ...routing.locales.flatMap((locale) =>
+    getPostSlugs(locale).map((slug) => ({
+      name: `blog/${slug}`,
+      path: `/blog/${slug}`,
+      extraParams: { slug },
+      locales: [locale],
+      load: () => import("@/app/[lang]/blog/[slug]/page"),
+    }))
+  ),
+];
 
 const CASES = routing.locales.flatMap((locale) =>
-  PAGES.map((page) => ({ locale, page }))
+  PAGES.filter((page) => !page.locales || page.locales.includes(locale)).map(
+    (page) => ({ locale, page })
+  )
 );
 
 async function metadataFor(
@@ -97,7 +120,7 @@ async function metadataFor(
   locale: AppLocale
 ): Promise<Metadata> {
   const mod = (await page.load()) as { generateMetadata: MetadataFn };
-  const slug = "extraParams" in page ? page.extraParams.slug : "";
+  const slug = page.extraParams ? page.extraParams.slug : "";
   return mod.generateMetadata({
     params: Promise.resolve({ lang: locale, slug }),
   });
@@ -222,5 +245,20 @@ describe("page openGraph metadata", () => {
     const metadata = await metadataFor(detailPage, "en");
 
     expect((metadata.openGraph as { type: string }).type).toBe("article");
+  });
+
+  it("marks the post detail page openGraph type as article with its published time", async () => {
+    const postPage = PAGES.find((page) => page.name.startsWith("blog/"));
+    if (!postPage) throw new Error("no post detail page case found");
+    const locale = postPage.locales?.[0] ?? "en";
+
+    const metadata = await metadataFor(postPage, locale);
+    const openGraph = metadata.openGraph as {
+      type: string;
+      publishedTime: string;
+    };
+
+    expect(openGraph.type).toBe("article");
+    expect(openGraph.publishedTime).toMatch(/^2026-08-20/);
   });
 });

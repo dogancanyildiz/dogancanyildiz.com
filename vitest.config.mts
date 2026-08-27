@@ -6,6 +6,15 @@ export default defineConfig({
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       "#site/content": fileURLToPath(new URL("./.velite", import.meta.url)),
+      // server-only's default export throws unconditionally; only the
+      // "react-server" export condition resolves to a no-op, and vitest runs
+      // in a plain node environment that never sets that condition. Alias
+      // straight to the package's own empty stub so importing a server-only
+      // module (mdx-content.tsx) in tests behaves like it does inside Next's
+      // server component graph.
+      "server-only": fileURLToPath(
+        new URL("./node_modules/server-only/empty.js", import.meta.url)
+      ),
     },
   },
   test: {

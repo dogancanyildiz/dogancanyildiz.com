@@ -30,6 +30,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "resend": "^6.9.2",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.5.0",
     "velite": "0.4.0"
   },

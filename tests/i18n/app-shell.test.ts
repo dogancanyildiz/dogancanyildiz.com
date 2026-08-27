@@ -13,6 +13,7 @@ const LANG_ROUTES = [
   "src/app/[lang]/projects/page.tsx",
   "src/app/[lang]/projects/[slug]/page.tsx",
   "src/app/[lang]/blog/page.tsx",
+  "src/app/[lang]/blog/[slug]/page.tsx",
   "src/app/[lang]/contact/page.tsx",
   "src/app/[lang]/opengraph-image.tsx",
 ];
