@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Mail, MapPin, Briefcase, Clock3 } from "lucide-react";
 import { useLocale } from "@/components/locale-provider";
 import { ContactForm } from "@/components/sections/contact-form";

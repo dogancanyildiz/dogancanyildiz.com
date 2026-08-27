@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useLocale } from "@/components/locale-provider";
 import { ProjectCard } from "./project-card";
 import { projects, featuredProjectIds } from "@/data/projects";
