@@ -49,16 +49,17 @@ missing, because a silent fallback would put a wrong host into `robots.txt` and
 ## Environment variables
 
 Every variable is documented in `.env.example`. The split between Coolify build
-and runtime variables is not cosmetic, getting it wrong fails silently in both
-directions.
+and runtime variables is not cosmetic. Marking the build variable as runtime
+only fails the build outright, and marking a secret as a build variable leaks it
+into image layers and build logs.
 
-| Variable                 | Coolify layer | Required          | Notes                                                                                                                                                                        |
-| ------------------------ | ------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`   | Build         | Yes               | Inlined into the client bundle by `next build`. Marking it runtime leaves it undefined in production.                                                                        |
-| `RESEND_API_KEY`         | Runtime       | Yes in production | Build variables can leak into image layers and build logs.                                                                                                                   |
-| `CONTACT_EMAIL`          | Runtime       | Yes in production | Inbox that receives form messages.                                                                                                                                           |
-| `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                                                                                                    |
-| `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after the origin is reachable from Cloudflare alone and Traefik trusts the Cloudflare ranges. `trustedIPs` by itself does not protect `CF-Connecting-IP`. |
+| Variable                 | Coolify layer | Required          | Notes                                                                                                                                                                                                                    |
+| ------------------------ | ------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_SITE_URL`   | Build         | Yes               | Inlined into the client bundle by `next build`. The Dockerfile `ARG` has no default, so a build without this argument fails in `resolveSiteUrl` while prerendering `/robots.txt` instead of shipping an undefined value. |
+| `RESEND_API_KEY`         | Runtime       | Yes in production | Build variables can leak into image layers and build logs.                                                                                                                                                               |
+| `CONTACT_EMAIL`          | Runtime       | Yes in production | Inbox that receives form messages.                                                                                                                                                                                       |
+| `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                                                                                                                                                |
+| `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after the origin is reachable from Cloudflare alone and Traefik trusts the Cloudflare ranges. `trustedIPs` by itself does not protect `CF-Connecting-IP`.                                             |
 
 ## Security posture
 

@@ -29,7 +29,7 @@ Coolify'da her değişkenin yanındaki "Build Variable?" kutusu, o değişkenin 
 
 | Değişken | Build Variable? | Değer | Gerekçe |
 |---|---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | **Evet** | `https://dogancanyildiz.sh` | `next build` bunu client bundle'a inline ediyor. Yalnızca Runtime işaretlenirse tarayıcıda sessizce `undefined` kalır. |
+| `NEXT_PUBLIC_SITE_URL` | **Evet** | `https://dogancanyildiz.sh` | `next build` bunu client bundle'a inline ediyor ve Dockerfile'daki `ARG NEXT_PUBLIC_SITE_URL` varsayılansız (commit `fc470e0`). Build Variable işaretlenmezse build sessizce `undefined` bırakmaz, `resolveSiteUrl` hatasıyla Coolify build logunda durur (`/robots.txt` prerender adımı). |
 | `RESEND_API_KEY` | Hayır (Runtime) | Resend panelinden alınan `re_...` anahtarı | Sır. Build variable image katmanlarına ve build loglarına sızabilir. |
 | `CONTACT_EMAIL` | Hayır (Runtime) | `me@dogancanyildiz.com` | Yalnızca sunucu tarafındaki contact route okuyor. |
 | `FROM_EMAIL` | Hayır (Runtime) | `contact@dogancanyildiz.sh` | Aynı gerekçe. Resend'de doğrulanmış domain olmalı, bkz. `docs/deploy/resend-domain.md`. |
