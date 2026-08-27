@@ -47,7 +47,13 @@ export async function generateImageMetadata({
 
 // satori cannot parse woff2, so these are the woff copies vendored under
 // public/, which the standalone build always ships. Two subsets are passed
-// because the latin file has no g-breve or dotted capital I.
+// because the latin file has no g-breve or dotted capital I. They are
+// registered under two different family names: satori keys its font map by
+// name + weight + style, so two entries sharing all three collapse into one
+// (the last one registered wins the tie break) and the other subset is never
+// consulted, silently dropping Turkish glyphs to the built in fallback face.
+// Giving the extended subset its own name and listing both names in the
+// fontFamily fallback chain makes satori try each font per character instead.
 async function loadDisplayFonts() {
   const base = join(process.cwd(), "public", "fonts", "og");
   const [latin, latinExt] = await Promise.all([
@@ -55,8 +61,18 @@ async function loadDisplayFonts() {
     readFile(join(base, "instrument-serif-latin-ext.woff")),
   ]);
   return [
-    { name: "Instrument Serif", data: latin, weight: 400 as const, style: "normal" as const },
-    { name: "Instrument Serif", data: latinExt, weight: 400 as const, style: "normal" as const },
+    {
+      name: "Instrument Serif",
+      data: latin,
+      weight: 400 as const,
+      style: "normal" as const,
+    },
+    {
+      name: "Instrument Serif Ext",
+      data: latinExt,
+      weight: 400 as const,
+      style: "normal" as const,
+    },
   ];
 }
 
@@ -70,76 +86,76 @@ export default async function OGImage({
   const fonts = await loadDisplayFonts();
 
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          background: GROUND,
-          fontFamily: "Instrument Serif",
-          padding: "72px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "72px",
-              height: "72px",
-              borderRadius: "20px",
-              background: SURFACE,
-              border: `1px solid ${HAIRLINE}`,
-              color: TEXT,
-              fontSize: "26px",
-              letterSpacing: "0.04em",
-            }}
-          >
-            DCY
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div
-              style={{
-                width: "10px",
-                height: "10px",
-                borderRadius: "9999px",
-                background: ACCENT,
-              }}
-            />
-            <div style={{ fontSize: "22px", color: MUTED, letterSpacing: "0.14em" }}>
-              dogancanyildiz.sh
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          <div style={{ fontSize: "86px", color: TEXT, lineHeight: 1.05 }}>
-            {person.name}
-          </div>
-          <div style={{ fontSize: "34px", color: MUTED, lineHeight: 1.3 }}>
-            {person.jobTitle[locale]}
-          </div>
-        </div>
-
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        background: GROUND,
+        fontFamily: "Instrument Serif, Instrument Serif Ext",
+        padding: "72px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "16px",
-            borderTop: `1px solid ${HAIRLINE}`,
-            paddingTop: "28px",
-            fontSize: "24px",
-            color: MUTED,
+            justifyContent: "center",
+            width: "72px",
+            height: "72px",
+            borderRadius: "20px",
+            background: SURFACE,
+            border: `1px solid ${HAIRLINE}`,
+            color: TEXT,
+            fontSize: "26px",
+            letterSpacing: "0.04em",
           }}
         >
-          {person.location.city}, Türkiye
+          DCY
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              width: "10px",
+              height: "10px",
+              borderRadius: "9999px",
+              background: ACCENT,
+            }}
+          />
+          <div
+            style={{ fontSize: "22px", color: MUTED, letterSpacing: "0.14em" }}
+          >
+            dogancanyildiz.sh
+          </div>
         </div>
       </div>
-    ),
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div style={{ fontSize: "86px", color: TEXT, lineHeight: 1.05 }}>
+          {person.name}
+        </div>
+        <div style={{ fontSize: "34px", color: MUTED, lineHeight: 1.3 }}>
+          {person.jobTitle[locale]}
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+          borderTop: `1px solid ${HAIRLINE}`,
+          paddingTop: "28px",
+          fontSize: "24px",
+          color: MUTED,
+        }}
+      >
+        {person.location.city}, Türkiye
+      </div>
+    </div>,
     { ...size, fonts }
   );
 }

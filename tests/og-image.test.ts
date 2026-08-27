@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const read = (relative: string) => readFileSync(join(process.cwd(), relative), "utf8");
+const read = (relative: string) =>
+  readFileSync(join(process.cwd(), relative), "utf8");
 
 describe("opengraph image", () => {
   const source = read("src/app/[lang]/opengraph-image.tsx");
@@ -48,6 +49,24 @@ describe("opengraph image", () => {
     expect(source).not.toContain(".woff2");
   });
 
+  it("registers the latin-ext subset under its own family name", () => {
+    // satori keys its font table by name + weight + style. Two font entries
+    // sharing all three collapse into one (only one subset is ever
+    // consulted), which drops Turkish glyphs like g-breve to a fallback face
+    // even though the woff file has them. Giving the extended subset a
+    // distinct name, and chaining it in the fontFamily fallback list below,
+    // is what makes satori actually try both files per character.
+    expect(source).toContain('name: "Instrument Serif Ext"');
+    const nameOccurrences = source.match(/name:\s*"Instrument Serif"/g) ?? [];
+    expect(nameOccurrences).toHaveLength(1);
+  });
+
+  it("chains both font family names so per-character fallback can reach the ext subset", () => {
+    expect(source).toContain(
+      'fontFamily: "Instrument Serif, Instrument Serif Ext"'
+    );
+  });
+
   it("stays off the edge runtime", () => {
     expect(source).not.toContain('runtime = "edge"');
   });
@@ -60,6 +79,6 @@ describe("icon", () => {
     expect(source).toContain("DCY");
     expect(source).toContain("#0a0c0f");
     expect(source).toContain("#4fcc8d");
-    expect(source).not.toContain("background: \"black\"");
+    expect(source).not.toContain('background: "black"');
   });
 });
