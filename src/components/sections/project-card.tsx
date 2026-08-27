@@ -12,9 +12,16 @@ import { fadeUp } from "@/lib/motion";
 interface ProjectCardProps {
   project: ProjectCardData;
   index: number;
+  /** h2 when the grid sits directly under the page h1, h3 under a section h2. */
+  headingLevel?: "h2" | "h3";
 }
 
-export function ProjectCard({ project, index }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  index,
+  headingLevel = "h3",
+}: ProjectCardProps) {
+  const Heading = headingLevel;
   const t = useTranslations("projects");
   const reduced = useReducedMotion() ?? false;
   const variants = fadeUp(reduced);
@@ -41,11 +48,11 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
       ) : null}
 
       <div className="flex items-start justify-between gap-4">
-        <h3 className="text-2xl leading-tight">
+        <Heading className="text-2xl leading-tight">
           <Link href={project.href} className="after:absolute after:inset-0">
             {project.title}
           </Link>
-        </h3>
+        </Heading>
         <span
           aria-hidden="true"
           className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground"

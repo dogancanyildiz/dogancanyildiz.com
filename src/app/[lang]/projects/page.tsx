@@ -46,7 +46,7 @@ export default async function ProjectsPage({
           <h1 className="text-4xl leading-tight sm:text-5xl">{t("title")}</h1>
           <p className="section-copy">{t("description")}</p>
         </header>
-        <ProjectGrid projects={projects} />
+        <ProjectGrid projects={projects} headingLevel="h2" />
       </div>
     </section>
   );

@@ -297,6 +297,12 @@
   .prose-content a {
     @apply text-primary underline underline-offset-4;
   }
+  /* rehype-autolink-headings wraps every heading in an anchor; keep those
+     looking like headings, not like inline links. */
+  .prose-content h2 > a,
+  .prose-content h3 > a {
+    @apply text-foreground no-underline;
+  }
   .prose-content ul {
     @apply list-disc space-y-2 pl-6;
   }
