@@ -9,14 +9,17 @@ export const meta = {
   ],
 }
 
-// args: { phase: number, planPath: string, branch: string, handoffPath: string|null, reportNotes: string }
+// args: { phase: number, planPath: string, branch: string, baseRef: string, handoffPath: string|null, reportNotes: string }
 const REPO = '/Users/dogancanyildiz/Dev/DCYLDZ/portfolio'
 const HANDOFF_DIR = REPO + '/docs/plans/handoffs'
-const { phase: N, planPath, branch, handoffPath, reportNotes } = args
+const { phase: N, planPath, branch, baseRef, handoffPath, reportNotes } = args
 
 const RULES = `
 KURALLAR (ihlal edilemez):
-- Repo: ${REPO}. Çalışma dalı: ${branch} (yoksa main'den oluştur). Asla main'e doğrudan commit etme, asla push etme, asla PR açma; bunlar site sahibinin kararı.
+- Repo: ${REPO}. Çalışma dalı: ${branch}; yoksa \`git checkout -b ${branch} ${baseRef}\` ile ${baseRef} üzerinden oluştur. Asla main'e doğrudan commit etme, asla push etme, asla PR açma; bunları ana oturum yapar.
+- Agent aracı bu oturumda MEVCUTTUR (ToolSearch'e gerek yok, doğrudan Agent çağır). Task'ları alt ajanlarla uygula; kendin yalnızca koordinasyon, entegrasyon ve kapı komutlarını çalıştır.
+- Skill aracıyla code-review, security-review veya başka fork tabanlı skill ÇAĞIRMA: fork senin bağlamını miras alıp senin adına StructuredOutput üretebiliyor ve ana iş akışı onu senin nihai çıktın sanıyor (Faz 0'da oldu). İnceleme için Agent aracıyla opus modelinde alt ajan aç ve incelenecek diff aralığını ver.
+- Dönmeden önce: git status temiz olmalı, devir notu ve manuel kontrol listesi commit'li olmalı, tüm kapılar (typecheck, lint, test, format, build) HEAD'de yeşil olmalı. StructuredOutput'u yalnızca bunlar sağlandıktan sonra, tek kez ver.
 - Commit mesajları Conventional Commits, İngilizce, AI atfı veya Co-Authored-By satırı YOK.
 - Metinlerde (kod yorumu, site metni, commit) em dash / en dash yok.
 - .local/ içeriği okunabilir ama asla commit edilmez, Docker image'a girmez.
@@ -49,7 +52,7 @@ ${RULES}
 Ek notlar: ${reportNotes || 'yok'}
 
 YÖNTEM: superpowers:subagent-driven-development skill'ini Skill aracıyla yükle ve uygula: planın her task'ı için taze bir alt ajan (Agent aracı) aç, iki aşamalı inceleme yap. Model seçimi (zorunlu): mekanik işler (dosya taşıma, grep, format, bağımlılık yükseltme) haiku; uygulama ve test yazımı sonnet; mimari/karmaşık hata ayıklama/güvenlik incelemesi opus. Her alt ajana ilgili task metnini, dosya yollarını ve kuralları tam ver; alt ajan bittiğinde testi ve lint'i kendin de çalıştır.
-Sıra: git checkout -b ${branch} (varsa checkout), task'ları plan sırasıyla uygula, her task sonunda commit. Tüm task'lar bitince planın "Bitti sayılma kriteri" komutlarını çalıştır ve sonuçları kaydet. Sonra devir notunu yaz: ${HANDOFF_DIR}/faz-${N}.md (bölümler: Yapılanlar, Doğrulananlar (komut + çıktı), Açık kalanlar, Üretilen arayüzler (dosya/fonksiyon/env/script adları), Sonraki faza uyarılar, Manuel adımlar). Manuel adımları ayrıca ${HANDOFF_DIR}/faz-${N}-manual-checklist.md dosyasına yaz.
+Sıra: dalı ${baseRef} üzerinden aç (varsa checkout), task'ları plan sırasıyla uygula, her task sonunda commit. Her task için alt ajanı Agent aracıyla aç (model kuralı yukarıda), alt ajan bittiğinde diff'i oku, testi ve lint'i kendin çalıştır, sonra opus modelinde ayrı bir inceleme alt ajanı ile o task'ın diff'ini incelet, bulguları kapat, sonra bir sonraki task'a geç. Tüm task'lar bitince planın "Bitti sayılma kriteri" komutlarını çalıştır ve sonuçları kaydet. Sonra devir notunu yaz: ${HANDOFF_DIR}/faz-${N}.md (bölümler: Yapılanlar, Doğrulananlar (komut + çıktı), Açık kalanlar, Üretilen arayüzler (dosya/fonksiyon/env/script adları), Sonraki faza uyarılar, Manuel adımlar). Manuel adımları ayrıca ${HANDOFF_DIR}/faz-${N}-manual-checklist.md dosyasına yaz.
 Dön: şemadaki alanlar. Uygulanamayanı tasksSkipped'a gerekçesiyle koy, uydurma.`,
   { label: `lead:faz-${N}`, phase: 'Execute', schema: LEAD_SCHEMA, model: 'fable', effort: 'max', agentType: 'general-purpose' })
 
