@@ -141,7 +141,14 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+  /* Solid accent, 2px offset. The old translucent ring disappeared on the
+     neutral ground. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: inherit;
   }
   html {
     scroll-behavior: smooth;
@@ -257,5 +264,12 @@
      target and costs nothing in a single column layout. */
   .tap-target {
     @apply min-h-11 min-w-11;
+  }
+
+  .skip-link {
+    @apply sr-only rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground;
+  }
+  .skip-link:focus-visible {
+    @apply not-sr-only fixed left-4 top-4 z-50 no-underline;
   }
 }

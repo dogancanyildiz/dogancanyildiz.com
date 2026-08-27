@@ -64,6 +64,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   // Enables static rendering for this layout and everything below it.
   setRequestLocale(lang);
 
+  const t = await getTranslations({ locale: lang, namespace: "a11y" });
+
   return (
     <html lang={lang} className={fontVariables} suppressHydrationWarning>
       <body className="font-sans antialiased">
@@ -75,6 +77,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         >
           <NextIntlClientProvider>
             <MotionProvider>
+              <a href="#main" className="skip-link">
+                {t("skipToContent")}
+              </a>
               <Header />
               <main id="main" className="min-h-[calc(100vh-7rem)]">
                 {children}

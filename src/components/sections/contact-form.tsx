@@ -124,17 +124,31 @@ export function ContactForm() {
         <Label htmlFor="website">Website</Label>
         <Input id="website" name="website" type="text" tabIndex={-1} />
       </div>
+      {/* The status paragraphs are conditionally rendered, so the role has to
+          sit on the element that appears: role=alert is assertive for the
+          failure path, role=status is polite for the success path. */}
       {status === "error" && (
-        <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p
+          role="alert"
+          className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+        >
           {errorMessage}
         </p>
       )}
       {status === "success" && (
-        <p className="rounded-2xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-primary">
+        <p
+          role="status"
+          className="rounded-2xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-primary"
+        >
           {t("form.success")}
         </p>
       )}
-      <Button type="submit" size="lg" disabled={status === "loading"}>
+      <Button
+        type="submit"
+        size="lg"
+        disabled={status === "loading"}
+        aria-busy={status === "loading"}
+      >
         {status === "loading" ? t("form.sending") : t("form.send")}
       </Button>
     </m.form>
