@@ -35,16 +35,17 @@ missing, because a silent fallback would put a wrong host into `robots.txt` and
 
 ## Scripts
 
-| Script                 | What it does                                 |
-| ---------------------- | -------------------------------------------- |
-| `npm run dev`          | Development server on http://localhost:3000  |
-| `npm run build`        | Production build, writes `.next/standalone`  |
-| `npm run start`        | Serves the production build                  |
-| `npm run lint`         | ESLint with the Next.js config               |
-| `npm run typecheck`    | `tsc --noEmit`                               |
-| `npm test`             | vitest, node environment, `src/**/*.test.ts` |
-| `npm run format`       | Prettier in check mode                       |
-| `npm run format:write` | Prettier in write mode                       |
+| Script                  | What it does                                                                                                           |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`           | Development server on http://localhost:3000                                                                            |
+| `npm run build`         | Production build, writes `.next/standalone`                                                                            |
+| `npm run start`         | Serves the production build                                                                                            |
+| `npm run lint`          | ESLint with the Next.js config                                                                                         |
+| `npm run typecheck`     | `tsc --noEmit`                                                                                                         |
+| `npm test`              | vitest, node environment, `src/**/*.test.ts` and `tests/**/*.test.ts`                                                  |
+| `npm run format`        | Prettier in check mode                                                                                                 |
+| `npm run format:write`  | Prettier in write mode                                                                                                 |
+| `npm run verify:routes` | Reads `.next/prerender-manifest.json` after a build: every content route prerendered in both locales, `/api/*` dynamic |
 
 ## Environment variables
 
