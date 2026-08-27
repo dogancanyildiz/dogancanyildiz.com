@@ -79,4 +79,34 @@ describe("deploy checklists match the shipped behaviour", () => {
       expect(readDoc(TRAEFIK)).toMatch(/silinmez/);
     });
   });
+
+  describe("origin restriction", () => {
+    // Coolify publishes the Traefik ports, so Docker DNATs them into FORWARD
+    // while ufw only filters INPUT. An allowlist written in ufw alone leaves
+    // the origin open to the whole internet while the checklist ticks the box
+    // that gates TRUST_CF_CONNECTING_IP=true.
+    const TRAEFIK = "docs/deploy/traefik-ve-origin.md";
+    const CHECKLIST = "docs/plans/handoffs/faz-1-manual-checklist.md";
+
+    it.each([TRAEFIK, CHECKLIST])(
+      "%s restricts the published ports through DOCKER-USER",
+      (path) => {
+        expect(readDoc(path)).toMatch(/DOCKER-USER/);
+      }
+    );
+
+    it.each([TRAEFIK, CHECKLIST])(
+      "%s never allowlists 80 and 443 in ufw",
+      (path) => {
+        expect(readDoc(path)).not.toMatch(/ufw allow from/);
+      }
+    );
+
+    it("the Traefik checklist states that ufw does not see the published ports", () => {
+      const doc = readDoc(TRAEFIK);
+      expect(doc).toMatch(/ufw tek başına 80 ve 443'ü kapatmaz/);
+      expect(doc).toMatch(/FORWARD/);
+      expect(doc).toMatch(/netfilter-persistent/);
+    });
+  });
 });

@@ -134,7 +134,7 @@ Test yerleşimi: `vitest.config.mts` `include: ["src/**/*.test.ts", "tests/**/*.
 
 `getClientIp` imzası değişmedi: `getClientIp(headers: Headers, options: { trustCloudflare: boolean }): string`. Bu faz yeni modül yazmadı, yalnızca `TRUST_CF_CONNECTING_IP` bayrağının Traefik ayarıyla eşleşmesini test ile kilitledi.
 
-Traefik middleware adları: `security-headers@file`, `compress@file`, `cloudflare-only@file` (ufw yerine ipAllowList seçilirse), `redirect-to-sh` (Cloudflare Redirect Rule'un yedeği).
+Traefik middleware adları: `security-headers@file`, `compress@file`, `cloudflare-only@file` (paket seviyesi kısıt yerine ipAllowList seçilirse), `redirect-to-sh` (Cloudflare Redirect Rule'un yedeği). Bu middleware'ler Coolify'ın ürettiği `https-0-<uuid>` ve `http-0-<uuid>` router adlarına bağlanır, `portfolio` adında bir router yoktur.
 
 Preview URL şablonu: `http://{{pr_id}}.preview.dogancanyildiz.sh`, şema bilerek `http`, DNS-only kayıt, yalnızca allowlist'teki IP'den erişilebilir. Preview'da `TRUST_CF_CONNECTING_IP` `false` kalır.
 

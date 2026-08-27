@@ -174,31 +174,51 @@ Beklenen: middlewares etiketi `https-0-<uuid>` ve `http-0-<uuid>` router adları
 
 ## 5. Origin'i Cloudflare IP'lerine kısıtlamak
 
-İki yol var, **ufw tercih edilir**: paket seviyesinde çalışır, Traefik'e hiç yük bindirmez ve Traefik yeniden yapılandırılırken bile geçerli kalır.
+Önce kritik gerçek: **ufw tek başına 80 ve 443'ü kapatmaz.** Coolify proxy'si Traefik'i `80:80` ve `443:443` ile publish eder. Docker bu portlar için PREROUTING'de DNAT yapıp paketi FORWARD zincirine sokar, ufw kuralları ise INPUT zincirindedir; ufw bu trafiği hiç görmez. `ufw default deny incoming` + Cloudflare allow kuralları yazılmış olsa bile origin tüm internete açık kalır. Docker tam bu iş için `DOCKER-USER` zincirini boş bırakır. Kaynak: `chaifeng/ufw-docker` ve Docker'ın kendi packet filtering dokümanı.
 
-### 5a. ufw (tercih edilen)
+Bu yüzden kısıt iki parçadır: ufw host servislerini (SSH ve publish edilmemiş portlar) kapatır, `DOCKER-USER` kuralları Docker'ın publish ettiği 80/443'ü kapatır. İkisi de yapılmadan Bitti kriteri 9 sağlanmış sayılmaz ve `TRUST_CF_CONNECTING_IP=true` yapılmaz.
+
+### 5a. ufw (host servisleri)
 
 ```bash
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw allow OpenSSH
-
-# Cloudflare edge addresses on 80 and 443
-for cidr in $(curl -s https://www.cloudflare.com/ips-v4) $(curl -s https://www.cloudflare.com/ips-v6); do
-  sudo ufw allow from "$cidr" proto tcp to any port 80,443 comment 'cloudflare'
-done
-
-# Admin address for preview deployments, which are DNS only and therefore
-# never reach the origin through Cloudflare. Replace ADMIN_IPV4 with the
-# owner's current public address.
-sudo ufw allow from ADMIN_IPV4 proto tcp to any port 80,443 comment 'admin previews'
-
 sudo ufw --force enable
 sudo ufw status numbered
 ```
 
-- [ ] `ADMIN_IPV4` değeri `curl -s https://api.ipify.org` ile alınır ve adres değiştikçe güncellenir.
-- [ ] Kural sayısı beklenen: 22 Cloudflare bloğu + OpenSSH + admin = 24 satır.
+- [ ] Buraya 80/443 kuralı yazmak gerekmiyor: o portlar ufw'nin görmediği zincirden geçiyor. Yazılırsa yanlış bir güvenlik hissi yaratır.
+- [ ] ufw'nin kapattığı tek şey host üzerinde dinleyen servisler (SSH, sistem daemon'ları) ve publish edilmemiş portlardır.
+
+### 5b. DOCKER-USER (asıl origin kısıtı)
+
+`DOCKER-USER`, Docker'ın FORWARD zincirinde kendi kurallarından **önce** işlettiği zincirdir; publish edilmiş konteyner portlarını filtrelemenin desteklenen yolu budur. Zincirin varsayılan içeriği tek bir `RETURN` kuralıdır, bu yüzden yeni kurallar `-A` ile değil `-I` ile başa eklenir; `-A` ile eklenen kural o `RETURN`'ün altında kalır ve hiç çalışmaz.
+
+```bash
+ADMIN_IPV4="$(curl -s https://api.ipify.org)"   # preview erişimi için allowlist
+
+# 1) Önce catch all DROP, zincirin başına
+sudo iptables  -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -j DROP
+sudo ip6tables -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -j DROP
+
+# 2) Sonra izinli kaynaklar, yine başa: DROP'un üstünde birikirler
+for cidr in $(curl -s https://www.cloudflare.com/ips-v4) "$ADMIN_IPV4"; do
+  sudo iptables -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -s "$cidr" -j RETURN
+done
+for cidr in $(curl -s https://www.cloudflare.com/ips-v6); do
+  sudo ip6tables -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -s "$cidr" -j RETURN
+done
+
+sudo iptables -S DOCKER-USER
+sudo ip6tables -S DOCKER-USER
+```
+
+- [ ] Sıra bağlayıcı: DROP önce eklenir, izinler onun üstüne eklenir. Ters yapılırsa DROP tüm izinlerin üstünde kalır ve Cloudflare dahil her şey kesilir.
+- [ ] `ADMIN_IPV4` değeri `curl -s https://api.ipify.org` ile alınır, adres değiştikçe kural güncellenir (eski kural `sudo iptables -D DOCKER-USER ...` ile silinir).
+- [ ] Beklenen kural sayısı: `iptables -S DOCKER-USER` -> 15 Cloudflare IPv4 bloğu + admin + DROP; `ip6tables -S DOCKER-USER` -> 7 IPv6 bloğu + DROP.
+- [ ] Kalıcılık: `sudo apt install iptables-persistent && sudo netfilter-persistent save`. Docker daemon veya Coolify proxy yeniden başlatıldıktan sonra `iptables -S DOCKER-USER` tekrar kontrol edilir; kurallar düşmüşse `netfilter-persistent reload` ile ya da yukarıdaki bloğu tekrar koşarak geri yüklenir.
+- [ ] `chaifeng/ufw-docker` kurulup `ufw-docker allow` kullanmak da aynı işi yapar; hangisi seçilirse seçilsin doğrulama aynıdır.
 
 Doğrulama, Cloudflare'ı bypass edip origin'e doğrudan bağlanmayı dene:
 
@@ -208,21 +228,21 @@ Doğrulama, Cloudflare'ı bypass edip origin'e doğrudan bağlanmayı dene:
 curl -sS --max-time 8 --resolve dogancanyildiz.sh:443:ORIGIN_IPV4 https://dogancanyildiz.sh/api/health
 ```
 
-Beklenen: `curl: (28) Connection timed out` veya `curl: (7) Failed to connect`. Bir JSON gövdesi dönerse kısıt çalışmıyordur.
+Beklenen: `curl: (28) Connection timed out` veya `curl: (7) Failed to connect`. Bir JSON gövdesi dönerse kısıt çalışmıyordur. Bu tek geçerli kanıttır, ufw çıktısındaki kural listesi kanıt değildir. Test Cloudflare'ı baypas ettiği için sonucu edge'deki hiçbir kural etkilemez.
 
-### 5b. Traefik ipAllowList (alternatif)
+### 5c. Traefik ipAllowList (ek katman veya alternatif)
 
-ufw kullanılamıyorsa (ör. sağlayıcı tarafında yönetilen bir firewall varsa) bölüm 3'teki `cloudflare-only` middleware'i uygulamanın etiketlerine eklenir. Router adı yine bölüm 4'teki kurala uyar, mevcut satırın değeri korunur:
+`DOCKER-USER` kullanılamıyorsa (ör. sağlayıcı tarafında yönetilen bir firewall varsa) bölüm 3'teki `cloudflare-only` middleware'i uygulamanın etiketlerine eklenir. Router adı yine bölüm 4'teki kurala uyar, mevcut satırın değeri korunur:
 
 ```
 traefik.http.routers.https-0-<uuid>.middlewares=<mevcut değer>,cloudflare-only@file,security-headers@file,compress@file
 ```
 
 - [ ] Bu yol seçilirse preview router'ına `cloudflare-only` **eklenmez**, aksi halde DNS-only preview'lar hiç açılmaz.
-- [ ] Bu yol origin portlarını ağ seviyesinde kapatmaz, yalnızca HTTP katmanında `403` döner. ufw ile birlikte kullanılabilir, ufw'nin yerine geçmez.
+- [ ] Bu yol origin portlarını ağ seviyesinde kapatmaz, yalnızca HTTP katmanında `403` döner. Paket yine de Traefik'e ulaşır. `DOCKER-USER` ile birlikte kullanılabilir, yerine geçmez.
 
 ## 6. Preview deployment erişimi
 
 - [ ] `*.preview.dogancanyildiz.sh` Cloudflare'da DNS-only (gri bulut), bkz. `docs/deploy/cloudflare-kurulum.md` bölüm 1.
-- [ ] Preview'lar `http` üzerinden servis edilir, TLS yok: gri bulutta Let's Encrypt HTTP-01 doğrulaması origin'e doğrudan ulaşmak zorunda kalır ve ufw bunu keser.
-- [ ] Erişim yalnızca ufw'de allowlist'e alınmış admin IP'sinden mümkündür. Bu bilerek seçilmiş bir kısıt: preview'lar herkese açık değildir.
+- [ ] Preview'lar `http` üzerinden servis edilir, TLS yok: gri bulutta Let's Encrypt HTTP-01 doğrulaması origin'e doğrudan ulaşmak zorunda kalır ve bölüm 5b'deki `DOCKER-USER` DROP kuralı bunu keser.
+- [ ] Erişim yalnızca bölüm 5b'de allowlist'e alınmış `ADMIN_IPV4` adresinden mümkündür. Bu bilerek seçilmiş bir kısıt: preview'lar herkese açık değildir.
