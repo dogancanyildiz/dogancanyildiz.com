@@ -47,6 +47,7 @@ missing, because a silent fallback would put a wrong host into `robots.txt` and
 | `npm run format`        | Prettier in check mode                                                                                                 |
 | `npm run format:write`  | Prettier in write mode                                                                                                 |
 | `npm run verify:routes` | Reads `.next/prerender-manifest.json` after a build: every content route prerendered in both locales, `/api/*` dynamic |
+| `npm run verify:links`  | HEAD/GET audit of project live demo URLs and certificate verify links (requires `npm run build:content` first)           |
 | `npm run release:check` | Dry run of `scripts/release-version.mjs`: prints the version the next merge to `main` would cut, writes nothing        |
 | `npm run vendor:fonts`  | Copies the woff2 and woff font files from the @fontsource packages into src/fonts and public/fonts/og                  |
 
@@ -202,7 +203,9 @@ build time and dev time against the schemas in `velite.config.ts`.
 - Project: `content/projects/<locale>/<slug>.mdx`. Required front matter:
   `title`, `slug`, `summary`, `role`, `stack` (a non empty list), `year`,
   `outcome`. `links.live`, `links.repo`, `cover`, `featured` and `order` are
-  optional.
+  optional. List `stack` in learning order when it is a web stack (HTML, CSS,
+  JavaScript, TypeScript, framework) or pipeline order for DevOps (Git, CI,
+  containers, OS, routing).
 - Blog post: `content/blog/<locale>/<slug>.mdx`. Required front matter:
   `title`, `slug`, `date`, `summary`. `tags`, `cover` and `draft` are
   optional.

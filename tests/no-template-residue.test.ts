@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const TRACKED_PATHS = ["src", "content", "messages", "public", ".env.example"];
@@ -52,6 +52,7 @@ function trackedFiles(): string[] {
   })
     .split("\n")
     .filter(Boolean)
+    .filter((file) => existsSync(file))
     .filter((file) => !BINARY_EXTENSIONS.some((ext) => file.endsWith(ext)))
     .filter((file) => !file.endsWith(".test.ts"));
 }

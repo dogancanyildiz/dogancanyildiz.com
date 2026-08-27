@@ -15,6 +15,26 @@ export const siteConfig = {
       city: "Konya",
       country: "TR",
     },
+    /** Public path stem; append .jpg/.webp when the file is delivered. */
+    profileImagePath: "/images/profile",
+    /** Featured skills for Person schema knowsAbout. */
+    knowsAbout: [
+      "TypeScript",
+      "Next.js",
+      "React",
+      "Node.js",
+      "Docker",
+      "DevOps",
+      "CI/CD",
+      "Linux",
+      "Network security",
+    ],
+    alumniOf: {
+      name: "Necmettin Erbakan University",
+    },
+    worksFor: {
+      name: "BerrSoft Bilgi Teknolojileri",
+    },
     sameAs: [
       "https://github.com/dogancanyildiz",
       "https://www.linkedin.com/in/dogancanyildiz",

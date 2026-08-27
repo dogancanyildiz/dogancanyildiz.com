@@ -5,6 +5,7 @@ import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { siteConfig } from "@/lib/site-config";
+import { BrandMarkText } from "@/lib/brand-mark";
 import {
   OG_IMAGE_CONTENT_TYPE,
   OG_IMAGE_ID,
@@ -16,7 +17,6 @@ export const contentType = OG_IMAGE_CONTENT_TYPE;
 
 // Palette: 03-tasarim-ui-ux.md dark column.
 const GROUND = "#0a0c0f";
-const SURFACE = "#14171b";
 const TEXT = "#f1f3f4";
 const MUTED = "#999fa6";
 const ACCENT = "#4fcc8d";
@@ -54,23 +54,23 @@ export async function generateImageMetadata({
 // consulted, silently dropping Turkish glyphs to the built in fallback face.
 // Giving the extended subset its own name and listing both names in the
 // fontFamily fallback chain makes satori try each font per character instead.
-async function loadDisplayFonts() {
+async function loadSansFonts() {
   const base = join(process.cwd(), "public", "fonts", "og");
   const [latin, latinExt] = await Promise.all([
-    readFile(join(base, "instrument-serif-latin.woff")),
-    readFile(join(base, "instrument-serif-latin-ext.woff")),
+    readFile(join(base, "geist-latin.woff")),
+    readFile(join(base, "geist-latin-ext.woff")),
   ]);
   return [
     {
-      name: "Instrument Serif",
+      name: "Geist Sans",
       data: latin,
-      weight: 400 as const,
+      weight: 600 as const,
       style: "normal" as const,
     },
     {
-      name: "Instrument Serif Ext",
+      name: "Geist Sans Ext",
       data: latinExt,
-      weight: 400 as const,
+      weight: 600 as const,
       style: "normal" as const,
     },
   ];
@@ -83,7 +83,7 @@ export default async function OGImage({
 }) {
   const locale = await resolveLocale(params);
   const { person } = siteConfig;
-  const fonts = await loadDisplayFonts();
+  const fonts = await loadSansFonts();
 
   return new ImageResponse(
     <div
@@ -94,7 +94,7 @@ export default async function OGImage({
         flexDirection: "column",
         justifyContent: "space-between",
         background: GROUND,
-        fontFamily: "Instrument Serif, Instrument Serif Ext",
+        fontFamily: "Geist Sans, Geist Sans Ext",
         padding: "72px",
       }}
     >
@@ -106,15 +106,9 @@ export default async function OGImage({
             justifyContent: "center",
             width: "72px",
             height: "72px",
-            borderRadius: "20px",
-            background: SURFACE,
-            border: `1px solid ${HAIRLINE}`,
-            color: TEXT,
-            fontSize: "26px",
-            letterSpacing: "0.04em",
           }}
         >
-          DCY
+          <BrandMarkText size={72} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div
@@ -126,7 +120,12 @@ export default async function OGImage({
             }}
           />
           <div
-            style={{ fontSize: "22px", color: MUTED, letterSpacing: "0.14em" }}
+            style={{
+              fontSize: "22px",
+              color: MUTED,
+              letterSpacing: "0.14em",
+              fontFamily: "Geist Sans, Geist Sans Ext",
+            }}
           >
             dogancanyildiz.com
           </div>
@@ -134,7 +133,15 @@ export default async function OGImage({
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <div style={{ fontSize: "86px", color: TEXT, lineHeight: 1.05 }}>
+        <div
+          style={{
+            fontSize: "86px",
+            color: TEXT,
+            lineHeight: 1.05,
+            fontWeight: 600,
+            letterSpacing: "-0.025em",
+          }}
+        >
           {person.name}
         </div>
         <div style={{ fontSize: "34px", color: MUTED, lineHeight: 1.3 }}>

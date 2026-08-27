@@ -1,5 +1,8 @@
 import type { Variants } from "motion/react";
 
+/** Pairs with the prefers-reduced-motion override in globals.css. */
+export const MOTION_ITEM_CLASS = "motion-item";
+
 /** 40ms per item, capped at four items: 03-tasarim-ui-ux.md motion budget. */
 export const STAGGER_SECONDS = 0.04;
 export const MAX_STAGGER_ITEMS = 4;

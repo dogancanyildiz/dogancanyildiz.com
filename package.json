@@ -1,6 +1,6 @@
 {
   "name": "portfolio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "velite --watch & next dev",
@@ -13,6 +13,7 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "verify:routes": "node scripts/assert-static-routes.mjs",
+    "verify:links": "node scripts/audit-live-links.mjs",
     "release:check": "node scripts/release-version.mjs --dry-run",
     "vendor:fonts": "node scripts/vendor-fonts.mjs"
   },
@@ -32,6 +33,7 @@
     "react-dom": "19.2.3",
     "resend": "^6.9.2",
     "server-only": "^0.0.1",
+    "simple-icons": "^15.22.0",
     "tailwind-merge": "^3.5.0",
     "velite": "0.4.0"
   },

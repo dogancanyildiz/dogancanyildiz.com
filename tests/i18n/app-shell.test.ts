@@ -100,11 +100,13 @@ describe("proxy", () => {
     }
   });
 
-  it("skips exactly /icon but not /icons", () => {
-    // /icon lives outside app/[lang], so a rewrite to /en/icon or /tr/icon
-    // 404s. The icon$ anchor narrows the exclusion to the exact /icon path,
-    // so a future /icons route stays locale rewritten like any other path.
+  it("skips exactly /icon and /apple-icon but not /icons", () => {
+    // /icon and /apple-icon live outside app/[lang], so a rewrite to
+    // /en/icon or /tr/icon would 404. The icon$ / apple-icon$ anchors narrow
+    // the exclusion to those exact paths, so a future /icons route stays
+    // locale rewritten like any other path.
     expect(matchesAny("/icon")).toBe(false);
+    expect(matchesAny("/apple-icon")).toBe(false);
     expect(matchesAny("/icons")).toBe(true);
   });
 
@@ -280,13 +282,14 @@ describe("global-not-found font parity", () => {
 });
 
 const LINK_USING_CONTENT_COMPONENTS = [
-  "src/components/sections/hero.tsx",
-  "src/components/sections/project-card.tsx",
+  "src/components/sections/project-list.tsx",
   "src/components/sections/post-list.tsx",
 ];
 
 const CONTENT_COMPONENTS = [
-  ...LINK_USING_CONTENT_COMPONENTS,
+  "src/components/sections/hero.tsx",
+  "src/components/sections/project-list.tsx",
+  "src/components/sections/post-list.tsx",
   "src/components/sections/skills-strip.tsx",
   "src/components/sections/contact-form.tsx",
   "src/components/sections/contact-page-content.tsx",

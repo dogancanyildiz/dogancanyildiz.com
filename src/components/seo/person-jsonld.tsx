@@ -1,4 +1,6 @@
 import type { AppLocale } from "@/i18n/routing";
+import { siteUrl } from "@/lib/env";
+import { profileImagePath } from "@/lib/profile-image";
 import { absoluteUrl } from "@/lib/seo/alternates";
 import { siteConfig } from "@/lib/site-config";
 
@@ -8,12 +10,23 @@ import { siteConfig } from "@/lib/site-config";
  * terminate the surrounding script tag.
  */
 export function PersonJsonLd({ locale }: { locale: AppLocale }) {
+  const imageSrc = profileImagePath();
   const data = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: siteConfig.person.name,
     jobTitle: siteConfig.person.jobTitle[locale],
     url: absoluteUrl(locale, "/"),
+    ...(imageSrc ? { image: `${siteUrl()}${imageSrc}` } : {}),
+    knowsAbout: [...siteConfig.person.knowsAbout],
+    alumniOf: {
+      "@type": "CollegeOrUniversity",
+      name: siteConfig.person.alumniOf.name,
+    },
+    worksFor: {
+      "@type": "Organization",
+      name: siteConfig.person.worksFor.name,
+    },
     address: {
       "@type": "PostalAddress",
       addressLocality: siteConfig.person.location.city,

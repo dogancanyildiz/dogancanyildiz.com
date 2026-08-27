@@ -7,8 +7,10 @@ import {
   getTranslations,
   setRequestLocale,
 } from "next-intl/server";
+import { ContactCta } from "@/components/sections/contact-cta";
 import { MDXContent } from "@/components/content/mdx-content";
 import { JsonLd } from "@/components/seo/json-ld";
+import { PageSection } from "@/components/layout/page-section";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import {
@@ -81,10 +83,9 @@ export default async function PostPage({ params }: PostPageProps) {
   };
 
   return (
-    <article className="section-space">
+    <PageSection as="article">
       <JsonLd data={structuredData} />
-      <div className="page-shell-reading space-y-10">
-        <Link
+      <Link
           href="/blog"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
@@ -92,8 +93,8 @@ export default async function PostPage({ params }: PostPageProps) {
           {t("back")}
         </Link>
 
-        <header className="space-y-4">
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+        <header className="space-y-4 border-b border-border pb-6">
+          <p className="meta-label">
             <time dateTime={post.date}>
               {format.dateTime(new Date(post.date), {
                 dateStyle: "long",
@@ -105,14 +106,14 @@ export default async function PostPage({ params }: PostPageProps) {
               minutes: Math.max(1, Math.round(post.metadata.readingTime)),
             })}
           </p>
-          <h1 className="text-4xl leading-tight sm:text-5xl">{post.title}</h1>
+          <h1 className="page-title">{post.title}</h1>
           <p className="section-copy">{post.summary}</p>
           {post.tags.length > 0 ? (
             <ul className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (
                 <li
                   key={tag}
-                  className="rounded-full border border-border px-3 py-1 font-mono text-xs tracking-[0.08em] text-muted-foreground"
+                  className="font-mono text-xs tracking-[0.08em] text-muted-foreground"
                 >
                   {tag}
                 </li>
@@ -124,7 +125,8 @@ export default async function PostPage({ params }: PostPageProps) {
         <div className="prose-content">
           <MDXContent code={post.code} />
         </div>
-      </div>
-    </article>
+
+        <ContactCta />
+    </PageSection>
   );
 }

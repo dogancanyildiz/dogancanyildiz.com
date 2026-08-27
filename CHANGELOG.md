@@ -10,6 +10,27 @@ and Other.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-27
+
+### Features
+
+- `4ea6ad1` **release**: tag and publish a release on every merge to main
+- `6b9a31c` **domain**: make dogancanyildiz.com the primary origin
+
+### Fixes
+
+- `a0235be` **docs**: correct the reversed redirect direction in two decision docs
+- `f7b3f46` **domain**: update sitemap test regex missed by the .sh to .com sweep
+
+### Other
+
+- `8b76bbc` align the decision records with the .com domain and release flow
+- `444d92b` describe the branching and release flow
+- `068dad1` run the quality gate on dev and main
+- `62eb3bf` **domain**: record the primary domain change
+
+**Full changelog**: [v0.1.0...v0.2.0](https://github.com/dogancanyildiz/portfolio/compare/v0.1.0...v0.2.0)
+
 ## [0.1.0] - 2026-08-27
 
 Baseline of the rebuilt portfolio: phases 0 to 4 of the roadmap in
@@ -47,5 +68,6 @@ Baseline of the rebuilt portfolio: phases 0 to 4 of the roadmap in
 [#4]: https://github.com/dogancanyildiz/portfolio/pull/4
 [#5]: https://github.com/dogancanyildiz/portfolio/pull/5
 [#6]: https://github.com/dogancanyildiz/portfolio/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/portfolio/compare/main...dev
+[Unreleased]: https://github.com/dogancanyildiz/portfolio/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/dogancanyildiz/portfolio/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/dogancanyildiz/portfolio/commits/main

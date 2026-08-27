@@ -1,9 +1,22 @@
 import type { Locale } from "@/lib/content";
 
+export type SkillCategoryId =
+  | "frontend"
+  | "backend"
+  | "databases"
+  | "devops"
+  | "networking"
+  | "security"
+  | "ways-of-working"
+  | "other";
+
 export interface SkillGroup {
+  id: SkillCategoryId;
+  /** Display order on the page. Lower numbers appear first. */
+  order: number;
   title: string;
   items: string[];
-  /** True for the four groups shown in the home page skills strip. */
+  /** True for the stack categories shown on the home page. */
   featured?: boolean;
 }
 
@@ -45,32 +58,66 @@ export interface EducationEntry {
 export const skills: Record<Locale, SkillGroup[]> = {
   en: [
     {
+      id: "frontend",
+      order: 1,
       title: "Frontend",
-      items: ["TypeScript", "JavaScript", "Next.js", "React", "HTML", "CSS", "Bootstrap"],
+      items: [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Next.js",
+        "Bootstrap",
+      ],
       featured: true,
     },
     {
+      id: "backend",
+      order: 2,
       title: "Backend",
       items: ["Node.js / Express.js", "PHP", "RESTful API design"],
       featured: true,
     },
-    { title: "Databases", items: ["MySQL", "PostgreSQL", "MongoDB", "SQLite"] },
     {
+      id: "databases",
+      order: 3,
+      title: "Databases",
+      items: ["PostgreSQL", "MySQL", "SQLite", "MongoDB"],
+      featured: true,
+    },
+    {
+      id: "devops",
+      order: 4,
       title: "DevOps and infrastructure",
       items: [
         "Git",
         "GitHub Actions",
         "Docker",
         "CI/CD pipelines",
+        "Linux server engineering",
         "Traefik",
         "Coolify",
-        "Linux server engineering",
-        "QEMU",
         "Go",
+        "QEMU",
       ],
       featured: true,
     },
     {
+      id: "security",
+      order: 5,
+      title: "Security",
+      items: [
+        "Web application security testing",
+        "Network and system penetration testing",
+        "Vulnerability assessment and exploitation",
+        "SOC fundamentals",
+      ],
+      featured: true,
+    },
+    {
+      id: "networking",
+      order: 6,
       title: "Networking",
       items: [
         "Network fundamentals",
@@ -83,27 +130,21 @@ export const skills: Record<Locale, SkillGroup[]> = {
       ],
     },
     {
-      title: "Security",
-      items: [
-        "Vulnerability assessment and exploitation",
-        "Network and system penetration testing",
-        "Web application security testing",
-        "SOC fundamentals",
-      ],
-      featured: true,
-    },
-    {
+      id: "ways-of-working",
+      order: 7,
       title: "Ways of working",
       items: [
         "Agile / Scrum",
         "Sprint planning",
-        "ClickUp",
         "Code review",
         "Issue and bug tracking",
+        "ClickUp",
         "Technical team leadership",
       ],
     },
     {
+      id: "other",
+      order: 8,
       title: "Other",
       items: [
         "DNS and domain configuration",
@@ -115,32 +156,66 @@ export const skills: Record<Locale, SkillGroup[]> = {
   ],
   tr: [
     {
+      id: "frontend",
+      order: 1,
       title: "Frontend",
-      items: ["TypeScript", "JavaScript", "Next.js", "React", "HTML", "CSS", "Bootstrap"],
+      items: [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Next.js",
+        "Bootstrap",
+      ],
       featured: true,
     },
     {
+      id: "backend",
+      order: 2,
       title: "Backend",
       items: ["Node.js / Express.js", "PHP", "RESTful API tasarımı"],
       featured: true,
     },
-    { title: "Veritabanları", items: ["MySQL", "PostgreSQL", "MongoDB", "SQLite"] },
     {
+      id: "databases",
+      order: 3,
+      title: "Veritabanları",
+      items: ["PostgreSQL", "MySQL", "SQLite", "MongoDB"],
+      featured: true,
+    },
+    {
+      id: "devops",
+      order: 4,
       title: "DevOps ve altyapı",
       items: [
         "Git",
         "GitHub Actions",
         "Docker",
         "CI/CD hatları",
+        "Linux sunucu yönetimi",
         "Traefik",
         "Coolify",
-        "Linux sunucu yönetimi",
-        "QEMU",
         "Go",
+        "QEMU",
       ],
       featured: true,
     },
     {
+      id: "security",
+      order: 5,
+      title: "Güvenlik",
+      items: [
+        "Web uygulaması güvenlik testi",
+        "Ağ ve sistem sızma testi",
+        "Zafiyet analizi ve istismar",
+        "SOC temelleri",
+      ],
+      featured: true,
+    },
+    {
+      id: "networking",
+      order: 6,
       title: "Ağ",
       items: [
         "Ağ temelleri",
@@ -153,33 +228,27 @@ export const skills: Record<Locale, SkillGroup[]> = {
       ],
     },
     {
-      title: "Güvenlik",
-      items: [
-        "Zafiyet analizi ve istismar",
-        "Ağ ve sistem sızma testi",
-        "Web uygulaması güvenlik testi",
-        "SOC temelleri",
-      ],
-      featured: true,
-    },
-    {
+      id: "ways-of-working",
+      order: 7,
       title: "Çalışma biçimi",
       items: [
         "Agile / Scrum",
         "Sprint planlama",
-        "ClickUp",
         "Kod incelemesi",
         "İş ve hata takibi",
+        "ClickUp",
         "Teknik ekip liderliği",
       ],
     },
     {
+      id: "other",
+      order: 8,
       title: "Diğer",
       items: [
         "DNS ve alan adı yapılandırması",
         "Web sitesi yayına alma ve bakımı",
-        "Teknik topluluk yönetimi",
-        "Topluluk önünde konuşma",
+        "Teknoloji topluluğu yönetimi",
+        "Konuşmalar",
       ],
     },
   ],

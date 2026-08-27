@@ -1,5 +1,5 @@
 # Tasarım Yönü, UI/UX ve Frontend
-Durum: Uygulandı (Faz 3, PR #5; içerik ve hero Faz 4, PR #6) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı (Faz 3, PR #5; içerik Faz 4, PR #6; UI/güven güncellemesi 2026-08-27) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -8,9 +8,9 @@ Mevcut tema teknik olarak "Emerald" değil, Tailwind'in emerald ramp'inin oklch'
 ## Karar(lar)
 
 1. **Tasarım yönü**: Terminal Editorial (A). Nötr zemin + rol tabanlı üç fontlu tipografi + tek sütun editoryal omurga + minimum hareket.
-2. **Tipografi**: Geist Sans Variable (gövde/UI) + Geist Mono Variable (etiket, yıl, stack rozeti, uptime, commit SHA, sertifika kodu) + Instrument Serif 400 (yalnızca h1 ve büyük pull quote). Üçü de `next/font/local` ile vendor edilmiş woff2 dosyalarından yüklenir, `latin` + `latin-ext` alt kümesi zorunlu.
+2. **Tipografi**: Geist Sans Variable (gövde, UI ve tüm başlıklar) + Geist Mono Variable (etiket, yıl, stack rozeti, uptime, commit SHA, sertifika kodu). İkisi de `next/font/local` ile vendor edilmiş woff2 dosyalarından yüklenir, `latin` + `latin-ext` alt kümesi zorunlu. Instrument Serif yalnızca OG image route'unda kalır; sayfa başlıkları Geist Sans kullanır.
 3. **Palet**: Nötr gri/siyah-beyaz zemin, emerald tek role indirilir: link, focus ring ve "up" durumu.
-4. **Layout**: Tek sütun editoryal; proje ve yazı listeleri kart değil satır (yıl · başlık · rol · stack, mono hizalı); proje detayında 4 hücreli mono künye + tam genişlik kapak; md altı için Radix Dialog tabanlı mobil menü.
+4. **Layout**: Ana sayfa `Hero` → seçili projeler → son yazılar → yetkinlik bölümü (`SkillsStrip`). Container `max-w-6xl` (`page-shell`). Proje ve yazı listeleri editorial index satırları (`content-entry`, numaralı sol sütun, outcome vurgusu). Yetkinlikler kategorize iki sütun grid (`SkillCategoryList`), teknoloji pill'leri yatay wrap, `simple-icons` ile marka logoları, sıra HTML → CSS → JS → framework mantığında. İç sayfalar `PageSection` + `PageHeader`; contact gizlilik metni görünür.
 5. **Hareket**: motion (eski framer-motion) LazyMotion + `m` ile, yalnızca opacity + 2-4px translate, 150-220ms, stagger 40ms ve en fazla 4 eleman; `useReducedMotion` + global `prefers-reduced-motion` CSS fallback'i zorunlu.
 6. **Erişilebilirlik**: WCAG 2.2 SC 2.5.8 (24x24 CSS px minimum hedef boyutu), contact form durum mesajlarında `role="alert"` / `role="status"`, solid accent + 2px offset focus ring.
 
@@ -78,19 +78,19 @@ Bu kararların kod tarafı Faz 3'te (dal `feature/faz-3-tasarim-sistemi`, PR #5,
 
 **Palet.** `src/app/globals.css` nötr oklch token sistemine geçti (`--background: oklch(0.9846 0.0017 247.8)` light, `oklch(0.1535 0.0072 258.4)` dark), `--shadow-color` token'ı eklendi ve panel gölgeleri buradan türetiliyor. `--primary` (oklch(0.4794 0.1156 156.3)) ile `--muted-foreground` (oklch(0.5044 0.0114 252.9)) artık ayrı değerler, çakışma bug'ı kapandı.
 
-**Layout.** `src/components/layout/mobile-menu.tsx` Radix Dialog tabanlı mobil menü ekliyor, `src/components/layout/footer.tsx` artık sayfa linklerini (`navItems`) ayrı bir `nav` bloğunda listeliyor; ikisi de kararla uyumlu. Proje/yazı listeleri satır formatında (`project-row`/blog satırı, mono hizalı). Hero (`src/components/sections/hero.tsx`) ve header (`src/components/layout/header.tsx`) Faz 4'te yeniden tasarlandı: hero tek sütun, plandaki metrik kartları ve "available for work" rozeti yok; header monogram (`{t("brand.monogram")}`) + görünür isim gösteriyor (plan `sr-only` istiyordu). Bu, aşağıdaki "Sapmalar" bölümünde ayrıca not edildi.
+**Layout (2026-08-27 güncel).** Ana sayfa: `Hero` (metrik strip, opsiyonel profil fotoğrafı) → `ProjectList` (featured) → `PostList` → `SkillsStrip` (`SkillCategoryList`, 2 sütun, teknoloji logoları). Flat sticky header, footer'da self-host satırı ve `/api/health` linki. Proje listesi outcome-first editorial index; kapaksız yayın kuralı sürüyor. Scroll landing, bento grid ve marquee kaldırıldı (UI yenileme).
 
-**Hareket.** `src/components/motion-provider.tsx` `LazyMotion` + `domAnimation` + `m` kalıbını kuruyor ve kök layout'ta sarmalayıcı olarak kullanılıyor. `src/lib/motion.ts` stagger'ı 40ms'e (`STAGGER_SECONDS = 0.04`), süreyi 180ms'e sabitliyor ve `MAX_STAGGER_ITEMS = 4` ile sınırlıyor; `useReducedMotion` her animasyonlu bileşende okunuyor. `globals.css:218` civarında global `@media (prefers-reduced-motion: reduce)` fallback'i var. Açık madde: `staggerItem`/`fadeUp` varyantlarının `hidden` durumu `reduced` bilgisine bakılmaksızın sunucu tarafında `opacity: 0` ile render ediliyor (useReducedMotion sunucuda `null` döner, `?? false`'a düşer), yani reduced-motion tercihi olan bir ziyaretçide bile ilk HTML'de içerik gizli geliyor, hidrasyona kadar; tarayıcıda doğrulanan bir tur yapılmadı.
+**Hareket.** `src/components/motion-provider.tsx` `LazyMotion` + `domAnimation` + `m` kalıbını kuruyor ve kök layout'ta sarmalayıcı olarak kullanılıyor. `src/lib/motion.ts` stagger'ı 40ms'e (`STAGGER_SECONDS = 0.04`), süreyi 180ms'e sabitliyor ve `MAX_STAGGER_ITEMS = 4` ile sınırlıyor; `useReducedMotion` her animasyonlu bileşende okunuyor. `globals.css` içinde global `@media (prefers-reduced-motion: reduce)` fallback'i var; `.motion-item` sınıfı SSR'da `opacity: 0` hidden varyantını reduced-motion kullanıcıları için geçersiz kılıyor.
 
-**Erişilebilirlik.** `src/app/[lang]/layout.tsx:88-89` skip link (`.skip-link`, `#main`), `contact-form.tsx:121` ve `:129` `role="alert"`/`role="status"`, `:139` `aria-busy={status === "loading"}`, `globals.css:272` `.tap-target` sınıfı 24x24 minimum hedef boyutu için, `theme-toggle.tsx:27` ve `:40` `aria-label={t("a11y.toggleTheme")}` ile TR/EN çevirili. Hepsi doğrulandı.
+**Erişilebilirlik.** `src/app/[lang]/layout.tsx:88-89` skip link (`.skip-link`, `#main`), `contact-form.tsx:121` ve `:129` `role="alert"`/`role="status"`, `:139` `aria-busy={status === "loading"}`, `globals.css` `.tap-target` sınıfı (header nav, dil anahtarı, footer), `theme-toggle.tsx:27` ve `:40` `aria-label={t("a11y.toggleTheme")}` ile TR/EN çevirili. Hepsi doğrulandı.
 
 **OG image / icon.** `src/app/icon.tsx` "DCY" monogramını kararın dark zemin (#0a0c0f) + accent (#4fcc8d) paletiyle render ediyor; `src/app/[lang]/opengraph-image.tsx` gerçek isim, unvan ve lokasyonu Instrument Serif ile basıyor, şablon "Building clean, fast experiences for the web" metni gitti.
 
-**Sapmalar (Faz 4, `d2eaf1e`):** Faz 4 devir notuna göre hero ve header planda tam kodu olmayan bir alanda yeniden tasarlandı: hero tek sütun, metrik kartları ve "available for work" rozeti kaldırıldı; header'da monogram + görünür isim kullanıldı (plan `sr-only` istiyordu); footer CTA butonu kaldırıldı; contact formundaki konu alanı kaldırıldı (API opsiyonel `subject`'i kabul etmeye devam ediyor). Bu değişiklikler bu dokümanın Karar 4'ünü daraltıyor ama ihlal etmiyor; site sahibinin onayı bekleniyor (bkz. `docs/plans/handoffs/faz-4.md`).
+**Faz 4 sapmaları (2026-08-27):** Hero metrik/available rozeti, header sr-only isim ve footer Contact CTA site sahibi onayıyla geri alındı (UI/UX yenileme). Contact formundaki konu alanı kaldırılmış halde kaldı (API opsiyonel `subject`'i kabul etmeye devam ediyor).
 
 **Hâlâ açık olanlar:**
 - Tarayıcıda ekran görüntüsü turu yapılmadı (Faz 3 manuel checklist'in 14 maddelik listesi, `docs/plans/handoffs/faz-3-manual-checklist.md`, sahibini bekliyor).
-- Proje kapakları henüz teslim edilmedi; `project-card.tsx:37` kapak alanını yalnızca `project.cover` varsa render ediyor, yoksa hiçbir gradyan placeholder göstermiyor (kararla uyumlu, ama görsel yok).
+- Proje kapakları henüz teslim edilmedi; detay sayfası kapak alanını yalnızca `project.cover` varsa render ediyor, liste satır formatında kapaksız (kararla uyumlu).
 - React ViewTransition alınmadı (`grep -ri "ViewTransition" src` sıfır sonuç); motion (LazyMotion) ile devam ediliyor, reddedilen alternatifler bölümündeki karar hâlâ geçerli.
 
 ## Riskler ve tripwire'lar
@@ -114,7 +114,7 @@ Faz 3 (Tasarım sistemi) sırası, [10-yol-haritasi.md](10-yol-haritasi.md) ile 
 5. LazyMotion + `m`'ye geçiş; stagger 40ms, en fazla 4 eleman; `useReducedMotion` + global `prefers-reduced-motion` CSS fallback'i.
 6. Erişilebilirlik: contact form mesajlarına `role="alert"`/`role="status"`, 24x24 minimum hedef boyutu denetimi, solid focus ring.
 7. `opengraph-image` ve `icon` route'ları gerçek isim, unvan ve yeni paletle yeniden yazılır (mevcut "Building clean, fast experiences for the web" şablon metni gider).
-8. project-card'da tüm kartı `Link`'e sarma kalıbı bırakılır; başlık link olur, kart `::after` ile genişletilmiş tıklama alanı alır.
+8. project-list'te başlık link olur, satır `::after` ile genişletilmiş tıklama alanı alır (`src/components/sections/project-list.tsx`).
 
 ## İlgili dokümanlar
 
