@@ -1,0 +1,26 @@
+---
+title: Ticket Purchasing System
+slug: ticket-purchasing-system
+summary: A containerized ticket purchasing application I attacked first and then hardened, built during the Siber Vatan program.
+role: Security engineer, Siber Vatan training program
+stack:
+  - PHP
+  - SQLite
+  - Docker
+year: 2024
+outcome: Every finding from the penetration test was closed with input validation, secure session handling and a hardened Docker deployment.
+featured: true
+order: 2
+---
+
+## What I did
+
+I built a ticket purchasing system as a security practice project inside the Siber Vatan training program, then ran a penetration test and a vulnerability assessment against my own application. The findings drove the second half of the work: input validation on every request that touches the database, session handling that survives a stolen cookie, and a Docker deployment where the application does not run as root and does not expose more than it needs to.
+
+## Why it was built this way
+
+Writing the application first and attacking it afterwards was the point. Reading a vulnerability list teaches you the name of a problem; watching your own checkout flow hand out someone else's ticket teaches you why the mitigation is shaped the way it is. Keeping the stack deliberately small, PHP with SQLite in a single container, meant nothing hid behind a framework: every input path and every session decision was code I had written and could break.
+
+## What I learned
+
+The fixes that mattered were not the exotic ones. Most of what I found came down to trusting a value that arrived from the client, and the pattern that closed it was always the same: validate at the boundary, keep the trusted state on the server, and never let the deployment be the place where a shortcut lives. Hardening the container turned out to be part of the same lesson, because a well written application on a permissive host is still a permissive system.

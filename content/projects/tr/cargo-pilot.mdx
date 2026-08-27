@@ -1,0 +1,29 @@
+---
+title: Cargo Pilot
+slug: cargo-pilot
+summary: Kargo ve yük planlama süreçlerini dijitalleştiren, yükün nasıl yerleşeceğini optimize eden bir lojistik platformu.
+role: DevOps Chapter Lead
+stack:
+  - Docker
+  - GitHub Actions
+  - Coolify
+  - Linux
+year: 2025
+links:
+  live: https://cargopilot.divizyon.org
+outcome: Elle yapılan yayınların yerini, kendi sunucumuzdaki Coolify altyapısında çalışan Docker ve GitHub Actions hattı aldı.
+featured: true
+order: 1
+---
+
+## Ne yaptım
+
+Cargo Pilot, Divizyon'da geliştirdiğimiz, lojistik operasyonlarında kargo ve yük planlamasını dijitalleştiren bir web platformu. DevOps chapter'ının sorumluluğunu üstlendim: uygulamayı Docker ile konteynerleştirdim, derleme ve yayın adımlarını GitHub Actions üzerinde kurdum, tümünü yönetilen bir platform yerine kendi sunucumuzdaki Coolify altyapısında çalıştırdım. Altyapı işinin yanında yük planlama optimizasyon algoritmasının çekirdeğine katkı verdim ve çok disiplinli ekibi Agile akışta, sprint planlama ve ClickUp üzerinde görev takibiyle koordine ettim.
+
+## Neden böyle kurgulandı
+
+Yük planlama, işin insanlar tarafından kağıt ve tablo üstünde yapılan kısmıydı; bu yüzden ürünün yerleşimi yalnızca kaydetmesi değil, kararı kendisinin vermesi gerekiyordu. Teslimat tarafında ise ekip küçüktü ve yayın adımı darboğazdı: her deploy sunucuyu tanıyan birini gerektiriyordu. Uygulamayı konteynere taşımak ve yayını bir hattın arkasına almak, deploy'u ekipteki herkesin tetikleyebileceği bir adıma çevirdi ve ortamı elle ayarlanan bir şey olmaktan çıkarıp tekrar üretilebilir hale getirdi.
+
+## Ne öğrendim
+
+Hem algoritmayı hem altyapıyı üstlenmek sistemi okuma biçimimi değiştirdi. Yerel testte ucuz görünen bir optimizasyon adımı, gerçek yük verisi geldiğinde üretimdeki en yavaş istek haline gelebiliyor; bunu erken görmenin tek yolu dizüstü bilgisayar yerine gerçek konteyneri gerçek veriyle çalıştırmak. İkinci ders makinelerle değil insanlarla ilgiliydi: bir hat ancak ekip ona güvendiğinde işe yarıyor, bu yüzden kimse cuma günü yayın almaya başlamadan önce geri alma yolunun deploy yolu kadar açık olması gerekiyordu.
