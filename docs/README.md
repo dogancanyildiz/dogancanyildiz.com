@@ -1,6 +1,6 @@
-# dogancanyildiz.sh Karar Dokümanları
+# dogancanyildiz.com Karar Dokümanları
 
-Durum: Kısmen uygulandı (Faz 0-3 main'de PR #2-#5, Faz 4 PR #6 açık), kalan: Faz 4 merge kararı ve teslimatlar, Faz 5 · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Kısmen uygulandı (Faz 0-3 main'de PR #2-#5, Faz 4 PR #6 açık), kalan: Faz 4 merge kararı ve teslimatlar, Faz 5 · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 Bu klasör, yarım kalmış portfolio reposunun modernizasyonu için yapılan denetim, araştırma ve karar kayıtlarını tutar. Kararlar 27 Ağustos 2026'da 3 denetim ve 6 araştırma ajanının çıktılarından sentezlendi, stack önerisi iki karşıt lensle doğrulandı. 2026-08-27 itibarıyla kararların büyük kısmı koda döndü: Faz 0-3 main dalında sırayla merge edildi (PR #2-#5), Faz 4 PR #6 olarak açık ve CI yeşil (merge kararı sahibinde), Faz 5 henüz başlamadı; ilgili dosyaların "Durum" satırları buna göre güncellendi. Uygulamanın çalışma kayıtları docs/plans/ (faz planları) ve docs/plans/handoffs/ (devir notları, manuel checklist'ler) altında tutulur.
 

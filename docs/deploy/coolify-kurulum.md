@@ -20,8 +20,10 @@ Hedef Coolify sürümü: v4.3.1. Bu adımlar Coolify panelinde el ile yürütül
 
 ## 3. Domain
 
-- [ ] Domains: `https://dogancanyildiz.sh`
-- [ ] "Redirect" ayarı: www -> non-www (Coolify'ın dahili www yönlendirmesi). `dogancanyildiz.com -> dogancanyildiz.sh` cross domain yönlendirmesi burada değil, Cloudflare Redirect Rules'ta tanımlanır, bkz. `docs/deploy/cloudflare-kurulum.md`.
+**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; tarihsel kurulum tersini tarif ediyordu.
+
+- [ ] Domains: `https://dogancanyildiz.com`
+- [ ] "Redirect" ayarı (www -> non-www): Coolify'ın dahili www yönlendirmesi **kullanılmaz**. `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi de dahil olmak üzere tüm domain yönlendirmesi Cloudflare Redirect Rules'ta tek yerden tanımlanır, bkz. `docs/deploy/cloudflare-kurulum.md`.
 
 ## 4. Env değişkenleri
 
@@ -29,22 +31,22 @@ Coolify'da her değişkenin yanındaki "Build Variable?" kutusu, o değişkenin 
 
 | Değişken | Build Variable? | Değer | Gerekçe |
 |---|---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | **Evet** | `https://dogancanyildiz.sh` | `next build` bunu client bundle'a inline ediyor ve Dockerfile'daki `ARG NEXT_PUBLIC_SITE_URL` varsayılansız (commit `fc470e0`). Build Variable işaretlenmezse build sessizce `undefined` bırakmaz, `resolveSiteUrl` hatasıyla Coolify build logunda durur (`/robots.txt` prerender adımı). |
+| `NEXT_PUBLIC_SITE_URL` | **Evet** | `https://dogancanyildiz.com` | `next build` bunu client bundle'a inline ediyor ve Dockerfile'daki `ARG NEXT_PUBLIC_SITE_URL` varsayılansız (commit `fc470e0`). Build Variable işaretlenmezse build sessizce `undefined` bırakmaz, `resolveSiteUrl` hatasıyla Coolify build logunda durur (`/robots.txt` prerender adımı). |
 | `RESEND_API_KEY` | Hayır (Runtime) | Resend panelinden alınan `re_...` anahtarı | Sır. Build variable image katmanlarına ve build loglarına sızabilir. |
 | `CONTACT_EMAIL` | Hayır (Runtime) | `me@dogancanyildiz.com` | Yalnızca sunucu tarafındaki contact route okuyor. |
-| `FROM_EMAIL` | Hayır (Runtime) | `contact@dogancanyildiz.sh` | Aynı gerekçe. Resend'de doğrulanmış domain olmalı, bkz. `docs/deploy/resend-domain.md`. |
+| `FROM_EMAIL` | Hayır (Runtime) | `contact@dogancanyildiz.com` | Aynı gerekçe. Resend'de doğrulanmış domain olmalı, bkz. `docs/deploy/resend-domain.md`. |
 | `TRUST_CF_CONNECTING_IP` | Hayır (Runtime) | Task 9 tamamlanana kadar `false`, sonra `true` | Faz 0'ın `trustsCloudflareHeaders()` kapısı. Traefik `forwardedHeaders.trustedIPs` set edilmeden ve origin yalnızca Cloudflare adreslerine kısıtlanmadan `true` yapılırsa rate limit anahtarı istemcinin uydurduğu başlıktan türer ve limit tamamen atlanabilir. Bkz. `docs/deploy/traefik-ve-origin.md` bölüm 2 ve 5. |
 | `GATUS_URL` | Hayır (Runtime) | Faz 5'te doldurulur | İç adres, client'a hiçbir koşulda gitmez. |
 
 - [ ] Doğrulama: deploy sonrası Coolify build logunda `re_` ile başlayan hiçbir string yok.
-- [ ] Doğrulama: canlı sayfanın HTML kaynağında `https://dogancanyildiz.sh` geçiyor (`NEXT_PUBLIC_SITE_URL` gerçekten gömülmüş).
+- [ ] Doğrulama: canlı sayfanın HTML kaynağında `https://dogancanyildiz.com` geçiyor (`NEXT_PUBLIC_SITE_URL` gerçekten gömülmüş).
 - [ ] Doğrulama: `TRUST_CF_CONNECTING_IP` yalnızca Task 9 bittikten sonra `true` yapıldı; PR preview ortamlarında `false` kalıyor (preview'lar Cloudflare'ın arkasında değil).
 
 ## 5. Auto deploy ve Preview Deployments
 
 - [ ] Advanced -> "Auto Deploy" açık. `main`'e push, GitHub App webhook'u üzerinden yeniden deploy tetikler.
 - [ ] Advanced -> "Preview Deployments" açık.
-- [ ] Preview URL şablonu: `http://{{pr_id}}.preview.dogancanyildiz.sh`
+- [ ] Preview URL şablonu: `http://{{pr_id}}.preview.dogancanyildiz.com`
   - Şema bilerek `http`. Cloudflare ücretsiz planı wildcard DNS kaydını proxy'leyemiyor, dolayısıyla `*.preview` kaydı gri bulut kalıyor; gri bulutta Let's Encrypt HTTP-01 doğrulaması origin'e doğrudan ulaşmak zorunda kalır ve origin yalnızca Cloudflare IP'lerine açık olduğu için başarısız olur. Preview'lar TLS'siz ve yalnızca allowlist'teki admin IP'sinden erişilebilir kalır, bkz. `docs/deploy/traefik-ve-origin.md`.
 - [ ] Doğrulama: test PR'ı açıldığında Coolify PR'a preview URL'i içeren bir yorum bırakıyor.
 

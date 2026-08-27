@@ -1,5 +1,5 @@
 # Güvenlik ve Bakım Operasyonu
-Durum: Kısmen uygulandı (Faz 0, PR #2; Faz 1, PR #3), kalan: Renovate GitHub App kurulumu ve aylık güvenlik takibi (Faz 5) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Kısmen uygulandı (Faz 0, PR #2; Faz 1, PR #3), kalan: Renovate GitHub App kurulumu ve aylık güvenlik takibi (Faz 5) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 

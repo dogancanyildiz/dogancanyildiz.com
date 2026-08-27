@@ -1,6 +1,6 @@
 # Fazlı Yol Haritası
 
-Durum: Kısmen uygulandı (Faz 0-3 main'de, Faz 4 PR #6 açık ve CI yeşil), kalan: Faz 4 merge kararı, Faz 5 (Gatus, Umami, Renovate) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Kısmen uygulandı (Faz 0-3 main'de, Faz 4 PR #6 açık ve CI yeşil), kalan: Faz 4 merge kararı, Faz 5 (Gatus, Umami, Renovate) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -45,18 +45,18 @@ Büyüklük: M. Çok sayıda küçük ve mekanik değişiklik, ama hiçbiri mima
 - [ ] Coolify'da GitHub App ile git tabanlı Dockerfile build pack, auto-deploy ve PR Preview Deployments açık (sahibi: manuel checklist, `docs/deploy/coolify-kurulum.md`)
 - [ ] Health check Coolify'da `/api/health`'e bağlanır ve staging'de doğrulanır (coollabsio/coolify#7500 bilinen bug'ı yüzünden) (sahibi: manuel checklist)
 - [x] GitHub Actions: PR'da lint + `tsc --noEmit` + build çalıştıran zorunlu kapı, image push yok (`ci.yml`'de `checks` ve `docker` job'ları; PR #6'da her ikisi de `pass`)
-- [ ] dogancanyildiz.sh apex + www Coolify dahili ayarıyla; dogancanyildiz.com -> .sh 301'i **Cloudflare Redirect Rules**'ta tek atlamada (Traefik redirectregex yalnızca yedek yol olarak Coolify'da tanımlı kalır, bkz. [06-devops-ve-deploy.md](06-devops-ve-deploy.md) bölüm 7-8) (sahibi: manuel checklist, ayrıca `11-acik-sorular.md` soru 5 açık)
+- [ ] **Karar değişikliği (2026-08-27):** dogancanyildiz.com apex + www ana domain (Cloudflare Redirect Rules'ta www -> apex dahil, Coolify dahili www ayarı kullanılmaz), dogancanyildiz.sh apex + www yalnızca Cloudflare'da proxied bir kayıt olarak origin'e ulaşmadan .sh -> .com 301'i **Cloudflare Redirect Rules**'ta tek atlamada (Traefik redirectregex yalnızca yedek yol olarak Coolify'da tanımlı kalır, bkz. [06-devops-ve-deploy.md](06-devops-ve-deploy.md) bölüm 7-8) (sahibi: manuel checklist; tarihsel madde metni ".sh ana, .com 301" idi, `11-acik-sorular.md` soru 5 artık cevaplandı, panele alınması bekliyor)
 - [ ] Cloudflare DNS proxied mod (turuncu bulut) açılır, SSL modu Full (strict) set edilir (sahibi: manuel checklist, `docs/deploy/cloudflare-kurulum.md`)
 - [ ] Traefik entrypoint'inde `forwardedHeaders.trustedIPs` Cloudflare IP listesiyle set edilir, contact rate limit anahtarı `CF-Connecting-IP` olur (sahibi: manuel checklist; kod tarafı hazır (`TRUST_CF_CONNECTING_IP` bayrağı), env hâlâ `false`)
 - [ ] Origin'i yalnızca Cloudflare IP'lerinden erişilebilir kılmak (DOCKER-USER iptables kuralları; ufw tek başına Docker'ın yayınladığı portları filtrelemiyor), önerilir (sahibi: manuel checklist, `docs/deploy/traefik-ve-origin.md`)
 - [ ] Cloudflare cache kuralı `_next/static/*` ve `public/` görselleri için, `/api/contact` için Cloudflare Rate Limiting kuralı (free planda 3 istek/10sn), Bot Fight Mode açık (sahibi: manuel checklist)
 - [ ] Traefik'te HSTS ve compress middleware'i, streaming için buffering kapatma (sahibi: manuel checklist)
 - [ ] Coolify env değişkenleri Build/Runtime olarak ayrılır (`NEXT_PUBLIC_SITE_URL` Build; `RESEND_API_KEY`, `CONTACT_EMAIL`, `FROM_EMAIL` Runtime) (sahibi: manuel checklist)
-- [ ] Resend'de dogancanyildiz.sh domain doğrulaması (SPF/DKIM/DMARC) (sahibi: manuel checklist, `docs/deploy/resend-domain.md`; FROM_EMAIL contact@dogancanyildiz.sh, alıcı me@dogancanyildiz.com)
+- [ ] Resend'de dogancanyildiz.com domain doğrulaması (SPF/DKIM/DMARC) (sahibi: manuel checklist, `docs/deploy/resend-domain.md`; FROM_EMAIL contact@dogancanyildiz.com, alıcı me@dogancanyildiz.com)
 
-Bitti sayılma kriteri: main'e merge edilen bir commit Coolify'da otomatik deploy tetikliyor ve site canlıda ayakta; test PR'ı açıldığında preview URL üretiliyor; `curl -I https://dogancanyildiz.com/herhangi-bir-yol` tek atlamada `https://dogancanyildiz.sh/herhangi-bir-yol`'a 301 dönüyor; Coolify sağlık kontrolü yeşil.
+Bitti sayılma kriteri: main'e merge edilen bir commit Coolify'da otomatik deploy tetikliyor ve site canlıda ayakta; test PR'ı açıldığında preview URL üretiliyor; `curl -I https://dogancanyildiz.sh/herhangi-bir-yol` tek atlamada `https://dogancanyildiz.com/herhangi-bir-yol`'a 301 dönüyor; Coolify sağlık kontrolü yeşil.
 
-Gerçek sonuç (PR #3, main'de merge): kod tarafı (Dockerfile, `.dockerignore`, CI workflow) yerelde ve CI'da doğrulandı, 10 dosya / 101 test (düzeltme turuyla 13 dosya / 125 test), `NEXT_PUBLIC_SITE_URL=... npm run build` 12 route / 18 statik sayfa; Docker imajı yerelde build edilip `healthy` görüldü. Panel adımlarının hiçbiri (Coolify, Cloudflare, Traefik, Resend) bu oturumda uygulanmadı; canlı otomatik deploy, preview URL ve `.com -> .sh` 301 bu yüzden doğrulanmadı, tamamı `docs/plans/handoffs/faz-1-manual-checklist.md`'de sahibini bekliyor.
+Gerçek sonuç (PR #3, main'de merge): kod tarafı (Dockerfile, `.dockerignore`, CI workflow) yerelde ve CI'da doğrulandı, 10 dosya / 101 test (düzeltme turuyla 13 dosya / 125 test), `NEXT_PUBLIC_SITE_URL=... npm run build` 12 route / 18 statik sayfa; Docker imajı yerelde build edilip `healthy` görüldü. Panel adımlarının hiçbiri (Coolify, Cloudflare, Traefik, Resend) bu oturumda uygulanmadı; canlı otomatik deploy, preview URL ve `.sh -> .com` 301 bu yüzden doğrulanmadı, tamamı `docs/plans/handoffs/faz-1-manual-checklist.md`'de sahibini bekliyor.
 
 Büyüklük: L. Repo şu an Docker'a hiç hazır değil (Dockerfile, .dockerignore, workflow, hiçbiri yok), sıfırdan kurulum.
 
