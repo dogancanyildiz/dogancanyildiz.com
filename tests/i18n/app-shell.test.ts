@@ -176,6 +176,14 @@ describe("404 pages", () => {
       "export const dynamicParams = false"
     );
   });
+});
+
+describe("global-not-found font parity", () => {
+  it("carries the same vendored font className the [lang] layout uses", () => {
+    const source = read("src/app/global-not-found.tsx");
+    expect(source).toContain('import { fontVariables } from "@/fonts"');
+    expect(source).toMatch(/className=\{`\$\{fontVariables\}/);
+  });
 
   it("has a localized boundary for notFound() thrown inside a locale", () => {
     const source = read("src/app/[lang]/not-found.tsx");

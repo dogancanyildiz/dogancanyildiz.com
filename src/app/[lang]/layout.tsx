@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import "../globals.css";
+import { fontVariables } from "@/fonts";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import { buildOpenGraph } from "@/lib/seo/locale-url";
@@ -64,7 +65,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
 
   return (
     <html lang={lang} suppressHydrationWarning>
-      <body className="font-sans antialiased">
+      <body className={`${fontVariables} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

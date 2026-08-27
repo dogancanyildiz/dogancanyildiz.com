@@ -49,12 +49,19 @@
 }
 
 :root {
-  --font-sans-stack: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  /* Vendored faces first, latin then latin-ext, then the system fallbacks.
+     The two vendored faces carry disjoint unicode-range declarations, so the
+     browser resolves Turkish glyphs on the -ext family instead of dropping to
+     a system font. */
+  --font-sans-stack:
+    var(--font-sans-latin), var(--font-sans-ext), ui-sans-serif, system-ui,
+    "Segoe UI", sans-serif;
   --font-display-stack:
-    "Iowan Old Style", "Palatino Linotype", "Book Antiqua",
-    "Cormorant Garamond", Georgia, serif;
+    var(--font-display-latin), var(--font-display-ext), "Iowan Old Style",
+    "Palatino Linotype", Georgia, serif;
   --font-mono-stack:
-    "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
+    var(--font-mono-latin), var(--font-mono-ext), ui-monospace,
+    "SFMono-Regular", "SF Mono", Consolas, monospace;
   --radius: 1.25rem;
   --background: oklch(0.979 0.021 166.5);
   --foreground: oklch(0.213 0.044 157.3);
@@ -175,12 +182,19 @@
     background: color-mix(in oklab, var(--primary) 40%, white);
     color: var(--primary-foreground);
   }
-  h1,
+  /* Instrument Serif is a single weight display face: it only holds up at h1
+     and pull quote size. Everything below h1 stays on Geist Sans. */
+  h1 {
+    font-family: var(--font-display-stack);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
   h2,
   h3,
   h4 {
-    font-family: var(--font-fraunces);
-    letter-spacing: -0.03em;
+    font-family: var(--font-sans-stack);
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
   p {
     text-wrap: pretty;
@@ -222,5 +236,9 @@
 
   .section-copy {
     @apply text-base leading-7 text-muted-foreground sm:text-lg;
+  }
+
+  .pull-quote {
+    @apply font-display text-2xl leading-snug text-foreground sm:text-3xl;
   }
 }
