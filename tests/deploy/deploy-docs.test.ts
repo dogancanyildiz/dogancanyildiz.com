@@ -31,4 +31,24 @@ describe("deploy checklists match the shipped behaviour", () => {
       }
     );
   });
+
+  describe("health check expectation", () => {
+    // src/app/api/health/route.ts answers with status, uptime and timestamp.
+    // A checklist that prints the body as a literal makes a healthy deploy
+    // look broken at the gate that blocks going to production.
+    const HANDOFF = "docs/plans/handoffs/faz-1.md";
+
+    it.each([COOLIFY, HANDOFF])(
+      "%s does not expect a literal {status:ok} body",
+      (path) => {
+        expect(readDoc(path)).not.toMatch(/200 `?\{"status":"ok"\}`?/);
+      }
+    );
+
+    it("the Coolify checklist names uptime and timestamp as varying fields", () => {
+      const doc = readDoc(COOLIFY);
+      expect(doc).toMatch(/uptime/);
+      expect(doc).toMatch(/timestamp/);
+    });
+  });
 });

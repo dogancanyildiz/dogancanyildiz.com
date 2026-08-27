@@ -73,8 +73,10 @@ Beklenen:
 
 ```
 healthy
-200 {"status":"ok"}
+200 {"status":"ok","uptime":<saniye>,"timestamp":"2026-..."}
 ```
+
+Sözleşme yalnızca HTTP `200` ve gövdedeki `status` alanının `ok` olmasıdır. `uptime` ve `timestamp` her çağrıda değişir (`src/app/api/health/route.ts`), gövdenin birebir eşleşmesi beklenmez; Coolify health check'i de yalnızca status koduna bakar.
 
 `unhealthy` görülürse rolling update yeni deploy'ları geri alır. O durumda Coolify UI'da health check geçici olarak kapatılır, sorun `#7500` referansıyla not edilir ve production'a health check bağlı halde geçilmez.
 
