@@ -2,9 +2,8 @@
 
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { ArrowUpRight } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -12,8 +11,9 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import type { Project } from "@/data/projects";
+import { Link } from "@/i18n/navigation";
 import { fadeUp } from "@/lib/motion";
+import type { Project } from "@/data/projects";
 
 interface ProjectCardProps {
   project: Project;
@@ -34,62 +34,6 @@ export function ProjectCard({
   const compact = variant === "compact";
   const featured = variant === "featured";
 
-  const content = (
-    <Card className="group h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-primary/30">
-      <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              {project.year}
-            </span>
-            {project.highlight ? (
-              <span className="text-xs font-medium text-primary">
-                {project.highlight}
-              </span>
-            ) : null}
-          </div>
-          <CardTitle
-            className={
-              featured
-                ? "text-3xl sm:text-4xl"
-                : compact
-                  ? "text-xl"
-                  : "text-2xl"
-            }
-          >
-            {title}
-          </CardTitle>
-          {project.summary ? (
-            <p className="max-w-xl text-sm leading-6 text-foreground/75">
-              {project.summary}
-            </p>
-          ) : null}
-        </div>
-        <span className="flex size-11 items-center justify-center rounded-full border border-border/70 bg-background/75 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-foreground">
-          <ArrowUpRight className="size-4" />
-        </span>
-      </CardHeader>
-      <CardContent className={compact ? "space-y-4 pt-0" : "space-y-5 pt-0"}>
-        <CardDescription>{description}</CardDescription>
-        {project.impact ? (
-          <p className="rounded-[1.25rem] border border-border/70 bg-background/55 px-4 py-3 text-sm leading-6 text-muted-foreground">
-            {project.impact}
-          </p>
-        ) : null}
-        <div className="flex flex-wrap gap-2">
-          {project.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full border border-border/65 bg-accent/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/80"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   const wrapperClassName = featured
     ? "lg:[&_div[data-slot='card']]:min-h-[31rem]"
     : compact
@@ -104,9 +48,70 @@ export function ProjectCard({
       custom={index}
       className={wrapperClassName}
     >
-      <Link href={`/projects/${project.slug}`} className="block h-full">
-        {content}
-      </Link>
+      {/* The whole card is clickable through the title link's ::after overlay,
+          so the card itself stays a plain container and can host extra links
+          (repo, live site) without nesting interactive elements. */}
+      <Card className="group relative h-full overflow-hidden transition-colors hover:border-primary">
+        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-border bg-background px-3 py-1 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-muted-foreground">
+                {project.year ?? ""}
+              </span>
+              {project.highlight ? (
+                <span className="text-xs font-medium text-primary">
+                  {project.highlight}
+                </span>
+              ) : null}
+            </div>
+            <CardTitle
+              className={
+                featured
+                  ? "text-3xl sm:text-4xl"
+                  : compact
+                    ? "text-xl"
+                    : "text-2xl"
+              }
+            >
+              <Link
+                href={`/projects/${project.slug}`}
+                className="text-foreground no-underline transition-colors after:absolute after:inset-0 after:content-[''] group-hover:text-primary"
+              >
+                {title}
+              </Link>
+            </CardTitle>
+            {project.summary ? (
+              <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+                {project.summary}
+              </p>
+            ) : null}
+          </div>
+          <span
+            aria-hidden="true"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors group-hover:text-foreground"
+          >
+            <ArrowUpRight className="size-4" />
+          </span>
+        </CardHeader>
+        <CardContent className={compact ? "space-y-4 pt-0" : "space-y-5 pt-0"}>
+          <CardDescription>{description}</CardDescription>
+          {project.impact ? (
+            <p className="rounded-[1.25rem] border border-border bg-background px-4 py-3 text-sm leading-6 text-muted-foreground">
+              {project.impact}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            {project.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-border bg-muted px-3 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.14em] text-foreground"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </m.div>
   );
 }

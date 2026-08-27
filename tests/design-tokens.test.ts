@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -163,5 +163,35 @@ describe("component colour hygiene", () => {
       .filter(({ body }) => /radial-gradient/.test(body))
       .map(({ file }) => file);
     expect(offenders).toEqual([]);
+  });
+});
+
+describe("project list layout", () => {
+  it("adds a row component that links year, title, role and stack", () => {
+    const path = "src/components/sections/project-row.tsx";
+    expect(existsSync(repoPath(path))).toBe(true);
+    const source = read(path);
+    expect(source).toContain("export function ProjectRow");
+    expect(source).toContain('from "@/i18n/navigation"');
+    expect(source).toContain("after:absolute after:inset-0");
+  });
+
+  it("renders the project list as rows, not a card grid", () => {
+    const source = read("src/components/sections/projects-section.tsx");
+    expect(source).toContain("ProjectRow");
+    expect(source).not.toContain("ProjectCard");
+    expect(source).toMatch(/<ul\b/);
+  });
+
+  it("keeps ProjectCard down to a single interactive element", () => {
+    const source = read("src/components/sections/project-card.tsx");
+    // The whole card used to sit inside <Link className="block h-full">,
+    // which made the accessible name of that one link the entire card's
+    // text (title, summary, impact, every tag). The title link's own
+    // ::after overlay now carries the click area instead.
+    expect(source).not.toMatch(/<Link[^>]*className="block h-full"/);
+    expect(source).toContain("after:absolute after:inset-0");
+    expect(source).not.toContain("hover:-translate-y-1");
+    expect(source).not.toContain("border-primary/30");
   });
 });
