@@ -4,7 +4,7 @@ Bu adımlar kodla yapılamaz; site sahibi uygular. Her madde "yapıldı" olarak 
 
 ## 1. Dalı yayınla ve PR aç
 
-- [ ] `git checkout feature/faz-0-guvenlik-ve-hijyen && git log --oneline main..HEAD` ile 12 commit'i (10 task, 1 inceleme düzeltmesi, 1 devir notu) gözden geçir.
+- [ ] `git checkout feature/faz-0-guvenlik-ve-hijyen && git log --oneline main..HEAD` ile 18 commit'i (10 task, 3 kod düzeltmesi, 2 belge/plan düzeltmesi, 3 devir notu) gözden geçir.
 - [ ] `git push -u origin feature/faz-0-guvenlik-ve-hijyen`
 - [ ] PR: base `main`, head `feature/faz-0-guvenlik-ve-hijyen`, başlık `feat: phase 0, security and hygiene`. Gövde için planın Task 11 Step 4'teki metni kullan (`docs/plans/2026-08-27-faz-0-guvenlik-ve-hijyen.md`, "gh pr create" bloğu); Bilinen sapma bölümüne `vitest.config.mts`, `.prettierignore`'daki `.superpowers` satırı ve boş `RESEND_API_KEY=` notunu ekle.
 - [ ] PR diff'inde `.env.local`, `.local/`, `.nodeterm/`, `node_modules`, `.next` OLMADIĞINI doğrula (bu oturumda `git diff --name-only e239564..HEAD` ile doğrulandı, boş).
