@@ -21,7 +21,12 @@ const item = {
 
 export function Hero() {
   const { t } = useLocale();
-  const highlights = [t("hero.focus1"), t("hero.focus2"), t("hero.focus3"), t("hero.focus4")];
+  const highlights = [
+    t("hero.focus1"),
+    t("hero.focus2"),
+    t("hero.focus3"),
+    t("hero.focus4"),
+  ];
 
   return (
     <section className="section-space relative overflow-hidden pt-10 sm:pt-14">
@@ -78,7 +83,10 @@ export function Hero() {
             </motion.div>
           </div>
 
-          <motion.aside variants={item} className="surface-panel relative overflow-hidden p-6 sm:p-8">
+          <motion.aside
+            variants={item}
+            className="surface-panel relative overflow-hidden p-6 sm:p-8"
+          >
             <div className="absolute inset-x-10 top-0 h-24 rounded-full bg-primary/12 blur-3xl" />
             <div className="relative space-y-8">
               <div className="space-y-3">
@@ -92,15 +100,23 @@ export function Hero() {
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                 <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-4">
                   <p className="font-display text-3xl text-foreground">5+</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{t("hero.metricYears")}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {t("hero.metricYears")}
+                  </p>
                 </div>
                 <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-4">
                   <p className="font-display text-3xl text-foreground">12</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{t("hero.metricProjects")}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {t("hero.metricProjects")}
+                  </p>
                 </div>
                 <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-4">
-                  <p className="font-display text-3xl text-foreground">UI + FE</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{t("hero.metricFocus")}</p>
+                  <p className="font-display text-3xl text-foreground">
+                    UI + FE
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {t("hero.metricFocus")}
+                  </p>
                 </div>
               </div>
               <div className="space-y-3">
@@ -118,7 +134,9 @@ export function Hero() {
                   ))}
                 </div>
               </div>
-              <p className="text-sm leading-6 text-muted-foreground">{t("hero.note")}</p>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {t("hero.note")}
+              </p>
             </div>
           </motion.aside>
         </motion.div>

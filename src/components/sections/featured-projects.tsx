@@ -36,7 +36,9 @@ export function FeaturedProjects() {
           />
         </motion.div>
         <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-          {lead ? <ProjectCard project={lead} index={0} variant="featured" /> : null}
+          {lead ? (
+            <ProjectCard project={lead} index={0} variant="featured" />
+          ) : null}
           <div className="grid gap-6">
             {rest.map((project, index) => (
               <ProjectCard

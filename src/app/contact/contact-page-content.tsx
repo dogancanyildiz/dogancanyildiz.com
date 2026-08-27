@@ -28,13 +28,17 @@ export function ContactPageContent() {
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                 {t("contact.cardTitle")}
               </p>
-              <p className="text-sm leading-7 text-muted-foreground">{t("contact.cardBody")}</p>
+              <p className="text-sm leading-7 text-muted-foreground">
+                {t("contact.cardBody")}
+              </p>
             </div>
             <div className="grid gap-3">
               <div className="rounded-[1.25rem] border border-border/70 bg-background/55 p-4">
                 <div className="flex items-center gap-3">
                   <MapPin className="size-4 shrink-0 text-muted-foreground" />
-                  <span className="text-sm text-foreground">{t("contact.location")}</span>
+                  <span className="text-sm text-foreground">
+                    {t("contact.location")}
+                  </span>
                 </div>
               </div>
               <div className="rounded-[1.25rem] border border-border/70 bg-background/55 p-4">
@@ -51,7 +55,9 @@ export function ContactPageContent() {
               <div className="rounded-[1.25rem] border border-border/70 bg-background/55 p-4">
                 <div className="flex items-center gap-3">
                   <Briefcase className="size-4 shrink-0 text-muted-foreground" />
-                  <span className="text-sm text-foreground">{t("contact.availability")}</span>
+                  <span className="text-sm text-foreground">
+                    {t("contact.availability")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -62,13 +68,17 @@ export function ContactPageContent() {
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                 {t("contact.responseTitle")}
               </p>
-              <p className="text-sm leading-7 text-muted-foreground">{t("contact.responseBody")}</p>
+              <p className="text-sm leading-7 text-muted-foreground">
+                {t("contact.responseBody")}
+              </p>
             </div>
             <div className="surface-panel p-5">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                 {t("contact.workingTitle")}
               </p>
-              <p className="text-sm leading-7 text-muted-foreground">{t("contact.workingBody")}</p>
+              <p className="text-sm leading-7 text-muted-foreground">
+                {t("contact.workingBody")}
+              </p>
             </div>
             <div className="surface-panel flex items-start gap-3 p-5 sm:col-span-2">
               <Clock3 className="mt-1 size-4 shrink-0 text-primary" />
@@ -76,7 +86,9 @@ export function ContactPageContent() {
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                   {t("contact.availabilityTitle")}
                 </p>
-                <p className="text-sm leading-7 text-muted-foreground">{t("contact.availabilityBody")}</p>
+                <p className="text-sm leading-7 text-muted-foreground">
+                  {t("contact.availabilityBody")}
+                </p>
               </div>
             </div>
           </div>
