@@ -1,5 +1,5 @@
 # Tasarım Yönü, UI/UX ve Frontend
-Durum: Öneri, site sahibinin onayını bekliyor · Tarih: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Uygulandı (Faz 3, PR #5; içerik ve hero Faz 4, PR #6) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
 
 ## Özet
 
@@ -69,6 +69,29 @@ Proje ve yazı listelerinin kart yerine satır (yıl · başlık · rol · stack
 - **CSS scroll-driven animations (`animation-timeline: scroll()`) ile okuma ilerleme çubuğu**: Firefox'ta hâlâ bayrak arkasında; gerekirse `@supports` ile progressive enhancement olarak eklenir, tek yol olarak kurulmaz.
 - **Nav'ı mobilde yatay kaydırılabilir bar yapmak**: Dialog'dan daha az keşfedilebilir, Radix Dialog tabanlı mobil menü tercih edildi.
 - **Tüm kartı `Link`'e sarmaya devam etmek**: Repo/canlı link eklendiğinde iç içe interaktif eleman sorunu çıkarır.
+
+## Uygulama durumu (2026-08-27)
+
+Bu kararların kod tarafı Faz 3'te (dal `feature/faz-3-tasarim-sistemi`, PR #5, merge commit `a3b2aed`) uygulandı; hero, header ve içerik metinleri Faz 4'te (dal `feature/faz-4-icerik-ve-yayin`, PR #6, henüz merge edilmedi, HEAD `8b4fe40`) yeniden ele alındı.
+
+**Fontlar.** Geist Sans, Geist Mono ve Instrument Serif woff2 dosyaları (latin + latin-ext, artı lisans metinleri) `src/fonts/` altında repoya vendor edildi, `src/fonts/index.ts` `next/font/local` ile yüklüyor ve `fontVariables`'ı hem `src/app/[lang]/layout.tsx` hem `src/app/global-not-found.tsx`'teki `<html>` etiketine bağlıyor. `grep -rn "next/font/google" src` sıfır sonuç veriyor; hiçbir Google Fonts isteği yok.
+
+**Palet.** `src/app/globals.css` nötr oklch token sistemine geçti (`--background: oklch(0.9846 0.0017 247.8)` light, `oklch(0.1535 0.0072 258.4)` dark), `--shadow-color` token'ı eklendi ve panel gölgeleri buradan türetiliyor. `--primary` (oklch(0.4794 0.1156 156.3)) ile `--muted-foreground` (oklch(0.5044 0.0114 252.9)) artık ayrı değerler, çakışma bug'ı kapandı.
+
+**Layout.** `src/components/layout/mobile-menu.tsx` Radix Dialog tabanlı mobil menü ekliyor, `src/components/layout/footer.tsx` artık sayfa linklerini (`navItems`) ayrı bir `nav` bloğunda listeliyor; ikisi de kararla uyumlu. Proje/yazı listeleri satır formatında (`project-row`/blog satırı, mono hizalı). Hero (`src/components/sections/hero.tsx`) ve header (`src/components/layout/header.tsx`) Faz 4'te yeniden tasarlandı: hero tek sütun, plandaki metrik kartları ve "available for work" rozeti yok; header monogram (`{t("brand.monogram")}`) + görünür isim gösteriyor (plan `sr-only` istiyordu). Bu, aşağıdaki "Sapmalar" bölümünde ayrıca not edildi.
+
+**Hareket.** `src/components/motion-provider.tsx` `LazyMotion` + `domAnimation` + `m` kalıbını kuruyor ve kök layout'ta sarmalayıcı olarak kullanılıyor. `src/lib/motion.ts` stagger'ı 40ms'e (`STAGGER_SECONDS = 0.04`), süreyi 180ms'e sabitliyor ve `MAX_STAGGER_ITEMS = 4` ile sınırlıyor; `useReducedMotion` her animasyonlu bileşende okunuyor. `globals.css:218` civarında global `@media (prefers-reduced-motion: reduce)` fallback'i var. Açık madde: `staggerItem`/`fadeUp` varyantlarının `hidden` durumu `reduced` bilgisine bakılmaksızın sunucu tarafında `opacity: 0` ile render ediliyor (useReducedMotion sunucuda `null` döner, `?? false`'a düşer), yani reduced-motion tercihi olan bir ziyaretçide bile ilk HTML'de içerik gizli geliyor, hidrasyona kadar; tarayıcıda doğrulanan bir tur yapılmadı.
+
+**Erişilebilirlik.** `src/app/[lang]/layout.tsx:88-89` skip link (`.skip-link`, `#main`), `contact-form.tsx:121` ve `:129` `role="alert"`/`role="status"`, `:139` `aria-busy={status === "loading"}`, `globals.css:272` `.tap-target` sınıfı 24x24 minimum hedef boyutu için, `theme-toggle.tsx:27` ve `:40` `aria-label={t("a11y.toggleTheme")}` ile TR/EN çevirili. Hepsi doğrulandı.
+
+**OG image / icon.** `src/app/icon.tsx` "DCY" monogramını kararın dark zemin (#0a0c0f) + accent (#4fcc8d) paletiyle render ediyor; `src/app/[lang]/opengraph-image.tsx` gerçek isim, unvan ve lokasyonu Instrument Serif ile basıyor, şablon "Building clean, fast experiences for the web" metni gitti.
+
+**Sapmalar (Faz 4, `d2eaf1e`):** Faz 4 devir notuna göre hero ve header planda tam kodu olmayan bir alanda yeniden tasarlandı: hero tek sütun, metrik kartları ve "available for work" rozeti kaldırıldı; header'da monogram + görünür isim kullanıldı (plan `sr-only` istiyordu); footer CTA butonu kaldırıldı; contact formundaki konu alanı kaldırıldı (API opsiyonel `subject`'i kabul etmeye devam ediyor). Bu değişiklikler bu dokümanın Karar 4'ünü daraltıyor ama ihlal etmiyor; site sahibinin onayı bekleniyor (bkz. `docs/plans/handoffs/faz-4.md`).
+
+**Hâlâ açık olanlar:**
+- Tarayıcıda ekran görüntüsü turu yapılmadı (Faz 3 manuel checklist'in 14 maddelik listesi, `docs/plans/handoffs/faz-3-manual-checklist.md`, sahibini bekliyor).
+- Proje kapakları henüz teslim edilmedi; `project-card.tsx:37` kapak alanını yalnızca `project.cover` varsa render ediyor, yoksa hiçbir gradyan placeholder göstermiyor (kararla uyumlu, ama görsel yok).
+- React ViewTransition alınmadı (`grep -ri "ViewTransition" src` sıfır sonuç); motion (LazyMotion) ile devam ediliyor, reddedilen alternatifler bölümündeki karar hâlâ geçerli.
 
 ## Riskler ve tripwire'lar
 

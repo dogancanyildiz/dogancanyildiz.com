@@ -1,6 +1,6 @@
 # Site Sahibine Açık Sorular
 
-Durum: Öneri, site sahibinin onayını bekliyor · Tarih: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Kısmen uygulandı (10/11 soru cevaplandı, cevaplar Faz 0-4'e yansıdı), kalan: soru 5 (domain'in son hali) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
 
 ## Özet
 
@@ -10,7 +10,7 @@ Proje planı, tasarım ve teknoloji seçimleri büyük ölçüde tamamlandı. Si
 
 | # | Soru | Neden Önemli | Varsayılan Cevap | Etkilediği Faz | Cevap (2026-08-27) |
 |---|------|--------------|------------------|-----------------|---------------------|
-| 1 | Gerçek bir CV PDF'i var mı ve siteye konacak mı? | CV download butonu şu an boş /cv.pdf'e işaret ediyor, yani kırık bir vaat. Ya gerçek dosya konacak ya da buton kaldırılmalı. | Buton siteden tamamen kalkar, hero.tsx:73 ve about/page.tsx:140'taki CV linki silinir. | Faz 4 (İçerik ve yayın) | **Cevaplandı.** Gerçek CV PDF'i var. Download CV butonu kalır; dosya `public/cv/dogancanyildiz-cv.pdf` yoluna konur (sahibi teslim edene kadar `.local/` altında tutulur, Faz 4'te `public/`'e taşınır). hero/about'taki `/cv.pdf` linki bu yola güncellenir. |
+| 1 | Gerçek bir CV PDF'i var mı ve siteye konacak mı? | CV download butonu şu an boş /cv.pdf'e işaret ediyor, yani kırık bir vaat. Ya gerçek dosya konacak ya da buton kaldırılmalı. | Buton siteden tamamen kalkar, hero.tsx:73 ve about/page.tsx:140'taki CV linki silinir. | Faz 4 (İçerik ve yayın) | **Cevaplandı ve teslim edildi.** Gerçek CV PDF'i var. Download CV butonu kalır; dosya `public/cv/dogancanyildiz-cv.pdf` yoluna kondu ve commit'lendi (PR #6, `feature/faz-4-icerik-ve-yayin` dalında, main'e merge bekliyor). hero/about'taki `/cv.pdf` linki bu yola güncellendi. İçerik onayı (telefon/adres) hâlâ sahibinde. |
 | 2 | CAPT (Hackviser), CCNA ve CyberOps sertifikaları için doğrulanabilir Credly/Cisco linki var mı? | Kanıtlanmamış sertifika iddiası güvenilirliği zayıflatır. Link varsa About bölümüne Credly gömme veya doğrudan doğrulama linki konur. | Sertifika satırı listeden çıkarılmaz, yalnızca doğrulama linki alanı boş bırakılır (bkz. 08-icerik-stratejisi.md). | Faz 4 (İçerik ve yayın) | **Cevaplandı.** Doğrulama linkleri var, sonradan iletilecek. Sertifikalar `verifyUrl` alanıyla modellenir (Velite/JSON'da opsiyonel), linkler geldikçe doldurulur. |
 | 3 | Speaking bölümü için etkinlik adı, konu, tarih ve slayt/video linki verilebilir mi? | GDG Konya ve GDG Cloud Konya rolleri var ama somut bir etkinlik kaydı yok. İçeriksiz bir Speaking bölümü şablon izlenimini güçlendirir. | Speaking bölümü siteden tamamen çıkarılır; roller yalnızca About içinde korunur. | Faz 4 (İçerik ve yayın) | **Cevaplandı.** Etkinlik adı, konu ve tarih var; slayt/video yok. Speaking ayrı bir sayfa değil, About içinde medyasız, kompakt bir "Konuşmalar" bloğu (etkinlik · konu · tarih) olarak gösterilir. "Speaking bölümü tamamen çıkar" kararı bu şekilde revize edildi. |
 | 4 | Divizyon projeleri (Cargo Pilot, Wikonya, Sportlink, Hubit) için ekran görüntüsü paylaşma izni var mı, hangileri public gösterilebilir? | Projeler case study formatında yazılacak, her birinin en az 1 gerçek ekran görüntüsü lazım. Görsel yoksa proje kapaksız yayınlanır. | Cargo Pilot ve Bilet Satın Alma 4-5 proje hedefi içinde sabit; her proje için gerçek görsel aranır, izin gelmeyen proje kapaksız yayınlanır. CSS gradyan veya stok görsel placeholder kullanılmaz. | Faz 4 (İçerik ve yayın) | **Cevaplandı.** Tüm Divizyon projeleri public gösterilebilir, linkleri var; ekran görüntüleri sonradan eklenecek. 4-5 case study planı sabit; görsel gelene kadar kapaksız yayın (placeholder yok) kuralı aynen geçerli. Her projede `liveUrl`/`repoUrl` alanı bulunur. |
@@ -24,24 +24,34 @@ Proje planı, tasarım ve teknoloji seçimleri büyük ölçüde tamamlandı. Si
 
 ## Yanıt Bekleme Sürecinde Yapılacaklar
 
-11 sorudan 10'u 2026-08-27'de cevaplandı; Faz 0, Faz 1, Faz 2, Faz 3 ve Faz 5 artık hiçbir açık soru tarafından bloklanmıyor. Geriye kalan tek soru (5, domain'in son hali) yalnızca şunu etkiliyor:
+11 sorudan 10'u 2026-08-27'de cevaplandı; Faz 0, Faz 1, Faz 2 ve Faz 3 artık main'de (PR #2-#5), hiçbir açık soru tarafından bloklanmadılar. Faz 5 de açık soru tarafından bloklanmıyor, henüz başlamadı. Geriye kalan tek soru (5, domain'in son hali) yalnızca şunu etkiliyor:
 
 - **Faz 1 sonu / yayın öncesi domain yönlendirmesi**: dogancanyildiz.sh ana domain kararı öneri olarak uygulanabilir (e-posta zaten kesinleşti), ama `.com -> .sh` 301'inin canlıya alınmasından önce sahibinin son onayı istenmeli.
 
-Faz 4 (İçerik ve yayın), önceki halinin aksine artık büyük ölçüde çözülmüş durumda; kalan bağımlılık yalnızca teslim edilecek somut dosyalar:
+Faz 4 (İçerik ve yayın) artık kod tarafıyla uygulandı (dal `feature/faz-4-icerik-ve-yayin`, PR #6, açık ve CI yeşil); kalan bağımlılık yalnızca sahibinin teslim edeceği somut veri:
 
-- CV PDF dosyasının kendisi (`public/cv/dogancanyildiz-cv.pdf` yoluna konacak),
-- Sertifika doğrulama linkleri (`verifyUrl` alanları),
-- Proje ekran görüntüleri (Divizyon projeleri için).
+- Sertifika doğrulama linkleri (`verifyUrl` alanları, `src/content/profile.ts`),
+- Konuşmalar verisi (`speaking.en`/`speaking.tr` dizileri, aynı dosya, şu an boş),
+- Proje ekran görüntüleri (`content/images/`, şu an boş, `covers=0`).
 
-Bu üçü içerik kararı değil, teslimat konusu; karar zaten netleşti (buton kalıyor, verifyUrl alanı var, projeler public), yalnızca dosya/link elde teslim edilene kadar ilgili alan boş/kapaksız kalıyor.
+CV PDF dosyası zaten teslim edildi ve `public/cv/dogancanyildiz-cv.pdf` yoluna kondu (PR #6 dalında commit'li, Download CV butonu bu yola bağlı); içerik onayı (telefon/adres) hâlâ sahibinde. Kalan üçü içerik kararı değil, teslimat konusu; karar zaten netleşti (`verifyUrl` alanı var, Konuşmalar bloğu kodlandı, projeler public), yalnızca dosya/link elde teslim edilene kadar ilgili alan boş/kapaksız/render edilmez kalıyor.
+
+## Teslimat durumu (2026-08-27)
+
+Soru 1-4'ün kod/şema tarafı Faz 4'te (PR #6) uygulandı; kalan yalnızca sahibinin teslim edeceği somut dosya veya veri, karar zaten netleşti ve site hiçbirini bekletmiyor (alanlar opsiyonel, boşken sessizce render edilmiyor).
+
+- **CV (soru 1): teslim edildi ve sitede.** `public/cv/dogancanyildiz-cv.pdf` commit'li (PR #6 dalında), Download CV butonu bu yola bağlı (`src/lib/cv.ts` `hasCv()`). İçerik onayı (telefon/adres) hâlâ sahibinde.
+- **Sertifika doğrulama linkleri (soru 2): bekleniyor, alan opsiyonel.** `src/content/profile.ts` içindeki `certificates.en`/`certificates.tr` kayıtlarında `verifyUrl?: string` alanı tanımlı ama şu an tanımsız; link geldiğinde tek satır eklemek yeterli, satır listeden çıkmıyor.
+- **Konuşmalar verisi (soru 3): bekleniyor, alan opsiyonel.** `speaking.en`/`speaking.tr` dizileri boş, About sayfası blok boşken hiç render etmiyor; `tests/profile.test.ts` yer tutucu metni (`[Etkinlik adı]` vb.) yasaklıyor. Etkinlik/konu/tarih geldiğinde `{ event, topic, date }` eklemek yeterli.
+- **Proje ekran görüntüleri (soru 4): bekleniyor.** `content/images/` boş, `covers=0`; kapaksız yayın kuralı geçerli, görsel gelince `content/images/<slug>-cover.png` + ilgili MDX'in frontmatter'ına `cover:` alanı eklemek yeterli.
+- **Metin onayı: bekleniyor.** Üç TR blog yazısı, bir EN çeviri ve beş case study (EN+TR) plan metninden yazıldı; olgular (yıllar, teknoloji yığını) herkese açık repolarla doğrulandı ama birinci şahıs deneyim cümleleri sahibinin onayını bekliyor (bkz. `docs/plans/handoffs/faz-4.md` "Açık kalanlar", `faz-4-manual-checklist.md` bölüm 3). Wikonya canlı site adı ve ticket projesi repo linki de bu onayın kapsamında.
 
 ## Tripwire'lar ve Riskler
 
 - **Soru 5 (domain) yanıtsız kalırsa**: `.com -> .sh` 301'i canlıya alınmadan önce sahibinin son onayı bekletilir; bu Faz 1'in tamamlanmasını değil, yalnızca domain yönlendirmesinin production'a alınmasını erteler. E-posta zaten kesinleştiği için Resend/SPF/DKIM/DMARC kurulumu bu belirsizlikten etkilenmez.
 - **Soru 4 (proje görselleri) teslim edilmezse**: case study'ler kapaksız yayınlanır; iddia kanıta bağlanamadığı için ikna gücü düşer. Projelerin kendisi (public gösterim, linkler) zaten cevaplandığı için bu yalnızca görsel eksikliği riski, içerik onayı riski değil.
 - **Soru 2 (sertifika linkleri) teslim edilmezse**: `verifyUrl` alanı boş kalır, satır listeden çıkmaz; sertifika iddiası doğrulanabilirlik kazanamaz ama sitede eksik görünmez.
-- **Soru 1 (CV PDF dosyası) teslim edilmezse**: buton karar olarak kalsa da dosya gelmeden `public/cv/`'e taşınamaz; Faz 4 launch gate'inde bu netleştirilmeli.
+- **Soru 1 (CV PDF dosyası)**: risk kapandı, dosya teslim edildi ve `public/cv/dogancanyildiz-cv.pdf` yoluna kondu (PR #6). Kalan yalnızca içerik onayı: dosyada telefon numarası veya ev adresi varsa yeni bir sürüm konulmalı (eski sürüm git tarihçesinde kalır).
 
 ## İlgili dokümanlar
 

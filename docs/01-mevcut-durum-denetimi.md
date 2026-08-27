@@ -1,6 +1,6 @@
 # Mevcut Durum Denetimi
 
-Durum: Öneri, site sahibinin onayını bekliyor · Tarih: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Uygulandı (Faz 0-4, PR #2-#6) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
 
 ## Özet
 
@@ -150,3 +150,47 @@ Denetim raporlarının önerileriyle 02-stack-karari.md ve ilgili kararlar aras�
 - [Upcoming Next.js August Security Release | Next.js](https://nextjs.org/blog/upcoming-nextjs-security-release-august-2026)
 - [45M Weekly Downloads at Risk: Next.js CVE-2026-75604 (CVSS 9.0) Enables Unauthenticated Remote Code Execution](https://securityonline.info/nextjs-rce-vulnerability/)
 - [Ultimate Next.js Standalone Dockerfile Guide (Tiny Images) | Build with Matija](https://www.buildwithmatija.com/blog/nextjs-standalone-dockerfile-guide)
+
+## Bulguların kapanış durumu (2026-08-27)
+
+Faz 0, Faz 1, Faz 2 ve Faz 3 sırayla `main`'e merge edildi (PR #2, #3, #4, #5). Faz 4 dalı (`feature/faz-4-icerik-ve-yayin`, HEAD `8b4fe40`) PR #6 olarak açık, CI yeşil, merge kararı site sahibinde; aşağıdaki "Faz 4 (PR #6, açık)" satırları bu koda karşılık geliyor, henüz `main`'de değil.
+
+| # | Bulgu | Kapanış | Kanıt |
+|---|---|---|---|
+| F1 | `--font-fraunces` tanımsız, `next/font` yok | Kapandı: Faz 3 (PR #5) | `src/fonts/` (Geist, Geist Mono, Instrument Serif woff2, latin + latin-ext), `next/font/local` ile bağlandı, Google Fonts isteği yok |
+| F2 | Cookie tabanlı i18n SEO'yu kırıyor | Kapandı: Faz 2 (PR #4) | `src/i18n/routing.ts`, `app/[lang]/`, `src/proxy.ts`; `cookies()` çağrıları kaldırıldı |
+| F3 | İçerik %100 şablon (Alex Chen, example.com) | Kapandı: Faz 4 (PR #6, açık) | `content/projects/{en,tr}/` (5 case study), `content/blog/` (4 yazı), `src/content/profile.ts`; `tests/no-template-residue.test.ts` |
+| F4 | Mobilde ana navigasyon erişilemiyor | Kapandı: Faz 3 (PR #5) | `src/components/layout/mobile-menu.tsx` (Radix Dialog), footer'a sayfa linkleri eklendi |
+| F5 | `prefers-reduced-motion` desteği yok | Kapandı: Faz 3 (PR #5) | `src/app/globals.css:218` medya sorgusu; `useReducedMotion` (hero, contact-form, project-card, post-list, skills-strip, contact-page-content); LazyMotion + `m` |
+| F6 | Gerçek görsel yok, placeholder gradient | Açık: Faz 4'te bilinçli "kapaksız yayın" kararı alındı (placeholder da kaldırıldı), ama kapak görselleri hâlâ 0 ve site sahibinden bekleniyor | `content/images/` yalnızca `.gitkeep` içeriyor |
+| F7 | Metadata cookie'ye bağımlı, canonical/alternates yok | Kapandı: Faz 2 (PR #4), Faz 4'te (PR #6, açık) ayrı bir katmana taşındı | `generateMetadata` locale param'ından üretiyor, canonical + hreflang + x-default var; `src/lib/seo/alternates.ts`, `src/lib/seo/page-metadata.ts` |
+| F8 | Şablon SVG'ler ve README | Kapandı: Faz 0 (PR #2) | `README.md` yeniden yazıldı; create-next-app SVG'leri silindi |
+| F9 | Contact form durum mesajlarında `aria-live` yok | Kapandı: Faz 3 (PR #5) | `src/components/sections/contact-form.tsx:121,129` (`role="alert"`, `role="status"`) |
+| F10 | footer sosyal linkler/email hardcoded | Kapandı: Faz 4 (PR #6, açık) | `src/lib/site.ts` (`SOCIAL`, `CONTACT_EMAIL_PUBLIC`), `footer.tsx` bunlardan okuyor |
+| B1 | Rate limit/honeypot/CAPTCHA yok | Kapandı: Faz 0 (PR #2) | `src/lib/rate-limit.ts` (5 istek/10 dk/IP, LRU tahliye), `src/lib/contact-validation.ts` (sunucu taraflı honeypot); Turnstile bilinçli olarak ertelendi (Not 2, hâlâ geçerli) |
+| B2 | `next` güvenlik yamalarının gerisinde | Kapandı: Faz 0 (PR #2) | `package.json`: `"next": "16.3.3"` |
+| B3 | Resend hata mesajı client'a sızıyor | Kapandı: Faz 0 (PR #2) | `/api/contact` jenerik hata mesajı dönüyor, detay yalnızca sunucu logunda |
+| B4 | `CONTACT_EMAIL`/`FROM_EMAIL` sessiz fallback | Kapandı: Faz 0 (PR #2) | `src/lib/env.ts`: prod'da bu değişkenler zorunlu |
+| B5 | `next.config.ts` boş | Kapandı: Faz 0 (PR #2) | `next.config.ts`: `output:"standalone"`, `poweredByHeader:false`, CSP + güvenlik başlıkları |
+| B6 | `NEXT_PUBLIC_SITE_URL` tanımsız | Kapandı: Faz 0 (PR #2) | `src/lib/env.ts`: build'de zorunlu, http(s) origin doğrulaması |
+| B7 | Email format doğrulanmıyor | Kapandı: Faz 0 (PR #2) | `src/lib/contact-validation.ts`: email regex + uzunluk sınırları |
+| B8 | `sitemap.ts` şablon slug'ları index ediyor | Kapandı: Faz 2 (PR #4) iki locale'li sitemap, Faz 4'te (PR #6, açık) Velite'tan yalnızca var olan çeviriler | `src/app/sitemap.ts`: `getProjects`/`getPosts` içerik katmanından okuyor |
+| B9 | Request body boyutu sınırı yok | Kapandı: Faz 0 (PR #2) | `src/lib/request-body.ts`: 16 KB byte sınırlı okuyucu, chunked dahil, 413 |
+| B10 | OG image/favicon şablon içeriği | Kapandı: Faz 3 (PR #5) | `src/app/[lang]/opengraph-image.tsx`, `icon.tsx`: gerçek kimlik, DCY monogram |
+| B11 | Blog/yazılar için içerik pipeline'ı yok | Kapandı: Faz 4 (PR #6, açık) | `velite.config.ts`, `content/blog/` (4 yazı) |
+| B12 | Canlı status/homelab widget veri kaynağı yok | Açık: Faz 5'te planlı, henüz başlamadı | - |
+| B13 | Analytics entegrasyonu yok | Açık: Faz 5'te planlı (Umami kesin evet), henüz başlamadı | - |
+| D1 | Dockerfile yok | Kapandı: Faz 1 (PR #3) | `Dockerfile` (deps/builder/runner, node:24-alpine, non-root `node` kullanıcısı) |
+| D2 | `.dockerignore` yok | Kapandı: Faz 1 (PR #3) | `.dockerignore` |
+| D3 | `next.config.ts`'de `output:'standalone'` yok | Kapandı: Faz 0 (PR #2) | `next.config.ts`: `output:"standalone"` |
+| D4 | docker-compose/Coolify compose tanımı yok | Kapandı: Faz 1 (PR #3), yalnızca yerel doğrulama amacıyla | `docker-compose.yml`: "Local verification only. Coolify does NOT use this file." |
+| D5 | GitHub Actions workflow yok | Kapandı: Faz 1 (PR #3) | `.github/workflows/ci.yml`: lint/typecheck/test/build/verify:routes + hadolint + docker build, image push yok |
+| D6 | Health-check endpoint yok | Kapandı: Faz 0 (PR #2) | `src/app/api/health/route.ts` |
+| D7 | Node sürüm pin'i yok | Kapandı: Faz 0 (PR #2) | `.nvmrc` (24), `package.json` `engines.node ">=20.9"` |
+| D8 | README hâlâ create-next-app şablonu | Kapandı: Faz 0 (PR #2) | `README.md` yeniden yazıldı (stack tablosu, Coolify/Docker deploy notları) |
+| D9 | `package-lock.json`'daki değişiklik npm sürüm farkı | Kapandı: Faz 0 (PR #2) | Lockfile npm 11 ile normalize edilip commit edildi |
+| D10 | 3 paket major sürüm geride | Kısmen kapandı: `tailwindcss` Faz 3'te (PR #5) güncellendi; `lucide-react`, `shadcn`, `typescript` hâlâ major geride, ayrı PR bekliyor | `package-lock.json`: `tailwindcss` `4.3.3`'e çözülüyor; `package.json`: `lucide-react ^0.575.0`, `shadcn ^3.8.5`, `typescript ^5` değişmedi |
+| D11 | Test ve format script'i yok | Kapandı: Faz 0 (PR #2) | `package.json`: `test` (`vitest run`), `format`/`format:write` (prettier), `typecheck` |
+
+Bu tabloya girmeyen D12 (`.env.example` eksiksiz) ve D13 (`tsc`/`eslint` temiz geçiyor) zaten Info seviyesinde "değişiklik gerekmiyor" olarak işaretlenmişti; D13'teki temizliğin korunması Faz 1'de GitHub Actions'a bağlandı (bkz. D5).
+

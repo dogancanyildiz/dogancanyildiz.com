@@ -1,5 +1,5 @@
 # Stack Kararı: Next.js mi, Astro mu, başka bir şey mi
-Durum: Öneri, site sahibinin onayını bekliyor · Tarih: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Uygulandı (Next.js'te kalındı, Faz 0-4) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
 
 ## Özet
 
@@ -151,6 +151,21 @@ Yan kararların detayı:
 Not: `next.config.ts` şu an 133 byte, yani pratikte boş. Repoda Dockerfile, `.dockerignore` ve `.github/workflows` yok; üçü de sıfırdan yazılacak.
 
 Olgusal düzeltme: ilk araştırmadaki "2469 satır TSX" rakamı `.ts` ve `.tsx` toplamıdır, yalnızca `.tsx` 1803 satır. Taşınabilirlik argümanının yönü değişmiyor.
+
+## Uygulama durumu (2026-08-27)
+
+Karar dört fazlık uygulamayla doğrulandı, yeniden açılmadı. Faz 0-3 `main`'e merge edildi (PR #2-#5); Faz 4 (PR #6, dal `feature/faz-4-icerik-ve-yayin`, HEAD `8b4fe40`) açık ve CI yeşil, merge kararı site sahibinde.
+
+- **Karar doğrulandı mı: evet.**
+  - Tüm içerik route'ları statik. `npm run verify:routes` (`scripts/assert-static-routes.mjs`) 5 sayfa x 2 locale + proje/blog detay route'larının tamamının prerendered olduğunu build çıktısından okuyarak doğruluyor; yalnızca `/api/contact` ve `/api/health` dynamic kalıyor. Script CI'da zorunlu adım (`.github/workflows/ci.yml`).
+  - i18n mesaj katmanı next-intl ile çalışıyor. `src/i18n/routing.ts`, `app/[lang]/`, `src/proxy.ts`; `messages/en.json` ve `messages/tr.json` 97 anahtar/13 namespace ile pariteli (`tests/messages.test.ts`).
+  - İçerik Velite ile geliyor. `velite.config.ts` (projects + posts koleksiyonu, `--clean --strict`), `content/projects/{en,tr}/` (5 case study), `content/blog/` (4 yazı); `src/data/projects.ts` ve `skills.ts` silindi, erişim `src/lib/content.ts` üzerinden.
+  - `next.config.ts`'de karar metninde geçen `output: 'standalone'` uygulandı; Dockerfile bu çıktıya göre yazıldı (Faz 1, PR #3).
+- **Tripwire'ların durumu.**
+  - Tripwire 2 (next-intl bağımlılıksız yola dönülür): tetiklenmedi. next-intl sorunsuz çalışıyor; `setRequestLocale` disiplini korunuyor, route'lar sessizce dynamic'e düşmedi (yukarıdaki `verify:routes` sonucu bunun kanıtı).
+  - Tripwire 1 (Astro yeniden değerlendirilir): henüz tetiklenmedi, gündemde değil. Karar metnindeki üç koşuldan hiçbiri (blog 40+ yazı, contact/status'un ayrı servise taşınması, yayından üç ay sonraki planlı gözden geçirme) şu ana kadar oluşmadı; planlı gözden geçirme Faz 5 sonrasına, launch'tan üç ay sonrasına kalıyor.
+  - Tripwire 3 (Turbopack yerine webpack): `serverExternalPackages` hâlâ tanımlı değil (`next.config.ts`, `grep` sonucu boş), bu yüzden ısırmadı; Velite içerik eklenmesi bu paketi devreye sokmadı.
+- **Bundle ölçümünün yeniden alınması: Faz 5 işi.** Karar metnindeki ölçüm tablosunda "16.3.3'te standalone 49 MB" rakamının yanında "launch öncesi yeniden ölçülecek" notu vardı; Faz 0-4 boyunca bu ölçüm tekrarlanmadı (Velite, i18n mesaj dosyaları ve gerçek içerik eklenmesi rakamı değiştirmiş olabilir). Faz 5'e devrediliyor.
 
 ## İlgili dokümanlar
 

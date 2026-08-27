@@ -1,6 +1,6 @@
 # DevOps, Docker, Coolify ve Deploy Hattı
 
-Durum: Öneri, site sahibinin onayını bekliyor · Tarih: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Kısmen uygulandı: kod ve checklist'ler (Faz 1, PR #3), panel adımları sahibinde · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
 
 ## Özet
 
@@ -141,7 +141,8 @@ Bu workflow image push etmiyor ve Coolify'a deploy tetiklemiyor; tek işi lint +
 | RESEND_API_KEY | Runtime | Sır; Build işaretlenirse image katmanlarına veya build loglarına sızma riski taşır |
 | CONTACT_EMAIL | Runtime | Yalnızca server route'ta (contact API) okunuyor, client'a hiç gitmiyor |
 | FROM_EMAIL | Runtime | Aynı gerekçe |
-| GATUS_URL | Runtime | Status widget verisi sunucu tarafında çekiliyor, client'a URL sızmıyor |
+| TRUST_CF_CONNECTING_IP | Runtime | `false` (varsayılan, `.env.example`'da uygulandı); origin Cloudflare'a kilitlenip (yukarıdaki DOCKER-USER adımı) doğrulanana kadar `CF-Connecting-IP` okunmuyor, rate limit `X-Forwarded-For`'un son hop'una düşüyor |
+| GATUS_URL | Runtime | Status widget verisi sunucu tarafında çekiliyor, client'a URL sızmıyor; `.env.example`'da tanımlı ama boş, Gatus Faz 5'te kuruluyor |
 
 ### 7. Traefik: redirect (yedek yol), HSTS/compress, buffering
 
@@ -203,6 +204,20 @@ Bu setin merkezinde tek bir zorunlu koşul var: PR önizlemesi. Coolify'da bu ö
 | 301'i Next.js `redirects()` içinde çözmek | Uygulamayı domain bilgisine bağlar; cross-domain yönlendirme edge/proxy katmanının işi, app kodunun değil. |
 | DNS-only (gri bulut) modda kalmak | Site sahibi diğer projelerinde zaten Full (strict) + proxied kullanıyor; DDoS/cache/Bot Fight Mode avantajlarından vazgeçmenin gerekçesi kalmadı. CF-Connecting-IP + Traefik `trustedIPs` ile gerçek client IP sorunu da çözülüyor (bölüm 8b). |
 | Traefik'te HTTP/3'ü ayrıca açmak | Cloudflare proxied modda HTTP/3 ve Brotli zaten edge'de sağlanıyor (bölüm 8g); Traefik'te tekrar açmanın getirisi yok. |
+
+## Uygulama durumu (2026-08-27)
+
+**Kod (Faz 1, PR #3, ana dala merge).** Dockerfile kararda tarif edilen deps -> builder -> runner sırasını `node:24-alpine` ile uyguluyor; küçük sapmalar var: `deps` aşaması `npm ci --no-audit --no-fund` kullanıyor, `builder` aşaması `NEXT_PUBLIC_SITE_URL`'i `ARG`/`ENV` ile alıyor ve **varsayılansız** bırakıyor (unutulan bir build argümanı `siteUrl()` içinde patlıyor, prod URL'in sessizce preview image'a gömülmesini önlüyor), `runner` aşaması node image'ının hazır `node` kullanıcısını kullanıyor (kararda tarif edilen `addgroup`/`adduser` yerine, aynı non-root sonucu daha az satırla veriyor). `HEALTHCHECK` kararda yoktu, sonradan eklendi: `curl`/`wget` değil **node'un yerleşik `fetch`'i** ile `/api/health`'i çağırıyor, çünkü `node:24-alpine`'da `curl` hiç yok ve `coollabsio/coolify#7500` tam da curl/wget tabanlı health check'lerin connection refused verdiği bug. `.dockerignore` kararda listelenenin ötesinde `coverage`, `.superpowers`, `.vscode`, `.idea`, `tsconfig.tsbuildinfo`, `.velite` ve `public/static`'i de kapsıyor; `docs`/`*.md` deseni kök seviyeyle sınırlı tutuluyor (yorum: recursive `**/*.md` `content/**/*.md`'yi de düşürür, Velite'ın Faz 4'te ihtiyaç duyduğu dosyalar). `.github/workflows/ci.yml` kararda "yalnızca PR kapısı" olarak tarif edilmişti; uygulamada iki job var: `checks` (`actions/checkout@v7`, `actions/setup-node@v7`, `npm run build:content` + lint + typecheck + test + build + `verify:routes`, hem `pull_request` hem main'e `push`'ta çalışıyor) ve `docker` (hadolint + `docker build`, image push yok): kararda geçmeyen bir genişleme, ama "image push yok, Coolify'a deploy tetiklemiyor" ilkesi korundu. `docker-compose.yml` yalnızca yerel doğrulama için, Coolify onu kullanmıyor (yorum satırında açıkça belirtilmiş).
+
+**Karar değişikliği: ufw yerine DOCKER-USER.** `docs/deploy/traefik-ve-origin.md` bölüm 5'te net gerekçelendirilmiş: ufw kuralları INPUT zincirinde çalışıyor, Coolify'ın Traefik'i publish ettiği 80/443 Docker'ın DNAT'ıyla doğrudan FORWARD zincirine giriyor, ufw bu trafiği hiç görmüyor. Origin kilidi bu yüzden iki parçalı: ufw yalnızca host servislerini (SSH, publish edilmemiş portlar) kapatıyor, asıl origin kısıtı `DOCKER-USER` zincirine `-I` (başa ekleme, `-A` değil, çünkü zincirin varsayılanı tek bir `RETURN`) ile yazılan iptables/ip6tables kurallarıyla yapılıyor (Cloudflare IPv4/IPv6 blokları + admin IP allowlist + DROP). Bu adım henüz sunucuda uygulanmadı, `docs/deploy/traefik-ve-origin.md` bir checklist olarak duruyor.
+
+**Traefik router adı bağlama.** Coolify router adlarını `traefik.http.routers.https-0-<uuid>` / `http-0-<uuid>` şeklinde uygulama UUID'sinden üretiyor; `portfolio` gibi sabit bir router adı hiç oluşmuyor. Kuralı olmayan bir isme yazılan `middlewares` etiketi Traefik tarafından sessizce yok sayılıyor (`coollabsio/coolify#9886`), bu yüzden HSTS/compress etiketleri Custom Labels alanındaki gerçek `<uuid>`'den kopyalanarak eklenmeli, uydurulmamalı. Bu da henüz panelde uygulanmadı.
+
+**Cloudflare (kod değil, panel checklist, `docs/deploy/cloudflare-kurulum.md`).** Rate limiting kuralı ücretsiz planın sert sınırlarına göre netleşti: `/api/contact` yoluna **3 istek / 10 saniye**, `Block` aksiyonu 10 saniye (ücretsiz planda periyot/timeout üst sınırı zaten 10 sn, HTTP metoduna göre filtre yok). PR preview'ları (`*.preview.dogancanyildiz.sh`) **DNS-only (gri bulut)** kalıyor çünkü ücretsiz planda wildcard DNS kaydı proxy'lenemiyor; bu yüzden yalnızca origin firewall'unda allowlist'e alınmış admin IP'sinden, TLS'siz `http` üzerinden erişilebiliyor. Panel adımları (DNS kayıtları, Redirect Rules, rate limiting kuralı, Bot Fight Mode) henüz Cloudflare'da uygulanmadı, doküman bir checklist.
+
+**`FROM_EMAIL`**: `.env.example`'da `contact@dogancanyildiz.sh` olarak set, alıcı (`CONTACT_EMAIL`) ise `me@dogancanyildiz.com`: kararda tarif edilen ayrım (gönderen yeni domain, alıcı eski) aynen uygulandı.
+
+**Panel adımları henüz uygulanmadı.** Coolify GitHub App kurulumu, Preview Deployments, health check bağlama, rolling update doğrulaması, DNS/Cloudflare kayıtları, origin kilidi (yukarıdaki DOCKER-USER): hepsi `docs/plans/handoffs/faz-1-manual-checklist.md`'de sahibinin manuel listesi olarak duruyor, kod tarafı (Dockerfile/CI/compose/docs) tamamlandı ama sunucuda/Coolify panelinde/Cloudflare panelinde henüz koşulmadı.
 
 ## Riskler ve tripwire'lar
 

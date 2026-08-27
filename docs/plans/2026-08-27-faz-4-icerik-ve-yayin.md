@@ -1,5 +1,7 @@
 # Faz 4: İçerik pipeline (Velite), gerçek içerik, blog ve yayın Implementation Plan
 
+
+> Durum: Uygulandı, PR #6 açık (CI yeşil, 458 test); sapmalar ve teslimat listesi handoffs/faz-4.md
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Şablon persona'yı tamamen kaldırıp, Velite 0.4.0 tabanlı MDX içerik pipeline'ı üstünde gerçek case study'leri, iki dilli çekirdek metinleri ve ilk blog yazılarını yayına çıkarmak.

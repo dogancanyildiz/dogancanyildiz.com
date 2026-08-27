@@ -1,9 +1,9 @@
 # Yönetici Özeti ve Ana Karar
-Durum: Öneri, site sahibinin onayını bekliyor · Tarih: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Kısmen uygulandı (Faz 0-3 main'de PR #2-#5, Faz 4 PR #6 açık), kalan: Faz 4 merge kararı ve teslimatlar, Faz 5 · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
 
 ## Özet
 
-Denetim üç kritik sorun ortaya çıkardı. Birincisi, site içeriği yüzde yüz şablon: Alex Chen persona'sı, altı kurgu proje, alex@example.com ve example.com kök linkli sosyal hesaplar hâlâ üretimde duruyor. İkincisi, i18n mimarisi cookie tabanlı çalıştığı için aynı URL iki farklı dil döndürüyor, hreflang teknik olarak kurulamıyor ve Googlebot cookie göndermediğinden TR içerik pratikte indekslenemiyor; kök layout'taki cookies() çağrısı ayrıca 11 route'un 8'ini gereksiz yere dynamic'e düşürüyor. Üçüncüsü, güvenlik ve deploy hattı eksik: repo Next 16.1.6'da donmuş durumda ve 2026 Temmuz-Ağustos'ta yayınlanan, biri kimlik doğrulamasız RCE olan kritik yamaların gerisinde; Docker/Coolify pipeline'ı hiç kurulmamış; contact formunun honeypot koruması yalnızca client tarafında çalışıyor, route.ts o alanı hiç okumuyor. Karar: mevcut Next.js 16 + React 19 + Tailwind 4 stack'inde kalınacak, sıfırdan yeniden yazım değil fazlı modernizasyon uygulanacak; tek istisna app/[lang] + next-intl restructure'ı olacak, o da tek PR'da bitirilecek. Çalışma altı fazda ilerleyecek (Faz 0-4 yayına kadar, Faz 5 yayın sonrası) ve 11 madde site sahibinin onayını bekliyor.
+Denetim üç kritik sorun ortaya çıkardı. Birincisi, site içeriği yüzde yüz şablon: Alex Chen persona'sı, altı kurgu proje, alex@example.com ve example.com kök linkli sosyal hesaplar hâlâ üretimde duruyor. İkincisi, i18n mimarisi cookie tabanlı çalıştığı için aynı URL iki farklı dil döndürüyor, hreflang teknik olarak kurulamıyor ve Googlebot cookie göndermediğinden TR içerik pratikte indekslenemiyor; kök layout'taki cookies() çağrısı ayrıca 11 route'un 8'ini gereksiz yere dynamic'e düşürüyor. Üçüncüsü, güvenlik ve deploy hattı eksik: repo Next 16.1.6'da donmuş durumda ve 2026 Temmuz-Ağustos'ta yayınlanan, biri kimlik doğrulamasız RCE olan kritik yamaların gerisinde; Docker/Coolify pipeline'ı hiç kurulmamış; contact formunun honeypot koruması yalnızca client tarafında çalışıyor, route.ts o alanı hiç okumuyor. Karar: mevcut Next.js 16 + React 19 + Tailwind 4 stack'inde kalınacak, sıfırdan yeniden yazım değil fazlı modernizasyon uygulanacak; tek istisna app/[lang] + next-intl restructure'ı olacak, o da tek PR'da bitirilecek. Çalışma altı fazda ilerleyecek (Faz 0-4 yayına kadar, Faz 5 yayın sonrası) ve 11 madde site sahibinin onayını bekliyor. 2026-08-27 itibarıyla Faz 0-3 main dalında sırayla merge edildi (PR #2-#5), Faz 4 feature/faz-4-icerik-ve-yayin dalında tamamlandı ve PR #6 olarak açık (21 commit, HEAD 8b4fe40, CI yeşil: typecheck, lint, test 32 dosya/458 test, prettier, build, verify:routes, hadolint, Docker imaj), merge kararı site sahibinde; Faz 5 henüz başlamadı.
 
 ### Bulunan 3 kritik sorun
 
@@ -31,14 +31,14 @@ Aşağıdaki kararlar kategori bazında gruplandı; her biri kendi detay doküma
 
 ### Faz özeti
 
-| Faz | Hedef (tek satır) |
-|---|---|
-| 0. Güvenlik ve hijyen | Bilinen CVE'leri kapat, Next 16.3.3'e çık, ölü boilerplate'i temizle; site hâlâ şablon ama temel sağlam. |
-| 1. Deploy hattı | Her push'ta kendi sunucusunda otomatik yayın, PR preview, doğru domain yönlendirmesi. |
-| 2. i18n yeniden mimarisi | İki dil ayrı URL'de, tüm içerik route'ları build'de prerender, hreflang/canonical doğru. |
-| 3. Tasarım sistemi | Font gerçekten yüklensin, palet nötrlensin, mobil menü gelsin, hareket ve erişilebilirlik toparlansın. |
-| 4. İçerik ve yayın | Şablon persona tamamen gitsin, gerçek case study'ler ve ilk blog yazıları iki dilde yayına çıksın; bu fazın sonu launch. |
-| 5. Altyapı vitrini ve ölçüm | Gatus tabanlı status widget, Umami, Renovate/Dependabot otomasyonu; yayın sonrası. |
+| Faz | Hedef (tek satır) | Durum |
+|---|---|---|
+| 0. Güvenlik ve hijyen | Bilinen CVE'leri kapat, Next 16.3.3'e çık, ölü boilerplate'i temizle; site hâlâ şablon ama temel sağlam. | Uygulandı (main, PR #2) |
+| 1. Deploy hattı | Her push'ta kendi sunucusunda otomatik yayın, PR preview, doğru domain yönlendirmesi. | Uygulandı (main, PR #3); panel/Coolify adımları sahibinin manuel checklist'inde ayrıca doğrulanacak |
+| 2. i18n yeniden mimarisi | İki dil ayrı URL'de, tüm içerik route'ları build'de prerender, hreflang/canonical doğru. | Uygulandı (main, PR #4) |
+| 3. Tasarım sistemi | Font gerçekten yüklensin, palet nötrlensin, mobil menü gelsin, hareket ve erişilebilirlik toparlansın. | Uygulandı (main, PR #5) |
+| 4. İçerik ve yayın | Şablon persona tamamen gitsin, gerçek case study'ler ve ilk blog yazıları iki dilde yayına çıksın; bu fazın sonu launch. | PR #6 açık, CI yeşil, merge kararı sahibinde; sahibinin teslim edeceği içerikler bekleniyor |
+| 5. Altyapı vitrini ve ölçüm | Gatus tabanlı status widget, Umami, Renovate/Dependabot otomasyonu; yayın sonrası. | Başlamadı |
 
 Detay: [10-yol-haritasi.md](./10-yol-haritasi.md).
 
@@ -46,19 +46,19 @@ Detay: [10-yol-haritasi.md](./10-yol-haritasi.md).
 
 Hızlı referans için ana bağımlılıkların hedef sürümleri:
 
-| Bağımlılık | Mevcut | Hedef |
-|---|---|---|
-| next | 16.1.6 | 16.3.3 |
-| react | 19.x | 19.2 |
-| tailwindcss | 4.x | 4.3.x |
-| next-intl | yok | 4.13.7 |
-| velite | yok | 0.4.0 (exact pin) |
-| motion (framer-motion) | ^12.34.3 | motion 13.1.1 |
-| node | pin yok | 24 (.nvmrc), engines.node >=20.9 |
+| Bağımlılık | Mevcut (Faz 0 öncesi) | Hedef | Durum (2026-08-27) |
+|---|---|---|---|
+| next | 16.1.6 | 16.3.3 | Uygulandı, package.json'da 16.3.3 |
+| react | 19.x | 19.2 | Uygulandı, package.json'da 19.2.3 |
+| tailwindcss | 4.x | 4.3.x | Uygulandı, package-lock'ta çözülen sürüm 4.3.3 |
+| next-intl | yok | 4.13.7 | Uygulandı, package.json'da 4.13.7 |
+| velite | yok | 0.4.0 (exact pin) | Uygulandı, package.json'da exact 0.4.0 |
+| motion (framer-motion) | ^12.34.3 | motion 13.1.1 | Uygulandı, package.json'da motion 13.1.1 |
+| node | pin yok | 24 (.nvmrc), engines.node >=20.9 | Uygulandı, .nvmrc 24 ve engines.node >=20.9 |
 
 typescript ve lucide-react major yükseltmeleri kasten bu listede yok; breaking değişiklik riski taşıdıkları için güvenlik yamasından ayrı, sonraki bir PR'a bırakıldı. Tam gerekçe ve yükseltme sırası: [02-stack-karari.md](./02-stack-karari.md).
 
-**Açık sorular:** 11 sorudan 10'u 2026-08-27'de site sahibi tarafından cevaplandı (CV PDF, sertifika doğrulama linkleri, Speaking içeriği, proje/ekran görüntüsü kapsamı, contact e-posta adresi, status widget kapsamı, sunucu RAM/CPU, Cloudflare proxied mod, blog dil politikası, Harp Okulu/İngilizce sunumu, Umami). Geriye yalnızca 1 soru açık: iletişim domain'inin son hali (dogancanyildiz.sh ana domain, .com 301 öneri olarak uygulanıyor, sahibinin kesin onayı bekleniyor). Tam liste ve cevaplar: [11-acik-sorular.md](./11-acik-sorular.md).
+**Açık sorular:** 11 sorudan 10'u 2026-08-27'de site sahibi tarafından cevaplandı (CV PDF, sertifika doğrulama linkleri, Speaking içeriği, proje/ekran görüntüsü kapsamı, contact e-posta adresi, status widget kapsamı, sunucu RAM/CPU, Cloudflare proxied mod, blog dil politikası, Harp Okulu/İngilizce sunumu, Umami). Geriye yalnızca 1 soru açık: iletişim domain'inin son hali (dogancanyildiz.sh ana domain, .com 301 Cloudflare'da hazır ama canlıya alınmadı, sahibinin kesin onayı bekleniyor). Bunun dışında Faz 4'ün PR #6'sı somut teslimatlar bekliyor, bunlar açık soru değil eksik girdi: Konuşmalar (speaking) verisi, sertifika verifyUrl'leri, proje kapak görselleri, birinci şahıs metin onayı, CV içerik onayı, Wikonya'nın canlı site adı ("Konya Genç" olarak değişti, link teyidi gerekiyor) ve ticket-purchasing-system repo linki onayı. Tam liste ve cevaplar: [11-acik-sorular.md](./11-acik-sorular.md).
 
 ## Gerekçe
 
@@ -85,12 +85,43 @@ Kategori bazlı reddedilen alternatiflerin tam gerekçesi: [02-stack-karari.md](
 - **next-intl bir tercih, zorunluluk değil:** Bağımlılıksız [lang] + elle sözlük de ~40 satırla çalışıyor ve tam statik üretim veriyor. Tripwire: setRequestLocale disiplini yüzünden route'lar sessizce dynamic'e düşerse veya next-intl bir Next major'ında takılırsa bağımlılıksız yola dönülecek.
 - **Velite 0.x sürüm riski:** Exact pin ve lockfile commit ile sınırlanıyor, caret kullanılmıyor.
 - **Turbopack + standalone external paket trace regresyonu** (vercel/next.js#88844): bugün bu projeyi ısırmıyor, ama Dockerfile'a external paket eklenirse next build --webpack'e geçiş gerekebilir.
-- **Google Fonts build-time bağımlılığı** (vercel/next.js#91653): self-host build'ini kırabiliyor, bu yüzden font vendoring zorunlu kılındı, next/font/google kullanılmıyor.
-- **Coolify health check bug'ı** (coollabsio/coolify#7500): Dockerfile HEALTHCHECK + Node container kombinasyonunda bilinen connection-refused sorunu var, staging'de ayrıca doğrulanacak.
-- **Env katmanı hatası:** RESEND_API_KEY Build olarak işaretlenirse image katmanlarına veya build loglarına sızabilir; NEXT_PUBLIC_SITE_URL yalnızca Runtime işaretlenirse client bundle'a hiç gömülmez ve production'da sessizce undefined döner.
-- **Açık sorular büyük ölçüde çözüldü, Faz 4'ü artık yalnızca teslimat bekletiyor:** CV PDF'i, sertifika linkleri, Speaking içeriği ve proje kapsamı kararları 2026-08-27'de netleşti (bkz. [11-acik-sorular.md](./11-acik-sorular.md)); kalan bağımlılık yalnızca somut dosyaların (CV PDF, sertifika doğrulama linkleri, proje ekran görüntüleri) teslim edilmesi. Teslim gelmezse ilgili alan placeholder olarak değil, boş/kapaksız bırakılarak yayınlanır. Geriye kalan tek gerçek açık soru (iletişim domain'inin son hali) Faz 4'ü değil, yalnızca domain 301'inin canlıya alınmasını etkiler.
+- **Google Fonts build-time bağımlılığı** (vercel/next.js#91653): self-host build'ini kırabiliyor, bu yüzden font vendoring zorunlu kılındı, next/font/google kullanılmıyor. **Kapandı (Faz 3, PR #5):** Geist, Geist Mono, Instrument Serif woff2 dosyaları src/fonts/ altında vendor'landı, next/font/local ile bağlandı, build sırasında Google Fonts isteği yok.
+- **Coolify health check bug'ı** (coollabsio/coolify#7500): Dockerfile HEALTHCHECK + Node container kombinasyonunda bilinen connection-refused sorunu var, staging'de ayrıca doğrulanacak. **Kısmen doğrulandı (Faz 1, PR #3):** yerel Docker'da `docker run` + `docker inspect` ile health status "healthy" doğrulandı, PORT override ile de çalıştığı görüldü; Coolify sunucusundaki canlı doğrulama (panel adımı) henüz uygulanmadı, faz-1-manual-checklist.md'de bekliyor.
+- **Env katmanı hatası:** RESEND_API_KEY Build olarak işaretlenirse image katmanlarına veya build loglarına sızabilir; NEXT_PUBLIC_SITE_URL yalnızca Runtime işaretlenirse client bundle'a hiç gömülmez ve production'da sessizce undefined döner. **Belgelendi, canlıda doğrulanmadı:** Build/Runtime ayrımı docs/deploy/coolify-kurulum.md ve faz-1-manual-checklist.md'de adım adım yazılı; Coolify panelinde fiilen uygulanması ve doğrulanması panel adımları arasında, henüz koşulmadı.
+- **Açık sorular büyük ölçüde çözüldü, Faz 4 artık yalnızca teslimat ve merge kararı bekliyor:** CV PDF'i, sertifika linkleri, Speaking içeriği ve proje kapsamı kararları 2026-08-27'de netleşti (bkz. [11-acik-sorular.md](./11-acik-sorular.md)); Faz 4 kod olarak PR #6'da tamamlandı ve CI yeşil, kalan bağımlılık yalnızca somut dosyaların (sertifika doğrulama linkleri, proje kapak görselleri, Konuşmalar verisi) teslim edilmesi ve sahibinin merge kararı. Teslim gelmezse ilgili alan placeholder olarak değil, boş/kapaksız bırakılarak yayınlanır. Geriye kalan tek gerçek açık soru (iletişim domain'inin son hali) Faz 4'ü değil, yalnızca domain 301'inin canlıya alınmasını etkiler.
 
 Açık soruların tam listesi ve her birinin gerektirdiği karar: [11-acik-sorular.md](./11-acik-sorular.md).
+
+## Uygulama durumu (2026-08-27)
+
+Bu bölüm kontrol oturumu tarafından repodaki gerçek duruma bakılarak doğrulandı; yukarıdaki karar metni tarihsel kayıt olarak korunuyor, bu bölüm onun üstünde geçerli.
+
+### Faz-PR eşlemesi
+
+| Faz | Dal | PR | Durum |
+|---|---|---|---|
+| 0. Güvenlik ve hijyen | feature/faz-0-guvenlik-ve-hijyen | #2 | Merged -> main |
+| 1. Deploy hattı | feature/faz-1-deploy-hatti | #3 | Merged -> main |
+| 2. i18n yeniden mimarisi | feature/faz-2-i18n-app-lang | #4 | Merged -> main |
+| 3. Tasarım sistemi | feature/faz-3-tasarim-sistemi | #5 | Merged -> main |
+| 4. İçerik ve yayın | feature/faz-4-icerik-ve-yayin | #6 | Açık, CI yeşil, 21 commit, HEAD 8b4fe40, merge kararı sahibinde |
+| 5. Altyapı vitrini ve ölçüm | yok | yok | Başlamadı |
+
+### Kapılar (Faz 4 HEAD, 8b4fe40)
+
+`npm run typecheck`, `npm run lint`, `npm test` (32 dosya / 458 test), `npm run format`, `npm run build` (yalnızca `/api/contact` ve `/api/health` dynamic, geri kalan tüm route'lar statik), `verify:routes` (26 içerik route'u statik: 5 proje x 2 locale, 1 EN yazı, 3 TR yazı), `hadolint` ve Docker imaj build'i; hepsi CI'da yeşil. Docker imajı iki locale'i (en, tr) servis ediyor. Şablon persona kalıntısı (Alex Chen, example.com) repoda sıfır; `tests/no-template-residue.test.ts` bunu kilitliyor.
+
+### Süreç özeti
+
+Faz 0 ve Faz 1 workflow içi faz liderleriyle yürütüldü; Faz 1'de faz lideri ile fork'un aynı git ağacında çakışması üzerine paralel ajanlar durduruldu ve kontrol oturumu devraldı. Faz 2 ve Faz 3 task bazlı v2 executor ile ilerledi: haiku planı task'lara ayrıştırıp model atadı, her task'ı task'a uygun model (haiku/sonnet/opus) uyguladı, opus bağımsız inceleme yaptı, fable entegrasyonu ve devir notunu yazdı, ardından iki bağımsız doğrulayıcı geçiş yaptı. Faz 4 ise sahibinin talebiyle ayrı bir nodeterm Claude Code oturumunda (Fable, ultracode) yürütüldü; her fazda iki bağımsız opus doğrulama geçişi yapıldı ve bloklayan bulgular tek düzeltme turuyla kapatıldı (örn. Faz 4'te 7 olgu bulgusu `0d418af` ile, `/foo/feed.xml` 200 bulgusu `48bbd9e` ile).
+
+### Kalanlar
+
+- **Faz 4 (PR #6):** merge kararı sahibinde; sahibinin teslim etmesi gereken içerikler: Konuşmalar (speaking) verisi, sertifika `verifyUrl` değerleri, proje kapak görselleri, birinci şahıs metin onayı (üç blog yazısı ve beş case study), CV PDF içerik onayı, Wikonya'nın canlı site adı teyidi ("Konya Genç"), ticket-purchasing-system repo linki onayı.
+- **Manuel kapılar hiç koşulmadı:** Lighthouse, hreflang test aracı, Search Console doğrulaması, contact formu uçtan uca testi, Coolify'daki canlı health check, Cloudflare 301'in canlıya alınması; docs/launch-checklist.md bu kapıların listesi.
+- **Faz 1 panel adımları uygulanmadı:** Coolify, Cloudflare, Traefik, Resend domain kurulumu kodda ve dokümanda hazır ama sahibinin manuel checklist'i (docs/plans/handoffs/faz-1-manual-checklist.md) henüz işaretlenmedi.
+- **Faz 5 hiç başlamadı:** Gatus container + status widget, Umami, Renovate GitHub App kurulumu, Next aylık güvenlik takibi, CSP nonce yolunun yeniden ele alınması, Faz 4'ten devredilen küçük test/sitemap x-default işleri.
+- **Açık soru:** iletişim domain'inin son hali (dogancanyildiz.sh ana domain, .com 301 Cloudflare'da hazır ama canlıya alınmadı).
 
 ## Uygulama notları
 
@@ -100,17 +131,17 @@ Domain ve ortam ayrımı yayın öncesi kritik: dogancanyildiz.sh ana domain ola
 
 ### Ana kararlar
 
-| Kategori | Karar | Güven | Detay dokümanı |
-|---|---|---|---|
-| Stack | Next.js 16.3.3'te kal, migrate değil incremental-modernize | Yüksek (0.88) | 02-stack-karari.md |
-| Tasarım / UI-UX | Terminal Editorial yönü, nötr palet + tek aksan, font vendoring | Yüksek | 03-tasarim-ui-ux.md |
-| i18n | app/[lang] + next-intl 4.13.7, as-needed prefix | Orta-yüksek, tripwire'lı | 04-i18n.md |
-| Backend / içerik altyapısı | Velite + MDX, Resend sertleştirme, Gatus status widget | Yüksek | 05-backend-icerik-ve-servisler.md |
-| DevOps / deploy | Docker + Coolify git tabanlı build, Cloudflare proxied + Redirect Rules tek atlama 301 (Traefik 301 yedek yol) | Yüksek | 06-devops-ve-deploy.md |
-| SEO / metadata | generateMetadata + hreflang + JSON-LD | Yüksek | 07-seo-ve-metadata.md |
-| İçerik stratejisi | Şablon persona kaldırılır, case study formatı | Orta, açık sorulara bağlı | 08-icerik-stratejisi.md |
-| Güvenlik | Yükseltme + güvenlik başlıkları + Renovate otomasyonu zorunlu | Yüksek | 09-guvenlik.md |
-| Yol haritası | 6 fazlı plan (Faz 0-5) | Yüksek | 10-yol-haritasi.md |
+| Kategori | Karar | Güven | Detay dokümanı | Durum |
+|---|---|---|---|---|
+| Stack | Next.js 16.3.3'te kal, migrate değil incremental-modernize | Yüksek (0.88) | 02-stack-karari.md | Uygulandı (Faz 0, PR #2) |
+| Tasarım / UI-UX | Terminal Editorial yönü, nötr palet + tek aksan, font vendoring | Yüksek | 03-tasarim-ui-ux.md | Uygulandı (Faz 3, PR #5) |
+| i18n | app/[lang] + next-intl 4.13.7, as-needed prefix | Orta-yüksek, tripwire'lı | 04-i18n.md | Uygulandı (Faz 2, PR #4) |
+| Backend / içerik altyapısı | Velite + MDX, Resend sertleştirme, Gatus status widget | Yüksek | 05-backend-icerik-ve-servisler.md | Kısmen uygulandı: Velite + Resend Faz 0/4'te (PR #2, #6); Gatus status widget Faz 5'te, başlamadı |
+| DevOps / deploy | Docker + Coolify git tabanlı build, Cloudflare proxied + Redirect Rules tek atlama 301 (Traefik 301 yedek yol) | Yüksek | 06-devops-ve-deploy.md | Kısmen uygulandı (Faz 1, PR #3): Dockerfile/CI/Coolify dokümantasyonu kodda, kalan: Coolify panel kurulumu ve Cloudflare 301'in canlıya alınması |
+| SEO / metadata | generateMetadata + hreflang + JSON-LD | Yüksek | 07-seo-ve-metadata.md | Uygulandı (Faz 2-4, PR #4, #6) |
+| İçerik stratejisi | Şablon persona kaldırılır, case study formatı | Orta, açık sorulara bağlı | 08-icerik-stratejisi.md | Kısmen uygulandı (Faz 4, PR #6 açık), kalan: sertifika linkleri, kapaklar, Konuşmalar verisi, sahibinin metin/CV onayı |
+| Güvenlik | Yükseltme + güvenlik başlıkları + Renovate otomasyonu zorunlu | Yüksek | 09-guvenlik.md | Kısmen uygulandı (Faz 0, PR #2): yükseltme ve başlıklar kodda, kalan: Renovate GitHub App kurulumu (Faz 5), npm audit ayrı PR |
+| Yol haritası | 6 fazlı plan (Faz 0-5) | Yüksek | 10-yol-haritasi.md | Kısmen uygulandı: Faz 0-3 main'de, Faz 4 PR #6 açık, Faz 5 başlamadı |
 
 ### Şimdilik kapsam dışı (YAGNI)
 

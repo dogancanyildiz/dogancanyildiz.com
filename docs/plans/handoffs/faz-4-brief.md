@@ -35,7 +35,7 @@ Sen Faz 4'ün lideri ve tek yazarısın. Bu oturum Fable modeli ve ultracode eff
 - Dal: `feature/faz-4-icerik-ve-yayin`, `main` üzerinden (Faz 0-3 PR'ları #2-#5 merge edildi). Tek dal, tek PR.
 - Alt ajanlar: her task için Agent aracıyla taze bir alt ajan (mekanik işler haiku, kod ve test sonnet, mimari/güvenlik/karmaşık opus), task bitince opus modelinde ayrı bir inceleme alt ajanı. `subagent_type: "fork"` KULLANMA. Aynı anda tek uygulayıcı; tek yazar sensin, commit'leri sen atarsın. `git add -A` kullanma, dosya seçerek ekle.
 - Her task: test önce (vitest), uygulama, `npm run typecheck && npm run lint && npm test && npm run format`, commit (Conventional Commits, İngilizce, AI atfı / Co-Authored-By YOK). Build ve `npm run verify:routes` her büyük adımdan sonra; tüm içerik route'ları statik kalmalı, yalnızca `/api/*` dynamic.
-- Metinlerde (EN ve TR site metni, kod yorumu, commit, doküman) em dash (—) ve en dash (–) YOK.
+- Metinlerde (EN ve TR site metni, kod yorumu, commit, doküman) em dash (U+2014) ve en dash (U+2013) YOK.
 - `.local/` içeriği okunur ama commit edilmez; Docker build context'ine girmez (`.dockerignore` zaten hariç tutuyor). Sırlar dosyaya yazılmaz.
 - Şablon persona temizliği bu fazın launch kapısı: `grep -ri "alex chen\|techcorp\|startupxyz\|example.com" src messages content` sıfır sonuç vermeli (`.env.example` ve testlerdeki bilinçli negatif örnekler hariç).
 - Docker/next problarında port 3000 yerine 3171 ve üzeri kullan, container'ları temizle.

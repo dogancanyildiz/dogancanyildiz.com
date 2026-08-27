@@ -3,23 +3,31 @@
 Bu listenin tamamı geçmeden `dogancanyildiz.com -> dogancanyildiz.sh` 301 yönlendirmesi
 canlıya alınmaz (bkz. `docs/00-ozet-ve-karar.md`, Uygulama notları).
 
+Durum (2026-08-27, Faz 4 HEAD `8b4fe40`, PR #6 açık): bölüm 1'in tamamı ve bölüm 2'nin
+repoda doğrulanabilir maddeleri yerelde ve CI'da geçti, işaretlendi. İşaretsiz kalanlar
+ya sahibinin teslimatını ya da canlı URL/tarayıcı gerektiren manuel kontrolleri bekliyor.
+
 ## 1. Otomatik kapılar
 
-- [ ] `npm run typecheck` hatasız
-- [ ] `npm run lint` hatasız
-- [ ] `npm test` tüm testler geçiyor (şema, içerik katmanı, sitemap, profil, kalıntı)
-- [ ] `npm run format` hatasız
-- [ ] `NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.sh npm run build` başarılı ve build
-      çıktısında dynamic (ƒ) yalnızca `/api/*` altında
+- [x] `npm run typecheck` hatasız
+- [x] `npm run lint` hatasız
+- [x] `npm test` tüm testler geçiyor (şema, içerik katmanı, sitemap, profil, kalıntı):
+      32 dosya / 458 test
+- [x] `npm run format` hatasız
+- [x] `NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.sh npm run build` başarılı ve build
+      çıktısında dynamic (ƒ) yalnızca `/api/*` altında (`/api/contact`, `/api/health`);
+      `npm run verify:routes` 26 içerik route'unu statik doğruluyor
 
 ## 2. İçerik
 
-- [ ] En az 4 proje ve 3 blog yazısı yayında
-- [ ] Kapaksız yayınlanan projelerde CSS gradyan veya stok görsel yok
-- [ ] Sertifika satırları listede, `verifyUrl` gelmeyenlerde link yok ama satır duruyor
-- [ ] Konuşmalar bloğu ya gerçek veriyle dolu ya da hiç render edilmiyor
-- [ ] CV PDF `public/cv/dogancanyildiz-cv.pdf` yolunda ise Download CV butonu görünüyor,
-      dosya yoksa buton hiç yok
+- [x] En az 4 proje ve 3 blog yazısı yayında (5 proje x 2 locale, 4 yazı: 1 EN, 3 TR)
+- [x] Kapaksız yayınlanan projelerde CSS gradyan veya stok görsel yok (`content/images/`
+      boş, `covers=0`)
+- [x] Sertifika satırları listede, `verifyUrl` gelmeyenlerde link yok ama satır duruyor
+- [x] Konuşmalar bloğu ya gerçek veriyle dolu ya da hiç render edilmiyor (`speaking` dizileri
+      boş, blok render edilmiyor)
+- [x] CV PDF `public/cv/dogancanyildiz-cv.pdf` yolunda ise Download CV butonu görünüyor,
+      dosya yoksa buton hiç yok (dosya commit'li, buton bu yola bağlı)
 - [ ] Sahibi üç blog yazısını ve beş proje case study'sini yayından önce doğruluk açısından
       gözden geçirdi; bu metinler `.local/content/portfolio-content.md` dosyasından
       türetildi, dosyadaki bir hata veya eksik olduğu gibi siteye geçmiş olabilir

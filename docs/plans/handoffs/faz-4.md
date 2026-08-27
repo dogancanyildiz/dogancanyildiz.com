@@ -42,7 +42,7 @@ Plan şablonundaki özet, gerçek değerlerle:
 - `content/` altında 5 proje (EN+TR, 10 dosya) ve 4 blog yazısı (3 TR, 1 EN çeviri) yayında; kapak yok (`covers=0`).
 - `src/data/projects.ts` ve `src/data/skills.ts` kaldırıldı; veri kaynağı Velite ve `src/content/profile.ts`.
 - Blog listesi, blog detayı, locale başına RSS, sitemap/hreflang entegrasyonu ve çevirisi olmayan sayfada dil değiştirici fallback'i tamam.
-- Gerçek metinler `messages/en.json` ve `messages/tr.json` içinde (96 anahtar, 11 namespace, iki dosya aynı küme, hepsi tüketiliyor); şablon persona sıfır.
+- Gerçek metinler `messages/en.json` ve `messages/tr.json` içinde (97 anahtar, 13 namespace, iki dosya aynı küme, hepsi tüketiliyor); şablon persona sıfır.
 
 ## Plandan sapmalar
 
@@ -152,7 +152,7 @@ Kriterlerin ötesinde koşulanlar:
 | CSS | `.prose-content` (h2/h3/a/ul/ol/pre/code; başlık autolink'leri foreground), shiki çift tema (`--shiki-light*` / `.dark` `--shiki-dark*`) |
 | Route'lar | `/[lang]/blog`, `/[lang]/blog/[slug]`, `/[lang]/feed.xml` (`force-static`, `dynamicParams = false`), `/favicon.ico` -> `/icon` 308; proxy matcher dizi (`/feed.xml` açık, `icon$`) |
 | Script'ler | `build` = `velite --clean --strict && next build`, `build:content`, `dev` = `velite --watch & next dev`; `verify:routes` slug bazlı ve feed route'larını istiyor |
-| Mesaj katalogları | 96 anahtar, 11 namespace (`brand` nesne, `nav`, `home`, `hero`, `about`, `projects`, `blog`, `contact` + `contact.form`, `footer`, `notFound`, `metadata`, `api`, `a11y`); `tests/messages.test.ts` parite ve tüketimi kilitliyor |
+| Mesaj katalogları | 97 anahtar, 13 namespace (`brand` nesne, `nav`, `home`, `hero`, `about`, `projects`, `blog`, `contact` + `contact.form`, `footer`, `notFound`, `metadata`, `api`, `a11y`); `tests/messages.test.ts` parite ve tüketimi kilitliyor |
 | Test dosyaları | `tests/content-schema.test.ts` (fixture config'ler `tests/fixtures/`), `tests/content-layer.test.ts`, `tests/profile.test.ts`, `tests/messages.test.ts`, `tests/no-template-residue.test.ts`, `tests/seo/alternates.test.ts`; `tests/seo/page-metadata.test.ts` `PageCase.locales` filtresi ile yazı sayfalarını yalnızca var oldukları locale'de çağırıyor |
 
 ## Sonraki faza (Faz 5, altyapı vitrini ve ölçüm) uyarılar
