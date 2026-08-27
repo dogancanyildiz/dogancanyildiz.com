@@ -55,6 +55,9 @@ Thumbs.db
 # ─── Local-only files (content drafts, CV, private notes) ────────────────────
 .local/
 
+# ─── Audit ───────────────────────────────────────────────────────────────────
+audit/
+
 # ─── Nodeterm canvas state ───────────────────────────────────────────────────
 .nodeterm/
 
@@ -75,3 +78,6 @@ tests/fixtures/.velite-invalid/
 # velite compiles a config file into <config dir>/node_modules/, so the test
 # fixture configs under tests/fixtures leave this behind
 tests/fixtures/node_modules/
+
+# ─── Local audit registers (open items, private working notes) ───────────────
+/audit/
