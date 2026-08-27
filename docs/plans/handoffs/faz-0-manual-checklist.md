@@ -32,7 +32,7 @@ Bu adımlar kodla yapılamaz; site sahibi uygular. Her madde "yapıldı" olarak 
 - [ ] Faz 1'de Traefik entrypoint'ine `forwardedHeaders.trustedIPs` olarak güncel Cloudflare IPv4/IPv6 aralıklarını gir (https://www.cloudflare.com/ips/).
 - [ ] Origin'e doğrudan erişimi kapat: sunucu güvenlik duvarı (ufw) veya Traefik `ipAllowList` ile yalnızca Cloudflare IP aralıklarına izin ver (spec: docs/09-guvenlik.md madde 6, docs/06-devops-ve-deploy.md madde e). `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.
 - [ ] Yukarıdaki iki ayar canlıya çıktıktan ve doğrulandıktan SONRA Coolify'da `TRUST_CF_CONNECTING_IP=true` yap ve yeniden deploy et. Sıra tersine dönerse `CF-Connecting-IP` taklit edilebilir ve rate limit atlatılır.
-- [ ] Bayrak açılana kadar `/api/contact` için Cloudflare Rate Limiting kuralının aktif olduğundan emin ol; uygulama içi limit bu dönemde X-Forwarded-For'a dayanıyor ve istek başına taklit edilebiliyor.
+- [ ] Bayrak açılana kadar `/api/contact` için Cloudflare Rate Limiting kuralının aktif olduğundan emin ol; uygulama içi limit bu dönemde X-Forwarded-For'un son hop'una (Traefik'in eklediği, Cloudflare proxied modda edge adresi) dayanır: sahtelenemez ama kaba.
 
 ## 6. Cloudflare
 

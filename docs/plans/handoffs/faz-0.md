@@ -2,7 +2,7 @@
 
 Tarih: 2026-08-27 · Dal: `feature/faz-0-guvenlik-ve-hijyen` (main `e239564` üzerinden) · Plan: `docs/plans/2026-08-27-faz-0-guvenlik-ve-hijyen.md`
 
-Durum: kod tarafı tamam; 10 task commit'i, 1 inceleme düzeltme commit'i ve bu devir notunun commit'i yerel dalda (toplam 12). Push ve PR site sahibine bırakıldı (bkz. Manuel adımlar). Uygulama sırasında subagent (Agent aracı) mevcut olmadığı için task'lar tek oturumda, plan brief'leri ve kapılarla doğrudan uygulandı; son inceleme `security-review` ve `code-review` skill'leriyle yapıldı (bkz. Son inceleme).
+Durum: kod tarafı tamam; 10 task commit'i, 2 inceleme düzeltme commit'i (`58bc79e`, `4a987eb`) ve 2 devir notu commit'i yerel dalda (toplam 14). Push ve PR site sahibine bırakıldı (bkz. Manuel adımlar). Süreç notu (şeffaflık için): faz lideri oturum başındaki ToolSearch sonucunu yanlış yorumlayıp Agent aracının bulunmadığına kanaat getirdi ve Task 1-10'u alt ajan açmadan, plan brief'leri, rapor dosyaları ve kapılarla doğrudan uyguladı. Son incelemede `code-review` skill'i (fork) 10 bulgu üretti; bulgular istendiğinde yeniden başlatılan fork, düzeltmeleri kendisi commit'ledi (`58bc79e`), devir notunu commit'ledi (`b398dd5`) ve SDD çalışma alanını sildi. Bunun ardından Agent aracının mevcut olduğu fark edildi: kalan düzeltme sonnet alt ajanına verildi (`4a987eb`), düzeltme aralığı opus alt ajanı tarafından yeniden incelendi (bkz. Son inceleme). Güvenlik incelemesi faz lideri tarafından doğrudan yapıldı.
 
 ## Yapılanlar
 
@@ -20,7 +20,8 @@ Commit'ler (main..HEAD, sırayla):
 | `e2b40f8` | 8 | `src/app/api/contact/route.ts` sertleştirildi (Content-Length 413, IP başına rate limit 429 + Retry-After, sunucu tarafı honeypot, jenerik hata metinleri, prod'da eksik CONTACT_EMAIL / FROM_EMAIL için 503) |
 | `41f83e5` | 9 | `src/app/api/health/route.ts` (force-dynamic, `Cache-Control: no-store`) |
 | `b5e87bb` | 10 | `public/` altındaki 5 create-next-app SVG'si silindi, `public/.gitkeep`, README yeniden yazıldı, `renovate.json` eklendi |
-| `58bc79e` | inceleme | Son inceleme bulgularının düzeltmesi: `src/lib/request-body.ts` (chunked gövde için byte sınırlı stream okuyucu, 6 test), rate limiter'da en az aktif anahtar tahliyesi, `node:net` `isIP`, `NEXT_PUBLIC_SITE_URL` için mutlak http(s) origin doğrulaması, `layout.tsx`'te `metadataBase`, CF-Connecting-IP güven koşulunun yorum / `.env.example` / README'de düzeltilmesi |
+| `58bc79e` | inceleme (fork) | Son inceleme bulgularının düzeltmesi: `src/lib/request-body.ts` (chunked gövde için byte sınırlı stream okuyucu, 6 test), rate limiter'da en az aktif anahtar tahliyesi, `node:net` `isIP`, `NEXT_PUBLIC_SITE_URL` için mutlak http(s) origin doğrulaması, `layout.tsx`'te `metadataBase`, CF-Connecting-IP güven koşulunun yorum / `.env.example` / README'de düzeltilmesi |
+| `4a987eb` | inceleme (sonnet) | X-Forwarded-For fallback'i istemcinin yazdığı ilk girdi yerine Traefik'in eklediği son hop'u kullanıyor (sahtelenemez, CF bayrağı açılana kadar edge adresi düzeyinde kaba), `.env.example` metni, 2 yeni test |
 
 Plandan sapmalar (hepsi bilinçli, gerekçesiyle):
 
@@ -44,7 +45,7 @@ $ npm run typecheck                                            rc=0 (çıktısı
 $ npm run lint                                                 rc=0 (çıktısız)
 $ npm test
  Test Files  5 passed (5)
-      Tests  45 passed (45)                                    rc=0   (58bc79e sonrası: 6 dosya, 58 test)
+      Tests  45 passed (45)                                    rc=0   (58bc79e sonrası 58 test; 4a987eb sonrası 6 dosya, 60 test)
 $ npm run format
 All matched files use Prettier code style!                     rc=0
 $ npm run build
@@ -114,8 +115,22 @@ chunked 195 KB gövde (Content-Length yok)   -> 413   (düzeltme öncesi 400, g�
 Content-Length 195 KB                       -> 413
 chunked küçük geçerli gövde                  -> 503   (gövde okunuyor, anahtar yok)
 og:image                                     -> https://dogancanyildiz.sh/opengraph-image?...   (öncesi http://localhost:PORT/...)
-honeypot -> 400; 6. istek -> 429; sahte X-Forwarded-For ile 429 sonrası -> 503 (yeni kova; bilinçli ara durum, aşağıda)
+honeypot -> 400; 6. istek -> 429
 kapılar: typecheck, lint, test 58/58 (6 dosya), format, build, çizgi kontrolü -> hepsi rc 0
+```
+
+İkinci düzeltme (4a987eb) sonrası problar (sonnet alt ajanı, `npm run start -- -p 3123`, RESEND_API_KEY yok):
+
+```
+og:image                                      -> https://dogancanyildiz.sh/opengraph-image?8a00cf2af784c582
+195 KB gövde, Transfer-Encoding: chunked      -> 413
+195 KB gövde, Content-Length                  -> 413
+honeypot / geçersiz e-posta / bozuk JSON      -> 400 / 400 / 400
+X-Forwarded-For "203.0.113.5, 203.0.113.4" x6 -> 503 x5, sonra 429 (Retry-After: 588)
+X-Forwarded-For "203.0.113.9, 203.0.113.4"    -> 429 (aynı son hop, aynı kova)
+X-Forwarded-For "203.0.113.4, 203.0.113.7"    -> 503 (farklı son hop, yeni kova)
+/api/health                                   -> 200
+kapılar: typecheck, lint, test 60/60 (6 dosya), format, build, çizgi kontrolü -> hepsi rc 0
 ```
 
 Geliştirme modu CSP (`npm run dev -- -p 3125`): `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' ws:; ...`, `/` 200, X-Powered-By yok; yani `isProduction` ayrımı iki tarafta da doğru başlığı üretiyor.
@@ -128,7 +143,7 @@ Kısmen karşılanan kriter: planın "example.com" grep'i (Task 11 Step 2 ve Bit
 
 - CSP `script-src 'self' 'unsafe-inline'` taşıyor. Nonce tabanlı CSP tüm route'ları dinamik render'a zorluyor, Faz 2'nin "yalnızca /api/* dynamic" kriteriyle çelişiyor. Faz 5'te Umami eklenirken CSP yeniden ele alınacak.
 - `TRUST_CF_CONNECTING_IP` varsayılan `false`. Traefik `forwardedHeaders.trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz (yalnızca X-Forwarded-* ailesini yönetir); bayrak ancak origin yalnızca Cloudflare'dan erişilebilir olduktan (Traefik `ipAllowList` veya sunucu güvenlik duvarı, spec 09-guvenlik.md madde 6) ve trustedIPs set edildikten SONRA `true` yapılmalı. Önce açılırsa herhangi bir peer sahte bir başlıkla istek başına yeni rate-limit kovası açabilir.
-- Bayrak kapalıyken uygulama içi rate limit ara durumdadır: `getClientIp` X-Forwarded-For'un en soldaki girdisini okur; Traefik zinciri iletiyorsa bu değer istemcinin gönderdiğidir (istek başına taklit edilebilir, yerelde doğrulandı), Traefik başlığı yeniden yazıyorsa Cloudflare edge adresidir (aynı PoP'taki ziyaretçiler tek kovayı paylaşır). Bu dönemde asıl koruma Faz 1'deki Cloudflare Rate Limiting kuralıdır. Kod planın belirlediği gibi bırakıldı; güvenilir hop sayısı (topoloji) Faz 1'de netleşince `getClientIp` sağdan sayan bir mantığa geçirilebilir.
+- Bayrak kapalıyken uygulama içi rate limit kaba çalışır: `getClientIp` X-Forwarded-For'un en sağdaki girdisini, yani önde duran güvenilir proxy'nin (Traefik) eklediği hop'u okur (`4a987eb`). Traefik önde olduğu sürece bu değer istemci tarafından yazılamaz; Cloudflare proxied modda Cloudflare edge adresidir, dolayısıyla aynı edge'den gelen ziyaretçiler aynı kovayı paylaşır (bir contact formu için kabul edilebilir). Ziyaretçi bazında hassasiyet `TRUST_CF_CONNECTING_IP=true` ile gelir; o da yalnızca origin Cloudflare dışına kapatıldıktan sonra açılmalı.
 - Renovate GitHub App kurulu değil; `renovate.json` hazır bekliyor, automerge ancak Faz 1'deki GitHub Actions kapısından sonra anlamlı. Not: `vulnerabilityAlerts.minimumReleaseAge: null` güvenlik PR'larını bekletmeden birleştirir; tedarik zinciri açısından bilinçli bir hız/risk tercihi, sahibi isterse 1-3 güne çekilebilir.
 - `npm audit`: 17 transitif bulgu (2 low, 4 moderate, 11 high), tamamı `fixAvailable: true`. Kaynaklar: `shadcn@3.8.5` -> `@modelcontextprotocol/sdk` -> hono / @hono/node-server / express / express-rate-limit / body-parser zinciri (yalnızca dev CLI) ve `resend@6.9.2` -> `svix` -> `uuid` (moderate). Plan kapsamı dışında bırakıldı; `npm audit fix --dry-run` (uygulanmadı) yalnızca semver içi değişiklikler öneriyor: `resend` 6.9.2 -> 6.24.0 (svix ve uuid ağaçtan çıkıyor), `hono` 4.12.1 -> 4.13.5, `@hono/node-server` 1.19.9 -> 1.19.17, `path-to-regexp` 8.3.0 -> 8.4.2, `qs`, `js-yaml`, `ip-address`, `flatted`, `fast-uri`, `minimatch`, `brace-expansion`, `picomatch` ve `@babel/*` patch/minor sürümleri. Force gerektiren madde yok. Ayrı bir PR'da `npm audit fix` koşup kapıları (typecheck, lint, test, build) doğrulamak yeterli görünüyor; `shadcn` major yükseltmesi zaten Faz 0 sonrası ayrı PR maddesi.
 - `lucide-react`, `shadcn`, `typescript` major yükseltmeleri yapılmadı (plan gereği ayrı PR).
@@ -218,7 +233,7 @@ Her yanıtta: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin
 - Dockerfile `node .next/standalone/server.js` çalıştırmalı; `public/` ve `.next/static` dizinlerini standalone çıktısının yanına kopyalamalı (standalone tek başına statik chunk'ları servis etmiyor). `HOSTNAME=0.0.0.0` ve `PORT` env'leri standalone sunucu tarafından okunuyor.
 - Coolify health check `/api/health`'e bağlanmalı; yanıt 200 ve `no-store`. coollabsio/coolify#7500 (HEALTHCHECK + Node) riski staging'de doğrulanmalı.
 - Coolify env ayrımı: `NEXT_PUBLIC_SITE_URL` Build, diğer dördü Runtime. Ters işaretlenirse ya client bundle'da URL undefined kalır ya da RESEND_API_KEY image katmanına sızar. `.env.example`'daki "Coolify layer" yorumları kaynak.
-- Traefik `forwardedHeaders.trustedIPs` Cloudflare aralıklarıyla set edildikten sonra `TRUST_CF_CONNECTING_IP=true` yapılmalı; sıralama tersine dönerse IP taklidi mümkün olur. `getClientIp` şu an XFF'in ilk değerini okuyor; Traefik önde olduğu sürece bu değer Traefik'in gördüğü peer IP'si, Cloudflare proxied modda ise Cloudflare edge IP'sidir, yani aynı edge'den gelen ziyaretçiler aynı rate-limit kovasına düşer. Bayrak açılana kadar bu bilinçli bir kısıt.
+- Traefik `forwardedHeaders.trustedIPs` Cloudflare aralıklarıyla set edildikten VE origin yalnızca Cloudflare'den erişilir hale getirildikten (Traefik ipAllowList veya host firewall, Faz 1) sonra `TRUST_CF_CONNECTING_IP=true` yapılmalı; `trustedIPs` tek başına CF-Connecting-IP'yi korumaz, o başlığı origin'e ulaşan herkes yazabilir. Bayrak kapalıyken `getClientIp` X-Forwarded-For'un son hop'unu (Traefik'in eklediği) anahtar olarak kullanır: sahtelenemez ama Cloudflare edge adresi düzeyinde kaba.
 - Cloudflare Rate Limiting kuralı (`/api/contact`) Faz 1'de dış katman olarak tanımlanmalı; uygulama içi limit tek process'e bağlı.
 - `.dockerignore`'a `.local/`, `.nodeterm/`, `.env*`, `.superpowers/`, `.claude/`, `docs/` girmeli (build context'e sızmasın).
 - ESLint 9 flat config nokta dizinleri yok saymıyor: `.superpowers/` gibi araç dizinlerine JS dosyası konursa `npm run lint` onları da lint'ler. Bu fazda geçici script'ler oturum scratchpad'ine taşındı; kalıcı çözüm gerekirse `eslint.config.mjs`'e `globalIgnores([".superpowers/**"])` eklenir.
@@ -235,4 +250,4 @@ Kodla yapılamayan, site sahibinin uygulaması gereken adımlar `docs/plans/hand
 ## Son inceleme
 
 - Güvenlik incelemesi (`security-review` skill'inin kriterleriyle, alt görev yerine doğrudan okuma): HIGH veya MEDIUM bulgu yok. İncelenip elenen maddeler: contact gövdesi (tip, uzunluk, e-posta deseni; düz metin e-posta, HTML sink yok), cross-site POST (kimliksiz public endpoint, kurban durumu yok), hata loglama (API anahtarı loglanmıyor), IP başlıkları (yalnızca rate-limit anahtarı, CF başlığı env bayrağına bağlı), health payload'ı (topoloji yok), CSP `'unsafe-inline'` (sertleştirme eksiği, somut açık değil), `.env.example` (sır yok), Renovate automerge (süreç tercihi, yukarıda not edildi).
-- Kod incelemesi (`code-review` skill, main..HEAD, high; alt ajan bulunmadığı için tek geçişli, 3 bulgusu curl ile doğrulanmış): 10 bulgu. Düzeltme dalgası `58bc79e` ile 8'i kapatıldı: (1) chunked gövdenin 413 sınırını atlaması -> `request-body.ts`; (2) CF-Connecting-IP güven koşulunun yanlış anlatılması -> yorum, `.env.example`, README; (3) X-Forwarded-For en sol girdisinin taklit edilebilirliği -> belgelendi, kod plan gereği ara durumda (yukarıda); (4) `maxKeys`'in gerçek bir sınır olmaması -> en az aktif anahtar tahliyesi; (5) `metadataBase` eksikliği, og:image'in localhost'a çözülmesi -> `layout.tsx`; (6) elle yazılmış IP regex'leri -> `node:net` `isIP`; (7) `NEXT_PUBLIC_SITE_URL`'in şemasız/path'li değerleri kabul etmesi -> origin doğrulaması; (8) CSP yorumundaki gerekçenin bugünkü build'de geçersiz olması -> yorum düzeltildi, nonce plan gereği alınmadı. Park edilenler: (9) Renovate automerge/velite kuralı, (10) `translations.ts` uzun çizgileri (Açık kalanlar'da). Düzeltme sonrası kapsamlı yeniden inceleme: her bulgu diff'te doğrulandı, yeni kırılma yok; kapılar ve problar temiz.
+- Kod incelemesi (`code-review` skill, main..HEAD, high; alt ajan bulunmadığı için tek geçişli, 3 bulgusu curl ile doğrulanmış): 10 bulgu. Düzeltme dalgaları `58bc79e` (fork) ve `4a987eb` (sonnet alt ajanı) ile 8'i kapatıldı: (1) chunked gövdenin 413 sınırını atlaması -> `request-body.ts`; (2) CF-Connecting-IP güven koşulunun yanlış anlatılması -> yorum, `.env.example`, README; (3) X-Forwarded-For en sol girdisinin taklit edilebilirliği -> `4a987eb` ile anahtar Traefik'in eklediği son hop oldu (sahtelenemez, CF bayrağına kadar kaba); (4) `maxKeys`'in gerçek bir sınır olmaması -> en az aktif anahtar tahliyesi; (5) `metadataBase` eksikliği, og:image'in localhost'a çözülmesi -> `layout.tsx`; (6) elle yazılmış IP regex'leri -> `node:net` `isIP`; (7) `NEXT_PUBLIC_SITE_URL`'in şemasız/path'li değerleri kabul etmesi -> origin doğrulaması; (8) CSP yorumundaki gerekçenin bugünkü build'de geçersiz olması -> yorum düzeltildi, nonce plan gereği alınmadı. Park edilenler: (9) Renovate automerge/velite kuralı, (10) `translations.ts` uzun çizgileri (Açık kalanlar'da). Düzeltme sonrası yeniden inceleme (`b5e87bb..4a987eb`, düzeltme turunda diff'in doğrudan okunmasıyla): sekiz düzeltmenin her biri diff'te doğrulandı, yeni kırılma görülmedi. `readBodyWithLimit` sınırı aşan chunked gövdede stream'i iptal edip `BodyTooLargeError` ile 413'e düşüyor; rate limiter'da `hits.delete` + yeniden ekleme Map insertion order'ını en az aktif sırasına çeviriyor ve tahliye döngüsü `maxKeys`'i gerçek tavan yapıyor; `getClientIp` son hop'u okuyor ve iki yeni test bunu assert ediyor; `resolveSiteUrl` yalnızca http(s) origin kabul ediyor. Kapılar düzeltme turunda yeniden koşuldu: typecheck, lint, test 60/60 (6 dosya), format, build -> hepsi rc 0.
