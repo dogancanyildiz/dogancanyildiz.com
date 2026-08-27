@@ -101,7 +101,7 @@ describe("sitemap", () => {
     const entries = sitemap();
 
     const pattern =
-      /^https:\/\/dogancanyildiz\.sh(\/tr)?\/(blog|projects)\/([a-z0-9-]+)$/;
+      /^https:\/\/dogancanyildiz\.com(\/tr)?\/(blog|projects)\/([a-z0-9-]+)$/;
 
     let matchedAny = false;
     for (const entry of entries) {
