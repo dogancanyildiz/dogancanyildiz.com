@@ -5,7 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import "../globals.css";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
-import { localeUrl } from "@/lib/seo/locale-url";
+import { buildOpenGraph } from "@/lib/seo/locale-url";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -37,8 +37,6 @@ export async function generateMetadata({
 
   const t = await getTranslations({ locale: lang, namespace: "metadata" });
 
-  const ogLocales = { en: "en_US", tr: "tr_TR" } as const;
-
   return {
     metadataBase: new URL(siteUrl()),
     title: {
@@ -46,17 +44,14 @@ export async function generateMetadata({
       template: `%s | ${t("defaultTitle")}`,
     },
     description: t("defaultDescription"),
-    openGraph: {
-      type: "website",
-      siteName: t("defaultTitle"),
+    // Only the home page keeps this object. Every other segment overrides it
+    // with its own, otherwise it would inherit the home page url and title.
+    openGraph: buildOpenGraph(lang, "/", {
       title: t("defaultTitle"),
       description: t("defaultDescription"),
-      url: localeUrl(lang, "/"),
-      locale: ogLocales[lang],
-      alternateLocale: routing.locales
-        .filter((candidate) => candidate !== lang)
-        .map((candidate) => ogLocales[candidate]),
-    },
+      siteName: t("defaultTitle"),
+      imageAlt: t("ogAlt"),
+    }),
   };
 }
 

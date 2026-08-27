@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { buildAlternates } from "@/lib/seo/locale-url";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo/locale-url";
 import { Hero } from "@/components/sections/hero";
 import { FeaturedProjects } from "@/components/sections/featured-projects";
 import { SkillsStrip } from "@/components/sections/skills-strip";
@@ -26,6 +26,12 @@ export async function generateMetadata({
   return {
     title: { absolute: t("defaultTitle") },
     description: t("defaultDescription"),
+    openGraph: buildOpenGraph(lang, "/", {
+      title: t("defaultTitle"),
+      description: t("defaultDescription"),
+      siteName: t("defaultTitle"),
+      imageAlt: t("ogAlt"),
+    }),
     alternates: buildAlternates(lang, "/"),
   };
 }

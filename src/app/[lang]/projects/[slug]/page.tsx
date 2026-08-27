@@ -4,7 +4,7 @@ import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { projects } from "@/data/projects";
-import { buildAlternates } from "@/lib/seo/locale-url";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo/locale-url";
 import { localesForProject } from "@/lib/content/project-locales";
 import { ProjectDetail } from "@/components/sections/project-detail";
 
@@ -29,10 +29,20 @@ export async function generateMetadata({
     locale: lang,
     namespace: "projects.items",
   });
+  const site = await getTranslations({ locale: lang, namespace: "metadata" });
+
+  const title = t(`${project.id}.title`);
+  const description = t(`${project.id}.description`);
 
   return {
-    title: t(`${project.id}.title`),
-    description: t(`${project.id}.description`),
+    title,
+    description,
+    openGraph: buildOpenGraph(lang, `/projects/${slug}`, {
+      title,
+      description,
+      siteName: site("defaultTitle"),
+      imageAlt: site("ogAlt"),
+    }),
     alternates: buildAlternates(
       lang,
       `/projects/${slug}`,

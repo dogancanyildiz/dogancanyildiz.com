@@ -2,9 +2,14 @@ import { ImageResponse } from "next/og";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import {
+  OG_IMAGE_CONTENT_TYPE,
+  OG_IMAGE_ID,
+  OG_IMAGE_SIZE,
+} from "@/lib/seo/og-image";
 
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const size = OG_IMAGE_SIZE;
+export const contentType = OG_IMAGE_CONTENT_TYPE;
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
@@ -23,7 +28,7 @@ export async function generateImageMetadata({
     ? lang
     : routing.defaultLocale;
   const t = await getTranslations({ locale, namespace: "metadata" });
-  return [{ id: "default", size, contentType, alt: t("ogAlt") }];
+  return [{ id: OG_IMAGE_ID, size, contentType, alt: t("ogAlt") }];
 }
 
 export default function OGImage() {
