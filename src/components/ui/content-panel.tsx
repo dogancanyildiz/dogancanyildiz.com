@@ -5,7 +5,7 @@ interface ContentPanelProps {
   className?: string;
 }
 
-/** Semantic content grouping — spacing only, no card chrome. */
+/** Semantic content grouping: spacing only, no card chrome. */
 export function ContentPanel({ children, className }: ContentPanelProps) {
   return <div className={cn("space-y-6", className)}>{children}</div>;
 }
@@ -15,7 +15,7 @@ interface InsetPanelProps {
   className?: string;
 }
 
-/** Nested block within a section — spacing only. */
+/** Nested block within a section: spacing only. */
 export function InsetPanel({ children, className }: InsetPanelProps) {
   return <div className={cn("space-y-3", className)}>{children}</div>;
 }
