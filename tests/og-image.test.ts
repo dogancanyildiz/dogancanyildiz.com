@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -80,5 +80,9 @@ describe("icon", () => {
     expect(source).toContain("#0a0c0f");
     expect(source).toContain("#4fcc8d");
     expect(source).not.toContain('background: "black"');
+  });
+
+  it("has no stale create-next-app favicon.ico to outrank it in the page head", () => {
+    expect(existsSync(join(process.cwd(), "src/app/favicon.ico"))).toBe(false);
   });
 });
