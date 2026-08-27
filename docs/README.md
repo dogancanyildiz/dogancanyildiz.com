@@ -23,7 +23,7 @@ Tek gerçek kaynak bu klasördür. Site içeriği (biyografi, projeler, sertifik
 | [10-yol-haritasi.md](10-yol-haritasi.md) | Faz 0-5, madde listeleri, bitiş kriterleri, launch noktası | 11 |
 | [11-acik-sorular.md](11-acik-sorular.md) | Site sahibine 11 soru; tamamı 2026-08-27'de cevaplandı, açık soru sayısı 0 (soru 5: `.com` ana domain, `.sh` 301) | 12 |
 | [12-kaynaklar.md](12-kaynaklar.md) | Dayanılan tüm URL'ler, kategoriye göre | referans |
-| [launch-checklist.md](launch-checklist.md) | Faz 4 yayın kapısı: otomatik kapılar, içerik, SEO/i18n, performans/erişilebilirlik, contact/altyapı; hiçbiri geçmeden .com -> .sh 301 canlıya alınmaz | uygulama, launch öncesi |
+| [launch-checklist.md](launch-checklist.md) | Faz 4 yayın kapısı: otomatik kapılar, içerik, SEO/i18n, performans/erişilebilirlik, contact/altyapı; hiçbiri geçmeden .sh -> .com 301 canlıya alınmaz | uygulama, launch öncesi |
 | [plans/](plans/) | Faz başına uygulama planı (writing-plans formatı), 2026-08-27-faz-0..5 dosyaları; kararlar dokümanlarından türetildi, faz yürütülürken izlendi; `.sh` domain varsayımıyla yazıldığı için `plans/README.md`'deki not | uygulama kaydı |
 | [plans/handoffs/](plans/handoffs/) | Faz başına devir notu (faz-N.md), sahibinin manuel checklist'i (faz-N-manual-checklist.md) ve ek notlar (faz-3-notlar.md, faz-4-brief.md); bir fazın gerçekte ne yaptığının, nelerin sahibi beklediğinin kanıtı | uygulama kaydı |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | Keep a Changelog biçiminde sürüm geçmişi; `release.yml` her `main` merge'inde günceller | referans |
