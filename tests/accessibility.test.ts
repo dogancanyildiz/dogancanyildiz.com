@@ -45,6 +45,25 @@ describe("focus ring", () => {
   });
 });
 
+describe("focus ring survives on form controls", () => {
+  it("never pairs outline-none with focus-visible:outline-2 in src/components/ui", () => {
+    const files = [
+      "src/components/ui/button.tsx",
+      "src/components/ui/input.tsx",
+      "src/components/ui/textarea.tsx",
+    ];
+    for (const file of files) {
+      const source = read(file);
+      const hasOutlineNone = /\boutline-none\b/.test(source);
+      const hasFocusVisibleOutline = source.includes("focus-visible:outline-2");
+      expect(
+        hasOutlineNone && hasFocusVisibleOutline,
+        `${file} pairs outline-none with focus-visible:outline-2, which zeroes out the ring in the same @layer utilities pass`
+      ).toBe(false);
+    }
+  });
+});
+
 describe("target size", () => {
   it("gives every icon-only control at least 44 CSS px", () => {
     for (const file of [
