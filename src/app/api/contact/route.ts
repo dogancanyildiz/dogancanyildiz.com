@@ -48,7 +48,9 @@ export async function POST(request: Request) {
     if (error instanceof BodyTooLargeError) {
       return NextResponse.json({ error: TOO_LARGE_MESSAGE }, { status: 413 });
     }
-    throw error;
+    // A body that cannot be read (client aborted, broken transfer) is a bad
+    // request, not a server fault, so it must not surface as a 500.
+    return NextResponse.json({ error: INVALID_MESSAGE }, { status: 400 });
   }
 
   const parsed = validateBody(parseJsonBody(rawBody));
