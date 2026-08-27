@@ -195,3 +195,21 @@ describe("project list layout", () => {
     expect(source).not.toContain("border-primary/30");
   });
 });
+
+describe("panel shadow", () => {
+  it("defines --shadow-color in both token blocks, black in dark mode", () => {
+    const light = css.slice(css.indexOf(":root {"), css.indexOf(".dark {"));
+    const dark = css.slice(css.indexOf(".dark {"));
+    expect(light).toMatch(/--shadow-color:\s*oklch\(/);
+    expect(dark).toMatch(/--shadow-color:\s*oklch\(0 0 0\)/);
+  });
+
+  it("mixes surface-panel and Card shadows from the token, not --foreground", () => {
+    for (const source of [css, read("src/components/ui/card.tsx")]) {
+      expect(source).toContain(
+        "color-mix(in_oklab,var(--shadow-color)_35%,transparent)"
+      );
+      expect(source).not.toContain("var(--foreground)_35%");
+    }
+  });
+});

@@ -87,6 +87,9 @@
   --ring: oklch(0.4794 0.1156 156.3);
   --status-up: oklch(0.4794 0.1156 156.3);
   --status-down: oklch(0.5054 0.1905 27.5);
+  /* Panels and cards mix their shadow from this. --foreground would do in
+     light mode but is near white in dark mode and paints a halo instead. */
+  --shadow-color: oklch(0.2066 0.0101 248.3);
   --chart-1: oklch(0.4794 0.1156 156.3);
   --chart-2: oklch(0.5044 0.0114 252.9);
   --chart-3: oklch(0.6998 0.0123 252.1);
@@ -124,6 +127,7 @@
   --ring: oklch(0.7591 0.1444 158);
   --status-up: oklch(0.7591 0.1444 158);
   --status-down: oklch(0.7106 0.1661 22.2);
+  --shadow-color: oklch(0 0 0);
   --chart-1: oklch(0.7591 0.1444 158);
   --chart-2: oklch(0.6998 0.0123 252.1);
   --chart-3: oklch(0.5044 0.0114 252.9);
@@ -241,7 +245,7 @@
   }
 
   .surface-panel {
-    @apply rounded-3xl border border-border bg-card/80 shadow-[0_24px_80px_-48px_color-mix(in_oklab,var(--foreground)_35%,transparent)] backdrop-blur-xl;
+    @apply rounded-3xl border border-border bg-card/80 shadow-[0_24px_80px_-48px_color-mix(in_oklab,var(--shadow-color)_35%,transparent)] backdrop-blur-xl;
   }
 
   .eyebrow {
