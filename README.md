@@ -107,3 +107,32 @@ docs/plans     Executable implementation plans, one per phase
 Architecture decisions live in `docs/`. Start with
 `docs/00-ozet-ve-karar.md` for the summary and `docs/10-yol-haritasi.md` for the
 phase order.
+
+## Deploy
+
+Production runs on a self hosted Coolify instance behind Cloudflare and
+Traefik. The image is built on the server from the Dockerfile in this repo,
+GitHub Actions only gates pull requests and does not push any image.
+
+Local verification of the production image:
+
+```bash
+docker compose up --build -d
+curl -s http://127.0.0.1:3000/api/health   # {"status":"ok", ...}
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3000/   # 200
+docker compose down
+```
+
+Lint the Dockerfile the same way CI does:
+
+```bash
+docker run --rm -i hadolint/hadolint:v2.15.1-alpine hadolint --failure-threshold warning - < Dockerfile
+```
+
+The parts that live in a control panel rather than in this repo are written
+down as step by step checklists:
+
+- `docs/deploy/coolify-kurulum.md` - GitHub App, build pack, env layers, health check
+- `docs/deploy/cloudflare-kurulum.md` - DNS, TLS, redirect, cache, rate limiting
+- `docs/deploy/traefik-ve-origin.md` - trusted proxy headers, HSTS, origin lockdown
+- `docs/deploy/resend-domain.md` - SPF, DKIM, DMARC for the sender domain
