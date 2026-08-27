@@ -61,6 +61,18 @@ into image layers and build logs.
 | `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                                                                                                                                                |
 | `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after the origin is reachable from Cloudflare alone and Traefik trusts the Cloudflare ranges. `trustedIPs` by itself does not protect `CF-Connecting-IP`.                                             |
 
+## Internationalization
+
+- English is served from the root (`/`, `/about`), Turkish from `/tr` (`/tr`, `/tr/about`).
+- Locale routing lives in `src/i18n/routing.ts`; `src/proxy.ts` applies it. Automatic
+  Accept-Language redirects and the locale cookie are disabled: the URL is the only signal.
+- Messages live in `messages/en.json` and `messages/tr.json`. Both files must carry the
+  exact same key set.
+- Every page and layout under `src/app/[lang]/` must call `setRequestLocale(lang)`. A page
+  that forgets it silently drops out of static rendering; `npm run verify:routes` catches it.
+- Route Handlers do not receive the `[lang]` param. `/api/contact` reads `locale` from the
+  request body instead.
+
 ## Security posture
 
 - Security headers and a Content Security Policy are set in `next.config.ts`

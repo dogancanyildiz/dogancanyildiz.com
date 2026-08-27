@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "format": "prettier --check .",
-    "format:write": "prettier --write ."
+    "format:write": "prettier --write .",
+    "verify:routes": "node scripts/assert-static-routes.mjs"
   },
   "engines": {
     "node": ">=20.9"
