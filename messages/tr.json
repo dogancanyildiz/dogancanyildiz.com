@@ -1,0 +1,184 @@
+{
+  "brand": "Alex Chen",
+  "nav": {
+    "home": "Ana Sayfa",
+    "about": "Hakkımda",
+    "projects": "Projeler",
+    "contact": "İletişim",
+    "languageLabel": "Dil"
+  },
+  "hero": {
+    "greeting": "Merhaba, ben",
+    "name": "Alex Chen",
+    "role": "Frontend Geliştirici",
+    "title": "Netlik, ritim ve hızla premium dijital ürünler tasarlıyorum.",
+    "subtitle": "Detaya önem veren ekipler için arayüz sistemleri, ürün deneyimleri ve frontend mimarisi geliştiriyorum.",
+    "viewProjects": "Projeleri gör",
+    "contact": "İletişime geç",
+    "availableForWork": "Seçili işler için uygunum",
+    "downloadCV": "CV İndir",
+    "eyebrow": "Bağımsız frontend partneri",
+    "summaryTitle": "Daha rafine teslimatlar",
+    "summaryBody": "Landing page'lerden dahili araçlara kadar ham ürün fikirlerini editoryal, modern ve kullanımı kolay arayüzlere dönüştürüyorum.",
+    "metricYears": "Yıllık ürün teslim deneyimi",
+    "metricProjects": "Seçili lansman",
+    "metricFocus": "Tasarım ve kod odağı",
+    "focus1": "Tasarım sistemleri",
+    "focus2": "Ürün siteleri",
+    "focus3": "Uygulama arayüzleri",
+    "focus4": "Frontend mimarisi",
+    "note": "Şu anda İstanbul merkezli, ürün ekipleriyle uzaktan çalışıyorum.",
+    "focusLabel": "Odak alanları"
+  },
+  "home": {
+    "featuredTitle": "Öne çıkan projeler",
+    "featuredSubtitle": "Yayına aldığım ürünler, sistemler ve arayüz çalışmalarından seçki.",
+    "skillsTitle": "Çalıştığım teknolojiler",
+    "viewAll": "Tüm projeleri gör",
+    "featuredEyebrow": "Seçili işler",
+    "skillsEyebrow": "Yetenekler",
+    "skillsSubtitle": "Ürün teslimi, sistem yaklaşımı ve arayüz kalitesi etrafında şekillenmiş pratik bir teknoloji seti."
+  },
+  "footer": {
+    "copyright": "Tüm hakları saklıdır.",
+    "contact": "İletişim",
+    "github": "GitHub",
+    "linkedin": "LinkedIn",
+    "twitter": "Twitter",
+    "elsewhere": "Bağlantılar",
+    "availability": "Seçili freelance ve tam zamanlı iş birliklerine açığım.",
+    "tagline": "Sakin bir görsel dil ve güçlü frontend temelleriyle arayüzler geliştiriyorum.",
+    "emailLabel": "Birincil e-posta"
+  },
+  "about": {
+    "title": "Hakkımda",
+    "intro": "Yüzeyde rafine, altında güvenilir hissettiren ürün deneyimleri geliştiriyorum.",
+    "p1": "İşim; arayüz kalitesi, frontend mühendisliği ve sistem düşüncesinin kesişiminde duruyor. Hıza, erişilebilirliğe ve ekiplerin büyütebileceği bir görsel dile önem veriyorum.",
+    "p2": "Yıllar içinde tasarım sistemleri, dashboard'lar, e-ticaret, dahili araçlar ve lansman yüzeyleri üzerinde çalıştım. Ortak hedef hep aynı: karmaşık işleri okunur hale getirmek.",
+    "skillsTitle": "Yetenekler ve araçlar",
+    "experienceTitle": "Deneyim",
+    "educationTitle": "Eğitim",
+    "browseIntro": "Projelerime göz atabilir veya",
+    "or": " sayfasına gidebilir veya ",
+    "projectsLink": "projeler",
+    "contactLink": "iletişime geçin",
+    "exp1Role": "Kıdemli Frontend Geliştirici",
+    "exp1Company": "TechCorp Inc.",
+    "exp1Period": "2021 - Günümüz",
+    "exp1Desc": "Ana ürünün frontend'ine liderlik. Tasarım sistemi kuruldu, Core Web Vitals iyileştirildi.",
+    "exp2Role": "Frontend Geliştirici",
+    "exp2Company": "StartupXYZ",
+    "exp2Period": "2019 - 2021",
+    "exp2Desc": "React ile müşteri paneli ve admin arayüzü geliştirildi. REST ve GraphQL API entegrasyonları.",
+    "exp3Role": "Junior Frontend Geliştirici",
+    "exp3Company": "WebAgency",
+    "exp3Period": "2017 - 2019",
+    "exp3Desc": "Duyarlı siteler ve küçük web uygulamaları. Tasarımcılar ve backend ekibiyle çalışıldı.",
+    "edu1Degree": "B.Sc. Bilgisayar Mühendisliği",
+    "edu1School": "Devlet Üniversitesi",
+    "edu1Period": "2013 - 2017",
+    "downloadCV": "CV İndir",
+    "skillsFrontend": "Frontend",
+    "skillsBackend": "Backend",
+    "skillsTools": "Araçlar",
+    "eyebrow": "Profil",
+    "manifestoEyebrow": "Yaklaşım",
+    "manifestoTitle": "Editoryal bakış açısıyla frontend",
+    "manifestoBody": "Benim için iyi ürünler; net hiyerarşi, yerinde motion, sağlam mimari ve akılda kalan ölçülü bir karakter taşır.",
+    "capabilitiesEyebrow": "Yetkinlikler",
+    "timelineEyebrow": "Kariyer yolu",
+    "educationEyebrow": "Arka plan"
+  },
+  "projects": {
+    "title": "Projeler",
+    "subtitle": "E-ticaret, analitik, tasarım sistemleri ve dahili araçlar arasında uzanan ürün ve platform işleri.",
+    "backToProjects": "Projelere dön",
+    "viewLive": "Canlıya bak",
+    "viewSource": "Kaynak kodu",
+    "technologies": "Teknolojiler",
+    "notFound": "Proje bulunamadı",
+    "eyebrow": "Arşiv",
+    "filtersTitle": "Teknolojiye göre filtrele",
+    "all": "Tümü",
+    "summary": "Proje özeti",
+    "impact": "Etkisi",
+    "role": "Rol",
+    "links": "Bağlantılar",
+    "items": {
+      "1": {
+        "title": "E-ticaret platformu",
+        "description": "Ürün kataloğu, sepet, ödeme ve admin paneli olan tam yığın mağaza. Next.js, Stripe ve PostgreSQL. Binlerce SKU, çoklu dil desteği."
+      },
+      "2": {
+        "title": "Analitik dashboard",
+        "description": "Pazarlama ekipleri için gerçek zamanlı analitik. Özel grafikler, filtreler, CSV/PDF dışa aktarma. Google Analytics ve dahili API entegrasyonu. 50+ şirket tarafından kullanılıyor."
+      },
+      "3": {
+        "title": "Tasarım sistemi ve dokümantasyon",
+        "description": "40+ bileşenli dahili tasarım sistemi, Storybook ve kullanım kılavuzu. UI tutarlılığı artırıldı, 5 ürün ekibinde teslimat hızlandı."
+      },
+      "4": {
+        "title": "Geliştirici CLI aracı",
+        "description": "Statik siteleri iskeletleyen ve yayınlayan açık kaynak CLI. npm'de haftalık 10k+ indirme. TypeScript, eklenti desteği."
+      },
+      "5": {
+        "title": "Mobil öncelikli rezervasyon uygulaması",
+        "description": "Hizmet pazarı için rezervasyon akışı. Takvim, müsaitlik, ödemeler, push bildirimleri. React Native (Expo) ve Node.js backend."
+      },
+      "6": {
+        "title": "Dahili İK portalı",
+        "description": "İzin talepleri, zaman çizelgeleri, organizasyon şeması. SSO, rol tabanlı erişim, denetim kayıtları. React ve .NET. 500+ çalışan."
+      }
+    }
+  },
+  "contact": {
+    "title": "İletişim",
+    "subtitle": "Bir ürün şekillendiriyor, landing page yeniliyor ya da frontend sisteminizi rafine etmek istiyorsanız detayları duymaktan memnun olurum.",
+    "location": "İstanbul, Türkiye",
+    "email": "alex@example.com",
+    "availability": "Tam zamanlı ve serbest çalışma fırsatlarına açığım.",
+    "eyebrow": "Konuşmayı başlatalım",
+    "cardTitle": "Destek olabileceğim alanlar",
+    "cardBody": "Tasarım odaklı ürün arayüzleri, landing page yenilemeleri, component sistemleri ve daha güçlü bir arayüz varlığı isteyen ekipler için frontend iyileştirmeleri.",
+    "responseTitle": "Yanıt süresi",
+    "responseBody": "Genelde 1-2 iş günü içinde.",
+    "workingTitle": "Çalışma tarzı",
+    "workingBody": "Kickoff'tan son polish aşamasına kadar yapılandırılmış, iş birlikçi ve detay odaklı.",
+    "availabilityTitle": "Uygunluk",
+    "availabilityBody": "Bu çeyrekte seçili ürün iş birliklerine açığım."
+  },
+  "form": {
+    "name": "Ad",
+    "email": "E-posta",
+    "subject": "Konu (isteğe bağlı)",
+    "message": "Mesaj",
+    "placeholderName": "Adınız",
+    "placeholderEmail": "siz@ornek.com",
+    "placeholderSubject": "Konu",
+    "placeholderMessage": "Mesajınız...",
+    "send": "Gönder",
+    "sending": "Gönderiliyor...",
+    "success": "Mesaj gönderildi. En kısa sürede dönüş yapacağım.",
+    "errorGeneric": "Bir şeyler yanlış gitti. Lütfen tekrar deneyin.",
+    "errorNetwork": "Ağ hatası. Lütfen tekrar deneyin.",
+    "introTitle": "Mesaj",
+    "introBody": "Biraz bağlam paylaşın, sonraki adımlarla birlikte dönüş yapayım."
+  },
+  "metadata": {
+    "defaultTitle": "Alex Chen Portfolyo",
+    "defaultDescription": "Premium frontend portfolyosu, seçili projeler, deneyim ve iletişim.",
+    "aboutTitle": "Hakkımda",
+    "aboutDescription": "Ben ve çalışmalarım hakkında.",
+    "projectsTitle": "Projeler",
+    "projectsDescription": "Üzerinde çalıştığım projelerden bir seçki.",
+    "contactTitle": "İletişim",
+    "contactDescription": "İletişime geçin.",
+    "ogAlt": "Portfolyo"
+  },
+  "api": {
+    "invalidRequest": "Geçersiz istek. Ad, e-posta ve mesaj alanları zorunlu.",
+    "emailNotConfigured": "E-posta gönderimi sunucuda yapılandırılmamış.",
+    "sendFailed": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.",
+    "tooManyRequests": "Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin."
+  }
+}
