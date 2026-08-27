@@ -5,7 +5,10 @@
     "about": "Hakkımda",
     "projects": "Projeler",
     "contact": "İletişim",
-    "languageLabel": "Dil"
+    "languageLabel": "Dil",
+    "menu": "Menü",
+    "openMenu": "Menüyü aç",
+    "closeMenu": "Menüyü kapat"
   },
   "hero": {
     "greeting": "Merhaba, ben",
@@ -42,6 +45,7 @@
   "footer": {
     "copyright": "Tüm hakları saklıdır.",
     "contact": "İletişim",
+    "navTitle": "Sayfalar",
     "github": "GitHub",
     "linkedin": "LinkedIn",
     "twitter": "Twitter",
@@ -186,5 +190,8 @@
     "emailNotConfigured": "E-posta gönderimi sunucuda yapılandırılmamış.",
     "sendFailed": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.",
     "tooManyRequests": "Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin."
+  },
+  "a11y": {
+    "skipToContent": "İçeriğe geç"
   }
 }

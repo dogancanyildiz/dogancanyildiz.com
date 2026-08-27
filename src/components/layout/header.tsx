@@ -1,28 +1,25 @@
 "use client";
 
-import { motion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { ArrowUpRight } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
+import { MobileMenu } from "./mobile-menu";
+import { navItems } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-
-const navKeys = [
-  { href: "/", key: "nav.home" },
-  { href: "/about", key: "nav.about" },
-  { href: "/projects", key: "nav.projects" },
-  { href: "/contact", key: "nav.contact" },
-] as const;
 
 export function Header() {
   const pathname = usePathname();
   const t = useTranslations();
 
   return (
-    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4">
-      <nav className="page-shell surface-panel flex min-h-16 items-center justify-between gap-3 px-4 py-3 sm:px-5">
+    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+      <nav
+        aria-label={t("nav.menu")}
+        className="page-shell surface-panel flex min-h-16 items-center justify-between gap-3 px-4 py-3 sm:px-5"
+      >
         <Link
           href="/"
           className="group flex min-w-0 items-center gap-3 no-underline"
@@ -31,42 +28,31 @@ export function Header() {
             DCY
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            <span className="block truncate font-mono text-[0.65rem] font-medium uppercase tracking-[0.2em] text-muted-foreground">
               Portfolio
             </span>
-            <span className="font-display text-lg text-foreground transition-colors group-hover:text-primary">
+            <span className="text-lg text-foreground transition-colors group-hover:text-primary">
               {t("brand")}
             </span>
           </span>
         </Link>
         <div className="flex min-w-0 items-center gap-2">
-          <ul className="hidden items-center gap-1 rounded-full border border-border/70 bg-background/65 p-1 md:flex">
-            {navKeys.map(({ href, key }) => {
+          <ul className="hidden items-center gap-1 rounded-full border border-border bg-background p-1 md:flex">
+            {navItems.map(({ href, key }) => {
               const isActive =
                 href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
                 <li key={href}>
                   <Link
                     href={href}
+                    aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "relative rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                      "relative flex min-h-9 items-center rounded-full px-4 text-sm font-medium no-underline transition-colors",
                       isActive
-                        ? "text-foreground"
+                        ? "bg-muted text-foreground"
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    {isActive && (
-                      <motion.span
-                        layoutId="nav-pill"
-                        className="absolute inset-0 rounded-full bg-accent/70"
-                        transition={{
-                          type: "spring",
-                          bounce: 0.2,
-                          duration: 0.4,
-                        }}
-                        style={{ zIndex: -1 }}
-                      />
-                    )}
                     {t(key)}
                   </Link>
                 </li>
@@ -82,6 +68,7 @@ export function Header() {
                 <ArrowUpRight className="size-4" />
               </Link>
             </Button>
+            <MobileMenu />
           </div>
         </div>
       </nav>

@@ -237,4 +237,10 @@
   .pull-quote {
     @apply font-display text-2xl leading-snug text-foreground sm:text-3xl;
   }
+
+  /* WCAG 2.2 SC 2.5.8 wants 24x24 CSS px minimum. 44px is the comfortable
+     target and costs nothing in a single column layout. */
+  .tap-target {
+    @apply min-h-11 min-w-11;
+  }
 }

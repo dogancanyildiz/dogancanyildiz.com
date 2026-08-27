@@ -1,19 +1,28 @@
 "use client";
 
-import { Github, Linkedin, Mail, Twitter } from "lucide-react";
+import { Github, Linkedin, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { navItems } from "@/lib/nav";
 
 const socialLinks = [
-  { href: "https://github.com", labelKey: "footer.github", Icon: Github },
-  { href: "https://linkedin.com", labelKey: "footer.linkedin", Icon: Linkedin },
-  { href: "https://twitter.com", labelKey: "footer.twitter", Icon: Twitter },
+  {
+    href: "https://github.com/dogancanyildiz",
+    labelKey: "footer.github",
+    Icon: Github,
+  },
+  {
+    href: "https://www.linkedin.com/in/dogancanyildiz",
+    labelKey: "footer.linkedin",
+    Icon: Linkedin,
+  },
 ] as const;
 
 export function Footer() {
   const year = new Date().getFullYear();
   const t = useTranslations();
+  const email = t("contact.email");
 
   return (
     <footer className="pb-6 pt-4 sm:pb-8">
@@ -25,25 +34,43 @@ export function Footer() {
               <h2 className="text-3xl sm:text-4xl">{t("brand")}</h2>
               <p className="section-copy">{t("footer.tagline")}</p>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="font-mono text-xs text-muted-foreground">
               © {year} {t("brand")}. {t("footer.copyright")}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+            <nav
+              aria-label={t("footer.navTitle")}
+              className="rounded-[1.5rem] border border-border bg-background p-5"
+            >
+              <p className="mb-3 font-mono text-[0.65rem] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                {t("footer.navTitle")}
+              </p>
+              <ul className="flex flex-col">
+                {navItems.map(({ href, key }) => (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className="tap-target flex items-center text-sm text-foreground no-underline transition-colors hover:text-primary"
+                    >
+                      {t(key)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <div className="rounded-[1.5rem] border border-border bg-background p-5">
+              <p className="mb-3 font-mono text-[0.65rem] font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 {t("footer.emailLabel")}
               </p>
               <a
-                href="mailto:alex@example.com"
-                className="inline-flex items-center gap-2 text-sm text-foreground transition-colors hover:text-primary"
+                href={`mailto:${email}`}
+                className="tap-target inline-flex items-center gap-2 text-sm text-foreground transition-colors hover:text-primary"
               >
                 <Mail className="size-4" />
-                alex@example.com
+                {email}
               </a>
-            </div>
-            <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+              <p className="mb-3 mt-6 font-mono text-[0.65rem] font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 {t("footer.elsewhere")}
               </p>
               <div className="flex items-center gap-3">
@@ -53,7 +80,7 @@ export function Footer() {
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex size-10 items-center justify-center rounded-full border border-border/70 bg-background/70 text-muted-foreground transition-all hover:-translate-y-0.5 hover:text-foreground"
+                    className="tap-target flex items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:text-foreground"
                     aria-label={t(labelKey)}
                   >
                     <Icon className="size-4" />
