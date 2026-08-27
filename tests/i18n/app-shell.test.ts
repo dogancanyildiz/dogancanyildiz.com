@@ -208,16 +208,33 @@ const CONTENT_COMPONENTS = [
   "src/components/sections/contact-page-content.tsx",
 ];
 
+// contact-form.tsx picks up useLocale from next-intl in Task 7 Step 3 to send
+// the locale with the contact request, so it is excluded here. The
+// from-locale-provider guard below already proves the old cookie based
+// useLocale is gone from every content component, including this one.
+const NO_USE_LOCALE_HOOK_COMPONENTS = CONTENT_COMPONENTS.filter(
+  (component) => component !== "src/components/sections/contact-form.tsx"
+);
+
 describe("content components", () => {
-  it.each(CONTENT_COMPONENTS)("reads messages through next-intl in %s", (component) => {
-    const source = read(component);
-    expect(source, component).toContain('from "next-intl"');
-    expect(source, component).toContain("useTranslations()");
-    expect(source, component).not.toContain(
-      'from "@/components/locale-provider"'
-    );
-    expect(source, component).not.toContain("useLocale");
-  });
+  it.each(CONTENT_COMPONENTS)(
+    "reads messages through next-intl in %s",
+    (component) => {
+      const source = read(component);
+      expect(source, component).toContain('from "next-intl"');
+      expect(source, component).toContain("useTranslations()");
+      expect(source, component).not.toContain(
+        'from "@/components/locale-provider"'
+      );
+    }
+  );
+
+  it.each(NO_USE_LOCALE_HOOK_COMPONENTS)(
+    "does not need the useLocale hook in %s",
+    (component) => {
+      expect(read(component), component).not.toContain("useLocale");
+    }
+  );
 
   it.each(LINK_USING_CONTENT_COMPONENTS)(
     "routes through the locale aware Link in %s",
@@ -230,9 +247,7 @@ describe("content components", () => {
 
   it("drops the transitional LocaleProvider from the root layout", () => {
     const layout = read("src/app/[lang]/layout.tsx");
-    expect(layout).not.toContain(
-      'from "@/components/locale-provider"'
-    );
+    expect(layout).not.toContain('from "@/components/locale-provider"');
     expect(layout).not.toContain("LocaleProvider");
   });
 
