@@ -10,6 +10,24 @@ and Other.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-27
+
+### Features
+
+- `4cda37d` strengthen trust signals and refresh the editorial UI
+
+### Fixes
+
+- `fa89e6a` replace em dashes in content-panel comments
+- `014b98a` satisfy eslint for footer health link and unused imports
+
+### Other
+
+- `4195d8f` record the repository settings behind the release flow
+- `0351a76` **release**: sync version v0.2.0
+
+**Full changelog**: [v0.2.0...v0.3.0](https://github.com/dogancanyildiz/portfolio/compare/v0.2.0...v0.3.0)
+
 ## [0.2.0] - 2026-08-27
 
 ### Features
@@ -68,6 +86,7 @@ Baseline of the rebuilt portfolio: phases 0 to 4 of the roadmap in
 [#4]: https://github.com/dogancanyildiz/portfolio/pull/4
 [#5]: https://github.com/dogancanyildiz/portfolio/pull/5
 [#6]: https://github.com/dogancanyildiz/portfolio/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/portfolio/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/portfolio/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/dogancanyildiz/portfolio/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/dogancanyildiz/portfolio/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/dogancanyildiz/portfolio/commits/main
