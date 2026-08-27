@@ -164,6 +164,12 @@
     "introTitle": "Message",
     "introBody": "Share a little context and I'll reply with next steps."
   },
+  "notFound": {
+    "code": "404",
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has moved to a new address.",
+    "backHome": "Back to home"
+  },
   "metadata": {
     "defaultTitle": "Alex Chen Portfolio",
     "defaultDescription": "Premium frontend portfolio, selected projects, experience, and contact.",

@@ -164,6 +164,12 @@
     "introTitle": "Mesaj",
     "introBody": "Biraz bağlam paylaşın, sonraki adımlarla birlikte dönüş yapayım."
   },
+  "notFound": {
+    "code": "404",
+    "title": "Sayfa bulunamadı",
+    "description": "Aradığınız sayfa yok ya da yeni bir adrese taşınmış.",
+    "backHome": "Ana sayfaya dön"
+  },
   "metadata": {
     "defaultTitle": "Alex Chen Portfolyo",
     "defaultDescription": "Premium frontend portfolyosu, seçili projeler, deneyim ve iletişim.",

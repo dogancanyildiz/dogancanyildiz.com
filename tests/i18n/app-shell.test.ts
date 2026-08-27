@@ -147,3 +147,47 @@ describe("application shell", () => {
     );
   });
 });
+
+describe("404 pages", () => {
+  it("answers unmatched paths with a full document, not a bare shell", () => {
+    // The root layout lives under [lang], so nothing wraps a path that never
+    // resolves to a locale. global-not-found.tsx has to bring its own document.
+    const source = read("src/app/global-not-found.tsx");
+    expect(source).toContain("<html lang=");
+    expect(source).toContain('import "./globals.css"');
+    expect(source).toContain('namespace: "notFound"');
+  });
+
+  it("turns the global-not-found convention on", () => {
+    // Next 16.3.3 ignores src/app/global-not-found.tsx without this flag.
+    const config = read("next.config.ts");
+    expect(config).toMatch(/experimental:\s*\{[\s\S]*globalNotFound:\s*true/);
+  });
+
+  it("keeps unknown locale segments out of the render path", () => {
+    // Without this the proxy skipped path /foo.txt matches [lang], the layout
+    // throws notFound() at request time and Next answers with a document that
+    // has no lang attribute and no stylesheet.
+    expect(read("src/app/[lang]/layout.tsx")).toContain(
+      "export const dynamicParams = false"
+    );
+  });
+
+  it("has a localized boundary for notFound() thrown inside a locale", () => {
+    const source = read("src/app/[lang]/not-found.tsx");
+    expect(source).toContain('useTranslations("notFound")');
+    expect(source).toContain('from "@/i18n/navigation"');
+    expect(source).not.toContain('from "next/link"');
+  });
+
+  it("carries the same notFound keys in both catalogs", () => {
+    const keys = (locale: string) =>
+      Object.keys(
+        (JSON.parse(read(`messages/${locale}.json`)) as Record<string, unknown>)
+          .notFound as Record<string, unknown>
+      ).sort();
+
+    expect(keys("en")).toEqual(["backHome", "code", "description", "title"]);
+    expect(keys("tr")).toEqual(keys("en"));
+  });
+});

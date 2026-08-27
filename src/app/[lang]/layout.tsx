@@ -19,6 +19,14 @@ export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
 }
 
+// Params outside generateStaticParams are rejected by the router before any
+// layout runs, here and in the segments below. Two effects: every content route
+// stays prerendered, and an unmatched path such as /foo.txt (which the proxy
+// skips, so it reaches [lang] with lang="foo.txt") gets the full
+// global-not-found.tsx document instead of the bare shell that a notFound()
+// thrown at request time produces.
+export const dynamicParams = false;
+
 export async function generateMetadata({
   params,
 }: {
