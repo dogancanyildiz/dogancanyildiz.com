@@ -5,46 +5,79 @@ beforeEach(() => {
 });
 
 describe("sitemap", () => {
-  it("lists every static page in both locales", async () => {
+  it("lists both locales for the static pages", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const urls = sitemap().map((entry) => entry.url);
 
     expect(urls).toContain("https://dogancanyildiz.sh/");
-    expect(urls).toContain("https://dogancanyildiz.sh/about");
-    expect(urls).toContain("https://dogancanyildiz.sh/projects");
-    expect(urls).toContain("https://dogancanyildiz.sh/contact");
     expect(urls).toContain("https://dogancanyildiz.sh/tr");
+    expect(urls).toContain("https://dogancanyildiz.sh/about");
     expect(urls).toContain("https://dogancanyildiz.sh/tr/about");
+    expect(urls).toContain("https://dogancanyildiz.sh/projects");
     expect(urls).toContain("https://dogancanyildiz.sh/tr/projects");
+    expect(urls).toContain("https://dogancanyildiz.sh/blog");
+    expect(urls).toContain("https://dogancanyildiz.sh/tr/blog");
+    expect(urls).toContain("https://dogancanyildiz.sh/contact");
     expect(urls).toContain("https://dogancanyildiz.sh/tr/contact");
   });
 
-  it("adds one detail entry per project per locale", async () => {
+  it("lists every project in both locales because all of them are translated", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const { getProjects } = await import("@/lib/content");
     const urls = sitemap().map((entry) => entry.url);
 
-    const en = urls.filter((url) =>
-      /^https:\/\/dogancanyildiz\.sh\/projects\/[^/]+$/.test(url)
-    );
-    const tr = urls.filter((url) =>
-      /^https:\/\/dogancanyildiz\.sh\/tr\/projects\/[^/]+$/.test(url)
-    );
-
-    expect(en).toHaveLength(getProjects("en").length);
-    expect(tr).toHaveLength(getProjects("tr").length);
-  });
-
-  it("attaches language alternates to every entry", async () => {
-    const sitemap = (await import("@/app/sitemap")).default;
-
-    for (const entry of sitemap()) {
-      expect(entry.alternates?.languages).toBeDefined();
-      expect(Object.keys(entry.alternates!.languages!)).toEqual(["en", "tr"]);
+    for (const project of getProjects("en")) {
+      expect(urls).toContain(
+        `https://dogancanyildiz.sh/projects/${project.slug}`
+      );
+      expect(urls).toContain(
+        `https://dogancanyildiz.sh/tr/projects/${project.slug}`
+      );
     }
   });
 
-  it("produces no duplicate urls", async () => {
+  it("never lists a post url for a locale that has no translation", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const urls = sitemap().map((entry) => entry.url);
+    const enUrl = "https://dogancanyildiz.sh/blog/self-hosting-with-coolify";
+    const trUrl = "https://dogancanyildiz.sh/tr/blog/self-hosting-with-coolify";
+
+    expect(urls).not.toContain(enUrl);
+    expect(urls).toContain(trUrl);
+  });
+
+  it("does not put an alternate language on an untranslated entry", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const entries = sitemap();
+    const entry = entries.find(
+      (item) =>
+        item.url ===
+        "https://dogancanyildiz.sh/tr/blog/self-hosting-with-coolify"
+    );
+
+    expect(entry).toBeDefined();
+    expect(entry?.alternates?.languages?.en).toBeUndefined();
+    expect(entry?.alternates?.languages?.tr).toBe(
+      "https://dogancanyildiz.sh/tr/blog/self-hosting-with-coolify"
+    );
+  });
+
+  it("sets lastModified on the post entry to the post date", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const { getPost } = await import("@/lib/content");
+    const entries = sitemap();
+    const entry = entries.find(
+      (item) =>
+        item.url ===
+        "https://dogancanyildiz.sh/tr/blog/self-hosting-with-coolify"
+    );
+    const post = getPost("tr", "self-hosting-with-coolify");
+
+    expect(post).toBeDefined();
+    expect(entry?.lastModified).toEqual(new Date(post!.date));
+  });
+
+  it("has no duplicate urls", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const urls = sitemap().map((entry) => entry.url);
 

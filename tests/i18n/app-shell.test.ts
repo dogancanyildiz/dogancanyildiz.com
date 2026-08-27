@@ -196,10 +196,17 @@ describe("application shell", () => {
     // getPathname honours localePrefix "as-needed", so the English link is
     // /about and not /en/about, which the proxy answers with a 307. Link with
     // an explicit locale prop always forces the prefix.
-    expect(source).toContain("getPathname({ locale, href: pathname })");
+    expect(source).toContain("getPathname({ locale, href: target })");
     expect(source).not.toContain("locale={locale}");
     expect(source).not.toContain("setLocale");
     expect(source).not.toContain("document.cookie");
+  });
+
+  it("falls back to the section root for untranslated content", () => {
+    const source = read("src/components/layout/language-switcher.tsx");
+    expect(source).toContain(
+      'import { switchTargetPath } from "@/i18n/switch-target"'
+    );
   });
 
   it("moved the page bodies into reusable section components", () => {

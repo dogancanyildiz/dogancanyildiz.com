@@ -6,6 +6,7 @@ import "../globals.css";
 import { fontVariables } from "@/fonts";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
+import { getUntranslatedPaths, type Locale } from "@/lib/content";
 import { buildOpenGraph } from "@/lib/seo/alternates";
 import { ThemeProvider } from "@/components/theme-provider";
 import { MotionProvider } from "@/components/motion-provider";
@@ -66,6 +67,13 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
 
   const t = await getTranslations({ locale: lang, namespace: "a11y" });
 
+  // Computed for every locale, not just the current one: the language
+  // switcher needs to know, for each target locale it links to, whether the
+  // current path is translated there. See src/i18n/switch-target.ts.
+  const untranslated = Object.fromEntries(
+    routing.locales.map((locale) => [locale, getUntranslatedPaths(locale)])
+  ) as Record<Locale, string[]>;
+
   return (
     <html lang={lang} className={fontVariables} suppressHydrationWarning>
       <body className="font-sans antialiased">
@@ -80,7 +88,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
               <a href="#main" className="skip-link">
                 {t("skipToContent")}
               </a>
-              <Header />
+              <Header untranslated={untranslated} />
               <main
                 id="main"
                 tabIndex={-1}

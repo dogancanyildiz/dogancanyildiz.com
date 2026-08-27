@@ -106,6 +106,37 @@ export function getPostLocales(slug: string): Locale[] {
   return locales;
 }
 
+/**
+ * Content paths that exist in at least one locale but not in `locale`.
+ *
+ * The language switcher uses this to avoid linking to a 404: switching to a
+ * locale that has no translation for the current project or post should land
+ * on the section root instead of the untranslated detail page. Draft posts
+ * are excluded on both sides because they come from getPostSlugs, which
+ * already applies the draft filter.
+ */
+export function getUntranslatedPaths(locale: Locale): string[] {
+  const paths: string[] = [];
+
+  const allProjectSlugs = new Set(
+    routing.locales.flatMap((candidate) => getProjectSlugs(candidate))
+  );
+  const translatedProjectSlugs = new Set(getProjectSlugs(locale));
+  for (const slug of allProjectSlugs) {
+    if (!translatedProjectSlugs.has(slug)) paths.push(`/projects/${slug}`);
+  }
+
+  const allPostSlugs = new Set(
+    routing.locales.flatMap((candidate) => getPostSlugs(candidate))
+  );
+  const translatedPostSlugs = new Set(getPostSlugs(locale));
+  for (const slug of allPostSlugs) {
+    if (!translatedPostSlugs.has(slug)) paths.push(`/blog/${slug}`);
+  }
+
+  return paths.sort();
+}
+
 export function toProjectCardData(project: Project): ProjectCardData {
   return {
     slug: project.slug,

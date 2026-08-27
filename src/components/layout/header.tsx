@@ -10,7 +10,14 @@ import { navItems } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-export function Header() {
+interface HeaderProps {
+  // Keyed by locale. Kept as a plain Record<string, string[]> instead of
+  // Record<Locale, string[]> so this client component never imports
+  // @/lib/content, which would pull the velite JSON into the client bundle.
+  untranslated: Record<string, string[]>;
+}
+
+export function Header({ untranslated }: HeaderProps) {
   const pathname = usePathname();
   const t = useTranslations();
 
@@ -60,7 +67,7 @@ export function Header() {
             })}
           </ul>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            <LanguageSwitcher untranslated={untranslated} />
             <ThemeToggle />
             <Button asChild size="sm" className="hidden sm:inline-flex">
               <Link href="/contact">

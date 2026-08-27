@@ -7,6 +7,7 @@ import {
   getProjectLocales,
   getProjectSlugs,
   getProjects,
+  getUntranslatedPaths,
   toPostCardData,
   toProjectCardData,
 } from "@/lib/content";
@@ -79,5 +80,17 @@ describe("post content layer", () => {
     expect(card.href).toBe("/blog/self-hosting-with-coolify");
     expect(card.readingTime).toBeGreaterThanOrEqual(1);
     expect(card.date.startsWith("2026-08-20")).toBe(true);
+  });
+});
+
+describe("untranslated paths", () => {
+  it("lists the tr only post as untranslated for en", () => {
+    expect(getUntranslatedPaths("en")).toEqual([
+      "/blog/self-hosting-with-coolify",
+    ]);
+  });
+
+  it("has nothing untranslated for tr because every project is bilingual", () => {
+    expect(getUntranslatedPaths("tr")).toEqual([]);
   });
 });

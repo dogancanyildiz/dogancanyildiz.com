@@ -44,6 +44,8 @@ const required = [
   "/tr/blog",
   "/en/contact",
   "/tr/contact",
+  "/en/feed.xml",
+  "/tr/feed.xml",
 ];
 
 const missing = required.filter((route) => !routes.includes(route));

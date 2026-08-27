@@ -38,6 +38,8 @@ describe("scripts/assert-static-routes.mjs", () => {
       "/tr/blog",
       "/en/contact",
       "/tr/contact",
+      "/en/feed.xml",
+      "/tr/feed.xml",
     ]) {
       expect(content).toContain(`"${route}"`);
     }

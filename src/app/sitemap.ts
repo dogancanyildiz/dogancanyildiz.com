@@ -1,64 +1,82 @@
 import type { MetadataRoute } from "next";
-import { routing, type AppLocale } from "@/i18n/routing";
-import { getProjects } from "@/lib/content";
+import { routing } from "@/i18n/routing";
+import {
+  getPostLocales,
+  getPosts,
+  getProjectLocales,
+  getProjects,
+  type Locale,
+} from "@/lib/content";
 import { absoluteUrl } from "@/lib/seo/alternates";
-import { localesForProject } from "@/lib/content/project-locales";
 
-const STATIC_PAGES = [
-  { path: "/", priority: 1, changeFrequency: "monthly" },
-  { path: "/projects", priority: 0.9, changeFrequency: "monthly" },
-  { path: "/about", priority: 0.8, changeFrequency: "monthly" },
-  { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
-] as const satisfies ReadonlyArray<{
+const STATIC_PAGES: Array<{
   path: string;
   priority: number;
-  changeFrequency: "monthly" | "yearly";
-}>;
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+}> = [
+  { path: "/", priority: 1, changeFrequency: "monthly" },
+  { path: "/about", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/projects", priority: 0.9, changeFrequency: "monthly" },
+  { path: "/blog", priority: 0.9, changeFrequency: "weekly" },
+  { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
+];
 
 function languagesFor(
   path: string,
-  availableLocales: readonly AppLocale[]
+  locales: readonly Locale[]
 ): Record<string, string> {
   const languages: Record<string, string> = {};
-
-  for (const locale of routing.locales) {
-    if (availableLocales.includes(locale)) {
-      languages[locale] = absoluteUrl(locale, path);
-    }
+  for (const locale of locales) {
+    languages[locale] = absoluteUrl(locale, path);
   }
-
   return languages;
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
+  const now = new Date();
   const entries: MetadataRoute.Sitemap = [];
 
-  for (const locale of routing.locales) {
-    for (const page of STATIC_PAGES) {
+  for (const page of STATIC_PAGES) {
+    for (const locale of routing.locales) {
       entries.push({
         url: absoluteUrl(locale, page.path),
-        lastModified,
+        lastModified: now,
         changeFrequency: page.changeFrequency,
         priority: page.priority,
         alternates: { languages: languagesFor(page.path, routing.locales) },
       });
     }
+  }
 
+  for (const locale of routing.locales) {
     for (const project of getProjects(locale)) {
       const path = `/projects/${project.slug}`;
-      const availableLocales = localesForProject(project.slug);
-
-      // A project that is not translated into this locale gets no entry and no
-      // alternate; see docs/04-i18n.md "fallback sayfa yok".
-      if (!availableLocales.includes(locale)) continue;
-
+      // getProjects(locale) already returns only projects that exist for this
+      // locale, so no skip step is needed here. The alternates set still has
+      // to come from getProjectLocales, not routing.locales, because a
+      // project translated into only one locale must not advertise a hreflang
+      // link that 404s.
       entries.push({
         url: absoluteUrl(locale, path),
-        lastModified,
+        lastModified: now,
         changeFrequency: "monthly",
         priority: 0.7,
-        alternates: { languages: languagesFor(path, availableLocales) },
+        alternates: {
+          languages: languagesFor(path, getProjectLocales(project.slug)),
+        },
+      });
+    }
+
+    for (const post of getPosts(locale)) {
+      const path = `/blog/${post.slug}`;
+      entries.push({
+        url: absoluteUrl(locale, path),
+        lastModified: new Date(post.date),
+        changeFrequency: "yearly",
+        priority: 0.6,
+        alternates: {
+          languages: languagesFor(path, getPostLocales(post.slug)),
+        },
       });
     }
   }
