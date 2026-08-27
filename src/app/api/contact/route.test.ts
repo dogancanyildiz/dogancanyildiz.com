@@ -1,8 +1,24 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CONTACT_RATE_LIMIT, contactRateLimiter } from "@/lib/rate-limit";
 
 import { POST } from "./route";
+
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async ({ namespace }) => {
+    const messages: Record<string, Record<string, string>> = {
+      api: {
+        invalidRequest:
+          "Invalid request. Name, email, and message are required.",
+        emailNotConfigured: "Email is not configured on the server.",
+        sendFailed: "The message could not be sent. Please try again later.",
+        tooManyRequests:
+          "Too many requests. Please try again in a few minutes.",
+      },
+    };
+    return (key: string) => messages[namespace]?.[key] ?? key;
+  }),
+}));
 
 function probe(): Request {
   // The shape the deploy checklist sends: a deliberately invalid body, so the

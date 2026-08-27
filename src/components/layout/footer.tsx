@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { Github, Linkedin, Mail, Twitter } from "lucide-react";
-import { useLocale } from "@/components/locale-provider";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 
 const socialLinks = [
@@ -13,7 +13,7 @@ const socialLinks = [
 
 export function Footer() {
   const year = new Date().getFullYear();
-  const { t } = useLocale();
+  const t = useTranslations();
 
   return (
     <footer className="pb-6 pt-4 sm:pb-8">

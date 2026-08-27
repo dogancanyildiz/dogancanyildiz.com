@@ -2627,7 +2627,7 @@ Implements docs/plans/2026-08-27-faz-2-i18n-app-lang.md (Faz 2 of docs/10-yol-ha
 
 ## Verification
 - `npm run typecheck && npm run lint && npm run test && npm run build && npm run verify:routes`
-- Only `/api/contact` is marked dynamic in the build output.
+- Only the `/api/*` route handlers (`/api/contact`, `/api/health`) are marked dynamic in the build output.
 - `/` and `/tr` return 200 with different `<html lang>`; `/en` redirects to `/` with 307.
 - hreflang tags are mutual and self referencing on `/`, `/tr`, `/about`, `/tr/about`.
 
@@ -2655,10 +2655,10 @@ Beklenen: hepsi exit 0; `verify:routes` çıktısı `Static route check passed: 
 **2. Build çıktısında dynamic route yalnızca /api**
 
 ```bash
-npm run build 2>&1 | grep -E "^[[:space:]]*ƒ" | grep -v "/api/"
+npm run build 2>&1 | grep -E "ƒ /" | grep -v "/api/"
 ```
 
-Beklenen: hiçbir satır yok (exit 1, boş çıktı).
+Beklenen: hiçbir satır yok (exit 1, boş çıktı). Route satırları `├ ƒ /api/contact` biçiminde, satır başında ağaç karakteri var; `^[[:space:]]*ƒ` deseni yalnızca `ƒ Proxy (Middleware)` ve lejant satırını yakalar, route satırlarını yakalamaz. `grep -E "ƒ /"` tek başına yalnızca `/api/contact` ve `/api/health` satırlarını basar; `/api/health` Faz 0'dan beri bilerek dinamiktir (`no-store`, `uptime`).
 
 Not: Faz 5, ana sayfaya `export const revalidate = 60` ekleyerek `/` ve `/tr` route'larını ISR (◐ veya ● + revalidate) yapacak; o fazdan sonra bu kriter "yalnızca /api/* ƒ, ana sayfa ISR" olarak okunur. Faz 2 için kriter aynen geçerli.
 
@@ -2764,7 +2764,7 @@ Faz 2 PR'ı merge edildikten sonra bir sonraki faz ajanına aşağıdaki blok do
 
 ### Doğrulandı
 - npm run typecheck / lint / test / build / verify:routes: hepsi yeşil (tarih: <tarih>).
-- Build çıktısında ƒ işaretli tek route: /api/contact.
+- Build çıktısında ƒ işaretli route'lar yalnızca /api/contact ve /api/health.
 - / ve /tr 200 ve farklı <html lang>; /en 307 ile /'a; /fr 404.
 - sitemap.xml <url> sayısı: <sayı>; robots.txt Disallow: /api/ içeriyor.
 - hreflang test aracı sonucu: <sonuç / preview URL>.

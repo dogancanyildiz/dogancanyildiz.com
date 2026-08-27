@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import {
   Card,
   CardHeader,
@@ -10,7 +11,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { useLocale } from "@/components/locale-provider";
 import type { Project } from "@/data/projects";
 
 interface ProjectCardProps {
@@ -24,7 +24,7 @@ export function ProjectCard({
   index,
   variant = "standard",
 }: ProjectCardProps) {
-  const { t } = useLocale();
+  const t = useTranslations();
   const title = t(`projects.items.${project.id}.title`);
   const description = t(`projects.items.${project.id}.description`);
   const compact = variant === "compact";

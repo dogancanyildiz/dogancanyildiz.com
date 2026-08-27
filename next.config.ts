@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -47,9 +48,17 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  experimental: {
+    // Lets src/app/global-not-found.tsx handle requests that never reach the
+    // [lang] segment. Without it those 404s render with no layout at all: no
+    // stylesheet, no html lang attribute.
+    globalNotFound: true,
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin();
+
+export default withNextIntl(nextConfig);

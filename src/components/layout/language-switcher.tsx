@@ -1,47 +1,56 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useLocale } from "@/components/locale-provider";
-import { Button } from "@/components/ui/button";
+import { useLocale, useTranslations } from "next-intl";
+import { getPathname, usePathname } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
+const localeLabels: Record<string, string> = {
+  en: "EN",
+  tr: "TR",
+};
+
+const localeNames: Record<string, string> = {
+  en: "English",
+  tr: "Türkçe",
+};
+
 export function LanguageSwitcher() {
-  const { locale, setLocale } = useLocale();
+  const activeLocale = useLocale();
+  const pathname = usePathname();
+  const t = useTranslations("nav");
 
   return (
-    <div className="flex rounded-full border border-border/70 bg-background/60 p-1">
-      <Button
-        variant="ghost"
-        size="sm"
-        className={cn(
-          "h-8 rounded-full px-3 text-[0.72rem] font-semibold uppercase tracking-[0.2em]",
-          locale === "en" &&
-            "bg-accent/70 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"
-        )}
-        onClick={() => setLocale("en")}
-        aria-pressed={locale === "en"}
-        aria-label="English"
-      >
-        <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          EN
-        </motion.span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className={cn(
-          "h-8 rounded-full px-3 text-[0.72rem] font-semibold uppercase tracking-[0.2em]",
-          locale === "tr" &&
-            "bg-accent/70 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"
-        )}
-        onClick={() => setLocale("tr")}
-        aria-pressed={locale === "tr"}
-        aria-label="Türkçe"
-      >
-        <motion.span whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          TR
-        </motion.span>
-      </Button>
-    </div>
+    <nav
+      aria-label={t("languageLabel")}
+      className="flex rounded-full border border-border/70 bg-background/60 p-1"
+    >
+      {routing.locales.map((locale) => {
+        const isActive = locale === activeLocale;
+        // getPathname applies localePrefix "as-needed" as configured, so the
+        // English link is /about and not /en/about, which the proxy would
+        // answer with a 307. Link forces the prefix whenever an explicit
+        // locale is passed. A plain anchor is enough here: switching the
+        // language reloads the whole tree anyway.
+        const href = getPathname({ locale, href: pathname });
+        return (
+          <a
+            key={locale}
+            href={href}
+            hrefLang={locale}
+            aria-current={isActive ? "true" : undefined}
+            aria-label={localeNames[locale]}
+            className={cn(
+              "inline-flex h-8 items-center rounded-full px-3 text-[0.72rem] font-semibold uppercase tracking-[0.2em] no-underline transition-colors",
+              isActive
+                ? "bg-accent/70 text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {localeLabels[locale]}
+          </a>
+        );
+      })}
+    </nav>
   );
 }

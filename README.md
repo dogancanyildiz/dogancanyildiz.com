@@ -35,16 +35,17 @@ missing, because a silent fallback would put a wrong host into `robots.txt` and
 
 ## Scripts
 
-| Script                 | What it does                                 |
-| ---------------------- | -------------------------------------------- |
-| `npm run dev`          | Development server on http://localhost:3000  |
-| `npm run build`        | Production build, writes `.next/standalone`  |
-| `npm run start`        | Serves the production build                  |
-| `npm run lint`         | ESLint with the Next.js config               |
-| `npm run typecheck`    | `tsc --noEmit`                               |
-| `npm test`             | vitest, node environment, `src/**/*.test.ts` |
-| `npm run format`       | Prettier in check mode                       |
-| `npm run format:write` | Prettier in write mode                       |
+| Script                  | What it does                                                                                                           |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`           | Development server on http://localhost:3000                                                                            |
+| `npm run build`         | Production build, writes `.next/standalone`                                                                            |
+| `npm run start`         | Serves the production build                                                                                            |
+| `npm run lint`          | ESLint with the Next.js config                                                                                         |
+| `npm run typecheck`     | `tsc --noEmit`                                                                                                         |
+| `npm test`              | vitest, node environment, `src/**/*.test.ts` and `tests/**/*.test.ts`                                                  |
+| `npm run format`        | Prettier in check mode                                                                                                 |
+| `npm run format:write`  | Prettier in write mode                                                                                                 |
+| `npm run verify:routes` | Reads `.next/prerender-manifest.json` after a build: every content route prerendered in both locales, `/api/*` dynamic |
 
 ## Environment variables
 
@@ -60,6 +61,18 @@ into image layers and build logs.
 | `CONTACT_EMAIL`          | Runtime       | Yes in production | Inbox that receives form messages.                                                                                                                                                                                       |
 | `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                                                                                                                                                |
 | `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after the origin is reachable from Cloudflare alone and Traefik trusts the Cloudflare ranges. `trustedIPs` by itself does not protect `CF-Connecting-IP`.                                             |
+
+## Internationalization
+
+- English is served from the root (`/`, `/about`), Turkish from `/tr` (`/tr`, `/tr/about`).
+- Locale routing lives in `src/i18n/routing.ts`; `src/proxy.ts` applies it. Automatic
+  Accept-Language redirects and the locale cookie are disabled: the URL is the only signal.
+- Messages live in `messages/en.json` and `messages/tr.json`. Both files must carry the
+  exact same key set.
+- Every page and layout under `src/app/[lang]/` must call `setRequestLocale(lang)`. A page
+  that forgets it silently drops out of static rendering; `npm run verify:routes` catches it.
+- Route Handlers do not receive the `[lang]` param. `/api/contact` reads `locale` from the
+  request body instead.
 
 ## Security posture
 

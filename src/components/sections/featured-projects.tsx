@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "motion/react";
-import { useLocale } from "@/components/locale-provider";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ProjectCard } from "./project-card";
 import { projects, featuredProjectIds } from "@/data/projects";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ const featured = featuredProjectIds
   .filter(Boolean) as typeof projects;
 
 export function FeaturedProjects() {
-  const { t } = useLocale();
+  const t = useTranslations();
   const [lead, ...rest] = featured;
 
   return (

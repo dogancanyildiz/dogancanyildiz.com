@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowRight, Download, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { useLocale } from "@/components/locale-provider";
 
 const container = {
   hidden: { opacity: 0 },
@@ -20,7 +20,7 @@ const item = {
 };
 
 export function Hero() {
-  const { t } = useLocale();
+  const t = useTranslations();
   const highlights = [
     t("hero.focus1"),
     t("hero.focus2"),

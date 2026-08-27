@@ -1,0 +1,190 @@
+{
+  "brand": "Alex Chen",
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "projects": "Projects",
+    "contact": "Contact",
+    "languageLabel": "Language"
+  },
+  "hero": {
+    "greeting": "Hi, I'm",
+    "name": "Alex Chen",
+    "role": "Frontend Developer",
+    "title": "Designing premium digital products with clarity, rhythm, and speed.",
+    "subtitle": "I build interface systems, product experiences, and frontend architecture for teams that care about detail.",
+    "viewProjects": "View projects",
+    "contact": "Get in touch",
+    "availableForWork": "Available for select work",
+    "downloadCV": "Download CV",
+    "eyebrow": "Independent frontend partner",
+    "summaryTitle": "A sharper way to ship",
+    "summaryBody": "From landing pages to internal tools, I turn rough product ideas into interfaces that feel editorial, modern, and easy to use.",
+    "metricYears": "Years shipping products",
+    "metricProjects": "Selected launches",
+    "metricFocus": "Focus across design and code",
+    "focus1": "Design systems",
+    "focus2": "Product websites",
+    "focus3": "Application UI",
+    "focus4": "Frontend architecture",
+    "note": "Currently based in Istanbul, collaborating remotely with product teams.",
+    "focusLabel": "Focus"
+  },
+  "home": {
+    "featuredTitle": "Featured projects",
+    "featuredSubtitle": "A curated selection of launches, systems, and product work.",
+    "skillsTitle": "Technologies I work with",
+    "viewAll": "View all projects",
+    "featuredEyebrow": "Selected work",
+    "skillsEyebrow": "Capabilities",
+    "skillsSubtitle": "A practical stack shaped by product delivery, systems thinking, and interface craft."
+  },
+  "footer": {
+    "copyright": "All rights reserved.",
+    "contact": "Contact",
+    "github": "GitHub",
+    "linkedin": "LinkedIn",
+    "twitter": "Twitter",
+    "elsewhere": "Elsewhere",
+    "availability": "Available for select freelance and full-time collaborations.",
+    "tagline": "Crafting interfaces with a calm visual voice and strong frontend foundations.",
+    "emailLabel": "Primary email"
+  },
+  "about": {
+    "title": "About",
+    "intro": "I build product experiences that feel polished on the surface and dependable underneath.",
+    "p1": "My work sits at the intersection of UI craft, frontend engineering, and system thinking. I care about speed, accessibility, and giving teams a visual language they can keep extending.",
+    "p2": "Over the years I've worked on design systems, dashboards, e-commerce, internal tools, and launch surfaces. The throughline is always the same: make complex things feel legible.",
+    "skillsTitle": "Skills & tools",
+    "experienceTitle": "Experience",
+    "educationTitle": "Education",
+    "browseIntro": "You can browse my",
+    "or": " or ",
+    "projectsLink": "projects",
+    "contactLink": "get in touch",
+    "exp1Role": "Senior Frontend Developer",
+    "exp1Company": "TechCorp Inc.",
+    "exp1Period": "2021 - Present",
+    "exp1Desc": "Lead frontend for the main product. Introduced design system and improved Core Web Vitals.",
+    "exp2Role": "Frontend Developer",
+    "exp2Company": "StartupXYZ",
+    "exp2Period": "2019 - 2021",
+    "exp2Desc": "Built customer dashboard and admin panel with React. Integrated REST and GraphQL APIs.",
+    "exp3Role": "Junior Frontend Developer",
+    "exp3Company": "WebAgency",
+    "exp3Period": "2017 - 2019",
+    "exp3Desc": "Developed responsive sites and small web apps. Worked with designers and backend team.",
+    "edu1Degree": "B.Sc. Computer Science",
+    "edu1School": "State University",
+    "edu1Period": "2013 - 2017",
+    "downloadCV": "Download CV",
+    "skillsFrontend": "Frontend",
+    "skillsBackend": "Backend",
+    "skillsTools": "Tools",
+    "eyebrow": "Profile",
+    "manifestoEyebrow": "Approach",
+    "manifestoTitle": "Frontend with an editorial eye",
+    "manifestoBody": "I like products that feel deliberate: clear hierarchy, thoughtful motion, stable architecture, and just enough personality to be memorable.",
+    "capabilitiesEyebrow": "Capabilities",
+    "timelineEyebrow": "Career path",
+    "educationEyebrow": "Background"
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "A collection of product, platform, and systems work spanning commerce, analytics, design systems, and internal tooling.",
+    "backToProjects": "Back to projects",
+    "viewLive": "Live demo",
+    "viewSource": "Source code",
+    "technologies": "Technologies",
+    "notFound": "Project not found",
+    "eyebrow": "Archive",
+    "filtersTitle": "Browse by stack",
+    "all": "All",
+    "summary": "Project summary",
+    "impact": "Impact",
+    "role": "Role",
+    "links": "Links",
+    "items": {
+      "1": {
+        "title": "E-commerce platform",
+        "description": "Full-stack online store with product catalog, cart, checkout, and admin panel. Built with Next.js, Stripe, and PostgreSQL. Handles thousands of SKUs and supports multiple locales."
+      },
+      "2": {
+        "title": "Analytics dashboard",
+        "description": "Real-time analytics dashboard for marketing teams. Custom charts, filters, and export to CSV/PDF. Integrates with Google Analytics and internal APIs. Used by 50+ companies."
+      },
+      "3": {
+        "title": "Design system & docs",
+        "description": "Internal design system with 40+ components, Storybook, and usage guidelines. Reduced UI inconsistency and sped up feature delivery across 5 product teams."
+      },
+      "4": {
+        "title": "Developer CLI tool",
+        "description": "Open-source CLI for scaffolding and deploying static sites. Published on npm with 10k+ weekly downloads. Written in TypeScript, supports plugins."
+      },
+      "5": {
+        "title": "Mobile-first booking app",
+        "description": "Booking flow for a service marketplace. Calendar, availability, payments, and push notifications. React Native (Expo) and Node.js backend."
+      },
+      "6": {
+        "title": "Internal HR portal",
+        "description": "Leave requests, timesheets, and org chart. SSO, role-based access, and audit logs. Built with React and .NET. Serves 500+ employees."
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "If you're shaping a product, refreshing a marketing surface, or refining a frontend system, I'd be glad to hear about it.",
+    "location": "Based in Istanbul, Turkey",
+    "email": "alex@example.com",
+    "availability": "Open to full-time and freelance opportunities.",
+    "eyebrow": "Start a conversation",
+    "cardTitle": "What I can help with",
+    "cardBody": "Design-forward product UI, landing page refreshes, component systems, and frontend clean-up for teams who want a sharper interface presence.",
+    "responseTitle": "Typical response",
+    "responseBody": "Usually within 1-2 business days.",
+    "workingTitle": "Working style",
+    "workingBody": "Structured, collaborative, and detail-oriented from kickoff through polish.",
+    "availabilityTitle": "Availability",
+    "availabilityBody": "Open for select product collaborations this quarter."
+  },
+  "form": {
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject (optional)",
+    "message": "Message",
+    "placeholderName": "Your name",
+    "placeholderEmail": "you@example.com",
+    "placeholderSubject": "Subject",
+    "placeholderMessage": "Your message...",
+    "send": "Send message",
+    "sending": "Sending...",
+    "success": "Message sent. I'll get back to you soon.",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "errorNetwork": "Network error. Please try again.",
+    "introTitle": "Message",
+    "introBody": "Share a little context and I'll reply with next steps."
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has moved to a new address.",
+    "backHome": "Back to home"
+  },
+  "metadata": {
+    "defaultTitle": "Alex Chen Portfolio",
+    "defaultDescription": "Premium frontend portfolio, selected projects, experience, and contact.",
+    "aboutTitle": "About",
+    "aboutDescription": "About me and my work.",
+    "projectsTitle": "Projects",
+    "projectsDescription": "A selection of projects I've worked on.",
+    "contactTitle": "Contact",
+    "contactDescription": "Get in touch.",
+    "ogAlt": "Portfolio"
+  },
+  "api": {
+    "invalidRequest": "Invalid request. Name, email, and message are required.",
+    "emailNotConfigured": "Email is not configured on the server.",
+    "sendFailed": "The message could not be sent. Please try again later.",
+    "tooManyRequests": "Too many requests. Please try again in a few minutes."
+  }
+}
