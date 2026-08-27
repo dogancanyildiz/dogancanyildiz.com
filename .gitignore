@@ -66,3 +66,9 @@ Thumbs.db
 # ─── Next.js agent rules (rewritten by `next dev` on every start) ─────────────
 AGENTS.md
 CLAUDE.md
+
+# ─── Velite content pipeline output ──────────────────────────────────────────
+/.velite/
+/public/static/
+tests/fixtures/.velite-valid/
+tests/fixtures/.velite-invalid/

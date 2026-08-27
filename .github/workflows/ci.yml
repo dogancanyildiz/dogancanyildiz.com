@@ -24,6 +24,9 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "npm"
       - run: npm ci
+      # Velite output is gitignored, so the content has to be compiled before
+      # typecheck and test can resolve the #site/content alias.
+      - run: npm run build:content
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
