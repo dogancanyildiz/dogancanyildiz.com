@@ -5,7 +5,10 @@
     "about": "About",
     "projects": "Projects",
     "contact": "Contact",
-    "languageLabel": "Language"
+    "languageLabel": "Language",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "hero": {
     "greeting": "Hi, I'm",
@@ -42,6 +45,7 @@
   "footer": {
     "copyright": "All rights reserved.",
     "contact": "Contact",
+    "navTitle": "Pages",
     "github": "GitHub",
     "linkedin": "LinkedIn",
     "twitter": "Twitter",
@@ -186,5 +190,9 @@
     "emailNotConfigured": "Email is not configured on the server.",
     "sendFailed": "The message could not be sent. Please try again later.",
     "tooManyRequests": "Too many requests. Please try again in a few minutes."
+  },
+  "a11y": {
+    "skipToContent": "Skip to content",
+    "toggleTheme": "Toggle theme"
   }
 }

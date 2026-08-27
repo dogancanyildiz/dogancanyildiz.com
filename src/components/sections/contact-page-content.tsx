@@ -1,13 +1,17 @@
 "use client";
 
-import { motion } from "motion/react";
+import * as m from "motion/react-m";
+import { useReducedMotion } from "motion/react";
 import { Mail, MapPin, Briefcase, Clock3 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ContactForm } from "@/components/sections/contact-form";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { fadeUp } from "@/lib/motion";
 
 export function ContactPageContent() {
   const t = useTranslations();
+  const reduced = useReducedMotion() ?? false;
+  const variants = fadeUp(reduced);
 
   return (
     <section className="section-space relative">
@@ -19,9 +23,11 @@ export function ContactPageContent() {
             description={t("contact.subtitle")}
           />
 
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
+          <m.div
+            variants={variants}
+            initial="hidden"
+            animate="show"
+            custom={0}
             className="surface-panel space-y-5 p-6"
           >
             <div>
@@ -61,7 +67,7 @@ export function ContactPageContent() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </m.div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="surface-panel p-5">

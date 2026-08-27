@@ -1,26 +1,18 @@
 "use client";
 
-import { motion } from "motion/react";
+import * as m from "motion/react-m";
+import { useReducedMotion } from "motion/react";
 import { ArrowRight, Download, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-  },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
+import { staggerContainer, staggerItem } from "@/lib/motion";
 
 export function Hero() {
   const t = useTranslations();
+  const reduced = useReducedMotion() ?? false;
+  const container = staggerContainer(reduced);
+  const item = staggerItem(reduced);
   const highlights = [
     t("hero.focus1"),
     t("hero.focus2"),
@@ -31,25 +23,25 @@ export function Hero() {
   return (
     <section className="section-space relative overflow-hidden pt-10 sm:pt-14">
       <div className="page-shell">
-        <motion.div
+        <m.div
           variants={container}
           initial="hidden"
           animate="show"
           className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end"
         >
           <div className="space-y-8">
-            <motion.div variants={item} className="flex flex-wrap gap-3">
+            <m.div variants={item} className="flex flex-wrap gap-3">
               <span className="eyebrow">
                 <Sparkles className="size-3.5" />
                 {t("hero.eyebrow")}
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-                <span className="size-2 rounded-full bg-emerald-500" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-1.5 font-mono text-[0.7rem] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="size-2 rounded-full bg-status-up" />
                 {t("hero.availableForWork")}
               </span>
-            </motion.div>
+            </m.div>
 
-            <motion.div variants={item} className="space-y-5">
+            <m.div variants={item} className="space-y-5">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary sm:text-base">
                 {t("hero.greeting")} {t("hero.name")} · {t("hero.role")}
               </p>
@@ -59,9 +51,9 @@ export function Hero() {
               <p className="max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">
                 {t("hero.subtitle")}
               </p>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               variants={item}
               className="flex flex-wrap items-center gap-3 pt-2"
             >
@@ -80,14 +72,13 @@ export function Hero() {
                   {t("hero.downloadCV")}
                 </a>
               </Button>
-            </motion.div>
+            </m.div>
           </div>
 
-          <motion.aside
+          <m.aside
             variants={item}
             className="surface-panel relative overflow-hidden p-6 sm:p-8"
           >
-            <div className="absolute inset-x-10 top-0 h-24 rounded-full bg-primary/12 blur-3xl" />
             <div className="relative space-y-8">
               <div className="space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
@@ -98,22 +89,20 @@ export function Hero() {
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-4">
-                  <p className="font-display text-3xl text-foreground">5+</p>
+                <div className="rounded-[1.5rem] border border-border bg-background p-4">
+                  <p className="font-mono text-3xl text-foreground">5+</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {t("hero.metricYears")}
                   </p>
                 </div>
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-4">
-                  <p className="font-display text-3xl text-foreground">12</p>
+                <div className="rounded-[1.5rem] border border-border bg-background p-4">
+                  <p className="font-mono text-3xl text-foreground">12</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {t("hero.metricProjects")}
                   </p>
                 </div>
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-4">
-                  <p className="font-display text-3xl text-foreground">
-                    UI + FE
-                  </p>
+                <div className="rounded-[1.5rem] border border-border bg-background p-4">
+                  <p className="font-mono text-3xl text-foreground">UI + FE</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {t("hero.metricFocus")}
                   </p>
@@ -127,7 +116,7 @@ export function Hero() {
                   {highlights.map((highlight) => (
                     <span
                       key={highlight}
-                      className="rounded-full border border-border/70 bg-accent/45 px-4 py-2 text-sm text-foreground"
+                      className="rounded-full border border-border bg-muted px-4 py-2 text-sm text-foreground"
                     >
                       {highlight}
                     </span>
@@ -138,8 +127,8 @@ export function Hero() {
                 {t("hero.note")}
               </p>
             </div>
-          </motion.aside>
-        </motion.div>
+          </m.aside>
+        </m.div>
       </div>
     </section>
   );

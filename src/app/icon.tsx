@@ -12,14 +12,16 @@ export default function Icon() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "black",
-        color: "white",
-        fontSize: 20,
+        // 03-tasarim-ui-ux.md dark ground and accent.
+        background: "#0a0c0f",
+        color: "#4fcc8d",
+        fontSize: 12,
         fontWeight: 700,
+        letterSpacing: "-0.02em",
         fontFamily: "system-ui, sans-serif",
       }}
     >
-      P
+      DCY
     </div>,
     { ...size }
   );

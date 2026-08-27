@@ -1,14 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ProjectCard } from "./project-card";
+import { useReducedMotion } from "motion/react";
+import { ProjectRow } from "./project-row";
 import { projects } from "@/data/projects";
+import { fadeUp } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { SectionHeading } from "@/components/ui/section-heading";
 
 export function ProjectsSection() {
   const t = useTranslations();
+  const reduced = useReducedMotion() ?? false;
+  const variants = fadeUp(reduced);
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
   const allTags = useMemo(() => {
@@ -32,18 +36,20 @@ export function ProjectsSection() {
           description={t("projects.subtitle")}
         />
 
-        <div className="surface-panel space-y-5 p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+        <div className="space-y-4">
+          <p className="font-mono text-[0.65rem] font-medium uppercase tracking-[0.2em] text-muted-foreground">
             {t("projects.filtersTitle")}
           </p>
           <div className="flex flex-wrap gap-2">
             <button
+              type="button"
               onClick={() => setActiveTag(null)}
+              aria-pressed={activeTag === null}
               className={cn(
-                "rounded-full border px-4 py-2 text-sm font-medium transition-all",
+                "min-h-9 rounded-full border px-4 font-mono text-xs uppercase tracking-[0.14em] transition-colors",
                 activeTag === null
-                  ? "border-primary/70 bg-primary text-primary-foreground"
-                  : "border-border/70 bg-background/60 text-muted-foreground hover:border-primary/35 hover:text-foreground"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-muted-foreground hover:text-foreground"
               )}
             >
               {t("projects.all")}
@@ -51,12 +57,14 @@ export function ProjectsSection() {
             {allTags.map((tag) => (
               <button
                 key={tag}
+                type="button"
                 onClick={() => setActiveTag(tag === activeTag ? null : tag)}
+                aria-pressed={activeTag === tag}
                 className={cn(
-                  "rounded-full border px-4 py-2 text-sm font-medium transition-all",
+                  "min-h-9 rounded-full border px-4 font-mono text-xs uppercase tracking-[0.14em] transition-colors",
                   activeTag === tag
-                    ? "border-primary/70 bg-primary text-primary-foreground"
-                    : "border-border/70 bg-background/60 text-muted-foreground hover:border-primary/35 hover:text-foreground"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-muted-foreground hover:text-foreground"
                 )}
               >
                 {tag}
@@ -65,16 +73,16 @@ export function ProjectsSection() {
           </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="border-t border-border">
           {filtered.map((project, index) => (
-            <ProjectCard
+            <ProjectRow
               key={project.id}
               project={project}
               index={index}
-              variant="standard"
+              variants={variants}
             />
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

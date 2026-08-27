@@ -1,4 +1,7 @@
-@import "tailwindcss";
+/* Scope automatic source detection to src/. Without it Tailwind 4.3 also
+   scans docs/ and tests/, and class names quoted in the plan documents (the
+   retired emerald shadow among them) end up in the compiled stylesheet. */
+@import "tailwindcss" source("../");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -24,6 +27,8 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
+  --color-status-up: var(--status-up);
+  --color-status-down: var(--status-down);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
@@ -49,138 +54,157 @@
 }
 
 :root {
-  --font-sans-stack: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  /* Vendored faces first, latin then latin-ext, then the system fallbacks.
+     The two vendored faces carry disjoint unicode-range declarations, so the
+     browser resolves Turkish glyphs on the -ext family instead of dropping to
+     a system font. */
+  --font-sans-stack:
+    var(--font-sans-latin), var(--font-sans-ext), ui-sans-serif, system-ui,
+    "Segoe UI", sans-serif;
   --font-display-stack:
-    "Iowan Old Style", "Palatino Linotype", "Book Antiqua",
-    "Cormorant Garamond", Georgia, serif;
+    var(--font-display-latin), var(--font-display-ext), "Iowan Old Style",
+    "Palatino Linotype", Georgia, serif;
   --font-mono-stack:
-    "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
+    var(--font-mono-latin), var(--font-mono-ext), ui-monospace,
+    "SFMono-Regular", "SF Mono", Consolas, monospace;
   --radius: 1.25rem;
-  --background: oklch(0.979 0.021 166.5);
-  --foreground: oklch(0.213 0.044 157.3);
-  --card: oklch(0.99 0.01 166);
-  --card-foreground: oklch(0.213 0.044 157.3);
-  --popover: oklch(0.993 0.006 166);
-  --popover-foreground: oklch(0.213 0.044 157.3);
-  --primary: oklch(0.516 0.114 157.2);
-  --primary-foreground: oklch(0.979 0.021 166.5);
-  --secondary: oklch(0.96 0.044 163.9);
-  --secondary-foreground: oklch(0.341 0.072 157.1);
-  --muted: oklch(0.968 0.03 166);
-  --muted-foreground: oklch(0.516 0.114 157.2);
-  --accent: oklch(0.929 0.079 165.1);
-  --accent-foreground: oklch(0.341 0.072 157.1);
-  --destructive: oklch(0.57 0.2 24);
-  --border: oklch(0.882 0.118 163.2 / 40%);
-  --input: oklch(0.929 0.079 165.1 / 60%);
-  --ring: oklch(0.614 0.138 157.4 / 55%);
-  --chart-1: oklch(0.727 0.155 158.5);
-  --chart-2: oklch(0.826 0.151 159.8);
-  --chart-3: oklch(0.614 0.138 157.4);
-  --chart-4: oklch(0.882 0.118 163.2);
-  --chart-5: oklch(0.516 0.114 157.2);
-  --sidebar: oklch(0.979 0.021 166.5);
-  --sidebar-foreground: oklch(0.213 0.044 157.3);
-  --sidebar-primary: oklch(0.516 0.114 157.2);
-  --sidebar-primary-foreground: oklch(0.979 0.021 166.5);
-  --sidebar-accent: oklch(0.96 0.044 163.9);
-  --sidebar-accent-foreground: oklch(0.341 0.072 157.1);
-  --sidebar-border: oklch(0.882 0.118 163.2 / 40%);
-  --sidebar-ring: oklch(0.614 0.138 157.4 / 55%);
+  --background: oklch(0.9846 0.0017 247.8);
+  --foreground: oklch(0.2066 0.0101 248.3);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2066 0.0101 248.3);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2066 0.0101 248.3);
+  /* Emerald survives in exactly three roles: primary, ring and status. */
+  --primary: oklch(0.4794 0.1156 156.3);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.9482 0.0034 247.9);
+  --secondary-foreground: oklch(0.2066 0.0101 248.3);
+  --muted: oklch(0.9482 0.0034 247.9);
+  --muted-foreground: oklch(0.5044 0.0114 252.9);
+  --accent: oklch(0.9265 0.0052 247.9);
+  --accent-foreground: oklch(0.2066 0.0101 248.3);
+  --destructive: oklch(0.5054 0.1905 27.5);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.9265 0.0052 247.9);
+  --input: oklch(0.9265 0.0052 247.9);
+  --ring: oklch(0.4794 0.1156 156.3);
+  --status-up: oklch(0.4794 0.1156 156.3);
+  --status-down: oklch(0.5054 0.1905 27.5);
+  /* Panels and cards mix their shadow from this. --foreground would do in
+     light mode but is near white in dark mode and paints a halo instead. */
+  --shadow-color: oklch(0.2066 0.0101 248.3);
+  --chart-1: oklch(0.4794 0.1156 156.3);
+  --chart-2: oklch(0.5044 0.0114 252.9);
+  --chart-3: oklch(0.6998 0.0123 252.1);
+  --chart-4: oklch(0.9265 0.0052 247.9);
+  --chart-5: oklch(0.2066 0.0101 248.3);
+  --sidebar: oklch(0.9846 0.0017 247.8);
+  --sidebar-foreground: oklch(0.2066 0.0101 248.3);
+  --sidebar-primary: oklch(0.4794 0.1156 156.3);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.9482 0.0034 247.9);
+  --sidebar-accent-foreground: oklch(0.2066 0.0101 248.3);
+  --sidebar-border: oklch(0.9265 0.0052 247.9);
+  --sidebar-ring: oklch(0.4794 0.1156 156.3);
 }
 
 .dark {
-  --background: oklch(0.18 0.038 157);
-  --foreground: oklch(0.979 0.021 166.5);
-  --card: oklch(0.22 0.05 157);
-  --card-foreground: oklch(0.979 0.021 166.5);
-  --popover: oklch(0.21 0.046 157);
-  --popover-foreground: oklch(0.979 0.021 166.5);
-  --primary: oklch(0.826 0.151 159.8);
-  --primary-foreground: oklch(0.213 0.044 157.3);
-  --secondary: oklch(0.27 0.06 157);
-  --secondary-foreground: oklch(0.96 0.044 163.9);
-  --muted: oklch(0.248 0.054 157);
-  --muted-foreground: oklch(0.727 0.1 158);
-  --accent: oklch(0.341 0.072 157.1);
-  --accent-foreground: oklch(0.96 0.044 163.9);
-  --destructive: oklch(0.68 0.17 24);
-  --border: oklch(0.419 0.091 156.9 / 35%);
-  --input: oklch(0.341 0.072 157.1 / 65%);
-  --ring: oklch(0.826 0.151 159.8 / 45%);
-  --chart-1: oklch(0.826 0.151 159.8);
-  --chart-2: oklch(0.727 0.155 158.5);
-  --chart-3: oklch(0.882 0.118 163.2);
-  --chart-4: oklch(0.614 0.138 157.4);
-  --chart-5: oklch(0.96 0.044 163.9);
-  --sidebar: oklch(0.21 0.046 157);
-  --sidebar-foreground: oklch(0.979 0.021 166.5);
-  --sidebar-primary: oklch(0.826 0.151 159.8);
-  --sidebar-primary-foreground: oklch(0.213 0.044 157.3);
-  --sidebar-accent: oklch(0.27 0.06 157);
-  --sidebar-accent-foreground: oklch(0.96 0.044 163.9);
-  --sidebar-border: oklch(0.419 0.091 156.9 / 35%);
-  --sidebar-ring: oklch(0.826 0.151 159.8 / 45%);
+  --background: oklch(0.1535 0.0072 258.4);
+  --foreground: oklch(0.9629 0.0025 228.8);
+  --card: oklch(0.2032 0.0093 255.6);
+  --card-foreground: oklch(0.9629 0.0025 228.8);
+  --popover: oklch(0.2032 0.0093 255.6);
+  --popover-foreground: oklch(0.9629 0.0025 228.8);
+  --primary: oklch(0.7591 0.1444 158);
+  --primary-foreground: oklch(0.1535 0.0072 258.4);
+  --secondary: oklch(0.2373 0.0113 254.1);
+  --secondary-foreground: oklch(0.9629 0.0025 228.8);
+  --muted: oklch(0.2373 0.0113 254.1);
+  --muted-foreground: oklch(0.6998 0.0123 252.1);
+  --accent: oklch(0.2667 0.011 254);
+  --accent-foreground: oklch(0.9629 0.0025 228.8);
+  --destructive: oklch(0.7106 0.1661 22.2);
+  --destructive-foreground: oklch(0.1535 0.0072 258.4);
+  --border: oklch(0.2993 0.0107 254);
+  --input: oklch(0.2993 0.0107 254);
+  --ring: oklch(0.7591 0.1444 158);
+  --status-up: oklch(0.7591 0.1444 158);
+  --status-down: oklch(0.7106 0.1661 22.2);
+  --shadow-color: oklch(0 0 0);
+  --chart-1: oklch(0.7591 0.1444 158);
+  --chart-2: oklch(0.6998 0.0123 252.1);
+  --chart-3: oklch(0.5044 0.0114 252.9);
+  --chart-4: oklch(0.2993 0.0107 254);
+  --chart-5: oklch(0.9629 0.0025 228.8);
+  --sidebar: oklch(0.1535 0.0072 258.4);
+  --sidebar-foreground: oklch(0.9629 0.0025 228.8);
+  --sidebar-primary: oklch(0.7591 0.1444 158);
+  --sidebar-primary-foreground: oklch(0.1535 0.0072 258.4);
+  --sidebar-accent: oklch(0.2373 0.0113 254.1);
+  --sidebar-accent-foreground: oklch(0.9629 0.0025 228.8);
+  --sidebar-border: oklch(0.2993 0.0107 254);
+  --sidebar-ring: oklch(0.7591 0.1444 158);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+  /* Solid accent, 2px offset. The old translucent ring disappeared on the
+     neutral ground. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: inherit;
   }
   html {
     scroll-behavior: smooth;
   }
   body {
     @apply bg-background text-foreground;
-    background-image:
-      radial-gradient(
-        circle at top left,
-        color-mix(in oklab, var(--accent) 20%, transparent) 0,
-        transparent 32%
-      ),
-      radial-gradient(
-        circle at top right,
-        color-mix(in oklab, var(--primary) 18%, transparent) 0,
-        transparent 36%
-      ),
-      linear-gradient(
-        180deg,
-        color-mix(in oklab, var(--background) 92%, white) 0%,
-        var(--background) 100%
-      );
     min-height: 100vh;
     text-rendering: optimizeLegibility;
   }
+  /* One very quiet hairline grid, no colour gradients. The editorial direction
+     wants the type to carry the page, not the background. */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
+    z-index: -1;
     pointer-events: none;
     background-image:
       linear-gradient(
         to right,
-        color-mix(in oklab, var(--foreground) 6%, transparent) 1px,
+        color-mix(in oklab, var(--foreground) 4%, transparent) 1px,
         transparent 1px
       ),
       linear-gradient(
         to bottom,
-        color-mix(in oklab, var(--foreground) 6%, transparent) 1px,
+        color-mix(in oklab, var(--foreground) 4%, transparent) 1px,
         transparent 1px
       );
-    background-size: 48px 48px;
-    mask-image: radial-gradient(circle at center, black 30%, transparent 85%);
-    opacity: 0.3;
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 45%);
+    opacity: 0.5;
   }
   ::selection {
-    background: color-mix(in oklab, var(--primary) 40%, white);
+    background: var(--primary);
     color: var(--primary-foreground);
   }
-  h1,
+  /* Instrument Serif is a single weight display face: it only holds up at h1
+     and pull quote size. Everything below h1 stays on Geist Sans. */
+  h1 {
+    font-family: var(--font-display-stack);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
   h2,
   h3,
   h4 {
-    font-family: var(--font-fraunces);
-    letter-spacing: -0.03em;
+    font-family: var(--font-sans-stack);
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
   p {
     text-wrap: pretty;
@@ -188,6 +212,21 @@
   a,
   button {
     -webkit-tap-highlight-color: transparent;
+  }
+  /* Covers everything motion does not: CSS transitions, tw-animate-css classes
+     and the smooth scroll behaviour on html. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+    }
   }
 }
 
@@ -209,11 +248,11 @@
   }
 
   .surface-panel {
-    @apply rounded-3xl border border-border/70 bg-card/75 shadow-[0_24px_80px_-40px_rgba(4,120,87,0.30)] backdrop-blur-xl;
+    @apply rounded-3xl border border-border bg-card/80 shadow-[0_24px_80px_-48px_color-mix(in_oklab,var(--shadow-color)_35%,transparent)] backdrop-blur-xl;
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground;
+    @apply inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 font-mono text-[0.7rem] font-medium uppercase tracking-[0.2em] text-muted-foreground;
   }
 
   .section-title {
@@ -222,5 +261,25 @@
 
   .section-copy {
     @apply text-base leading-7 text-muted-foreground sm:text-lg;
+  }
+
+  .pull-quote {
+    @apply font-display text-2xl leading-snug text-foreground sm:text-3xl;
+  }
+
+  /* WCAG 2.2 SC 2.5.8 wants 24x24 CSS px minimum. 44px is the comfortable
+     target and costs nothing in a single column layout. */
+  .tap-target {
+    @apply min-h-11 min-w-11;
+  }
+
+  .skip-link {
+    @apply sr-only rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground;
+  }
+  /* not-sr-only zeroes padding and margin, and this rule outranks .skip-link,
+     so the pill restates its inset once it becomes visible. */
+  .skip-link:focus-visible {
+    @apply not-sr-only fixed left-4 top-4 z-50 no-underline;
+    padding: 0.5rem 1rem;
   }
 }

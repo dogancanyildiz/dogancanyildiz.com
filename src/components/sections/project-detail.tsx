@@ -1,11 +1,13 @@
 "use client";
 
-import { motion } from "motion/react";
+import * as m from "motion/react-m";
+import { useReducedMotion } from "motion/react";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import type { Project } from "@/data/projects";
+import { fadeUp } from "@/lib/motion";
 
 interface ProjectDetailProps {
   project: Project;
@@ -13,17 +15,15 @@ interface ProjectDetailProps {
 
 export function ProjectDetail({ project }: ProjectDetailProps) {
   const t = useTranslations();
+  const reduced = useReducedMotion() ?? false;
+  const variants = fadeUp(reduced);
   const title = t(`projects.items.${project.id}.title`);
   const description = t(`projects.items.${project.id}.description`);
 
   return (
     <section className="section-space">
       <div className="page-shell-reading space-y-10">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-        >
+        <m.div variants={variants} initial="hidden" animate="show" custom={0}>
           <Link
             href="/projects"
             className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -31,15 +31,15 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             <ArrowLeft className="size-4" />
             {t("projects.backToProjects")}
           </Link>
-        </motion.div>
+        </m.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.05 }}
+        <m.div
+          variants={variants}
+          initial="hidden"
+          animate="show"
+          custom={1}
           className="surface-panel space-y-8 overflow-hidden p-6 sm:p-8"
         >
-          <div className="h-32 rounded-[1.75rem] bg-[radial-gradient(circle_at_top_left,_color-mix(in_oklab,var(--primary)_22%,transparent),transparent_55%),linear-gradient(135deg,color-mix(in_oklab,var(--accent)_42%,transparent),transparent)]" />
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -58,7 +58,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               </p>
 
               {project.summary ? (
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+                <div className="rounded-[1.5rem] border border-border bg-background p-5">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.summary")}
                   </p>
@@ -69,7 +69,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               ) : null}
 
               {project.impact ? (
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+                <div className="rounded-[1.5rem] border border-border bg-background p-5">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.impact")}
                   </p>
@@ -82,7 +82,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
 
             <div className="space-y-5">
               {project.role ? (
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+                <div className="rounded-[1.5rem] border border-border bg-background p-5">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.role")}
                   </p>
@@ -93,7 +93,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               ) : null}
 
               {(project.githubUrl || project.liveUrl) && (
-                <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+                <div className="rounded-[1.5rem] border border-border bg-background p-5">
                   <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                     {t("projects.links")}
                   </p>
@@ -126,7 +126,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                 </div>
               )}
 
-              <div className="rounded-[1.5rem] border border-border/70 bg-background/55 p-5">
+              <div className="rounded-[1.5rem] border border-border bg-background p-5">
                 <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                   {t("projects.technologies")}
                 </p>
@@ -134,7 +134,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   {project.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-border/70 bg-accent/45 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/85"
+                      className="rounded-full border border-border bg-muted px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/85"
                     >
                       {tag}
                     </span>
@@ -143,7 +143,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               </div>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

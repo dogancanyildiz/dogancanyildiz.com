@@ -42,9 +42,13 @@ Bu faz Faz 2 (i18n yeniden mimarisi) merge edildikten sonra başlar. Aşağıdak
 | `src/app/[lang]/layout.tsx` | Kök layout. `<html lang={lang}>` ve `<body>` bu dosyadadır, `src/app/layout.tsx` yoktur. `generateStaticParams` + `setRequestLocale` çağırır. |
 | `messages/en.json`, `messages/tr.json` | `src/lib/i18n/translations.ts`'teki anahtar ağacının birebir taşınmış hali (`nav.home`, `brand`, `hero.*`, `footer.*`, `projects.*`, `form.*`, `contact.*`, `metadata.*`). |
 | Bileşenlerde çeviri | `const t = useTranslations()` (kök scope), tam nokta yolu ile çağrı: `t("nav.home")`. Server tarafında `getTranslations({ locale, namespace })`. |
-| `src/app/opengraph-image.tsx`, `src/app/icon.tsx` | `app` kökünde, locale bağımsız, statik prerender. |
+| `src/app/icon.tsx` | `app` kökünde, locale bağımsız, statik prerender (`/icon`). |
+| `src/app/[lang]/opengraph-image.tsx` | `[lang]` altında, **locale bağımlı**: `generateStaticParams` (`routing.locales`) + `generateImageMetadata` üretir, ikincisi Next tarafından önce boş `params` ile çağrıldığı için `hasLocale` ile `routing.defaultLocale`'e düşen bir fallback taşır. `size` / `contentType` / görsel id'si `src/lib/seo/og-image.ts`'teki `OG_IMAGE_SIZE` / `OG_IMAGE_CONTENT_TYPE` / `OG_IMAGE_ID`'den gelir, `alt` `getTranslations({ locale, namespace: "metadata" })` ile `t("ogAlt")`'tan üretilir. Build çıktısında `/[lang]/opengraph-image/[__metadata_id__]` olarak görünür, çalışan sunucuda `/opengraph-image/default` (EN, prefix'siz) ve `/tr/opengraph-image/default` (TR) olarak yayınlanır. `src/app/opengraph-image.tsx` (kökte) YOKTUR; kökte böyle bir dosya oluşturmak ikinci bir OG route'u doğurur ve `buildOpenGraph`'ın işaret ettiği `OG_IMAGE_PATH` ile uyuşmaz. |
+| `src/app/global-not-found.tsx` | `app` kökünde, locale bağımsız ayrı bir doküman: kendi `<html lang="en">` / `<body className="font-sans antialiased">`'ini kurar, `globals.css`'i kendi import eder, kendi `ThemeProvider`'ını sarar, `next.config.ts`'teki `experimental.globalNotFound: true` ile açılır. `[lang]/layout.tsx`'e eklenecek hiçbir şeyi (font className'i, tema, yeni token, header/footer) otomatik almaz; bu fazın font ve zemin katmanı görevleri (Task 2, Task 4) bu dosyayı da hesaba katmalı (Faz 2 devir notu, "Sonraki faza uyarılar" madde 1). |
 | Silinmiş dosyalar | `src/components/locale-provider.tsx`, `src/lib/i18n/translations.ts`, `src/lib/i18n/use-translation.ts`, `src/app/layout.tsx`, `src/app/{about,contact,projects}/layout.tsx` |
 | Faz 0 çıktısı | `motion@13.1.1` kurulu, tüm importlar `motion/react`; `vitest` kurulu, `npm test` = `vitest run`, `vitest.config.ts` içindeki include deseni `["src/**/*.test.ts", "tests/**/*.test.ts"]` (Faz 0 birinciyi, Faz 1 ikinciyi ekledi). Bu fazın testleri `tests/` altına yazılır. |
+
+> **Task 0 düzeltmesi (2026-08-27):** Yukarıdaki tablo dal açılmadan önce `ls` ile yeniden doğrulandı ve iki hata bulundu, ikisi de bu revizyonda düzeltildi: (1) `src/app/opengraph-image.tsx` diye bir dosya yok, gerçek OG route'u `src/app/[lang]/opengraph-image.tsx`'te ve locale bağımlı, bu yüzden Task 9'un dosya hedefi ve kodu da güncellendi; (2) `src/app/global-not-found.tsx` bu tabloda hiç yoktu, Faz 2 devir notunun bağlayıcı uyarısına rağmen Task 2 ve Task 4'ün Files listelerine girmemişti, ikisi de eklendi. Ayrıntı: `docs/plans/handoffs/faz-3-notlar.md`.
 
 ---
 
@@ -415,8 +419,10 @@ read woff2."
 
 **Files:**
 - Modify: `src/app/[lang]/layout.tsx`
+- Modify: `src/app/global-not-found.tsx` (`<body>` className'ine `fontVariables` eklenir; bu dosya `[lang]/layout.tsx`'ten ayrı bir doküman olduğu için font className'ini kalıtım yoluyla almaz, bkz. Faz 2 devir notu "Sonraki faza uyarılar" madde 1)
 - Modify: `src/app/globals.css:51-56` (font stack değişkenleri), `src/app/globals.css:157-163` (h1-h4 kuralı)
 - Test: `tests/design-tokens.test.ts`
+- Modify: `tests/i18n/app-shell.test.ts` (404 dokümanının da `fontVariables` taşıdığını kilitleyen assert eklenir; bu dosya zaten `globals.css` importunu kilitliyor)
 
 **Interfaces:**
 - Consumes: `fontVariables: string` (`@/fonts`)
@@ -487,7 +493,7 @@ read woff2."
   }
 ```
 
-- [ ] **Step 4: Fontları layout'a bağla**
+- [ ] **Step 4: Fontları layout'a ve 404 dokümanına bağla**
 
 `src/app/[lang]/layout.tsx` içinde import bloğuna ekle:
 
@@ -496,6 +502,18 @@ import { fontVariables } from "@/fonts";
 ```
 
 ve `<body>` etiketini şununla değiştir:
+
+```tsx
+      <body className={`${fontVariables} font-sans antialiased`}>
+```
+
+`src/app/global-not-found.tsx` kendi `<html>`/`<body>`'sini kurduğu için aynı değişiklik orada da tekrarlanmak zorunda, aksi halde 404 dokümanında `--font-sans-latin` tanımsız kalır ve `--font-sans-stack` doğrudan `ui-sans-serif, system-ui` fallback'ine düşer. Aynı import satırını ekle ve:
+
+```tsx
+      <body className="font-sans antialiased">
+```
+
+satırını şununla değiştir:
 
 ```tsx
       <body className={`${fontVariables} font-sans antialiased`}>
@@ -531,10 +549,22 @@ describe("typography tokens", () => {
 });
 ```
 
+`tests/i18n/app-shell.test.ts`'e (Faz 2'nin bu dosyayı `globals.css` importunu kilitlemek için kullandığı yerin yanına, dosyanın kendi `read` yardımcısıyla) 404 dokümanının vendor edilmiş fontları da taşıdığını kilitleyen bir assert ekle:
+
+```ts
+describe("global-not-found font parity", () => {
+  it("carries the same vendored font className the [lang] layout uses", () => {
+    const source = read("src/app/global-not-found.tsx");
+    expect(source).toContain('import { fontVariables } from "@/fonts"');
+    expect(source).toMatch(/className=\{`\$\{fontVariables\}/);
+  });
+});
+```
+
 - [ ] **Step 6: Testi çalıştır**
 
-Run: `npm test -- tests/design-tokens.test.ts`
-Beklenen: PASS, 3 test.
+Run: `npm test -- tests/design-tokens.test.ts tests/i18n/app-shell.test.ts`
+Beklenen: `design-tokens.test.ts` PASS 3 test, `app-shell.test.ts` içindeki yeni `global-not-found font parity` bloğu dahil tüm suite PASS.
 
 - [ ] **Step 7: Build ile fontların gerçekten yüklendiğini doğrula**
 
@@ -563,14 +593,16 @@ Beklenen: `no google fonts: OK`.
 - [ ] **Step 9: Commit**
 
 ```bash
-git add src/app/globals.css "src/app/[lang]/layout.tsx" tests/design-tokens.test.ts
+git add src/app/globals.css "src/app/[lang]/layout.tsx" src/app/global-not-found.tsx tests/design-tokens.test.ts tests/i18n/app-shell.test.ts
 git commit -m "fix(typography): load the vendored faces and drop the dead --font-fraunces token
 
 globals.css pointed h1-h4 at a --font-fraunces custom property that was never
 defined anywhere, so every heading silently fell back to the system sans stack.
 Wire the six next/font/local variables into body, put them at the head of the
 three font stacks and give the serif face the h1 and pull quote roles only,
-since Instrument Serif ships a single 400 weight."
+since Instrument Serif ships a single 400 weight. global-not-found.tsx gets the
+same fontVariables className: it renders its own html and body outside the
+[lang] layout, so it would otherwise keep falling back to the system stack."
 ```
 
 ---
@@ -580,6 +612,7 @@ since Instrument Serif ships a single 400 weight."
 **Files:**
 - Modify: `src/app/globals.css:7-49` (`@theme inline`, status renkleri eklenir), `src/app/globals.css:51-89` (`:root`), `src/app/globals.css:91-123` (`.dark`)
 - Test: `tests/design-tokens.test.ts`
+- Verify (kod değişikliği yok): `src/app/global-not-found.tsx` bu dosyayı kendi import ettiği için (`import "./globals.css"`) `:root`/`.dark` token değişiklikleri buraya da otomatik yansır, ayrı bir düzenleme gerekmez; Task 10'un görsel denetimi 404 sayfasını da kapsamalı.
 
 **Interfaces:**
 - Consumes: yok
@@ -796,6 +829,7 @@ loses its alpha channel so the focus ring stays solid."
 - Modify: `src/components/sections/project-card.tsx:35` (CSS gradyan kapak)
 - Modify: `src/components/sections/project-detail.tsx:42` (CSS gradyan kapak, `bg-accent/45`)
 - Test: `tests/design-tokens.test.ts`
+- Verify (kod değişikliği yok): `src/app/global-not-found.tsx` `.eyebrow` sınıfını kullanıyor ve `globals.css`'i kendi import ediyor, bu yüzden Step 1-3'ün zemin/`.eyebrow` değişiklikleri buraya da otomatik yansır; ayrıca Step 11'in `collectTsxFiles("src")` taraması bu dosyayı zaten kapsıyor, `emerald`/`rgba(`/`radial-gradient` yasağı burada da geçerli olmak zorunda.
 
 **Interfaces:**
 - Consumes: Task 3'ün nötr token'ları
@@ -2625,13 +2659,13 @@ add a skip to content link and put a 44px minimum on every icon only control."
 ### Task 9: opengraph-image ve icon route'larını gerçek kimlikle yeniden yaz
 
 **Files:**
-- Modify: `src/app/opengraph-image.tsx` (tam yeniden yazım)
+- Modify: `src/app/[lang]/opengraph-image.tsx` (tam yeniden yazım; `generateStaticParams`, `generateImageMetadata` ve `OG_IMAGE_*` importları korunur, bkz. Step 1)
 - Modify: `src/app/icon.tsx` (tam yeniden yazım)
 - Test: `tests/og-image.test.ts`
 
 **Interfaces:**
-- Consumes: `public/fonts/og/instrument-serif-latin.woff`, `public/fonts/og/instrument-serif-latin-ext.woff` (Task 1)
-- Produces: `/opengraph-image` 1200x630 PNG, `/icon` 32x32 PNG (DCY monogram)
+- Consumes: `public/fonts/og/instrument-serif-latin.woff`, `public/fonts/og/instrument-serif-latin-ext.woff` (Task 1); `src/lib/seo/og-image.ts` (`OG_IMAGE_ID`, `OG_IMAGE_SIZE`, `OG_IMAGE_CONTENT_TYPE`, Faz 2 çıktısı); `src/lib/site-config.ts` (`siteConfig.person`, Faz 2 çıktısı); `messages/{en,tr}.json` `metadata.ogAlt`
+- Produces: `/opengraph-image/default` (EN, prefix'siz) ve `/tr/opengraph-image/default` (TR) 1200x630 PNG, `/icon` 32x32 PNG (DCY monogram)
 
 **İçerik kaynağı** (`.local/content/portfolio-content.md`, bölüm 0 ve 1):
 - İsim: `Doğan Can Yıldız`
@@ -2640,16 +2674,24 @@ add a skip to content link and put a 44px minimum on every icon only control."
 
 - [ ] **Step 1: OG görselini yeniden yaz**
 
-`src/app/opengraph-image.tsx` dosyasının tamamını şununla değiştir:
+`src/app/[lang]/opengraph-image.tsx` dosyasının tamamını şununla değiştir. `generateStaticParams`, `generateImageMetadata` (boş `params` fallback'i dahil) ve `src/lib/seo/og-image.ts`'ten gelen `OG_IMAGE_*` importları korunuyor; yalnızca render gövdesi şablon metninden gerçek kimliğe geçiyor ve `alt` hâlâ `generateImageMetadata` içinden, çeviriden geliyor, sabit bir `export const alt` OLMUYOR:
 
 ```tsx
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import { hasLocale } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
+import { siteConfig } from "@/lib/site-config";
+import {
+  OG_IMAGE_CONTENT_TYPE,
+  OG_IMAGE_ID,
+  OG_IMAGE_SIZE,
+} from "@/lib/seo/og-image";
 
-export const alt = "Doğan Can Yıldız, Full-Stack Web Developer and DevOps Engineer";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const size = OG_IMAGE_SIZE;
+export const contentType = OG_IMAGE_CONTENT_TYPE;
 
 // Palette: 03-tasarim-ui-ux.md dark column.
 const GROUND = "#0a0c0f";
@@ -2658,6 +2700,29 @@ const TEXT = "#f1f3f4";
 const MUTED = "#999fa6";
 const ACCENT = "#4fcc8d";
 const HAIRLINE = "#2a2e33";
+
+export function generateStaticParams() {
+  return routing.locales.map((lang) => ({ lang }));
+}
+
+// Next calls this once with empty params to enumerate the image ids, then once
+// per locale while prerendering, so `lang` has to fall back to the default
+// locale instead of being handed to next-intl as undefined. This is the same
+// fallback Faz 2 already needed for the same reason, do not drop it.
+async function resolveLocale(paramsPromise: Promise<{ lang: string }>) {
+  const { lang } = await paramsPromise;
+  return hasLocale(routing.locales, lang) ? lang : routing.defaultLocale;
+}
+
+export async function generateImageMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const locale = await resolveLocale(params);
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return [{ id: OG_IMAGE_ID, size, contentType, alt: t("ogAlt") }];
+}
 
 // satori cannot parse woff2, so these are the woff copies vendored under
 // public/, which the standalone build always ships. Two subsets are passed
@@ -2674,7 +2739,13 @@ async function loadDisplayFonts() {
   ];
 }
 
-export default async function OGImage() {
+export default async function OGImage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const locale = await resolveLocale(params);
+  const { person } = siteConfig;
   const fonts = await loadDisplayFonts();
 
   return new ImageResponse(
@@ -2726,10 +2797,10 @@ export default async function OGImage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div style={{ fontSize: "86px", color: TEXT, lineHeight: 1.05 }}>
-            Doğan Can Yıldız
+            {person.name}
           </div>
           <div style={{ fontSize: "34px", color: MUTED, lineHeight: 1.3 }}>
-            Full-Stack Web Developer &amp; DevOps Engineer
+            {person.jobTitle[locale]}
           </div>
         </div>
 
@@ -2744,7 +2815,7 @@ export default async function OGImage() {
             color: MUTED,
           }}
         >
-          Full-Stack &amp; DevOps · Konya, Türkiye
+          {person.location.city}, Türkiye
         </div>
       </div>
     ),
@@ -2753,7 +2824,7 @@ export default async function OGImage() {
 }
 ```
 
-`export const runtime = "edge"` geri eklenmez (Faz 0'da kaldırıldı, Global Constraints: edge runtime kullanılmaz).
+`export const runtime = "edge"` geri eklenmez (Faz 0'da kaldırıldı, Global Constraints: edge runtime kullanılmaz). `size` ve `contentType` `og-image.ts`'teki sabitlerden geliyor ki `buildOpenGraph`'ın işaret ettiği boyut ile burada üretilen görsel hiç ayrışamasın.
 
 - [ ] **Step 2: Favicon'u yeniden yaz**
 
@@ -2806,13 +2877,34 @@ import { describe, expect, it } from "vitest";
 const read = (relative: string) => readFileSync(join(process.cwd(), relative), "utf8");
 
 describe("opengraph image", () => {
-  const source = read("src/app/opengraph-image.tsx");
+  const source = read("src/app/[lang]/opengraph-image.tsx");
 
-  it("carries the real name and title, not the template copy", () => {
-    expect(source).toContain("Doğan Can Yıldız");
-    expect(source).toContain("Full-Stack Web Developer");
+  it("draws the real identity from site-config, not the template copy", () => {
+    expect(source).toContain("siteConfig");
+    expect(source).toContain("person.name");
+    expect(source).toContain("person.jobTitle[locale]");
     expect(source).not.toContain("Building clean, fast");
     expect(source).not.toContain("Portfolio</p>");
+  });
+
+  it("keeps the alt text locale-driven instead of a fixed export", () => {
+    expect(source).not.toMatch(/export const alt =/);
+    expect(source).toContain('namespace: "metadata"');
+    expect(source).toContain('t("ogAlt")');
+  });
+
+  it("keeps the per-locale image metadata plumbing", () => {
+    expect(source).toContain("generateStaticParams");
+    expect(source).toContain("generateImageMetadata");
+    expect(source).toContain("hasLocale(routing.locales, lang)");
+    expect(source).toContain("routing.defaultLocale");
+  });
+
+  it("takes size, contentType and the image id from the shared og-image source", () => {
+    expect(source).toContain("OG_IMAGE_SIZE");
+    expect(source).toContain("OG_IMAGE_CONTENT_TYPE");
+    expect(source).toContain("OG_IMAGE_ID");
+    expect(source).toContain("@/lib/seo/og-image");
   });
 
   it("uses the neutral palette from the design doc", () => {
@@ -2848,38 +2940,46 @@ describe("icon", () => {
 - [ ] **Step 4: Testi çalıştır**
 
 Run: `npm test -- tests/og-image.test.ts`
-Beklenen: PASS, 5 test.
+Beklenen: PASS, 8 test.
 
 - [ ] **Step 5: Görselleri gerçekten üret ve gözle kontrol et**
+
+Görsel dosya adına giden yol `id` segmentini taşıyor (`generateImageMetadata`'nın döndürdüğü `OG_IMAGE_ID`, bugün `"default"`), ayrıca route `[lang]` altında olduğu için EN prefix'siz, TR `/tr` altında yayınlanır (Faz 2'de doğrulandı, bkz. `docs/plans/handoffs/faz-2.md`):
 
 ```bash
 npm run build
 npm start &
 sleep 4
-curl -s -o /tmp/og.png -w "%{http_code} %{content_type} %{size_download}\n" http://localhost:3000/opengraph-image
+curl -s -o /tmp/og-en.png -w "%{http_code} %{content_type} %{size_download}\n" http://localhost:3000/opengraph-image/default
+curl -s -o /tmp/og-tr.png -w "%{http_code} %{content_type} %{size_download}\n" http://localhost:3000/tr/opengraph-image/default
 curl -s -o /tmp/icon.png -w "%{http_code} %{content_type} %{size_download}\n" http://localhost:3000/icon
 kill %1
 ```
 
-Beklenen: iki satır da `200 image/png` ve 1000 byte'tan büyük bir boyut.
+Beklenen: üç satır da `200 image/png` ve 1000 byte'tan büyük bir boyut.
 
-`/tmp/og.png` dosyasını aç ve doğrula:
+`/tmp/og-en.png` dosyasını aç ve doğrula:
 - "Doğan Can Yıldız" satırında `ğ` ve `ı` karakterleri gerçekten çiziliyor, kutu (tofu) yok.
-- Zemin `#0a0c0f`, başlık serif, alt satır gri.
+- Zemin `#0a0c0f`, başlık serif, alt satır gri, unvan İngilizce.
 - Sol üstte DCY rozeti ve yeşil nokta var.
+
+`/tmp/og-tr.png` dosyasında aynı düzen ama unvan TR çevirisiyle (`Full-Stack Web Geliştirici ve DevOps Mühendisi`) çiziliyor, `ğ`/`ı` yine tofu değil.
 
 `/tmp/icon.png` dosyasında DCY üç harfi kırpılmadan görünüyor.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/app/opengraph-image.tsx src/app/icon.tsx tests/og-image.test.ts
+git add "src/app/[lang]/opengraph-image.tsx" src/app/icon.tsx tests/og-image.test.ts
 git commit -m "feat(og): rebuild the social image and favicon with the real identity
 
 The OG card still shipped the create-next-app copy ('Building clean, fast
 experiences for the web') and the favicon was a letter P on black. Both now
 carry the real name, title and location on the neutral palette, with the DCY
-monogram. The OG card loads the vendored Instrument Serif woff files, both
+monogram, sourced from siteConfig.person so the two locales get their own job
+title. generateStaticParams, generateImageMetadata and its empty-params
+fallback stay as Faz 2 left them; only the render body and the alt copy
+changed. The OG card loads the vendored Instrument Serif woff files, both
 subsets, because satori cannot read woff2 and the latin subset has no g-breve."
 ```
 
@@ -3098,11 +3198,12 @@ Beklenen: yalnızca `/api/contact` ve `/api/health`.
 ```bash
 npm run build && npm start &
 sleep 4
-curl -s -o /tmp/og.png -w "%{http_code} %{content_type}\n" http://localhost:3000/opengraph-image
+curl -s -o /tmp/og-en.png -w "%{http_code} %{content_type}\n" http://localhost:3000/opengraph-image/default
+curl -s -o /tmp/og-tr.png -w "%{http_code} %{content_type}\n" http://localhost:3000/tr/opengraph-image/default
 curl -s -o /tmp/icon.png -w "%{http_code} %{content_type}\n" http://localhost:3000/icon
 kill %1
 ```
-Beklenen: iki satır da `200 image/png`. `/tmp/og.png` görsel kontrolünde "Doğan Can Yıldız" tofu olmadan çiziliyor.
+Beklenen: üç satır da `200 image/png`. `/tmp/og-en.png` görsel kontrolünde "Doğan Can Yıldız" tofu olmadan çiziliyor.
 
 **10. Üslup kuralı**
 
@@ -3138,7 +3239,7 @@ Faz 3 kapandığında aşağıdaki şablon doldurulup Faz 4 ajanına verilir.
 - [ ] `prefers-reduced-motion: reduce` açıkken hiçbir animasyon çalışmıyor
 - [ ] `grep -rn "emerald\|rgba(\|font-fraunces" src/` sonuç vermiyor
 - [ ] Build çıktısında yalnızca `/api/*` dynamic
-- [ ] `/opengraph-image` ve `/icon` 200 image/png, tofu yok
+- [ ] `/opengraph-image/default`, `/tr/opengraph-image/default` ve `/icon` 200 image/png, tofu yok
 - [ ] 14 maddelik ekran görüntüsü kontrol listesi PR'a eklendi
 
 ## Açık kaldı (Faz 4'e devrediliyor)

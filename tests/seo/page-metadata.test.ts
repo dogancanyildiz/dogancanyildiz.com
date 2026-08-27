@@ -3,6 +3,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { projects } from "@/data/projects";
 
+// next/font/local is a build time only export: outside the Next compiler
+// (webpack or SWC) it resolves to an empty module, so calling it throws
+// "default is not a function". This file imports the [lang] layout directly
+// to call its generateMetadata, and the layout now pulls in src/fonts, so the
+// loader needs a stand-in. The returned variable name is never asserted on
+// here, only the metadata it returns.
+vi.mock("next/font/local", () => ({
+  default: () => ({ variable: "" }),
+}));
+
 // next-intl/server resolves to its client build outside a Next request, and
 // getTranslations then throws. The stub keeps the real message catalogs, so a
 // page that asks for a missing key still fails the test.

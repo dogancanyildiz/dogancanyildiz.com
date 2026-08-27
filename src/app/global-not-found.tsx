@@ -7,6 +7,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import "./globals.css";
+import { fontVariables } from "@/fonts";
 import { routing } from "@/i18n/routing";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -42,7 +43,11 @@ export default async function GlobalNotFound() {
   const secondary = secondaryLocale ? await messages(secondaryLocale) : null;
 
   return (
-    <html lang={routing.defaultLocale} suppressHydrationWarning>
+    <html
+      lang={routing.defaultLocale}
+      className={fontVariables}
+      suppressHydrationWarning
+    >
       <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"

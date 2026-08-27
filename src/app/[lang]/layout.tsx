@@ -3,10 +3,12 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import "../globals.css";
+import { fontVariables } from "@/fonts";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import { buildOpenGraph } from "@/lib/seo/locale-url";
 import { ThemeProvider } from "@/components/theme-provider";
+import { MotionProvider } from "@/components/motion-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -62,8 +64,10 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   // Enables static rendering for this layout and everything below it.
   setRequestLocale(lang);
 
+  const t = await getTranslations({ locale: lang, namespace: "a11y" });
+
   return (
-    <html lang={lang} suppressHydrationWarning>
+    <html lang={lang} className={fontVariables} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
@@ -72,9 +76,20 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
           disableTransitionOnChange
         >
           <NextIntlClientProvider>
-            <Header />
-            <main className="min-h-[calc(100vh-7rem)]">{children}</main>
-            <Footer />
+            <MotionProvider>
+              <a href="#main" className="skip-link">
+                {t("skipToContent")}
+              </a>
+              <Header />
+              <main
+                id="main"
+                tabIndex={-1}
+                className="min-h-[calc(100vh-7rem)] focus-visible:outline-none"
+              >
+                {children}
+              </main>
+              <Footer />
+            </MotionProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

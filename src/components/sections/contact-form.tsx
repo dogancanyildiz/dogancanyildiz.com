@@ -1,18 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
+import * as m from "motion/react-m";
+import { useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { fadeUp } from "@/lib/motion";
 
 type Status = "idle" | "loading" | "success" | "error";
 
 export function ContactForm() {
   const t = useTranslations();
   const locale = useLocale();
+  const reduced = useReducedMotion() ?? false;
+  const variants = fadeUp(reduced);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -59,10 +63,11 @@ export function ContactForm() {
   }
 
   return (
-    <motion.form
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+    <m.form
+      variants={variants}
+      initial="hidden"
+      animate="show"
+      custom={0}
       onSubmit={handleSubmit}
       className="surface-panel relative mx-auto w-full max-w-2xl space-y-6 p-6 sm:p-8"
     >
@@ -119,19 +124,33 @@ export function ContactForm() {
         <Label htmlFor="website">Website</Label>
         <Input id="website" name="website" type="text" tabIndex={-1} />
       </div>
+      {/* The status paragraphs are conditionally rendered, so the role has to
+          sit on the element that appears: role=alert is assertive for the
+          failure path, role=status is polite for the success path. */}
       {status === "error" && (
-        <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p
+          role="alert"
+          className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+        >
           {errorMessage}
         </p>
       )}
       {status === "success" && (
-        <p className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
+        <p
+          role="status"
+          className="rounded-2xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-primary"
+        >
           {t("form.success")}
         </p>
       )}
-      <Button type="submit" size="lg" disabled={status === "loading"}>
+      <Button
+        type="submit"
+        size="lg"
+        disabled={status === "loading"}
+        aria-busy={status === "loading"}
+      >
         {status === "loading" ? t("form.sending") : t("form.send")}
       </Button>
-    </motion.form>
+    </m.form>
   );
 }
