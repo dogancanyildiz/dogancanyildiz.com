@@ -1,0 +1,26 @@
+---
+title: Self-hosting this site with Coolify and Traefik
+slug: self-hosting-with-coolify
+date: 2026-08-20
+summary: This site runs on my own server instead of a managed platform. Here is how the Coolify, Traefik and Docker pipeline works, and where it tripped me up.
+tags:
+  - devops
+  - coolify
+  - docker
+---
+
+## Why my own server
+
+Hosting this site on a managed platform would have taken ten minutes. Running it on my own server turns the site itself into evidence: a portfolio that claims DevOps work should also be willing to show the infrastructure it stands on.
+
+## How the pipeline works
+
+The application is built by a multi stage Dockerfile with separate deps, builder and runner stages. The running container drops to a non root user and carries only the standalone output, the static assets and the public folder. Coolify watches the repository through its GitHub App integration: every commit on the main branch triggers a deploy, and every pull request gets its own preview URL. Traefik sits in front and handles TLS termination and routing.
+
+## Where it tripped me up
+
+The first snag was the health check. Connection refused on Node containers is a known Coolify issue, so the check has to be verified on staging before it is wired to production. The second was the environment variable layer. Values prefixed with NEXT_PUBLIC_ are inlined at build time, so marking one as runtime only leaves it silently undefined in production. The reverse is worse: marking an API key as a build variable can leak it into image layers and build logs.
+
+## What I got out of it
+
+The whole release step collapsed into one command, and every piece of the infrastructure lives in the repository. The price is maintenance: the server, the certificates and the updates are now my job. For a personal site that trade was worth it, because operating it is exactly the thing I wanted to learn.

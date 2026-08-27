@@ -98,9 +98,13 @@ const PAGES: PageCase[] = [
     extraParams: { slug },
     load: () => import("@/app/[lang]/projects/[slug]/page"),
   })),
+  // The locale is baked into the case name because a bilingual post (like
+  // self-hosting-with-coolify) produces one PAGES entry per locale that
+  // otherwise share the same `blog/<slug>` name, which would collapse into
+  // duplicate it.each test titles.
   ...routing.locales.flatMap((locale) =>
     getPostSlugs(locale).map((slug) => ({
-      name: `blog/${slug}`,
+      name: `blog/${slug} [${locale}]`,
       path: `/blog/${slug}`,
       extraParams: { slug },
       locales: [locale],
@@ -265,7 +269,9 @@ describe("page openGraph metadata", () => {
   );
 
   it("marks the post detail page openGraph type as article with its published time", async () => {
-    const postPage = PAGES.find((page) => page.name.startsWith("blog/"));
+    const postPage = PAGES.find(
+      (page) => page.name === "blog/self-hosting-with-coolify [tr]"
+    );
     if (!postPage) throw new Error("no post detail page case found");
     const locale = postPage.locales?.[0] ?? "en";
 
@@ -277,5 +283,34 @@ describe("page openGraph metadata", () => {
 
     expect(openGraph.type).toBe("article");
     expect(openGraph.publishedTime).toMatch(/^2026-08-20/);
+  });
+
+  it("gives the bilingual post both languages in its alternates on the english case", async () => {
+    const postPage = PAGES.find(
+      (page) => page.name === "blog/self-hosting-with-coolify [en]"
+    );
+    if (!postPage) throw new Error("no english case for the bilingual post");
+
+    const metadata = await metadataFor(postPage, "en");
+    const languages = metadata.alternates?.languages as
+      Record<string, string> | undefined;
+
+    expect(languages?.en).toBeTruthy();
+    expect(languages?.tr).toBeTruthy();
+  });
+
+  it("gives a turkish only post only tr and x-default in its alternates", async () => {
+    const postPage = PAGES.find(
+      (page) => page.name === "blog/capt-sinavina-hazirlik [tr]"
+    );
+    if (!postPage) {
+      throw new Error("no turkish case for the turkish only post");
+    }
+
+    const metadata = await metadataFor(postPage, "tr");
+    const languages = metadata.alternates?.languages as
+      Record<string, string> | undefined;
+
+    expect(Object.keys(languages ?? {}).sort()).toEqual(["tr", "x-default"]);
   });
 });

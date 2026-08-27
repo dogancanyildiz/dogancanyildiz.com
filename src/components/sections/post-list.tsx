@@ -9,9 +9,12 @@ import { fadeUp } from "@/lib/motion";
 
 interface PostListProps {
   posts: PostCardData[];
+  /** h2 when the list sits directly under the page h1, h3 under a section h2. */
+  headingLevel?: "h2" | "h3";
 }
 
-export function PostList({ posts }: PostListProps) {
+export function PostList({ posts, headingLevel = "h2" }: PostListProps) {
+  const Heading = headingLevel;
   const t = useTranslations("blog");
   const format = useFormatter();
   const reduced = useReducedMotion() ?? false;
@@ -38,11 +41,11 @@ export function PostList({ posts }: PostListProps) {
             <span aria-hidden="true"> · </span>
             {t("readingTime", { minutes: post.readingTime })}
           </p>
-          <h2 className="mt-2 text-2xl leading-snug">
+          <Heading className="mt-2 text-2xl leading-snug">
             <Link href={post.href} className="after:absolute after:inset-0">
               {post.title}
             </Link>
-          </h2>
+          </Heading>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
             {post.summary}
           </p>

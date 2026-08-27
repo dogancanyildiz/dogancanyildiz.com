@@ -1,4 +1,5 @@
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeExternalLinks from "rehype-external-links";
 import rehypeSlug from "rehype-slug";
 import rehypeShiki from "@shikijs/rehype";
 import { defineCollection, defineConfig, s } from "velite";
@@ -68,6 +69,11 @@ export const mdx: MdxOptions = {
   rehypePlugins: [
     rehypeSlug,
     [rehypeAutolinkHeadings, { behavior: "wrap" }],
+    // MDX bodies will carry external links; this keeps them safe without editors remembering rel.
+    [
+      rehypeExternalLinks,
+      { target: "_blank", rel: ["noopener", "noreferrer"] },
+    ],
     [
       rehypeShiki,
       {

@@ -27,6 +27,8 @@
   "home": {
     "featuredTitle": "Selected work",
     "featuredLink": "All projects",
+    "latestPostsTitle": "Latest writing",
+    "latestPostsLink": "All posts",
     "skillsTitle": "What I work with",
     "skillsEyebrow": "Capabilities",
     "skillsSubtitle": "Full-stack development on a networking and security foundation, shipped on infrastructure I run myself."

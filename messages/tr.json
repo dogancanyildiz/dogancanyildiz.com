@@ -27,6 +27,8 @@
   "home": {
     "featuredTitle": "Seçilmiş işler",
     "featuredLink": "Tüm projeler",
+    "latestPostsTitle": "Son yazılar",
+    "latestPostsLink": "Tüm yazılar",
     "skillsTitle": "Neyle çalışıyorum",
     "skillsEyebrow": "Yetkinlikler",
     "skillsSubtitle": "Ağ ve güvenlik temeli üstünde full-stack geliştirme; altyapısını kendim işlettiğim sistemlerde yayına alıyorum."

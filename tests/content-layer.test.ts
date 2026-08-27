@@ -55,23 +55,33 @@ describe("project content layer", () => {
 });
 
 describe("post content layer", () => {
-  it("has exactly one turkish post and no english posts yet", () => {
+  it("has three turkish posts sorted newest first and one english post", () => {
     const trPosts = getPosts("tr");
-    expect(trPosts).toHaveLength(1);
-    expect(trPosts[0]?.slug).toBe("self-hosting-with-coolify");
-    expect(getPosts("en")).toEqual([]);
+    expect(trPosts.map((post) => post.slug)).toEqual([
+      "self-hosting-with-coolify",
+      "capt-sinavina-hazirlik",
+      "ccna-dan-web-guvenligine",
+    ]);
+
+    const enPosts = getPosts("en");
+    expect(enPosts).toHaveLength(1);
+    expect(enPosts[0]?.slug).toBe("self-hosting-with-coolify");
   });
 
-  it("lists tr as the only locale for the first post", () => {
-    expect(getPostLocales("self-hosting-with-coolify")).toEqual(["tr"]);
+  it("lists en and tr as the locales for the bilingual post", () => {
+    expect(getPostLocales("self-hosting-with-coolify")).toEqual(["en", "tr"]);
+  });
+
+  it("lists tr as the only locale for a turkish only post", () => {
+    expect(getPostLocales("capt-sinavina-hazirlik")).toEqual(["tr"]);
   });
 
   it("lists no locales for a slug that does not exist", () => {
     expect(getPostLocales("nothing")).toEqual([]);
   });
 
-  it("finds no english translation of the turkish only post", () => {
-    expect(getPost("en", "self-hosting-with-coolify")).toBeUndefined();
+  it("finds no english translation of a turkish only post", () => {
+    expect(getPost("en", "capt-sinavina-hazirlik")).toBeUndefined();
   });
 
   it("builds a locale neutral href and reading time in the card dto", () => {
@@ -84,9 +94,10 @@ describe("post content layer", () => {
 });
 
 describe("untranslated paths", () => {
-  it("lists the tr only post as untranslated for en", () => {
+  it("lists the tr only posts as untranslated for en", () => {
     expect(getUntranslatedPaths("en")).toEqual([
-      "/blog/self-hosting-with-coolify",
+      "/blog/capt-sinavina-hazirlik",
+      "/blog/ccna-dan-web-guvenligine",
     ]);
   });
 

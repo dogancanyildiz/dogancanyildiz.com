@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo/alternates";
 import { Hero } from "@/components/sections/hero";
+import { PostList } from "@/components/sections/post-list";
 import { ProjectGrid } from "@/components/sections/project-grid";
 import { SkillsStrip } from "@/components/sections/skills-strip";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
@@ -13,6 +14,8 @@ import { skills } from "@/content/profile";
 import { hasCv } from "@/lib/cv";
 import {
   getFeaturedProjects,
+  getPosts,
+  toPostCardData,
   toProjectCardData,
   type Locale,
 } from "@/lib/content";
@@ -55,6 +58,9 @@ export default async function HomePage({
 
   const tHome = await getTranslations({ locale: lang, namespace: "home" });
   const featured = getFeaturedProjects(lang as Locale).map(toProjectCardData);
+  const latestPosts = getPosts(lang as Locale)
+    .slice(0, 3)
+    .map(toPostCardData);
 
   return (
     <>
@@ -74,6 +80,24 @@ export default async function HomePage({
           <ProjectGrid projects={featured} />
         </div>
       </section>
+      {latestPosts.length > 0 ? (
+        <section className="section-space">
+          <div className="page-shell-reading space-y-8">
+            <div className="flex flex-wrap items-baseline justify-between gap-4">
+              <h2 className="text-3xl sm:text-4xl">
+                {tHome("latestPostsTitle")}
+              </h2>
+              <Link
+                href="/blog"
+                className="text-sm text-primary underline-offset-4 hover:underline"
+              >
+                {tHome("latestPostsLink")}
+              </Link>
+            </div>
+            <PostList posts={latestPosts} headingLevel="h3" />
+          </div>
+        </section>
+      ) : null}
       <SkillsStrip
         groups={skills[lang as Locale].filter((group) => group.featured)}
       />
