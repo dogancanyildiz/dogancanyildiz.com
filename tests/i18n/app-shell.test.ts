@@ -120,6 +120,7 @@ describe("rss feed route", () => {
     expect(exists("src/app/[lang]/feed.xml/route.ts")).toBe(true);
     const source = read("src/app/[lang]/feed.xml/route.ts");
     expect(source).toContain('export const dynamic = "force-static"');
+    expect(source).toContain("export const dynamicParams = false");
     expect(source).toContain("export function generateStaticParams()");
     expect(source).toContain("application/rss+xml");
   });

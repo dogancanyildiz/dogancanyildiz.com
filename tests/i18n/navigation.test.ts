@@ -29,6 +29,10 @@ describe("switchTargetPath", () => {
     ).toBe("/projects");
   });
 
+  it("falls back to the root for any other untranslated path", () => {
+    expect(switchTargetPath("/somewhere", ["/somewhere"])).toBe("/");
+  });
+
   it("leaves a translated path unchanged", () => {
     expect(
       switchTargetPath("/about", ["/blog/self-hosting-with-coolify"])

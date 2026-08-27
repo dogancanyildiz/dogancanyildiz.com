@@ -6,6 +6,10 @@ import { absoluteUrl } from "@/lib/seo/alternates";
 import { siteConfig } from "@/lib/site-config";
 
 export const dynamic = "force-static";
+// Layouts do not wrap route handlers, so the [lang] layout's dynamicParams
+// does not reach this file: without its own flag /anything/feed.xml would
+// serve the default locale feed with a 200 instead of a 404.
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
