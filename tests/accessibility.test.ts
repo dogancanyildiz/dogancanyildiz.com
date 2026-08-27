@@ -89,6 +89,13 @@ describe("theme toggle reflects the resolved theme", () => {
     expect(source).toContain("resolvedTheme");
     expect(source).not.toMatch(/\btheme === "dark"/);
   });
+
+  it("labels the button from the message catalog in both mount states", () => {
+    expect(source).not.toContain('aria-label="Toggle theme"');
+    expect(
+      source.match(/aria-label=\{t\("a11y\.toggleTheme"\)\}/g)
+    ).toHaveLength(2);
+  });
 });
 
 describe("skip link", () => {

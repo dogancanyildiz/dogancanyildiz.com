@@ -192,6 +192,7 @@
     "tooManyRequests": "Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin."
   },
   "a11y": {
-    "skipToContent": "İçeriğe geç"
+    "skipToContent": "İçeriğe geç",
+    "toggleTheme": "Temayı değiştir"
   }
 }

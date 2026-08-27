@@ -111,7 +111,7 @@ describe("new message keys", () => {
     }
   });
 
-  it("adds a root level a11y.skipToContent to both catalogs", () => {
+  it("adds the root level a11y labels to both catalogs", () => {
     for (const locale of ["en", "tr"]) {
       const messages = JSON.parse(read(`messages/${locale}.json`)) as Record<
         string,
@@ -119,6 +119,7 @@ describe("new message keys", () => {
       >;
       expect(messages.a11y, locale).toEqual({
         skipToContent: expect.any(String),
+        toggleTheme: expect.any(String),
       });
     }
   });
@@ -129,5 +130,6 @@ describe("new message keys", () => {
     expect(Object.keys(en).sort()).toEqual(Object.keys(tr).sort());
     expect(messageKeys("en", "nav")).toEqual(messageKeys("tr", "nav"));
     expect(messageKeys("en", "footer")).toEqual(messageKeys("tr", "footer"));
+    expect(messageKeys("en", "a11y")).toEqual(messageKeys("tr", "a11y"));
   });
 });

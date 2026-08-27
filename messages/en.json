@@ -192,6 +192,7 @@
     "tooManyRequests": "Too many requests. Please try again in a few minutes."
   },
   "a11y": {
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "toggleTheme": "Toggle theme"
   }
 }
