@@ -1,0 +1,24 @@
+---
+title: Hubit
+slug: hubit
+summary: Interactive 3D visualizations on the web, built with Three.js and tuned for smooth interaction on ordinary hardware.
+role: Frontend Engineer and UI Designer
+stack:
+  - Three.js
+  - JavaScript
+year: 2024
+outcome: The scene stays interactive on mid range laptops instead of only on a developer machine.
+order: 4
+---
+
+## What I did
+
+At Divizyon I built the interactive 3D layer of Hubit with Three.js and designed the interface around it. The work split into two halves: getting the scene to read clearly as a user interface rather than a demo, and getting it to stay responsive while it does.
+
+## Why it was built this way
+
+A 3D view earns its place only when it shows something a flat layout cannot. That constraint drove the design: every control had a plain counterpart, and the camera never moved in a way the user did not ask for, because a scene that moves on its own is a scene people stop trusting.
+
+## What I learned
+
+Rendering performance on the web is mostly a budgeting problem. The frame cost is decided long before the render loop, in how many objects exist, how many materials they share and how much work happens per frame that could have happened once. Profiling on a mid range laptop instead of my own machine changed which optimizations were worth doing.

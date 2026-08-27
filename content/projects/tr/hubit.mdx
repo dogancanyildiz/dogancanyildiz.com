@@ -1,0 +1,24 @@
+---
+title: Hubit
+slug: hubit
+summary: Three.js ile geliştirilen, sıradan donanımda da akıcı kalacak şekilde ayarlanmış etkileşimli web tabanlı 3B görselleştirmeler.
+role: Frontend Mühendisi ve Arayüz Tasarımcısı
+stack:
+  - Three.js
+  - JavaScript
+year: 2024
+outcome: Sahne yalnızca geliştirici makinesinde değil, orta seviye dizüstü bilgisayarlarda da etkileşimli kalıyor.
+order: 4
+---
+
+## Ne yaptım
+
+Divizyon'da Hubit'in etkileşimli 3B katmanını Three.js ile geliştirdim ve etrafındaki arayüzü tasarladım. İş iki yarıya ayrıldı: sahnenin bir demo gibi değil bir kullanıcı arayüzü gibi okunmasını sağlamak ve bunu yaparken tepkisel kalmasını sağlamak.
+
+## Neden böyle kurgulandı
+
+Bir 3B görünüm, ancak düz bir düzenin gösteremeyeceği bir şeyi gösterdiğinde yerini hak eder. Bu kısıt tasarımı belirledi: her kontrolün düz bir karşılığı vardı ve kamera kullanıcının istemediği bir biçimde hiç hareket etmedi, çünkü kendi kendine hareket eden bir sahne insanların güvenmeyi bıraktığı bir sahnedir.
+
+## Ne öğrendim
+
+Web'de render performansı büyük ölçüde bir bütçe problemi. Kare maliyeti render döngüsünden çok önce belirleniyor: kaç nesne var, kaç materyal paylaşılıyor ve her karede bir kez yapılabilecek ne kadar iş tekrar ediliyor. Kendi makinem yerine orta seviye bir dizüstü bilgisayarda ölçüm almak, hangi optimizasyonun değdiğini değiştirdi.
