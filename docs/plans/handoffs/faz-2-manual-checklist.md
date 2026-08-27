@@ -55,7 +55,7 @@ Dal: `feature/faz-2-i18n-app-lang`, `feature/faz-1-deploy-hatti` (`81f97c8`) üz
 
 - [ ] **`AGENTS.md` / `CLAUDE.md` `.gitignore`'da** (`26bf303`). Kabul ediliyorsa `docs/plans/handoffs/faz-1-manual-checklist.md` bölüm 11'deki madde kapanır. İstenmiyorsa `.gitignore`'daki iki satır silinir ve ya dosyalar commit edilir (içerik uzun çizgi taşıyor, `next dev` her başlangıçta yeniden yazar) ya da `next.config.ts`'e `agentRules: false` eklenip dosyalar silinir.
 - [ ] **Sitemap `x-default`**: `<head>` üretiyor, sitemap üretmiyor. Eklenecekse `src/app/sitemap.ts`'teki `languagesFor` kaldırılıp `buildAlternates`'in `languages` haritası paylaşılır ve `tests/seo/sitemap.test.ts:39` güncellenir.
-- [ ] **EN og:image `/en/` prefix'i** (307 hop). Faz 3 `opengraph-image.tsx`'i yeniden yazarken kapatılır; ayrı bir düzeltme istenmiyor.
+- [x] **EN og:image `/en/` prefix'i** (307 hop). Düzeltme turunda kapandı (`2b10bd7`): `og:image` artık `localeUrl` ile üretiliyor, İngilizce sayfalarda `https://dogancanyildiz.sh/opengraph-image/default`, hop yok. Karar gerekmiyor.
 - [ ] **429, 413 ve okunamayan gövde 400'ü İngilizce.** Seçenekler `faz-2.md` "Açık kalanlar"da; hiçbiri seçilmezse `route.ts`'e neden yorumu yazılır.
 - [ ] **404 dokümanı her zaman `<html lang="en">`** (TR paragrafı `lang="tr"` bloğunda). Faz 3 tasarımı `global-not-found.tsx`'e uygularken locale'e özel 404 istenip istenmediğine karar verilir.
 - [ ] **`npm run format` CI adımı**: `.github/workflows/ci.yml` `checks` job'ına `- run: npm run format` ve `tests/deploy/ci-workflow.test.ts` listesine aynı komut. Bu fazda dört task bu kapıya takıldı.
