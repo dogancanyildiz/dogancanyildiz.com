@@ -109,6 +109,8 @@ Bu bölüm kontrol oturumu tarafından repodaki gerçek duruma bakılarak doğru
 | 4. İçerik ve yayın | feature/faz-4-icerik-ve-yayin | #6 | Açık, CI yeşil, 21 commit, HEAD 8b4fe40, merge kararı sahibinde |
 | 5. Altyapı vitrini ve ölçüm | yok | yok | Başlamadı |
 
+Bunların dışında, bir faz sayılmayan çapraz kesen bir altyapı değişikliği daha var: **ana domainin dogancanyildiz.com'a sabitlenmesi ve dallanma/sürüm otomasyonu** (dal `feature/com-primary-and-release-flow`, `dev`'den açıldı). Kapsamı: `NEXT_PUBLIC_SITE_URL`/sitemap/robots/testlerin `.com`'a geçirilmesi, `ci.yml`'in `dev` ve `main`'de zorunlu koşması, `main`'e her merge'de otomatik tag + GitHub Release + `CHANGELOG.md` üreten `release.yml`. Kod tarafı bu dalda tamamlandı ve kalite kapıları yeşil; bu değişiklik dev'e PR ile girer, PR numarası burada henüz belirtilmiyor, ana oturum PR açıldığında bu satırı günceller. Detay: [06-devops-ve-deploy.md](./06-devops-ve-deploy.md) "Dallanma ve sürüm akışı".
+
 ### Kapılar (Faz 4 HEAD, 8b4fe40)
 
 `npm run typecheck`, `npm run lint`, `npm test` (32 dosya / 458 test), `npm run format`, `npm run build` (yalnızca `/api/contact` ve `/api/health` dynamic, geri kalan tüm route'lar statik), `verify:routes` (26 içerik route'u statik: 5 proje x 2 locale, 1 EN yazı, 3 TR yazı), `hadolint` ve Docker imaj build'i; hepsi CI'da yeşil. Docker imajı iki locale'i (en, tr) servis ediyor. Şablon persona kalıntısı (Alex Chen, example.com) repoda sıfır; `tests/no-template-residue.test.ts` bunu kilitliyor.
@@ -146,6 +148,8 @@ Domain ve ortam ayrımı yayın öncesi kritik: dogancanyildiz.com ana domain (*
 | İçerik stratejisi | Şablon persona kaldırılır, case study formatı | Orta, açık sorulara bağlı | 08-icerik-stratejisi.md | Kısmen uygulandı (Faz 4, PR #6 açık), kalan: sertifika linkleri, kapaklar, Konuşmalar verisi, sahibinin metin/CV onayı |
 | Güvenlik | Yükseltme + güvenlik başlıkları + Renovate otomasyonu zorunlu | Yüksek | 09-guvenlik.md | Kısmen uygulandı (Faz 0, PR #2): yükseltme ve başlıklar kodda, kalan: Renovate GitHub App kurulumu (Faz 5), npm audit ayrı PR |
 | Yol haritası | 6 fazlı plan (Faz 0-5) | Yüksek | 10-yol-haritasi.md | Kısmen uygulandı: Faz 0-3 main'de, Faz 4 PR #6 açık, Faz 5 başlamadı |
+| Ana domain | dogancanyildiz.com ana domain, dogancanyildiz.sh yalnızca 301 ile ona yönlenen ikincil domain (karar değişikliği; tarihsel öneri metni tam tersiydi, bkz. yukarıdaki not ve [11-acik-sorular.md](./11-acik-sorular.md) soru 5) | Kesin (sahibin kararı, 2026-08-27) | 07-seo-ve-metadata.md, 06-devops-ve-deploy.md | Kod tarafı uygulandı: `NEXT_PUBLIC_SITE_URL`, sitemap/robots/JSON-LD çıktısı, testler (dal `feature/com-primary-and-release-flow`, dev'e PR ile girer); kalan: Cloudflare Redirect Rule'un (`.sh -> .com` 301) canlıya alınması sahipte |
+| Dallanma ve sürüm | `feature/* -> dev -> main`, main'e her merge otomatik sürüm üretir (tag `vX.Y.Z` + GitHub Release + `CHANGELOG.md`); ilk otomatik sürüm 0.2.0, 1.0.0 launch'ta sahibinin `workflow_dispatch` ile elle kestiği sürüm | Yüksek | 06-devops-ve-deploy.md | Uygulandı: `release.yml`, `ci.yml`'in `dev`+`main`'de koşması, `scripts/release-version.mjs`, `CHANGELOG.md` taban girdisi (dal `feature/com-primary-and-release-flow`, dev'e PR ile girer) |
 
 ### Şimdilik kapsam dışı (YAGNI)
 

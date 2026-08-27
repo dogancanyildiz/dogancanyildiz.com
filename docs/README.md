@@ -1,6 +1,6 @@
 # dogancanyildiz.com Karar Dokümanları
 
-Durum: Kısmen uygulandı (Faz 0-3 main'de PR #2-#5, Faz 4 PR #6 açık), kalan: Faz 4 merge kararı ve teslimatlar, Faz 5 · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Kısmen uygulandı (Faz 0-3 main'de PR #2-#5, Faz 4 PR #6 açık), kalan: Faz 4 merge kararı ve teslimatlar, Faz 5; ayrıca ana domainin `.com`'a sabitlenmesi ve dallanma/sürüm otomasyonu (dal `feature/com-primary-and-release-flow`) kod tarafıyla tamamlandı, dev'e PR ile girecek. Sürüm geçmişi kökteki [`CHANGELOG.md`](../CHANGELOG.md)'de tutuluyor. · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 Bu klasör, yarım kalmış portfolio reposunun modernizasyonu için yapılan denetim, araştırma ve karar kayıtlarını tutar. Kararlar 27 Ağustos 2026'da 3 denetim ve 6 araştırma ajanının çıktılarından sentezlendi, stack önerisi iki karşıt lensle doğrulandı. 2026-08-27 itibarıyla kararların büyük kısmı koda döndü: Faz 0-3 main dalında sırayla merge edildi (PR #2-#5), Faz 4 PR #6 olarak açık ve CI yeşil (merge kararı sahibinde), Faz 5 henüz başlamadı; ilgili dosyaların "Durum" satırları buna göre güncellendi. Uygulamanın çalışma kayıtları docs/plans/ (faz planları) ve docs/plans/handoffs/ (devir notları, manuel checklist'ler) altında tutulur.
 
@@ -21,11 +21,12 @@ Tek gerçek kaynak bu klasördür. Site içeriği (biyografi, projeler, sertifik
 | [08-icerik-stratejisi.md](08-icerik-stratejisi.md) | Sektör araştırması, case study formatı, içerik kararları, içerik dosyasının siteye haritası | 9 |
 | [09-guvenlik.md](09-guvenlik.md) | CVE'ler ve 16.3.3 zorunluluğu, yayın öncesi güvenlik listesi, bakım otomasyonu | 10 |
 | [10-yol-haritasi.md](10-yol-haritasi.md) | Faz 0-5, madde listeleri, bitiş kriterleri, launch noktası | 11 |
-| [11-acik-sorular.md](11-acik-sorular.md) | Site sahibine 11 soru; 10'u 2026-08-27'de cevaplandı, 1'i açık (iletişim domain'inin son hali) | 12 |
+| [11-acik-sorular.md](11-acik-sorular.md) | Site sahibine 11 soru; tamamı 2026-08-27'de cevaplandı, açık soru sayısı 0 (soru 5: `.com` ana domain, `.sh` 301) | 12 |
 | [12-kaynaklar.md](12-kaynaklar.md) | Dayanılan tüm URL'ler, kategoriye göre | referans |
 | [launch-checklist.md](launch-checklist.md) | Faz 4 yayın kapısı: otomatik kapılar, içerik, SEO/i18n, performans/erişilebilirlik, contact/altyapı; hiçbiri geçmeden .com -> .sh 301 canlıya alınmaz | uygulama, launch öncesi |
-| [plans/](plans/) | Faz başına uygulama planı (writing-plans formatı), 2026-08-27-faz-0..5 dosyaları; kararlar dokümanlarından türetildi, faz yürütülürken izlendi | uygulama kaydı |
+| [plans/](plans/) | Faz başına uygulama planı (writing-plans formatı), 2026-08-27-faz-0..5 dosyaları; kararlar dokümanlarından türetildi, faz yürütülürken izlendi; `.sh` domain varsayımıyla yazıldığı için `plans/README.md`'deki not | uygulama kaydı |
 | [plans/handoffs/](plans/handoffs/) | Faz başına devir notu (faz-N.md), sahibinin manuel checklist'i (faz-N-manual-checklist.md) ve ek notlar (faz-3-notlar.md, faz-4-brief.md); bir fazın gerçekte ne yaptığının, nelerin sahibi beklediğinin kanıtı | uygulama kaydı |
+| [`../CHANGELOG.md`](../CHANGELOG.md) | Keep a Changelog biçiminde sürüm geçmişi; `release.yml` her `main` merge'inde günceller | referans |
 
 ## Nasıl güncellenir
 
