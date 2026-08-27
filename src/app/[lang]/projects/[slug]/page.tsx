@@ -4,7 +4,7 @@ import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { projects } from "@/data/projects";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo/locale-url";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo/alternates";
 import { localesForProject } from "@/lib/content/project-locales";
 import { ProjectDetail } from "@/components/sections/project-detail";
 

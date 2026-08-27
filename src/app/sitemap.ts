@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { projects } from "@/data/projects";
-import { localeUrl } from "@/lib/seo/locale-url";
+import { absoluteUrl } from "@/lib/seo/alternates";
 import { localesForProject } from "@/lib/content/project-locales";
 
 const STATIC_PAGES = [
@@ -23,7 +23,7 @@ function languagesFor(
 
   for (const locale of routing.locales) {
     if (availableLocales.includes(locale)) {
-      languages[locale] = localeUrl(locale, path);
+      languages[locale] = absoluteUrl(locale, path);
     }
   }
 
@@ -37,7 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const locale of routing.locales) {
     for (const page of STATIC_PAGES) {
       entries.push({
-        url: localeUrl(locale, page.path),
+        url: absoluteUrl(locale, page.path),
         lastModified,
         changeFrequency: page.changeFrequency,
         priority: page.priority,
@@ -54,7 +54,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       if (!availableLocales.includes(locale)) continue;
 
       entries.push({
-        url: localeUrl(locale, path),
+        url: absoluteUrl(locale, path),
         lastModified,
         changeFrequency: "monthly",
         priority: 0.7,

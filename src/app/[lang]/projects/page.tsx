@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo/locale-url";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo/alternates";
 import { ProjectsSection } from "@/components/sections/projects-section";
 
 export function generateStaticParams() {
@@ -29,7 +29,7 @@ export async function generateMetadata({
       siteName: t("defaultTitle"),
       imageAlt: t("ogAlt"),
     }),
-    alternates: buildAlternates(lang, "/projects"),
+    alternates: buildAlternates(lang, "/projects", [...routing.locales]),
   };
 }
 

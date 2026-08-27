@@ -1,5 +1,5 @@
 import type { AppLocale } from "@/i18n/routing";
-import { localeUrl } from "@/lib/seo/locale-url";
+import { absoluteUrl } from "@/lib/seo/alternates";
 import { siteConfig } from "@/lib/site-config";
 
 /**
@@ -13,7 +13,7 @@ export function PersonJsonLd({ locale }: { locale: AppLocale }) {
     "@type": "Person",
     name: siteConfig.person.name,
     jobTitle: siteConfig.person.jobTitle[locale],
-    url: localeUrl(locale, "/"),
+    url: absoluteUrl(locale, "/"),
     address: {
       "@type": "PostalAddress",
       addressLocality: siteConfig.person.location.city,
