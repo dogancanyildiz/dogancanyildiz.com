@@ -1,13 +1,18 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
 
-const manifestUrl = new URL("../.next/prerender-manifest.json", import.meta.url);
+const manifestUrl = new URL(
+  "../.next/prerender-manifest.json",
+  import.meta.url
+);
 
 let manifest;
 try {
   manifest = JSON.parse(await readFile(manifestUrl, "utf8"));
 } catch {
-  console.error("prerender-manifest.json not found. Run `npm run build` first.");
+  console.error(
+    "prerender-manifest.json not found. Run `npm run build` first."
+  );
   process.exit(1);
 }
 
