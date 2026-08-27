@@ -236,10 +236,121 @@ Bu setin merkezinde tek bir zorunlu koşul var: PR önizlemesi. Coolify'da bu ö
 ## Uygulama notları
 
 - Dosya sırası önemli: önce `next.config.ts`'e `output: "standalone"` eklenir (Faz 0), sonra Dockerfile/.dockerignore/GitHub Actions eklenir (Faz 1). Tersi sırayla Dockerfile ilk denemede başarısız olur.
-- `.github/workflows/ci.yml` yalnızca PR'larda çalışır (`on: pull_request`), main push'unda tekrar koşmaz; Coolify'ın kendi build'i main push'unu zaten kapsıyor.
+- `.github/workflows/ci.yml` 2026-08-27'den beri `dev` ve `main` için hem `pull_request` hem `push` olaylarında koşuyor (bkz. aşağıdaki "Dallanma ve sürüm akışı"); yukarıdaki 5. karardaki "yalnızca PR kapısı" başlığı o tarihten öncesini anlatıyor. Coolify'ın kendi build'i bundan bağımsız çalışmayı sürdürüyor.
 - Health check route'u (`src/app/api/health/route.ts`) Faz 0'da, Dockerfile'dan önce eklenmeli ki Coolify'da health check ayarı Faz 1'de doğrudan bağlanabilsin.
 - Traefik label'larını eklemeden önce Coolify'da "Readonly labels" kapatılmalı, aksi halde elle eklenen middleware'ler UI tarafından ezilir.
 - Detaylı faz sıralaması için bkz. [10-yol-haritasi.md](10-yol-haritasi.md) (Faz 0: Güvenlik ve hijyen, Faz 1: Deploy hattı).
+
+## Dallanma ve sürüm akışı (2026-08-27)
+
+Sahibi 2026-08-27'de ana domaini `dogancanyildiz.com` olarak sabitledi ve
+dallanmayı üç kademeye ayırdı. `dogancanyildiz.sh` yalnızca 301 ile .com'a
+yönlenen ikincil domain olarak duruyor.
+
+### Dal hiyerarşisi
+
+```
+feature/*  --PR-->  dev  --PR-->  main  --push-->  release.yml
+```
+
+- **feature/\***: tek bir iş için açılır, tabanı `dev`'dir.
+- **dev**: entegrasyon dalı. Bütün feature PR'ları buraya iner, CI burada da
+  zorunlu koşar.
+- **main**: yayınlanan durum. Yalnızca `dev`'den gelen PR ile ilerler.
+- `main`'e her merge `release.yml`'i tetikler: tag, GitHub Release ve `dev`'e
+  geri dönen sürüm senkron PR'ı.
+
+`.github/workflows/ci.yml` artık hem `dev` hem `main` için `pull_request` ve
+`push` olaylarında koşuyor; iki job adı (`lint, typecheck, test, build` ve
+`hadolint and image build`) branch protection'a bağlandığı için sabit
+tutulmalı, yeniden adlandırmak korumayı sessizce boşa düşürür.
+
+### release.yml ne yapıyor
+
+`.github/workflows/release.yml`, `main`'e push ve `workflow_dispatch` ile
+çalışır. `workflow_dispatch` isteğe bağlı bir `version` girdisi alır; 1.0.0
+gibi bir sürümü sahibi bu girdiyle elle keser.
+
+1. `actions/checkout@v7` ile `fetch-depth: 0`, tüm geçmiş ve tag'ler alınır.
+2. `actions/setup-node@v7`, `.nvmrc` (Node 24).
+3. `scripts/release-version.mjs` son `v*` tag'ini bulur (yoksa taban
+   `package.json`'daki 0.1.0), o tag'den beri gelen commit'leri Conventional
+   Commits'e göre sınıflandırır ve sonraki sürümü JSON olarak yazar.
+4. Sürüm çıkıyorsa annotated tag `main`'in HEAD'ine atılır ve push edilir.
+5. `gh release create vX.Y.Z --title vX.Y.Z --notes-file` ile Release yayınlanır;
+   notlar Features / Fixes / Other başlıkları altında kısa sha ve commit mesajı
+   ile gruplanır, sonunda karşılaştırma linki durur.
+6. `package.json`, `package-lock.json` ve `CHANGELOG.md` güncellenir, ama
+   `main`'e doğrudan push edilmez: `release/sync-vX.Y.Z` dalından `dev`'e
+   `chore(release): sync version vX.Y.Z` başlıklı bir PR açılır. Böylece `main`
+   korumalı kalır, sürüm bilgisi bir sonraki `dev -> main` PR'ı ile geri döner.
+
+Git kimliği `github-actions[bot]`. Notlarda ve commit'lerde yapay zeka atfı yok.
+
+**Sürüm bumpu nasıl karar veriliyor:**
+
+| Commit tipi | Etki |
+|---|---|
+| `feat` | minor |
+| `fix`, `perf`, `refactor` | patch |
+| `BREAKING CHANGE:` gövdede veya `!:` konu satırında | major |
+| `chore`, `docs`, `ci`, `test`, `style`, `build` | sürüm yok |
+
+Aralıkta yalnızca sürümsüz tipler varsa iş akışı tag atmadan temiz çıkar.
+Yerelde denemek için `npm run release:check` (dry run, hiçbir şey yazmaz).
+
+### İki bilinen kısıt
+
+- **GITHUB_TOKEN ile açılan PR başka workflow tetiklemez.** Sürüm senkron PR'ı
+  bu yüzden ci check'leri olmadan açılır. `dev` korumalı olduğu için merge
+  edilemez; PR bir kez kapatılıp yeniden açıldığında check'ler koşar. Kalıcı
+  çözüm bir makine hesabı PAT'i veya GitHub App token'ı olur, şimdilik gerekli
+  değil.
+- **Actions'ın PR açma izni ayrı bir ayar.** Settings > Actions > General >
+  "Allow GitHub Actions to create and approve pull requests" kapalıysa senkron
+  PR adımı 403 ile düşer.
+
+### Coolify tarafı
+
+- **Production**: `main` dalını izler, her merge sonrası otomatik deploy.
+  Domain `dogancanyildiz.com`.
+- **Preview Deployments**: PR başına ayrı URL, GitHub App üzerinden.
+- **Staging (opsiyonel, önerilir)**: `dev` dalını izleyen ikinci bir Coolify
+  uygulaması, `dev.dogancanyildiz.com` alt alan adıyla. Bu uygulamada
+  `NEXT_PUBLIC_SITE_URL` staging alan adına ayarlanır ve Cloudflare tarafında
+  alt alan adı arama motorlarına kapatılır (`X-Robots-Tag: noindex` ya da
+  Cloudflare Transform Rule). Şimdilik zorunlu değil, PR preview'ları çoğu
+  doğrulama için yetiyor; `dev` uzun süre `main`'in önünde kalmaya başlarsa
+  kurulmalı.
+
+### Branch protection kuralları
+
+Ana oturum `gh api` ile uygular, iki dalda da aynı iskelet:
+
+| Ayar | `main` | `dev` |
+|---|---|---|
+| Pull request zorunlu | evet | evet |
+| Zorunlu status check: `lint, typecheck, test, build` | evet | evet |
+| Zorunlu status check: `hadolint and image build` | evet | evet |
+| Check'ler güncel dal üzerinde koşsun (strict) | evet | evet |
+| Force push | kapalı | kapalı |
+| Dal silme | kapalı | kapalı |
+| Yönetici muafiyeti | kapalı tutulması önerilir | açık kalabilir |
+
+`release.yml`'in tag push edebilmesi için tag koruması eklenmemeli, ya da
+eklenirse `github-actions[bot]` muaf tutulmalı.
+
+### Sürüm politikası
+
+- **0.x**: yayın öncesi. İlk otomatik sürüm 0.2.0 olacak, çünkü `package.json`
+  0.1.0'da duruyor ve `dev`'de biriken commit'ler arasında `feat` var.
+- **1.0.0**: launch sürümü. Otomatik bumpla değil, sahibinin `workflow_dispatch`
+  üzerinden `version: 1.0.0` girmesiyle kesilir.
+- **1.0.0 sonrası**: tamamen Conventional Commits'e göre, yukarıdaki tabloyla.
+
+`CHANGELOG.md` Keep a Changelog biçiminde tutuluyor; 0.1.0 girdisi Faz 0 ile 4
+arasını (PR #2 ile #6) özetleyen taban girdisidir, sonraki her sürümü
+`scripts/release-version.mjs --write-changelog` dosyanın başına ekler.
 
 ## İlgili dokümanlar
 
