@@ -10,11 +10,12 @@ import { isIP } from "node:net";
  * phase 1). The caller passes that decision in through trustCloudflare, this
  * module never guesses.
  *
- * The X-Forwarded-For fallback is a best effort interim: the leftmost entry is
- * whatever the client sent when the chain is forwarded, and the Cloudflare edge
- * address when Traefik rewrites the header. Until trustCloudflare is on, the
- * Cloudflare rate limiting rule in front of /api/contact is the layer that
- * actually holds.
+ * The X-Forwarded-For fallback takes the last entry, the hop appended by the
+ * trusted proxy in front of the app. Everything to its left is client
+ * supplied and forgeable. Behind Cloudflare that hop is a Cloudflare edge
+ * address, so the fallback is coarse but cannot be forged; the exact visitor
+ * needs trustCloudflare. The Cloudflare rate limiting rule in front of
+ * /api/contact remains the outer layer.
  */
 
 export const UNKNOWN_IP = "unknown";
@@ -39,9 +40,13 @@ export function getClientIp(
   }
 
   const forwarded = headers.get("x-forwarded-for") ?? "";
-  const first = forwarded.split(",")[0]?.trim() ?? "";
-  if (isIpAddress(first)) {
-    return first;
+  const hops = forwarded
+    .split(",")
+    .map((hop) => hop.trim())
+    .filter((hop) => hop.length > 0);
+  const nearest = hops[hops.length - 1] ?? "";
+  if (isIpAddress(nearest)) {
+    return nearest;
   }
 
   return UNKNOWN_IP;

@@ -46,18 +46,14 @@ describe("getClientIp", () => {
       "cf-connecting-ip": "203.0.113.9",
       "x-forwarded-for": "198.51.100.4, 10.0.0.1",
     });
-    expect(getClientIp(headers, { trustCloudflare: false })).toBe(
-      "198.51.100.4"
-    );
+    expect(getClientIp(headers, { trustCloudflare: false })).toBe("10.0.0.1");
   });
 
-  it("takes the first x-forwarded-for entry", () => {
+  it("takes the last x-forwarded-for entry, the hop the trusted proxy appended", () => {
     const headers = headersOf({
       "x-forwarded-for": " 198.51.100.4 , 10.0.0.1 ",
     });
-    expect(getClientIp(headers, { trustCloudflare: false })).toBe(
-      "198.51.100.4"
-    );
+    expect(getClientIp(headers, { trustCloudflare: false })).toBe("10.0.0.1");
   });
 
   it("falls back to x-forwarded-for when a spoofed CF header is not an ip", () => {
@@ -74,5 +70,17 @@ describe("getClientIp", () => {
     expect(getClientIp(headersOf({}), { trustCloudflare: true })).toBe(
       UNKNOWN_IP
     );
+  });
+
+  it("does not let a client supplied x-forwarded-for prefix change the key", () => {
+    const first = headersOf({ "x-forwarded-for": "203.0.113.5, 203.0.113.4" });
+    const second = headersOf({ "x-forwarded-for": "203.0.113.6, 203.0.113.4" });
+    expect(getClientIp(first, { trustCloudflare: false })).toBe("203.0.113.4");
+    expect(getClientIp(second, { trustCloudflare: false })).toBe("203.0.113.4");
+  });
+
+  it("returns the unknown bucket when the nearest hop is not an ip", () => {
+    const headers = headersOf({ "x-forwarded-for": "203.0.113.5, garbage" });
+    expect(getClientIp(headers, { trustCloudflare: false })).toBe(UNKNOWN_IP);
   });
 });
