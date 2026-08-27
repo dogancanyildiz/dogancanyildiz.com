@@ -81,3 +81,12 @@ describe("target size", () => {
     );
   });
 });
+
+describe("theme toggle reflects the resolved theme", () => {
+  const source = read("src/components/layout/theme-toggle.tsx");
+
+  it("reads resolvedTheme instead of the raw (possibly 'system') theme value", () => {
+    expect(source).toContain("resolvedTheme");
+    expect(source).not.toMatch(/\btheme === "dark"/);
+  });
+});

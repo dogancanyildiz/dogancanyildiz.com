@@ -14,7 +14,7 @@ function useMounted() {
 }
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
 
   if (!mounted) {
@@ -31,9 +31,9 @@ export function ThemeToggle() {
       size="icon-sm"
       className="tap-target border border-border bg-background"
       aria-label="Toggle theme"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
-      {theme === "dark" ? (
+      {resolvedTheme === "dark" ? (
         <Sun className="size-4" />
       ) : (
         <Moon className="size-4" />
