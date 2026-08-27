@@ -47,7 +47,7 @@
     "description": "Konya'da yaşayan, web uygulamaları geliştiren ve bu uygulamaların çalıştığı altyapıyı da kendisi işleten full-stack geliştirici.",
     "lead": "Next.js, Node.js/Express ve MongoDB ile ölçeklenebilir, kullanıcı dostu web uygulamaları geliştiren bir yazılım mühendisiyim.",
     "body1": "İşim kodu yazmakla bitmiyor. Uygulamaları kendi sunucumdaki altyapıda derleyip yayına alıyorum (Docker, GitHub Actions CI/CD, Coolify, Traefik ve Linux sunucular) ve Agile ekiplerde çalışıyorum; sprint planlama ile iş takibini ClickUp üzerinde yürütüyorum.",
-    "body2": "İşimi ayıran şey, uygulama katmanının altındaki güçlü ağ ve güvenlik temeli: CAPT sertifikalıyım, Cisco CCNA hattının tamamını ve CyberOps Associate eğitimini tamamladım. Bu, bir sistemin yalnızca nasıl kurulduğunu değil, nasıl yayına alındığını, dışarıya nasıl açıldığını ve nasıl sıkılaştırıldığını de düşünmek demek.",
+    "body2": "İşimi ayıran şey, uygulama katmanının altındaki güçlü ağ ve güvenlik temeli: CAPT sertifikalıyım, Cisco CCNA hattının tamamını ve CyberOps Associate eğitimini tamamladım. Bu, bir sistemin yalnızca nasıl kurulduğunu değil, nasıl yayına alındığını, dışarıya nasıl açıldığını ve nasıl sıkılaştırıldığını da düşünmek demek.",
     "body3": "İşin dışında iki yıl GDG Konya organizatörlüğü yaptım ve GDG Cloud Konya çekirdek ekibinde yer aldım; yerel geliştirici topluluğu için teknik konuşmalar, study jam'ler ve uygulamalı atölyeler düzenledik.",
     "nowLabel": "Şu anda",
     "now": "BerrSoft'ta Full-Stack Developer, Necmettin Erbakan Üniversitesi'nde Matematik ve Bilgisayar Bilimleri öğrencisi",

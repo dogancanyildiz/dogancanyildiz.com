@@ -19,8 +19,8 @@ Uygulama çok aşamalı bir Dockerfile ile derleniyor; `deps`, `builder` ve `run
 
 ## Nerede tökezledim
 
-İlk tökezleme sağlık kontrolüydü. Node tabanlı konteynerlerde Coolify'ın sağlık kontrolünün bağlantı reddi vermesi bilinen bir sorun, bu yüzden kontrolü production'a bağlamadan önce staging'de doğrulamak gerekiyor. İkincisi ortam değişkenlerinin katmanıydı: `NEXT_PUBLIC_` ile başlayan değerler derleme sırasında paket içine gömülüyor, yalnızca çalışma zamanı olarak işaretlenirse üretimde sessizce tanımsız kalıyorlar. Bunun tersi daha kötü: bir API anahtarını derleme değişkeni yapmak onu imaj katmanlarına ve derleme günlüklerine sızdırabiliyor.
+İlk tökezleme sağlık kontrolüydü. Node tabanlı konteynerlerde curl veya wget ile yazılan Coolify sağlık kontrolünün bağlantı reddi vermesi bilinen bir sorun; bu depodaki kontrol bu yüzden Node'un kendi fetch çağrısıyla yazıldı ve production'a bağlanmadan önce staging'de doğrulanıyor. İkincisi ortam değişkenlerinin katmanıydı: `NEXT_PUBLIC_` ile başlayan değerler derleme sırasında paket içine gömülüyor, bu yüzden derleme değişkeni olarak verilmek zorundalar; bu depoda site adresi eksikse derleme bilerek hata veriyor ki yanlış adres sessizce pakete gömülmesin. Bunun tersi daha kötü: bir API anahtarını derleme değişkeni yapmak onu imaj katmanlarına ve derleme günlüklerine sızdırabiliyor.
 
 ## Ne kazandım
 
-Yayın adımının tamamı bir komuta indi ve altyapının her parçası depoda duruyor. Karşılığında ödediğim bedel bakım: sunucu, sertifika ve güncellemeler artık benim işim. Kişisel bir site için bu değişim bana değdi, çünkü öğrenmek istediğim şey tam olarak buydu.
+Yayın adımının tamamı bir komuta indi ve altyapının her parçası depoda duruyor. Karşılığında ödediğim bedel bakım: sunucu, sertifika ve güncellemeler artık benim işim. Kişisel bir site için bu takas bana değdi, çünkü öğrenmek istediğim şey tam olarak buydu.

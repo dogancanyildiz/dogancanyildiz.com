@@ -47,6 +47,7 @@ missing, because a silent fallback would put a wrong host into `robots.txt` and
 | `npm run format`        | Prettier in check mode                                                                                                 |
 | `npm run format:write`  | Prettier in write mode                                                                                                 |
 | `npm run verify:routes` | Reads `.next/prerender-manifest.json` after a build: every content route prerendered in both locales, `/api/*` dynamic |
+| `npm run vendor:fonts`  | Copies the woff2 and woff font files from the @fontsource packages into src/fonts and public/fonts/og                  |
 
 ## Environment variables
 

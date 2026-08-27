@@ -19,7 +19,7 @@ The application is built by a multi stage Dockerfile with separate deps, builder
 
 ## Where it tripped me up
 
-The first snag was the health check. Connection refused on Node containers is a known Coolify issue, so the check has to be verified on staging before it is wired to production. The second was the environment variable layer. Values prefixed with NEXT_PUBLIC_ are inlined at build time, so marking one as runtime only leaves it silently undefined in production. The reverse is worse: marking an API key as a build variable can leak it into image layers and build logs.
+The first snag was the health check. Connection refused from curl or wget based Coolify health checks on Node containers is a known issue, which is why the check in this repository uses Node's own fetch call and is verified on staging before it is wired to production. The second was the environment variable layer. Values prefixed with NEXT_PUBLIC_ are inlined at build time, so they have to arrive as build variables; in this repository the build fails on purpose when the site url is missing, so a wrong address is never silently baked into the bundle. The reverse is worse: marking an API key as a build variable can leak it into image layers and build logs.
 
 ## What I got out of it
 
