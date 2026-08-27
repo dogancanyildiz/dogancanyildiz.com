@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
+import { getPathname, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
@@ -27,11 +27,16 @@ export function LanguageSwitcher() {
     >
       {routing.locales.map((locale) => {
         const isActive = locale === activeLocale;
+        // getPathname applies localePrefix "as-needed" as configured, so the
+        // English link is /about and not /en/about, which the proxy would
+        // answer with a 307. Link forces the prefix whenever an explicit
+        // locale is passed. A plain anchor is enough here: switching the
+        // language reloads the whole tree anyway.
+        const href = getPathname({ locale, href: pathname });
         return (
-          <Link
+          <a
             key={locale}
-            href={pathname}
-            locale={locale}
+            href={href}
             hrefLang={locale}
             aria-current={isActive ? "true" : undefined}
             aria-label={localeNames[locale]}
@@ -43,7 +48,7 @@ export function LanguageSwitcher() {
             )}
           >
             {localeLabels[locale]}
-          </Link>
+          </a>
         );
       })}
     </nav>
