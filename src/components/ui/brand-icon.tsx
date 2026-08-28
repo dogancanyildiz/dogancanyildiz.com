@@ -16,8 +16,13 @@ const LINKEDIN_PATH =
  * hyphenated attribute names: the prop was dropped on the floor, and a typo in
  * one would have gone unnoticed the same way. aria-hidden stays the default
  * (every caller labels the control around the mark) but is now overridable.
+ *
+ * The geometry is not. SVGAttributes declares both `path` and `viewBox`, so
+ * spreading the caller's props over the element would otherwise let a caller
+ * swap the brand mark for an arbitrary outline; both are dropped from the
+ * public props and written after the spread.
  */
-type BrandIconProps = SVGProps<SVGSVGElement>;
+type BrandIconProps = Omit<SVGProps<SVGSVGElement>, "path" | "viewBox">;
 
 /**
  * Renders a brand mark as an inline `currentColor` SVG, sized and colored
@@ -34,9 +39,9 @@ function BrandIcon({
 }: BrandIconProps & { path: string }) {
   return (
     <svg
-      viewBox="0 0 24 24"
       aria-hidden="true"
       {...props}
+      viewBox="0 0 24 24"
       className={cn("size-4", className)}
     >
       <path d={path} fill="currentColor" />
