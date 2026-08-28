@@ -142,9 +142,9 @@ feature/*  --PR-->  dev  --PR-->  main  --push-->  release workflow
 - `feature/*` branches off `dev`. `dev` is the integration branch, `main` is
   the released state and only moves through a pull request from `dev`.
 - `.github/workflows/ci.yml` runs on pull requests to and pushes on both `dev`
-  and `main`. Its two jobs, `lint, typecheck, test, build` and
-  `hadolint and image build`, are the required checks in branch protection, so
-  their names must not change.
+  and `main`. Its two jobs, `Quality checks` and `Docker image`, plus the
+  `CodeQL analysis` job from `codeql.yml`, are the required checks in branch
+  protection, so their names must not change.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
   They are the only input the version comes from.
 

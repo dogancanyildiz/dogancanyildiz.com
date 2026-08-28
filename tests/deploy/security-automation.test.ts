@@ -35,6 +35,7 @@ describe("dependency and code scanning", () => {
     expect(content).toMatch(/schedule:\s*\n\s*(#.*\n\s*)?- cron:/);
     expect(content).toContain("languages: javascript-typescript");
     expect(content).toContain("security-events: write");
+    expect(content).toContain("name: CodeQL analysis");
   });
 });
 

@@ -1,4 +1,4 @@
-name: codeql
+name: CodeQL
 
 on:
   push:
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   analyze:
-    name: codeql (javascript-typescript)
+    name: CodeQL analysis
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -26,13 +26,16 @@ jobs:
       # Required to upload SARIF results to the Security tab.
       security-events: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: github/codeql-action/init@v4
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
         with:
           languages: javascript-typescript
           # security-extended adds the lower-precision queries; the codebase
           # is small enough that the extra noise is reviewable.
           queries: security-extended
-      - uses: github/codeql-action/analyze@v4
+      - name: Run the analysis
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:javascript-typescript"

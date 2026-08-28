@@ -14,8 +14,8 @@ describe("ci workflow", () => {
 
   it("keeps the job names branch protection binds its required checks to", () => {
     const content = workflow();
-    expect(content).toContain("name: lint, typecheck, test, build");
-    expect(content).toContain("name: hadolint and image build");
+    expect(content).toContain("name: Quality checks");
+    expect(content).toContain("name: Docker image");
   });
 
   it("pins the node version through .nvmrc", () => {
