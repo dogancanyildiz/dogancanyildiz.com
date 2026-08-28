@@ -1,29 +1,32 @@
-"use client";
-
 import { buildInfo, formatBuildSha } from "@/lib/build-info";
 import { Mail, Rss } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { navItems } from "@/lib/nav";
-import { siteUrl } from "@/lib/env";
+import { routing } from "@/i18n/routing";
 import { CONTACT_EMAIL_PUBLIC, SOCIAL } from "@/lib/site";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icon";
 
-export function Footer() {
+export async function Footer() {
   const year = buildInfo.year;
-  const t = useTranslations();
-  const tBrand = useTranslations("brand");
+  const [t, tBrand, locale] = await Promise.all([
+    getTranslations(),
+    getTranslations("brand"),
+    getLocale(),
+  ]);
   const buildSha = formatBuildSha(buildInfo.sha);
   const buildDate = buildInfo.date;
+  // feed.xml is a route handler, not an i18n page route, so it is linked
+  // directly rather than through the next-intl Link helper.
+  const feedHref =
+    locale === routing.defaultLocale ? "/feed.xml" : `/${locale}/feed.xml`;
 
   return (
     <footer className="mt-auto border-t border-border">
       <div className="page-shell grid gap-10 py-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
         <div className="space-y-3">
           <p className="eyebrow">{t("footer.availability")}</p>
-          <h2 className="text-lg font-semibold tracking-tight">
-            {tBrand("name")}
-          </h2>
+          <h2 className="section-heading">{tBrand("name")}</h2>
           <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
             {t("footer.tagline")}
           </p>
@@ -32,26 +35,17 @@ export function Footer() {
           </p>
           <div className="space-y-1 pt-3 font-mono text-xs text-muted-foreground">
             <p>{t("footer.selfHosted")}</p>
-            <p>
-              <a
-                href={`${siteUrl()}/api/health`}
-                className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-              >
-                {t("footer.healthLink")}
-              </a>
-              {buildDate ? (
-                <>
+            {buildDate || buildSha ? (
+              <p>
+                {buildDate
+                  ? t("footer.lastUpdated", { date: buildDate })
+                  : null}
+                {buildDate && buildSha ? (
                   <span aria-hidden="true"> · </span>
-                  {t("footer.lastUpdated", { date: buildDate })}
-                </>
-              ) : null}
-              {buildSha ? (
-                <>
-                  <span aria-hidden="true"> · </span>
-                  <span>{buildSha}</span>
-                </>
-              ) : null}
-            </p>
+                ) : null}
+                {buildSha ? <span>{buildSha}</span> : null}
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -101,14 +95,13 @@ export function Footer() {
               >
                 <LinkedinIcon className="size-4" />
               </a>
-              <Link
-                href="/feed.xml"
-                prefetch={false}
+              <a
+                href={feedHref}
                 aria-label={t("footer.rss")}
                 className="tap-target text-muted-foreground transition-colors hover:text-foreground"
               >
                 <Rss className="size-4" aria-hidden="true" />
-              </Link>
+              </a>
             </div>
           </div>
         </div>
