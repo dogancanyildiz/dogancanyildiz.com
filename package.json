@@ -15,6 +15,7 @@
     "format:write": "prettier --write .",
     "verify:routes": "node scripts/assert-static-routes.mjs",
     "verify:links": "node scripts/audit-live-links.mjs",
+    "verify:docs": "node scripts/verify-docs.mjs",
     "release:check": "node scripts/release-version.mjs --dry-run",
     "vendor:fonts": "node scripts/vendor-fonts.mjs"
   },
