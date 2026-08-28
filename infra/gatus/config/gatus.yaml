@@ -57,7 +57,11 @@ alerting:
   #     success-threshold: 2
   #     send-on-resolved: true
 
-  # --- Example: a second, differently-worded generic webhook -----------
+  # --- Example: a differently-worded generic webhook body --------------
+  # A replacement for the active `custom` block above, not an addition:
+  # `alerting:` holds a single `custom` key, so uncommenting this while
+  # the block above is also active is a duplicate YAML key, and Gatus only
+  # ever runs one custom provider anyway. Comment out the block above first.
   # custom:
   #   url: "${GATUS_ALERT_WEBHOOK_URL_SECONDARY}"
   #   method: "POST"

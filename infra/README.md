@@ -36,8 +36,11 @@ follow-up. By default it posts to a generic webhook read from
 `gatus` resource, not committed here); leaving that variable empty disables
 alerting entirely; Gatus does not error, it just sends nothing. Point it at a
 Discord or Slack incoming webhook URL to get a notification with no other
-setup. Prefer email instead, or run both channels at once? Swap in the
-commented `email` (or second `custom`) block in the same file.
+setup. Prefer email instead, or want a differently worded webhook body? Swap
+in the commented `email` block, or replace the active `custom` block with the
+second one, in the same file. Only one `custom` provider can be active at a
+time (the `alerting:` map takes a single `custom` key), so the second example
+is a drop-in replacement, not an additional channel.
 
 Gatus itself runs on the same server it monitors. If that server goes down
 entirely, Gatus goes down with it and cannot send the alert. The dashboard
@@ -57,5 +60,7 @@ therefore briefly reachable at `https://analytics.dogancanyildiz.com` with
 that default password. Log in immediately after the first successful deploy
 and change it under Settings before doing anything else with the domain
 (sharing it, linking to it, adding a second user). The manual checklist at
-`docs/plans/handoffs/faz-5-manual-checklist.md` orders the Coolify and DNS
-steps to keep this window as short as practical.
+`docs/plans/handoffs/faz-5-manual-checklist.md` currently stands the domain
+up (step 4) before the password change (step 5); the password change is the
+first thing to do once the panel is reachable, before adding the website or
+sharing the link.
