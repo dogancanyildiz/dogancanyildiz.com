@@ -12,15 +12,12 @@ export function SkillCategoryList({ groups }: SkillCategoryListProps) {
   return (
     <div className="skill-category-list">
       {ordered.map((group) => (
-        <section
+        <div
           key={group.id}
           aria-labelledby={`skill-category-${group.id}`}
           className="skill-category"
         >
-          <h3
-            id={`skill-category-${group.id}`}
-            className="meta-label"
-          >
+          <h3 id={`skill-category-${group.id}`} className="meta-label">
             {group.title}
           </h3>
           <ul className="skill-item-list">
@@ -30,7 +27,7 @@ export function SkillCategoryList({ groups }: SkillCategoryListProps) {
               </li>
             ))}
           </ul>
-        </section>
+        </div>
       ))}
     </div>
   );
