@@ -59,16 +59,22 @@ describe("velite content schema", () => {
     const result = runVelite("tests/fixtures/velite.schema-fields.config.ts");
     expect(result.status, result.output).toBe(0);
 
-    const read = (name: string) =>
-      JSON.parse(
+    const readFirst = (name: string): Record<string, unknown> => {
+      const entries = JSON.parse(
         readFileSync(
           join(process.cwd(), "tests/fixtures/.velite-schema-fields", name),
           "utf8"
         )
       ) as Array<Record<string, unknown>>;
+      const [first] = entries;
+      if (!first) {
+        throw new Error(`${name} collected no entries`);
+      }
+      return first;
+    };
 
-    const [project] = read("projects.json");
-    const [post] = read("posts.json");
+    const project = readFirst("projects.json");
+    const post = readFirst("posts.json");
 
     expect(project.draft).toBe(true);
     expect(project.coverAlt).toBe(

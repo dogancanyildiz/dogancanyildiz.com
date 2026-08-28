@@ -48,7 +48,9 @@ const ICU_PLACEHOLDER_PATTERN = /\{\s*(\w+)/g;
 function placeholdersIn(value: unknown): Set<string> {
   if (typeof value !== "string") return new Set();
   return new Set(
-    [...value.matchAll(ICU_PLACEHOLDER_PATTERN)].map((match) => match[1])
+    [...value.matchAll(ICU_PLACEHOLDER_PATTERN)].flatMap(
+      (match) => match[1] ?? []
+    )
   );
 }
 

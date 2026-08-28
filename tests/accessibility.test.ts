@@ -197,7 +197,10 @@ function listClientComponentFiles(dir: string): string[] {
 // from a hook already scoped to a namespace (useTranslations("nav")) and
 // contributes nothing on its own.
 function topLevelNamespace(key: string): string | null {
-  return key.includes(".") ? key.split(".")[0] : null;
+  if (!key.includes(".")) {
+    return null;
+  }
+  return key.split(".")[0] ?? null;
 }
 
 // Parses every useTranslations(...) call in a client component's source and
@@ -219,7 +222,9 @@ function requiredNamespaces(source: string): Set<string> {
     const callPattern = new RegExp(`\\b${varName}\\(\\s*"([^"]+)"`, "g");
     let callMatch: RegExpExecArray | null;
     while ((callMatch = callPattern.exec(source))) {
-      const namespace = topLevelNamespace(callMatch[1]);
+      const callKey = callMatch[1];
+      if (!callKey) continue;
+      const namespace = topLevelNamespace(callKey);
       if (namespace) required.add(namespace);
     }
   }

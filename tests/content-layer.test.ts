@@ -42,6 +42,9 @@ describe("project content layer", () => {
     for (let index = 1; index < list.length; index += 1) {
       const previous = list[index - 1];
       const current = list[index];
+      if (!previous || !current) {
+        throw new Error(`missing project around index ${index}`);
+      }
       if (previous.order !== current.order) {
         expect(previous.order).toBeLessThan(current.order);
         continue;
@@ -162,7 +165,11 @@ describe("untranslated paths", () => {
     for (const locale of routing.locales) {
       for (const path of getUntranslatedPaths(locale)) {
         const [, section, slug] = path.split("/");
+        if (!slug) {
+          throw new Error(`unexpected untranslated path: ${path}`);
+        }
         const lookup = section === "blog" ? getPost : getProject;
+
         expect(lookup(locale, slug), path).toBeUndefined();
         expect(
           routing.locales.some((candidate) => lookup(candidate, slug)),
