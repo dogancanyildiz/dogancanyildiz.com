@@ -63,21 +63,28 @@ describe("vendored fonts", () => {
     }
   });
 
-  it("keeps the metric fallback off every latin face", () => {
-    // The generated fallback face has no unicode-range, so on a latin face it
-    // would render the Turkish glyphs in Arial and the latin-ext file would
-    // never be reached.
+  it("pins the metric fallback to the exact faces that carry one", () => {
     const source = readFileSync(join(root, "src", "fonts", "index.ts"), "utf8");
     const fallbackFor = (variable: string) => {
       const block = source.slice(source.indexOf(`variable: "${variable}"`));
       return block.match(/adjustFontFallback: (false|"[^"]+")/)?.[1];
     };
+    // The generated fallback face has no unicode-range, so on a latin face it
+    // would render the Turkish glyphs in the fallback and the latin-ext file
+    // would never be reached.
     expect(fallbackFor("--font-sans-latin")).toBe("false");
     expect(fallbackFor("--font-mono-latin")).toBe("false");
     expect(fallbackFor("--font-display-latin")).toBe("false");
-    // The last web face in --font-sans-stack carries the metric fallback for
-    // the whole stack: both subsets are the same typeface.
+    // The last web face of a stack carries the metric fallback for the whole
+    // stack: both subsets are the same typeface, and the generated face sits
+    // behind both of them.
     expect(fallbackFor("--font-sans-ext")).toBe('"Arial"');
+    expect(fallbackFor("--font-display-ext")).toBe('"Times New Roman"');
+    // Mono is the exception: both accepted values are proportional, so an
+    // adjusted face here would sit in front of ui-monospace and render the
+    // hero metric numerals and code blocks in a proportional font while Geist
+    // Mono loads.
+    expect(fallbackFor("--font-mono-ext")).toBe("false");
   });
 
   it("preloads only the faces that render on the first screen", () => {

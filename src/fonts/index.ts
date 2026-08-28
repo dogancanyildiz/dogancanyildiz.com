@@ -16,10 +16,21 @@ import localFont from "next/font/local";
 // false) generates a size-adjusted local() face and appends it to that loader's
 // own font-family list. The generated face carries no unicode-range, so on a
 // latin face it would sit in front of the latin-ext face and swallow the
-// Turkish glyphs. It is therefore off on every latin face and on only for
-// geistSansExt, the last web face in --font-sans-stack: from there the adjusted
-// fallback covers the whole sans stack while it loads (both subsets are the
-// same typeface, so the metrics match) without shadowing anything.
+// Turkish glyphs. It is therefore off on every latin face and on only for the
+// last web face of a stack, where the adjusted fallback covers the whole stack
+// while it loads (both subsets are the same typeface, so the metrics match)
+// without shadowing anything: Arial on geistSansExt, Times New Roman on
+// instrumentSerifExt, whose stack otherwise drops from a display serif straight
+// to the sans faces that follow it in --font-display-stack.
+//
+// geistMonoExt keeps it off on purpose. Both accepted values are proportional,
+// so a size-adjusted Arial would land in --font-mono-stack ahead of
+// ui-monospace and render every mono run, the hero metric numerals and code
+// blocks alike, in a proportional face until Geist Mono arrives. The mono latin
+// subset is preloaded, so that window is short and the metric mismatch it
+// leaves behind is the cheaper of the two. CLS was not measured on production
+// for any of these three decisions: the live host still answers 526 through
+// Cloudflare on HTTPS.
 //
 // Preloads are deliberately narrow. Every locale renders body copy in Geist
 // Sans and Turkish puts latin-ext glyphs on the first screen, so both sans
@@ -118,7 +129,7 @@ export const instrumentSerifExt = localFont({
   display: "swap",
   variable: "--font-display-ext",
   preload: false,
-  adjustFontFallback: false,
+  adjustFontFallback: "Times New Roman",
   declarations: [
     {
       prop: "unicode-range",
