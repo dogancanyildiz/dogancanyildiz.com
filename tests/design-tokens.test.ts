@@ -108,8 +108,9 @@ describe("colour tokens", () => {
         block === "light"
           ? css.slice(css.indexOf(":root {"), css.indexOf(".dark {"))
           : css.slice(css.indexOf(".dark {"));
-      const primary = source.match(/--primary:\s*([^;]+);/)?.[1].trim();
-      const muted = source.match(/--muted-foreground:\s*([^;]+);/)?.[1].trim();
+      const primary = source.match(/--primary:\s*([^;]+);/)?.[1]?.trim();
+      const muted = source.match(/--muted-foreground:\s*([^;]+);/)?.[1]?.trim();
+
       expect(primary).toBeDefined();
       expect(muted).toBeDefined();
       expect(
@@ -161,12 +162,15 @@ function relativeLuminance(oklchValue: string) {
     /oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)/
   );
   if (!match) throw new Error(`not an oklch() value: ${oklchValue}`);
+  // Destructuring the fixed length tuple before mapping keeps each channel a
+  // definite number; .map() would widen it to number[].
   const [r, g, b] = oklchToLinearSrgb(
     Number(match[1]),
     Number(match[2]),
     Number(match[3])
-  ).map((channel) => Math.min(1, Math.max(0, channel)));
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  );
+  const clamp = (channel: number) => Math.min(1, Math.max(0, channel));
+  return 0.2126 * clamp(r) + 0.7152 * clamp(g) + 0.0722 * clamp(b);
 }
 
 function contrastRatio(a: string, b: string) {
@@ -181,7 +185,8 @@ const themeBlocks = {
 } as const;
 
 const tokenValue = (block: string, name: string) => {
-  const value = block.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1].trim();
+  const value = block.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1]?.trim();
+
   if (!value) throw new Error(`token ${name} is not defined in this block`);
   return value;
 };
@@ -485,7 +490,8 @@ describe("no dead classes in the shipped stylesheet", () => {
     const selector = prelude.slice(prelude.lastIndexOf("}") + 1);
     if (selector.trimStart().startsWith("@")) continue;
     for (const match of selector.matchAll(/\.([a-z][a-z0-9-]*)/g)) {
-      if (!NOT_OURS.has(match[1])) declared.add(match[1]);
+      const className = match[1];
+      if (className && !NOT_OURS.has(className)) declared.add(className);
     }
   }
 

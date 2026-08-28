@@ -85,9 +85,12 @@ export function readOklchToken(
     );
 
   const tokenPattern = new RegExp(`--${name}:\\s*oklch\\(([^)]+)\\)`);
-  const match = block[1].match(tokenPattern);
-  if (!match) throw new Error(`Token --${name} not found in ${theme} block`);
+  const match = block[1]?.match(tokenPattern);
+  if (!match?.[1])
+    throw new Error(`Token --${name} not found in ${theme} block`);
 
   const [L, C, H] = match[1].trim().split(/\s+/).map(Number);
+  if (L === undefined || C === undefined || H === undefined)
+    throw new Error(`Token --${name} is not a three part oklch() value`);
   return oklchToLinearSrgb(L, C, H);
 }
