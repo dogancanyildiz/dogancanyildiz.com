@@ -50,8 +50,10 @@ export const viewport: Viewport = {
 // Namespaces the client tree actually reads through useTranslations. Kept
 // narrow on purpose: server-only namespaces such as about, notFound,
 // metadata, api and systems never cross the RSC boundary, so they never
-// prefetch into every locale's client bundle. tests/nav.test.ts locks this
-// list against the components that still call useTranslations client side.
+// prefetch into every locale's client bundle. tests/accessibility.test.ts
+// ("client message payload") scans every "use client" component's
+// useTranslations calls and fails if any of them needs a namespace missing
+// from this list.
 const CLIENT_MESSAGE_NAMESPACES = [
   "nav",
   "brand",

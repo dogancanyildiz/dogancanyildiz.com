@@ -1,6 +1,7 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { isNavItemActive } from "@/lib/nav";
 
 const read = (relative: string) =>
   readFileSync(join(process.cwd(), relative), "utf8");
@@ -173,12 +174,67 @@ describe("theme-color viewport export", () => {
   });
 });
 
+// Walks src/ and returns every file whose first non-blank line is the
+// "use client" directive, so the namespace scan below covers exactly the
+// components next-intl's client provider actually has to serve.
+function listClientComponentFiles(dir: string): string[] {
+  const files: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      files.push(...listClientComponentFiles(full));
+      continue;
+    }
+    if (!/\.(tsx?|jsx?)$/.test(entry)) continue;
+    const source = readFileSync(full, "utf8");
+    if (/^\s*["']use client["'];?/.test(source)) files.push(full);
+  }
+  return files;
+}
+
+// A namespaced key such as "hero.tagline" or "footer.github" requires the
+// top level namespace before the first dot; a bare key such as "menu" comes
+// from a hook already scoped to a namespace (useTranslations("nav")) and
+// contributes nothing on its own.
+function topLevelNamespace(key: string): string | null {
+  return key.includes(".") ? key.split(".")[0] : null;
+}
+
+// Parses every useTranslations(...) call in a client component's source and
+// returns the set of message namespaces it needs: the hook's own explicit
+// namespace argument, plus the namespace prefix of every string literal key
+// passed to the variable it returns when the hook was called unscoped.
+function requiredNamespaces(source: string): Set<string> {
+  const required = new Set<string>();
+  const hookPattern =
+    /\bconst\s+(\w+)\s*=\s*useTranslations\((?:"([^"]+)")?\)/g;
+  let hookMatch: RegExpExecArray | null;
+  while ((hookMatch = hookPattern.exec(source))) {
+    const [, varName, explicitNamespace] = hookMatch;
+    if (explicitNamespace) {
+      const top = topLevelNamespace(explicitNamespace) ?? explicitNamespace;
+      required.add(top);
+      continue;
+    }
+    const callPattern = new RegExp(`\\b${varName}\\(\\s*"([^"]+)"`, "g");
+    let callMatch: RegExpExecArray | null;
+    while ((callMatch = callPattern.exec(source))) {
+      const namespace = topLevelNamespace(callMatch[1]);
+      if (namespace) required.add(namespace);
+    }
+  }
+  return required;
+}
+
 describe("client message payload", () => {
   const layout = read("src/app/[lang]/layout.tsx");
   const namespaceListMatch = layout.match(
     /CLIENT_MESSAGE_NAMESPACES = \[([\s\S]*?)\] as const/
   );
   const namespaceList = namespaceListMatch?.[1] ?? "";
+  const declaredNamespaces = new Set(
+    [...namespaceList.matchAll(/"([^"]+)"/g)].map((match) => match[1])
+  );
 
   it("narrows NextIntlClientProvider to the namespaces client components use", () => {
     expect(layout).toContain(
@@ -188,20 +244,21 @@ describe("client message payload", () => {
     expect(namespaceListMatch).not.toBeNull();
   });
 
-  it("includes every namespace a client component still reads through useTranslations", () => {
-    for (const namespace of [
-      "nav",
-      "brand",
-      "hero",
-      "home",
-      "footer",
-      "projects",
-      "blog",
-      "contact",
-      "a11y",
-    ]) {
-      expect(namespaceList).toContain(`"${namespace}"`);
+  it('covers every namespace a "use client" component reads through useTranslations', () => {
+    const clientFiles = listClientComponentFiles(join(process.cwd(), "src"));
+    expect(clientFiles.length).toBeGreaterThan(0);
+
+    const required = new Set<string>();
+    for (const file of clientFiles) {
+      for (const namespace of requiredNamespaces(readFileSync(file, "utf8"))) {
+        required.add(namespace);
+      }
     }
+
+    const missing = [...required]
+      .filter((namespace) => !declaredNamespaces.has(namespace))
+      .sort();
+    expect(missing).toEqual([]);
   });
 
   it("leaves out namespaces that only ever render through getTranslations on the server", () => {
@@ -250,12 +307,22 @@ describe("desktop nav active state", () => {
     expect(source.match(/isNavItemActive\(pathname, href\)/g)).toHaveLength(1);
     expect(source).toContain('aria-current={isActive ? "page" : undefined}');
   });
+});
+
+describe("isNavItemActive", () => {
+  it("matches the root item only on the exact root path", () => {
+    expect(isNavItemActive("/", "/")).toBe(true);
+    expect(isNavItemActive("/about", "/")).toBe(false);
+  });
+
+  it("matches an item on its own path and its subpaths", () => {
+    expect(isNavItemActive("/about", "/about")).toBe(true);
+    expect(isNavItemActive("/about/team", "/about")).toBe(true);
+  });
 
   it("does not match a sibling route by prefix", () => {
-    const nav = read("src/lib/nav.ts");
-    expect(nav).toContain(
-      "return pathname === href || pathname.startsWith(`${href}/`);"
-    );
+    expect(isNavItemActive("/about-me", "/about")).toBe(false);
+    expect(isNavItemActive("/projects/x", "/blog")).toBe(false);
   });
 });
 
