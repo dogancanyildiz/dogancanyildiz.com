@@ -154,6 +154,12 @@ describe("skill category list", () => {
     expect(source).not.toMatch(/<section\b/);
     expect(source).toContain("<div");
   });
+
+  it("no longer ships the unused SkillGroupGrid deprecated alias", () => {
+    expect(read("src/components/sections/skill-group-grid.tsx")).not.toContain(
+      "SkillGroupGrid"
+    );
+  });
 });
 
 describe("page header titleId", () => {
