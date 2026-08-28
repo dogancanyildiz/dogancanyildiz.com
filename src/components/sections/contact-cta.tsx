@@ -10,8 +10,10 @@ export async function ContactCta() {
     <div className="flex flex-col gap-5 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between">
       <div className="max-w-xl space-y-1.5">
         <p className="meta-label">{t("title")}</p>
-        <h2 className="text-lg font-semibold tracking-tight">{t("ctaTitle")}</h2>
-        <p className="text-sm leading-relaxed text-muted-foreground">{t("ctaBody")}</p>
+        <h2 className="section-heading">{t("ctaTitle")}</h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {t("ctaBody")}
+        </p>
       </div>
       <Button asChild size="lg" className="shrink-0">
         <Link href="/contact">

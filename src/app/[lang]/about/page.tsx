@@ -9,7 +9,10 @@ import { AboutSubnav } from "@/components/sections/about-subnav";
 import { sortSkillGroups } from "@/lib/skills";
 import { TestimonialsBand } from "@/components/sections/testimonials-band";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { ContentEntryBody, ContentEntryIndex } from "@/components/ui/content-entry";
+import {
+  ContentEntryBody,
+  ContentEntryIndex,
+} from "@/components/ui/content-entry";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/layout/page-section";
 import { ContactCta } from "@/components/sections/contact-cta";
@@ -85,7 +88,9 @@ export default async function AboutPage({ params }: AboutPageProps) {
       <div className="flex flex-wrap gap-x-8 gap-y-4 border-y border-border py-5">
         <div>
           <p className="meta-label">{t("nowLabel")}</p>
-          <p className="mt-1 text-sm leading-relaxed text-foreground">{t("now")}</p>
+          <p className="mt-1 text-sm leading-relaxed text-foreground">
+            {t("now")}
+          </p>
         </div>
         <div>
           <p className="meta-label">{t("locationLabel")}</p>
@@ -104,12 +109,18 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </Button>
       ) : null}
 
-      <section id="about-skills" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
+      <section
+        id="about-skills"
+        className="space-y-5 border-t border-border pt-8 scroll-mt-32"
+      >
         <h2 className="section-heading">{t("skillsTitle")}</h2>
         <SkillCategoryList groups={sortSkillGroups(skills[locale])} />
       </section>
 
-      <section id="about-experience" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
+      <section
+        id="about-experience"
+        className="space-y-5 border-t border-border pt-8 scroll-mt-32"
+      >
         <h2 className="section-heading">{t("experienceTitle")}</h2>
         <ul className="content-stack">
           {experience[locale].map((entry, index) => (
@@ -147,7 +158,10 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </ul>
       </section>
 
-      <section id="about-community" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
+      <section
+        id="about-community"
+        className="space-y-5 border-t border-border pt-8 scroll-mt-32"
+      >
         <h2 className="section-heading">{t("communityTitle")}</h2>
         <ul className="content-stack">
           {community[locale].map((entry, index) => (
@@ -174,7 +188,10 @@ export default async function AboutPage({ params }: AboutPageProps) {
       </section>
 
       {talks.length > 0 ? (
-        <section id="about-speaking" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
+        <section
+          id="about-speaking"
+          className="space-y-5 border-t border-border pt-8 scroll-mt-32"
+        >
           <h2 className="section-heading">{t("speakingTitle")}</h2>
           <ul className="divide-y divide-border">
             {talks.map((talk) => (
@@ -189,7 +206,10 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </section>
       ) : null}
 
-      <section id="about-certificates" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
+      <section
+        id="about-certificates"
+        className="space-y-5 border-t border-border pt-8 scroll-mt-32"
+      >
         <h2 className="section-heading">{t("certificatesTitle")}</h2>
         <ul className="divide-y divide-border">
           {certificates[locale].map((certificate) => (
@@ -221,7 +241,10 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </ul>
       </section>
 
-      <section id="about-education" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
+      <section
+        id="about-education"
+        className="space-y-5 border-t border-border pt-8 scroll-mt-32"
+      >
         <h2 className="section-heading">{t("educationTitle")}</h2>
         <ul className="divide-y divide-border">
           {education[locale].map((entry) => (
@@ -238,12 +261,15 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </ul>
       </section>
 
-      <section id="about-languages" className="space-y-3 border-t border-border pt-8 scroll-mt-28">
+      <section
+        id="about-languages"
+        className="space-y-3 border-t border-border pt-8 scroll-mt-32"
+      >
         <h2 className="section-heading">{t("languagesTitle")}</h2>
         <p className="section-copy">{t("languages")}</p>
       </section>
 
-      <div id="about-testimonials" className="scroll-mt-28">
+      <div id="about-testimonials" className="scroll-mt-32">
         <TestimonialsBand locale={locale} title={t("testimonialsTitle")} />
       </div>
 

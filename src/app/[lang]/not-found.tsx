@@ -22,9 +22,7 @@ export default function LocaleNotFound() {
     <section className="section-space">
       <div className="page-shell flex flex-col items-start gap-6">
         <span className="eyebrow">{t("code")}</span>
-        <h1 className="max-w-3xl text-4xl leading-[1.05] sm:text-5xl">
-          {t("title")}
-        </h1>
+        <h1 className="max-w-3xl page-title">{t("title")}</h1>
         <p className="max-w-xl text-lg leading-8 text-muted-foreground">
           {t("description")}
         </p>

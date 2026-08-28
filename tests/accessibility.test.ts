@@ -1,6 +1,7 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { isNavItemActive } from "@/lib/nav";
 
 const read = (relative: string) =>
   readFileSync(join(process.cwd(), relative), "utf8");
@@ -92,11 +93,28 @@ describe("theme toggle reflects the resolved theme", () => {
     expect(source).not.toMatch(/\btheme === "dark"/);
   });
 
-  it("labels the button from the message catalog in both mount states", () => {
+  it("labels the button from the message catalog", () => {
     expect(source).not.toContain('aria-label="Toggle theme"');
     expect(
       source.match(/aria-label=\{t\("a11y\.toggleTheme"\)\}/g)
-    ).toHaveLength(2);
+    ).toHaveLength(1);
+  });
+
+  it("renders a single button, not a separate pre-mount fallback", () => {
+    // The icon swap is a CSS dark: variant, so there is nothing left that
+    // has to differ between the server render and the hydrated client
+    // render: one Button, not a disabled placeholder plus a live one.
+    expect(source).not.toContain("disabled");
+    expect(source.match(/<Button/g)).toHaveLength(1);
+  });
+
+  it("swaps icons with the dark: variant instead of a JS branch", () => {
+    expect(source).toContain("dark:hidden");
+    expect(source).toContain("dark:block");
+  });
+
+  it("reports its state via aria-pressed", () => {
+    expect(source).toContain('aria-pressed={resolvedTheme === "dark"}');
   });
 });
 
@@ -113,5 +131,233 @@ describe("skip link", () => {
     expect(read("src/app/[lang]/layout.tsx")).toMatch(
       /<main[^>]*id="main"[^>]*tabIndex=\{-1\}/
     );
+  });
+
+  it("gives the main landmark its own visible focus ring instead of hiding it", () => {
+    const layout = read("src/app/[lang]/layout.tsx");
+    expect(layout).not.toContain("focus-visible:outline-none");
+    expect(layout).toContain("focus-visible:outline-2");
+    expect(layout).toContain("focus-visible:outline-offset-[-2px]");
+    expect(layout).toContain("focus-visible:outline-ring");
+  });
+});
+
+describe("sticky footer layout", () => {
+  it("makes body a flex column so footer mt-auto has a track to grow into", () => {
+    const layout = read("src/app/[lang]/layout.tsx");
+    expect(layout).toMatch(/<body\b[^>]*className="[^"]*\bflex\b/);
+    expect(layout).toMatch(/<body\b[^>]*className="[^"]*\bmin-h-screen\b/);
+    expect(layout).toMatch(/<body\b[^>]*className="[^"]*\bflex-col\b/);
+  });
+
+  it("drops the fixed viewport-relative min height on main in favour of flex-1", () => {
+    const layout = read("src/app/[lang]/layout.tsx");
+    expect(layout).not.toContain("min-h-[calc(100vh-7rem)]");
+    expect(layout).toMatch(/<main\b[^>]*className="[^"]*\bflex-1\b/);
+  });
+
+  it("keeps mt-auto on the footer now that it has an effect", () => {
+    expect(read("src/components/layout/footer.tsx")).toContain("mt-auto");
+  });
+});
+
+describe("theme-color viewport export", () => {
+  it("declares a light and dark theme-color that match the background token", () => {
+    const layout = read("src/app/[lang]/layout.tsx");
+    expect(layout).toMatch(/export const viewport:\s*Viewport\s*=/);
+    expect(layout).toContain(
+      '{ media: "(prefers-color-scheme: light)", color: "#f9fafb" }'
+    );
+    expect(layout).toContain(
+      '{ media: "(prefers-color-scheme: dark)", color: "#0a0c0f" }'
+    );
+  });
+});
+
+// Walks src/ and returns every file whose first non-blank line is the
+// "use client" directive, so the namespace scan below covers exactly the
+// components next-intl's client provider actually has to serve.
+function listClientComponentFiles(dir: string): string[] {
+  const files: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      files.push(...listClientComponentFiles(full));
+      continue;
+    }
+    if (!/\.(tsx?|jsx?)$/.test(entry)) continue;
+    const source = readFileSync(full, "utf8");
+    if (/^\s*["']use client["'];?/.test(source)) files.push(full);
+  }
+  return files;
+}
+
+// A namespaced key such as "hero.tagline" or "footer.github" requires the
+// top level namespace before the first dot; a bare key such as "menu" comes
+// from a hook already scoped to a namespace (useTranslations("nav")) and
+// contributes nothing on its own.
+function topLevelNamespace(key: string): string | null {
+  return key.includes(".") ? key.split(".")[0] : null;
+}
+
+// Parses every useTranslations(...) call in a client component's source and
+// returns the set of message namespaces it needs: the hook's own explicit
+// namespace argument, plus the namespace prefix of every string literal key
+// passed to the variable it returns when the hook was called unscoped.
+function requiredNamespaces(source: string): Set<string> {
+  const required = new Set<string>();
+  const hookPattern =
+    /\bconst\s+(\w+)\s*=\s*useTranslations\((?:"([^"]+)")?\)/g;
+  let hookMatch: RegExpExecArray | null;
+  while ((hookMatch = hookPattern.exec(source))) {
+    const [, varName, explicitNamespace] = hookMatch;
+    if (explicitNamespace) {
+      const top = topLevelNamespace(explicitNamespace) ?? explicitNamespace;
+      required.add(top);
+      continue;
+    }
+    const callPattern = new RegExp(`\\b${varName}\\(\\s*"([^"]+)"`, "g");
+    let callMatch: RegExpExecArray | null;
+    while ((callMatch = callPattern.exec(source))) {
+      const namespace = topLevelNamespace(callMatch[1]);
+      if (namespace) required.add(namespace);
+    }
+  }
+  return required;
+}
+
+describe("client message payload", () => {
+  const layout = read("src/app/[lang]/layout.tsx");
+  const namespaceListMatch = layout.match(
+    /CLIENT_MESSAGE_NAMESPACES = \[([\s\S]*?)\] as const/
+  );
+  const namespaceList = namespaceListMatch?.[1] ?? "";
+  const declaredNamespaces = new Set(
+    [...namespaceList.matchAll(/"([^"]+)"/g)].map((match) => match[1])
+  );
+
+  it("narrows NextIntlClientProvider to the namespaces client components use", () => {
+    expect(layout).toContain(
+      "pickMessages(messages, CLIENT_MESSAGE_NAMESPACES)"
+    );
+    expect(layout).not.toMatch(/<NextIntlClientProvider>/);
+    expect(namespaceListMatch).not.toBeNull();
+  });
+
+  it('covers every namespace a "use client" component reads through useTranslations', () => {
+    const clientFiles = listClientComponentFiles(join(process.cwd(), "src"));
+    expect(clientFiles.length).toBeGreaterThan(0);
+
+    const required = new Set<string>();
+    for (const file of clientFiles) {
+      for (const namespace of requiredNamespaces(readFileSync(file, "utf8"))) {
+        required.add(namespace);
+      }
+    }
+
+    const missing = [...required]
+      .filter((namespace) => !declaredNamespaces.has(namespace))
+      .sort();
+    expect(missing).toEqual([]);
+  });
+
+  it("leaves out namespaces that only ever render through getTranslations on the server", () => {
+    for (const namespace of [
+      "about",
+      "notFound",
+      "metadata",
+      "api",
+      "systems",
+    ]) {
+      expect(namespaceList).not.toContain(`"${namespace}"`);
+    }
+  });
+});
+
+describe("language switcher", () => {
+  const source = read("src/components/layout/language-switcher.tsx");
+
+  it("keeps the visible TR/EN label instead of letting aria-label override it", () => {
+    expect(source).not.toContain("aria-label={localeNames[locale]}");
+    expect(source).toContain("{localeLabels[locale]}");
+    expect(source).toContain(
+      '<span className="sr-only"> ({localeNames[locale]})</span>'
+    );
+  });
+
+  it("sets lang alongside hrefLang on each locale link", () => {
+    expect(source).toContain("hrefLang={locale}");
+    expect(source).toContain("lang={locale}");
+  });
+});
+
+describe("brand link", () => {
+  it("stops the aria-label from overriding the sr-only brand name", () => {
+    const source = read("src/components/layout/header.tsx");
+    expect(source).not.toContain('aria-label={tBrand("name")}');
+    expect(source).toContain(
+      '<span className="sr-only">{tBrand("name")}</span>'
+    );
+  });
+});
+
+describe("desktop nav active state", () => {
+  it("computes aria-current and the active class from one shared helper", () => {
+    const source = read("src/components/layout/header.tsx");
+    expect(source.match(/isNavItemActive\(pathname, href\)/g)).toHaveLength(1);
+    expect(source).toContain('aria-current={isActive ? "page" : undefined}');
+  });
+});
+
+describe("isNavItemActive", () => {
+  it("matches the root item only on the exact root path", () => {
+    expect(isNavItemActive("/", "/")).toBe(true);
+    expect(isNavItemActive("/about", "/")).toBe(false);
+  });
+
+  it("matches an item on its own path and its subpaths", () => {
+    expect(isNavItemActive("/about", "/about")).toBe(true);
+    expect(isNavItemActive("/about/team", "/about")).toBe(true);
+  });
+
+  it("does not match a sibling route by prefix", () => {
+    expect(isNavItemActive("/about-me", "/about")).toBe(false);
+    expect(isNavItemActive("/projects/x", "/blog")).toBe(false);
+  });
+});
+
+describe("mobile menu active state", () => {
+  it("marks the current route with aria-current, driven by the shared nav pathname helper", () => {
+    const source = read("src/components/layout/mobile-menu.tsx");
+    expect(source).toContain("usePathname");
+    expect(source).toContain("isNavItemActive(pathname, href)");
+    expect(source).toContain('aria-current={isActive ? "page" : undefined}');
+  });
+});
+
+describe("about subnav", () => {
+  it("tracks the section in view instead of never marking anything current", () => {
+    const list = read("src/components/sections/about-subnav-list.tsx");
+    expect(list).toContain("IntersectionObserver");
+    expect(list).toContain('aria-current={isActive ? "location" : undefined}');
+  });
+
+  it("resolves the active section from a tracked set in items order, and clears it once nothing intersects", () => {
+    const list = read("src/components/sections/about-subnav-list.tsx");
+    // A batch's entry order is not document order, and the callback only
+    // reports entries whose intersection changed, so the active id has to
+    // come from a set built up across calls, resolved against the caller's
+    // own item order, rather than from whichever entry the batch names last.
+    expect(list).toContain("new Set<string>()");
+    expect(list).toContain("intersecting.delete(entry.target.id)");
+    expect(list).toContain("items.find((item) => intersecting.has(item.id))");
+    expect(list).toContain("setActiveId(topmost?.id ?? null)");
+  });
+
+  it("filters optional sections through an isVisible predicate, not a hard coded id", () => {
+    const source = read("src/components/sections/about-subnav.tsx");
+    expect(source).not.toContain("optional");
+    expect(source).not.toContain('section.id === "about-speaking"');
+    expect(source).toContain("isVisible?.() ?? true");
   });
 });
