@@ -1,8 +1,32 @@
-import type { ComponentType } from "react";
-import { ProjectMeta } from "@/components/content/mdx-project-meta";
-import { Screenshot } from "@/components/content/mdx-screenshot";
+import type { ComponentType, ReactNode } from "react";
 
-export const mdxComponents: Record<string, ComponentType<Record<string, unknown>>> = {
-  ProjectMeta: ProjectMeta as unknown as ComponentType<Record<string, unknown>>,
-  Screenshot: Screenshot as unknown as ComponentType<Record<string, unknown>>,
+/**
+ * Element overrides handed to every compiled MDX body.
+ *
+ * The two shortcodes that used to live here (ProjectMeta, Screenshot) were
+ * removed: no content file ever used them, they were not part of the content
+ * strategy in docs/08-icerik-stratejisi.md or the Faz 4 plan, and reaching
+ * them through the component map cost two `as unknown as` casts. If a case
+ * study needs an in-body meta grid later, it should arrive with the content
+ * that needs it and with translated labels.
+ */
+
+/**
+ * A table wider than the prose column has to scroll inside its own box.
+ * Without the wrapper the whole document scrolls sideways on a phone, which
+ * moves the body text out from under the reader.
+ */
+function MdxTable({ children }: { children?: ReactNode }) {
+  return (
+    <div className="table-wrap">
+      <table>{children}</table>
+    </div>
+  );
+}
+
+export const mdxComponents: Record<
+  string,
+  ComponentType<Record<string, unknown>>
+> = {
+  table: MdxTable,
 };
