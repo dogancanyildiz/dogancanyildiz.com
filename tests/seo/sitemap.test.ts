@@ -36,17 +36,17 @@ describe("sitemap", () => {
     }
   });
 
-  it("never lists a post url for a locale that has no translation", async () => {
+  it("lists every bilingual post at both locale urls", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const urls = sitemap().map((entry) => entry.url);
     const enUrl = "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik";
     const trUrl = "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik";
 
-    expect(urls).not.toContain(enUrl);
+    expect(urls).toContain(enUrl);
     expect(urls).toContain(trUrl);
   });
 
-  it("does not put an alternate language on an untranslated entry", async () => {
+  it("puts both languages on a bilingual post entry", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const entries = sitemap();
     const entry = entries.find(
@@ -55,9 +55,14 @@ describe("sitemap", () => {
     );
 
     expect(entry).toBeDefined();
-    expect(entry?.alternates?.languages?.en).toBeUndefined();
+    expect(entry?.alternates?.languages?.en).toBe(
+      "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
+    );
     expect(entry?.alternates?.languages?.tr).toBe(
       "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik"
+    );
+    expect(entry?.alternates?.languages?.["x-default"]).toBe(
+      "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
     );
   });
 

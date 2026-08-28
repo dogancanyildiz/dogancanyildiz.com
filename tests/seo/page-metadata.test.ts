@@ -299,18 +299,22 @@ describe("page openGraph metadata", () => {
     expect(languages?.tr).toBeTruthy();
   });
 
-  it("gives a turkish only post only tr and x-default in its alternates", async () => {
+  it("gives a bilingual post en, tr and x-default in its alternates", async () => {
     const postPage = PAGES.find(
       (page) => page.name === "blog/capt-sinavina-hazirlik [tr]"
     );
     if (!postPage) {
-      throw new Error("no turkish case for the turkish only post");
+      throw new Error("no turkish case for the bilingual post");
     }
 
     const metadata = await metadataFor(postPage, "tr");
     const languages = metadata.alternates?.languages as
       Record<string, string> | undefined;
 
-    expect(Object.keys(languages ?? {}).sort()).toEqual(["tr", "x-default"]);
+    expect(Object.keys(languages ?? {}).sort()).toEqual([
+      "en",
+      "tr",
+      "x-default",
+    ]);
   });
 });

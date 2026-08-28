@@ -12,8 +12,6 @@ const LOCALES = ["en", "tr"] as const;
 const FORBIDDEN = [
   "not completed",
   "tamamlanmadı",
-  "B1",
-  "A2",
   "TBD",
   "placeholder",
   "Lorem",
@@ -56,6 +54,8 @@ describe("profile data", () => {
     for (const term of FORBIDDEN) {
       expect(serialized).not.toContain(term);
     }
+    expect(serialized).not.toMatch(/\bB1\b/);
+    expect(serialized).not.toMatch(/\bA2\b/);
   });
 
   it("contains no bracketed placeholder text in the speaking list", () => {

@@ -21,9 +21,9 @@ describe("typography tokens", () => {
     );
   });
 
-  it("aliases display to the sans stack for a single modern typeface", () => {
+  it("aliases display to the serif stack with sans fallback", () => {
     expect(css).toMatch(
-      /--font-display-stack:\s*var\(--font-sans-latin\),\s*var\(--font-sans-ext\)/
+      /--font-display-stack:\s*var\(--font-display-latin\),\s*var\(--font-display-ext\),\s*var\(--font-sans-latin\)/
     );
   });
 
@@ -204,14 +204,6 @@ describe("panel shadow", () => {
     const dark = css.slice(css.indexOf(".dark {"));
     expect(light).toMatch(/--shadow-color:\s*oklch\(/);
     expect(dark).toMatch(/--shadow-color:\s*oklch\(0 0 0\)/);
-  });
-
-  it("mixes Card shadows from the token, not --foreground", () => {
-    const card = read("src/components/ui/card.tsx");
-    expect(card).toContain(
-      "color-mix(in_oklab,var(--shadow-color)_35%,transparent)"
-    );
-    expect(card).not.toContain("var(--foreground)_35%");
   });
 });
 

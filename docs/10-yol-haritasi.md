@@ -1,10 +1,10 @@
 # Fazlı Yol Haritası
 
-Durum: Kısmen uygulandı (Faz 0-3 main'de, Faz 4 PR #6 açık ve CI yeşil), kalan: Faz 4 merge kararı, Faz 5 (Gatus, Umami, Renovate) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Kısmen uygulandı (Faz 0-3 main'de, Faz 4 PR #6 açık, Faz 5 kod tarafı repoda), kalan: Faz 4 merge, Faz 5 panel adımları · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
-Modernizasyon 6 fazda yürütülür: Faz 0'dan Faz 5'e kadar sıralı, her faz kendi dalında ve tek PR'da biter, main'e merge edilmeden bir sonraki faz başlamaz. Sıralamanın mantığı basit: önce hemen kapatılması gereken güvenlik açıkları ve boilerplate temizliği (Faz 0), sonra her sonraki fazın canlıda doğrulanabilmesi için deploy hattı (Faz 1), ardından tek seferde bitirilmesi gereken büyük mimari kırılma olan i18n restructure (Faz 2), üstüne tasarım sistemi (Faz 3), en son da asıl amaç olan gerçek içerik ve yayın (Faz 4). Faz 4'ün sonu launch noktasıdır. Faz 5 (Gatus, Umami, Renovate) yayın sonrasına bırakılır çünkü hiçbiri launch için zorunlu değildir. Repo şu an `tsc --noEmit` ve eslint'ten temiz geçiyor; bu güvenlik ağı her fazın sonunda korunmak zorunda, aksi halde fazlı ilerlemenin tüm amacı (her adımda çalışan bir site) boşa düşer.
+Modernizasyon 6 fazda yürütülür: Faz 0'dan Faz 5'e kadar sıralı, her faz kendi dalında ve tek PR'da biter, main'e merge edilmeden bir sonraki faz başlamaz. Sıralamanın mantığı basit: önce hemen kapatılması gereken güvenlik açıkları ve boilerplate temizliği (Faz 0), sonra her sonraki fazın canlıda doğrulanabilmesi için deploy hattı (Faz 1), ardından tek seferde bitirilmesi gereken büyük mimari kırılma olan i18n restructure (Faz 2), üstüne tasarım sistemi (Faz 3), en son da asıl amaç olan gerçek içerik ve yayın (Faz 4). Faz 4'ün sonu launch noktasıdır. Faz 5 (Gatus, Umami, Dependabot) yayın sonrasına bırakılır çünkü hiçbiri launch için zorunlu değildir. Repo şu an `tsc --noEmit` ve eslint'ten temiz geçiyor; bu güvenlik ağı her fazın sonunda korunmak zorunda, aksi halde fazlı ilerlemenin tüm amacı (her adımda çalışan bir site) boşa düşer.
 
 ## Karar(lar)
 
@@ -17,7 +17,7 @@ Faz sırası ve kapsamı aşağıdaki tabloda özetleniyor, ayrıntılı madde l
 | Faz 2 | İki dil ayrı URL'lerde, tüm içerik route'ları build'de prerender, doğru hreflang/canonical | `app/[lang]` + next-intl 4.13.7 kurulumu | Faz 1 | L | Uygulandı, main'de | #4 |
 | Faz 3 | Tipografi gerçekten yüklensin, palet nötrlensin, mobilde site gezilebilir olsun | Vendor'lanmış fontlar, nötr token seti, mobil menü, hareket/erişilebilirlik toparlaması | Faz 2 | M | Uygulandı, main'de | #5 |
 | Faz 4 | Şablon persona tamamen gitsin, gerçek case study'ler ve ilk blog yazıları yayına çıksın | Velite içerik pipeline'ı, gerçek proje/blog sayfaları, iki dilli çeviri | Faz 3 | L | PR açık, CI yeşil, merge kararı sahibinde | #6 |
-| Faz 5 | Self-host kimliğini iddia değil gösterim haline getirmek, bakımı otomatikleştirmek | Gatus widget, Umami, Renovate/Dependabot | Faz 4 (yayın sonrası) | S | Başlamadı | - |
+| Faz 5 | Self-host kimliğini iddia değil gösterim haline getirmek, bakımı otomatikleştirmek | Gatus widget, Umami, Dependabot/CodeQL | Faz 4 (yayın sonrası) | S | Kod repoda, panel adımları açık | - |
 
 Ayrıntı: `00-ozet-ve-karar.md` genel kararın gerekçesini, `02-stack-karari.md` neden Next.js'te kalındığını anlatıyor; burada yalnızca fazlara bölünmüş uygulama sırası var.
 
@@ -116,24 +116,25 @@ Büyüklük: L. En çok elle yazılan içerik burada, iki dilde.
 
 ### Faz 5: Altyapı vitrini ve ölçüm (yayın sonrası)
 
-- [ ] Gatus container'ı Coolify'da kurulur, izlenecek endpoint'ler ve public görünürlük bilinçli seçilir
-- [ ] Ana sayfaya systems bölümü: sunucu tarafında 60 saniye revalidate ile Gatus JSON'undan beslenen, yalnızca agregat veri gösteren widget
-- [ ] Build-time commit SHA ve deploy zamanı env olarak image'a gömülür ve widget'ta gösterilir
-- [ ] Umami container'ı (self-hosted, çerezsiz analytics; Node + Postgres) ve CSP uyumlu script entegrasyonu kurulur; kurulum kesinleşti, koşullu değil (bkz. `11-acik-sorular.md` soru 11)
-- [ ] Renovate/Dependabot: patch ve minor otomatik merge, Coolify otomatik redeploy; Next aylık güvenlik yayınları takibi
-- [ ] Release akışının ilk gerçek sürümü: `main`'e bu fazdan itibaren gelen ilk merge, `release.yml` üzerinden otomatik olarak v0.2.0 tag'i, GitHub Release ve `CHANGELOG.md` girdisi üretir (bkz. [06-devops-ve-deploy.md](06-devops-ve-deploy.md) "Sürüm politikası"); launch'ta v1.0.0 otomatik bump ile değil, sahibinin `workflow_dispatch` üzerinden elle girdiği `version: 1.0.0` ile kesilir
+- [x] Gatus compose + config repoda (`infra/gatus/`, `public_site` + `public_umami`, alerting yok, 2026-08-28).
+- [x] Ana sayfaya systems bölümü: `src/lib/status.ts` + `src/components/sections/systems.tsx`, 60s revalidate (2026-08-28).
+- [x] Build-time commit SHA ve deploy zamanı widget'ta (`NEXT_PUBLIC_BUILD_SHA/DATE` + `build-info.ts`, 2026-08-28).
+- [x] Umami compose repoda (`infra/umami/`) + CSP + `UmamiScript` layout entegrasyonu (2026-08-28).
+- [x] Dependabot + CodeQL repoda; Renovate kaldırıldı (`security-automation.test.ts`, 2026-08-28).
+- [ ] Coolify'da gatus, umami ve portfolio env redeploy (manuel: `docs/plans/handoffs/faz-5-manual-checklist.md`).
+- [ ] Release akışının ilk gerçek sürümü: Faz 5 merge sonrası `release.yml` → v0.2.0 tag
 - [ ] Blog için aylık 1 yazı ritmi; ilk 3 ayın sonunda Astro'ya geçiş sorusunun yeniden değerlendirilmesi
-- [ ] Faz 4 devri: sitemap `x-default` üretimi (sayfa `<head>`'i üretiyor, `sitemap.ts` üretmiyor, ikisi uyuşmuyor)
-- [ ] Faz 4 devri: `tests/no-template-residue.test.ts`'in `git ls-files` bağımlılığını gider (tarball'da çalışmıyor, yalnızca izlenen dosyaları görüyor)
-- [ ] Faz 4 devri: `tests/messages.test.ts` sezgisini sıkılaştır (namespace+kalan sezgisi 211 kombinasyonda yanlış pozitif verebiliyor)
-- [ ] Faz 4 devri: 404 dokümanını locale'e duyarlı hale getir (`global-not-found.tsx` her zaman `<html lang="en">`, `/tr/blog/nope` da İngilizce doküman alıyor)
-- [ ] Faz 4 devri: 429/413 hata metinlerini TR/EN'e çevir (hâlâ İngilizce sabit)
-- [ ] Faz 4 devri: header'da "Contact" tekrarını gider (nav listesi + CTA aynı anda gösteriyor)
-- [ ] Faz 4 devri: footer yılını build-time'a sabitle (istemci `new Date().getFullYear()` ile hesaplıyor, yılbaşında hidrasyon uyuşmazlığı riski)
+- [x] Sitemap `x-default` üretimi (`src/app/sitemap.ts` `languagesFor`, 2026-08-28 UI/UX kapanış).
+- [x] 404 global dokümanı pathname'den locale çıkarır (`x-pathname` proxy header + `global-not-found.tsx`, 2026-08-28).
+- [x] 429/413 contact API metinleri `messages/*/api` kataloğundan gelir (2026-08-28).
+- [x] Footer yılı build-time sabit (`buildInfo.year`, 2026-08-28).
+- [x] BlogPosting JSON-LD `image` ve `publisher` alanları (2026-08-28).
+- [x] `tests/no-template-residue.test.ts` dosya sistemi taraması (git bağımlılığı kaldırıldı, 2026-08-28).
+- [x] `tests/messages.test.ts` namespace eşleşmesi yalnızca gerçek `useTranslations` namespace'leri için (2026-08-28).
 
 (`/favicon.ico` sorunu Faz 4'te çözüldü: `next.config.ts` `redirects()` ile 308 -> `/icon`; burada ayrıca madde değil.)
 
-Bitti sayılma kriteri: status widget canlı Gatus verisiyle çalışıyor ve Network sekmesinde hostname/port/IP hiç görünmüyor (yalnızca takma ad + yüzde + zaman damgası); Renovate en az bir otomatik PR açmış; Umami kuruluysa sayfa yüklemesi CSP ihlali vermiyor.
+Bitti sayılma kriteri: status widget canlı Gatus verisiyle çalışıyor ve Network sekmesinde hostname/port/IP hiç görünmüyor (yalnızca takma ad + yüzde + zaman damgası); Dependabot en az bir dependency PR açmış veya merged; Umami kuruluysa sayfa yüklemesi CSP ihlali vermiyor. Runbook: `docs/runbooks/infrastructure.md`.
 
 Büyüklük: S. Her madde bağımsız ve küçük, launch'u bekletmeden sırayla eklenebilir.
 
@@ -148,7 +149,7 @@ Faz sırasının mantığı bağımlılık zinciri: Faz 0 hiçbir şeye bağlı 
 - **Tek büyük PR / sıfırdan rewrite**: `00-ozet-ve-karar.md`'deki migrate-or-modernize kararının doğrudan reddettiği seçenek. Reddedilme gerekçesi: repo şu an temiz derleniyor, bu güvenlik ağını tek bir dev haftası boyunca kırmanın karşılığı yok.
 - **Fazları paralel dallarda eş zamanlı yürütmek** (ör. Faz 2 ve Faz 4 aynı anda): i18n restructure route yapısını değiştiriyor, içerik katmanı o yapının üstüne yazılıyor; paralel yürütmek merge çatışmasını ve çifte işi garantiler.
 - **İçeriği en başta yapmak**: Cazip görünüyor çünkü asıl amaç şablon içeriği kaldırmak, ama açık sorulara (CV PDF, sertifika linkleri, ekran görüntüsü izinleri) bağlı olduğu için önce yapılırsa diğer fazları bloklar. Şablon içerikle deploy hattı ve i18n'i test etmek daha güvenli.
-- **Faz 5'i launch'tan önce yapmak**: Gatus/Umami/Renovate hiçbiri ziyaretçi deneyimini değiştirmiyor, launch'u geciktirmenin YAGNI'ye aykırı bir bedeli olurdu.
+- **Faz 5'i launch'tan önce yapmak**: Gatus/Umami/Dependabot hiçbiri ziyaretçi deneyimini değiştirmiyor, launch'u geciktirmenin YAGNI'ye aykırı bir bedeli olurdu.
 
 ## Uygulama durumu (2026-08-27)
 
@@ -157,7 +158,7 @@ Faz sırasının mantığı bağımlılık zinciri: Faz 0 hiçbir şeye bağlı 
 - **Faz 2** (main, PR #4): `app/[lang]`, next-intl 4.13.7 (`routing.ts`, `i18n/request.ts`, `proxy.ts`), `messages/en.json` + `tr.json`, eski `translations.ts`/`locale-provider` silindi, canonical + hreflang + x-default, Person JSON-LD, dil değiştirici URL tabanlı. Doğrulama: 19 dosya / 207 test (düzeltme turuyla 20 dosya / 271 test), `verify:routes` "20 content routes prerendered (6 project pages per locale)". Sapma: her sayfa kendi `openGraph` nesnesini kuruyor (Next çocuk `openGraph`'ı birleştirmiyor, değiştiriyor).
 - **Faz 3** (main, PR #5): Geist/Geist Mono/Instrument Serif vendor woff2, nötr oklch token seti, mobil menü (Radix Dialog), LazyMotion + `m` (stagger 40ms), erişilebilirlik (skip link, solid focus ring, role=alert/status, 24px hedef), OG image + icon gerçek kimlik (DCY monogram), `project-card` Link + `::after` kalıbı. Doğrulama: 27 dosya / 367 test. Açık: SSR HTML'de gizli hareket varyantı (`opacity:0`) hidrasyona kadar, tarayıcıda ekran görüntüsü turu yapılmadı.
 - **Faz 4** (dal `feature/faz-4-icerik-ve-yayin`, PR #6, açık, CI yeşil, HEAD `8b4fe40`, 21 commit): velite 0.4.0, 5 proje x 2 locale + 1 EN yazı + 3 TR yazı, `src/data/projects.ts` ve `skills.ts` silindi, `src/content/profile.ts` (speaking boş, certificates `verifyUrl` tanımsız), CV PDF `public/cv/dogancanyildiz-cv.pdf` commit'li. Doğrulama: 32 dosya / 458 test, `verify:routes` "26 content routes prerendered (5 project pages per locale, 1 en posts, 3 tr posts)", build yalnızca `/api/contact` ve `/api/health` dynamic, şablon persona kalıntısı sıfır. Sapmalar: hero/header yeniden tasarlandı (metrik kartları ve "available for work" rozeti yok), form konu alanı kaldırıldı, blog TR-first, task sırası değişti (ayrıntı `docs/plans/handoffs/faz-4.md` "Plandan sapmalar", 26 madde). Merge kararı sahibinde; sahibinin teslimatı bekleniyor: Konuşmalar verisi, sertifika `verifyUrl`'leri, proje kapakları, birinci şahıs metin onayı, CV içeriği onayı, Wikonya canlı site adı, ticket repo linki (bkz. `11-acik-sorular.md` "Teslimat durumu").
-- **Faz 5**: başlamadı.
+- **Faz 5**: kod tarafı repoda (2026-08-28); Coolify/Cloudflare panel adımları `docs/plans/handoffs/faz-5-manual-checklist.md` ile açık.
 
 ## Riskler ve tripwire'lar
 

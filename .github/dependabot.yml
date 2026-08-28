@@ -1,0 +1,71 @@
+# Dependabot replaces the earlier renovate.json. The Renovate app was never
+# installed, so that file described automation that did not run. Dependabot
+# is built into GitHub and needs no install step.
+#
+# Policy: security updates open a PR immediately (configured in repo settings,
+# Dependabot security updates). Version updates below are batched weekly and
+# always go through a pull request, nothing is merged without a review.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Istanbul
+    target-branch: dev
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    groups:
+      # Patch and minor bumps land together so a week of updates is one PR.
+      npm-minor-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Major bumps of the framework core are reviewed one at a time, on
+      # purpose, with the migration guide open.
+      - dependency-name: next
+        update-types: [version-update:semver-major]
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+      # Exact pin, see docs/02-stack-karari.md. Bumped by hand.
+      - dependency-name: velite
+      # eslint-plugin-react (via eslint-config-next) does not run on ESLint 10
+      # yet; bumped by hand when eslint-config-next supports the next major.
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      # Until typescript-eslint supports the next major.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # Must track the runtime major in .nvmrc.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Istanbul
+    target-branch: dev
+    labels: [dependencies, ci]
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Istanbul
+    target-branch: dev
+    labels: [dependencies, docker]
+    ignore:
+      # LTS line only, bumped by hand together with .nvmrc and engines.
+      - dependency-name: node
+        update-types: [version-update:semver-major]

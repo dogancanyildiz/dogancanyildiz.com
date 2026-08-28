@@ -14,6 +14,7 @@ vi.mock("next-intl/server", () => ({
         sendFailed: "The message could not be sent. Please try again later.",
         tooManyRequests:
           "Too many requests. Please try again in a few minutes.",
+        bodyTooLarge: "Request body is too large.",
       },
     };
     return (key: string) => messages[namespace]?.[key] ?? key;

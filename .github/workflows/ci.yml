@@ -1,4 +1,4 @@
-name: ci
+name: CI
 
 on:
   pull_request:
@@ -15,36 +15,49 @@ concurrency:
 
 jobs:
   checks:
-    name: lint, typecheck, test, build
+    name: Quality checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: "npm"
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
       # Velite output is gitignored, so the content has to be compiled before
       # typecheck and test can resolve the #site/content alias.
-      - run: npm run build:content
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run test
-      - run: npm run build
+      - name: Compile content
+        run: npm run build:content
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm run test
+      - name: Build
+        run: npm run build
         env:
           # Build time only. The value never has to be a secret, it is inlined
           # into the client bundle anyway.
           NEXT_PUBLIC_SITE_URL: https://dogancanyildiz.com
           NEXT_PUBLIC_BUILD_SHA: ${{ github.sha }}
           NEXT_PUBLIC_BUILD_DATE: ${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}
-      - run: npm run verify:routes
-      - run: npm run verify:links
+      - name: Verify static routes
+        run: npm run verify:routes
+      - name: Verify live links
+        run: npm run verify:links
 
   docker:
-    name: hadolint and image build
+    name: Docker image
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the repository
+        uses: actions/checkout@v7
       - name: Lint the Dockerfile
         run: docker run --rm -i hadolint/hadolint:v2.15.1-alpine hadolint --failure-threshold warning - < Dockerfile
       - name: Build the production image

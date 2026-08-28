@@ -33,6 +33,9 @@
   "home": {
     "featuredTitle": "Selected work",
     "featuredLink": "All projects",
+    "experienceTitle": "Experience",
+    "experienceDescription": "The most recent role on my résumé. Full history on the About page.",
+    "experienceLink": "Full résumé",
     "latestPostsTitle": "Latest writing",
     "latestPostsLink": "All posts",
     "skillsTitle": "What I work with",
@@ -74,7 +77,8 @@
     "languagesTitle": "Languages",
     "languages": "Turkish is my native language. I work in written English every day: documentation, repositories and the posts on this site.",
     "downloadCv": "Download CV",
-    "testimonialsTitle": "References"
+    "testimonialsTitle": "References",
+    "subnavLabel": "On this page"
   },
   "projects": {
     "title": "Projects",
@@ -92,14 +96,14 @@
     "description": "Notes on full-stack development, self-hosted infrastructure and web security. Posts are written in Turkish first; some of them are translated into English.",
     "readingTime": "{minutes} min read",
     "back": "All posts",
-    "empty": "No English posts yet. The Turkish edition of this blog has more."
+    "empty": "No posts yet."
   },
   "contact": {
     "title": "Contact",
     "description": "Open to interesting projects and conversations.",
     "intro": "Open to interesting projects and conversations. The fastest way to reach me is email.",
     "ctaTitle": "Have a project in mind?",
-    "ctaBody": "Tell me what you are building. I usually reply within a day.",
+    "ctaBody": "Tell me what you are building. I usually reply within two to three business days.",
     "ctaButton": "Send a message",
     "emailLabel": "Email",
     "locationLabel": "Location",
@@ -116,7 +120,7 @@
       "messagePlaceholder": "What would you like to build?",
       "submit": "Send message",
       "sending": "Sending",
-      "success": "Thanks, your message is on its way. I usually reply within a day.",
+      "success": "Thanks, your message is on its way. I usually reply within two to three business days.",
       "error": "The message could not be sent. Please email me directly instead.",
       "honeypotLabel": "Leave this field empty"
     }
@@ -136,7 +140,23 @@
     "invalidRequest": "Invalid request. Name, email, and message are required.",
     "emailNotConfigured": "Email is not configured on the server.",
     "sendFailed": "The message could not be sent. Please try again later.",
-    "tooManyRequests": "Too many requests. Please try again in a few minutes."
+    "tooManyRequests": "Too many requests. Please try again in a few minutes.",
+    "bodyTooLarge": "Request body is too large."
+  },
+  "systems": {
+    "eyebrow": "Systems",
+    "title": "Live infrastructure",
+    "description": "This site runs on a server I maintain myself. The numbers below come from my own monitoring and refresh every 60 seconds.",
+    "siteLabel": "Site",
+    "up": "Operational",
+    "down": "Down",
+    "uptimeLabel": "Uptime, last 24 hours",
+    "deployLabel": "Last deploy",
+    "commitLabel": "Commit",
+    "stackLabel": "Runs on",
+    "noData": "No data",
+    "unavailable": "Status unavailable",
+    "lastCheck": "Last checked {time}"
   },
   "a11y": {
     "skipToContent": "Skip to content",

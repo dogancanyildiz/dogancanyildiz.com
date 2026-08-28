@@ -47,3 +47,6 @@ Thumbs.db
 # host-built copy here would only go stale.
 .velite
 public/static
+
+# Side service compose stacks (Gatus, Umami). Deployed as separate Coolify resources.
+infra

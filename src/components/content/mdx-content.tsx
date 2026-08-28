@@ -8,7 +8,7 @@ import * as runtime from "react/jsx-runtime";
 // The server-only import above turns an accidental client-side import of this
 // module into a build error instead of shipping new Function to the browser.
 function getMDXComponent(code: string): ComponentType<{
-  components?: Record<string, ComponentType>;
+  components?: Record<string, ComponentType<Record<string, unknown>>>;
 }> {
   const factory = new Function(code);
   return factory({ ...runtime }).default;
@@ -16,7 +16,7 @@ function getMDXComponent(code: string): ComponentType<{
 
 interface MDXContentProps {
   code: string;
-  components?: Record<string, ComponentType>;
+  components?: Record<string, ComponentType<Record<string, unknown>>>;
 }
 
 export function MDXContent({ code, components }: MDXContentProps) {

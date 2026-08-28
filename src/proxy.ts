@@ -1,7 +1,18 @@
 import createMiddleware from "next-intl/middleware";
+import { NextRequest } from "next/server";
 import { routing } from "@/i18n/routing";
 
-export default createMiddleware(routing);
+const handleI18n = createMiddleware(routing);
+
+export default function proxy(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  const patched = new NextRequest(request.url, {
+    headers: requestHeaders,
+    method: request.method,
+  });
+  return handleI18n(patched);
+}
 
 export const config = {
   matcher: [

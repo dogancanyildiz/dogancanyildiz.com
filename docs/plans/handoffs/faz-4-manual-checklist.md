@@ -7,7 +7,7 @@ Dal: `feature/faz-4-icerik-ve-yayin`, `main` (`ad56a51`) üzerine. Faz 0-3 PR'la
 ## 1. PR ve CI
 
 - [ ] PR'ı gözden geçir: gövdede ne değişti, doğrulama, sapmalar ve açık kalanlar; AI atfı ve uzun çizgi yok.
-- [ ] `gh pr checks --watch`: `lint, typecheck, test, build` ve `hadolint and image build` `pass`. `checks` job'ında artık yedi `run` adımı var (`npm run build:content` `npm ci`'dan hemen sonra); logda `Static route check passed: 26 content routes prerendered (5 project pages per locale, 1 en posts, 3 tr posts).` ve `Tests 458 passed` görünmeli.
+- [ ] `gh pr checks --watch`: `lint, typecheck, test, build` ve `hadolint and image build` `pass`. Logda `Tests 538 passed` (2026-08-28 UI/UX kapanış) görünmeli.
 - [ ] `npm run format` CI'da hâlâ koşmuyor (Faz 2'den beri açık). Bu fazda üç task Prettier'a takıldı ve yerelde düzeltildi; `ci.yml`'e bir satır eklemek sahibinin kararı.
 - [ ] Merge kararı: bu PR merge edilince site şablon persona'dan tamamen kurtulur; Faz 2 devir notundaki "JSON-LD gerçek isim, görünen içerik şablon" uyuşmazlığı bununla kapanır.
 
@@ -27,20 +27,21 @@ Dal: `feature/faz-4-icerik-ve-yayin`, `main` (`ad56a51`) üzerine. Faz 0-3 PR'la
 - [ ] **CV PDF içeriği**: `public/cv/dogancanyildiz-cv.pdf` artık herkese açık ve git tarihçesinde. İçinde telefon numarası veya ev adresi varsa (içerik notu 11 telefonu siteye koymamayı seçmişti) yeni bir sürüm konulmalı; eski sürüm tarihçede kalır.
 - [ ] **Wikonya canlı linki**: `https://wikonya.vercel.app` bugün kendini "Konya Genç - Bilgi Evreni" olarak tanıtıyor, sayfada "Wikonya" geçmiyor. Link doğru hedefte mi, proje adı güncellenmeli mi sahibi karar versin.
 - [ ] **Ticket projesi repo linki**: `https://github.com/dogancanyildiz/bilet-satin-alma` case study'ye eklendi (repo açıklaması "Yavuzlar Web Project Task"). Sahibi bu repo linkinin yayınlanmasını istemiyorsa `content/projects/{en,tr}/ticket-purchasing-system.mdx` içindeki `links.repo` satırı silinir.
-- [ ] **Hubit**: `t0-hubit` reposu fork olduğu için link verilmedi; sahibi ekip reposunu vermek isterse `links.repo` eklenir.
+- [ ] **Hubit**: `t0-hubit` repo linki EN/TR case study'lere eklendi (2026-08-28 UI denetim kapanışı).
+- [ ] **Profil fotoğrafı**: `public/images/profile.webp` henüz yok; `profile-image.ts` path hazır, dosya gelince hero otomatik gösterir.
 
 ## 4. SEO ve i18n (herkese açık URL ister)
 
 - [ ] `https://dogancanyildiz.sh/sitemap.xml` Search Console'a gönderildi; 24 url (10 statik, 10 proje, 4 yazı) hatasız işlendi.
 - [ ] Search Console URL inceleme: yalnız TR olan bir yazı (`/tr/blog/capt-sinavina-hazirlik`) dizinlenebilir; `/blog/capt-sinavina-hazirlik` 404 olarak görünüyor.
-- [ ] technicalseo.com hreflang tester ile `/`, `/about`, `/projects`, `/projects/cargo-pilot`, `/blog/self-hosting-with-coolify` (iki dilli) ve `/tr/blog/capt-sinavina-hazirlik` (tek dilli) tarandı; self-referencing ve karşılıklı hreflang hatası yok. Beklenen: iki dilli sayfalarda `en`, `tr`, `x-default`; tek dilli yazıda yalnızca `tr` ve `x-default` (x-default TR'ye işaret eder).
-- [ ] Sitemap `x-default` üretmiyor, sayfa `<head>` üretiyor (Faz 2'den beri açık). Karar sahibinin; eklenecekse `src/app/sitemap.ts` `languagesFor` içine `x-default` girmeli ve `tests/seo/sitemap.test.ts` güncellenmeli.
+- [ ] technicalseo.com hreflang tester ile `/`, `/about`, `/projects`, `/projects/cargo-pilot`, `/blog/self-hosting-with-coolify` (iki dilli) tarandı; self-referencing ve karşılıklı hreflang hatası yok. Beklenen: iki dilli sayfalarda `en`, `tr`, `x-default`.
+- [x] Sitemap `x-default` artık `src/app/sitemap.ts` `languagesFor` ile üretiliyor (2026-08-28, `<head>` ile uyumlu).
 - [ ] `docs/launch-checklist.md` bölüm 3'ün tamamı işaretlendi.
 
 ## 5. Performans, erişilebilirlik ve tarayıcı kontrolleri
 
 - [ ] Lighthouse (mobil, production URL): Performance, Accessibility, Best Practices, SEO kaydedildi; SEO 100, Accessibility 95 altına düşmüyor. Bu oturumda koşulmadı.
-- [ ] Ekran kontrolleri: `/projects` kart ızgarası (iki sütun md ve üstü), `/projects/cargo-pilot` dört hücreli künye + canlı site butonu, `/tr/projects/ticket-purchasing-system` canlı site yok yalnızca kaynak kod butonu, `/tr/blog` üç satır, `/blog` tek satır, `/tr/blog/self-hosting-with-coolify` başlık autolink'leri link gibi görünmüyor (renk foreground, altı çizili değil), `/about` Konuşmalar bloğu yok, sertifikalarda link yok, Download CV butonu var, `/contact` tek `<h1>`.
+- [ ] Ekran kontrolleri: `/projects` satır listesi, kartlarda live/repo chip, `/projects/cargo-pilot` dört hücreli künye, `/tr/blog` üç satır, `/blog` üç satır (EN çeviriler eklendi), `/about` sticky subnav, Konuşmalar bloğu yok (veri bekliyor), sertifikalarda verify linki yok (veri bekliyor), Download CV butonu var, `/contact` tek `<h1>`.
 - [ ] Dil değiştirici: `/tr/blog/capt-sinavina-hazirlik` sayfasında EN linki `/blog`'a gidiyor (404 değil); `/tr/blog/self-hosting-with-coolify` sayfasında EN linki `/blog/self-hosting-with-coolify`'a gidiyor.
 - [ ] Dark modda shiki kod blokları: bugünkü yazılarda kod bloğu yok; ilk kod bloklu yazıda `.dark .prose-content .shiki` kuralının koyu tema renklerini uyguladığı görülmeli.
 - [ ] `prefers-reduced-motion: reduce` açıkken kart ve satır animasyonları yok. Faz 3'ün açık maddesi (gizli varyantın SSR HTML'e yazılması) bu fazda değişmedi: JS kapalıyken kartlar ve satırlar `opacity:0` ile gelir. Karar sahibinin (Faz 3 checklist bölüm 4).
@@ -56,17 +57,17 @@ Dal: `feature/faz-4-icerik-ve-yayin`, `main` (`ad56a51`) üzerine. Faz 0-3 PR'la
 ## 7. Sahibinin kararını bekleyen maddeler
 
 - [ ] `npm run format` CI'a girsin mi (bölüm 1).
-- [ ] Sitemap `x-default` (bölüm 4).
+- [x] Sitemap `x-default` (bölüm 4, 2026-08-28).
 - [x] Reduced-motion SSR gizli varyantı: `.motion-item` + `@media (prefers-reduced-motion: reduce)` CSS override (2026-08-27 UI yenileme).
-- [ ] 404 dokümanı her zaman `<html lang="en">` (Faz 2 devri); `/tr/blog/nope` da İngilizce 404 dokümanı alıyor.
+- [x] 404 global dokümanı pathname'den locale alır (`/tr/...` → `<html lang="tr">`, 2026-08-28).
 - [x] Hero ve header tasarımı: metrik kartları, `availableForWork` rozeti, header monogram + `sr-only` isim (2026-08-27 UI yenileme, site sahibi onayı).
 - [x] Footer'daki Contact outline CTA butonu geri yüklendi (2026-08-27 UI yenileme).
 - [ ] Ana sayfa yetkinlik şeridi profildeki `featured` işaretli dört grubu gösteriyor (Frontend, Backend, DevOps ve altyapı, Güvenlik); değiştirmek için `src/content/profile.ts` içindeki `featured` bayrakları.
 - [x] Liklidi-inspired scroll landing (2026-08-27): hero full viewport, marquee, bento, strength grid, anchor nav; tarayıcıda 390/768/1280 screenshot turu sahibinde.
 - [ ] `src/content/home.ts` içindeki strengths/manifesto metinleri sahibi tarafından okunup onaylanmalı.
-- [ ] Blog dil politikası TR-first uygulandı: EN blog listesi tek yazı gösteriyor, `blog.empty` metni EN'de yalnızca hiç yazı kalmazsa görünür.
+- [ ] Blog dil politikası: EN blog artık 3 yazı gösteriyor (CAPT ve CCNA çevirileri eklendi, 2026-08-28).
 - [ ] Task 15 alt ajanı, 3000 portunda dinleyen ve kendisine ait olmayan bir `next-server` sürecini yanlışlıkla sonlandırdı. Bu oturumun tüm doğrulamaları 3171 ve 3172'de koşuldu. Başka bir oturumun dev sunucusu kapanmış olabilir, yeniden başlatılması gerekir.
 
 ## 8. Faz 0-3'ten devralınıp hâlâ açık olanlar
 
-Panel adımlarının hiçbiri (Coolify, Cloudflare, Traefik, Resend, DNS), `TRUST_CF_CONNECTING_IP`, `.com -> .sh` onayı, Renovate GitHub App, `npm audit` kararı, CSP nonce (Faz 5), `MAX_MESSAGE_LENGTH` ile `MAX_BODY_BYTES` ilişkisi, 429/413 metinlerinin İngilizce kalması, next-intl TypeScript augmentation, DOM tabanlı test kurulumu, `--destructive-foreground` ve `.pull-quote` ölü tanımları, Faz 3'ün 14 maddelik görsel kontrol listesi. Bu fazda kapananlar: `/favicon.ico` 404 (308 -> `/icon`), proxy `icon` prefix eşleşmesi (`icon$`), `metadata.ogAlt` şablon değeri, `footer.twitter` ölü anahtarı, header'daki sabit "Portfolio" eyebrow'u, `localesForProject` boş dalı ve `verify:routes`'un eşit sayı iddiası (slug bazlı karşılaştırma), sitemap `lastModified` yazılar için gerçek tarih (statik sayfalar ve projeler hâlâ build zamanı).
+Panel adımlarının hiçbiri (Coolify, Cloudflare, Traefik, Resend, DNS), `TRUST_CF_CONNECTING_IP`, `.com -> .sh` onayı, Renovate GitHub App, `npm audit` kararı, CSP nonce (Faz 5), `MAX_MESSAGE_LENGTH` ile `MAX_BODY_BYTES` ilişkisi, next-intl TypeScript augmentation, DOM tabanlı test kurulumu, `--destructive-foreground`, Faz 3'ün 14 maddelik görsel kontrol listesi. 2026-08-28 UI/UX kapanışında kod tarafında kapananlar: sitemap `x-default`, global 404 locale, contact API 413/429 i18n, footer build-time yıl, BlogPosting JSON-LD genişletmesi, `no-template-residue` fs taraması, `messages.test` namespace sıkılaştırması, hero `DisplayHeading`, ana sayfa scroll yeniden sıralama, About subnav, proje kart live/repo chip, EN blog +2 çeviri, Hubit repo linki, dead UI bileşen temizliği, MDX shortcode'lar.

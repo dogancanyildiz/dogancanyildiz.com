@@ -8,6 +8,9 @@ import { Hero } from "@/components/sections/hero";
 import { PostList } from "@/components/sections/post-list";
 import { ProjectList } from "@/components/sections/project-list";
 import { SkillsStrip } from "@/components/sections/skills-strip";
+import { ExperienceSummary } from "@/components/sections/experience-summary";
+import { Systems } from "@/components/sections/systems";
+import { ContactCta } from "@/components/sections/contact-cta";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
 import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
@@ -17,12 +20,17 @@ import { hasCv } from "@/lib/cv";
 import { featuredSkillGroups } from "@/lib/skills";
 import { profileImagePath } from "@/lib/profile-image";
 import {
-  getFeaturedProjects,
   getPosts,
+  getProjects,
   toPostCardData,
   toProjectCardData,
   type Locale,
 } from "@/lib/content";
+
+// GATUS_URL is a runtime variable, so the Gatus fetch does not run during the
+// Docker build. Without this the route would be frozen as fully static and the
+// systems panel would never leave its "status unavailable" state.
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
@@ -62,7 +70,7 @@ export default async function HomePage({
 
   const locale = lang as Locale;
   const tHome = await getTranslations({ locale, namespace: "home" });
-  const featured = getFeaturedProjects(locale).map(toProjectCardData);
+  const projects = getProjects(locale).map(toProjectCardData);
   const latestPosts = getPosts(locale).slice(0, 3).map(toPostCardData);
 
   return (
@@ -83,8 +91,15 @@ export default async function HomePage({
               </Link>
             }
           />
-          <ProjectList projects={featured} headingLevel="h3" />
+          <ProjectList projects={projects} headingLevel="h3" />
         </div>
+
+        <ExperienceSummary locale={locale} />
+
+        <Systems />
+
+        <SkillsStrip groups={featuredSkillGroups(skills[locale])} />
+
         {latestPosts.length > 0 ? (
           <div className="space-y-8">
             <PageHeader
@@ -102,7 +117,8 @@ export default async function HomePage({
             <PostList posts={latestPosts} headingLevel="h3" />
           </div>
         ) : null}
-        <SkillsStrip groups={featuredSkillGroups(skills[locale])} />
+
+        <ContactCta />
       </PageSection>
     </>
   );

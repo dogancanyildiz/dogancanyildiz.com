@@ -44,6 +44,8 @@ describe("project content layer", () => {
     const card = toProjectCardData(project);
     expect(card.href).toBe("/projects/cargo-pilot");
     expect(card.title).toBe("Cargo Pilot");
+    expect(card.liveUrl).toBe("https://cargopilot.divizyon.org");
+    expect(card.repoUrl).toBeNull();
     expect(card.cover).toBeNull();
   });
 
@@ -55,7 +57,7 @@ describe("project content layer", () => {
 });
 
 describe("post content layer", () => {
-  it("has three turkish posts sorted newest first and one english post", () => {
+  it("has three turkish posts and three english posts sorted newest first", () => {
     const trPosts = getPosts("tr");
     expect(trPosts.map((post) => post.slug)).toEqual([
       "self-hosting-with-coolify",
@@ -64,24 +66,26 @@ describe("post content layer", () => {
     ]);
 
     const enPosts = getPosts("en");
-    expect(enPosts).toHaveLength(1);
-    expect(enPosts[0]?.slug).toBe("self-hosting-with-coolify");
+    expect(enPosts.map((post) => post.slug)).toEqual([
+      "self-hosting-with-coolify",
+      "capt-sinavina-hazirlik",
+      "ccna-dan-web-guvenligine",
+    ]);
   });
 
-  it("lists en and tr as the locales for the bilingual post", () => {
+  it("lists en and tr as the locales for the bilingual posts", () => {
     expect(getPostLocales("self-hosting-with-coolify")).toEqual(["en", "tr"]);
-  });
-
-  it("lists tr as the only locale for a turkish only post", () => {
-    expect(getPostLocales("capt-sinavina-hazirlik")).toEqual(["tr"]);
+    expect(getPostLocales("capt-sinavina-hazirlik")).toEqual(["en", "tr"]);
+    expect(getPostLocales("ccna-dan-web-guvenligine")).toEqual(["en", "tr"]);
   });
 
   it("lists no locales for a slug that does not exist", () => {
     expect(getPostLocales("nothing")).toEqual([]);
   });
 
-  it("finds no english translation of a turkish only post", () => {
-    expect(getPost("en", "capt-sinavina-hazirlik")).toBeUndefined();
+  it("finds english translations for every published post slug", () => {
+    expect(getPost("en", "capt-sinavina-hazirlik")?.locale).toBe("en");
+    expect(getPost("en", "ccna-dan-web-guvenligine")?.locale).toBe("en");
   });
 
   it("builds a locale neutral href and reading time in the card dto", () => {
@@ -94,11 +98,8 @@ describe("post content layer", () => {
 });
 
 describe("untranslated paths", () => {
-  it("lists the tr only posts as untranslated for en", () => {
-    expect(getUntranslatedPaths("en")).toEqual([
-      "/blog/capt-sinavina-hazirlik",
-      "/blog/ccna-dan-web-guvenligine",
-    ]);
+  it("has nothing untranslated for en because every project and post is bilingual", () => {
+    expect(getUntranslatedPaths("en")).toEqual([]);
   });
 
   it("has nothing untranslated for tr because every project is bilingual", () => {

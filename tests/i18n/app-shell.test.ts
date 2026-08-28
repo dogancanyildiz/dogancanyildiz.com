@@ -68,6 +68,7 @@ describe("proxy", () => {
     expect(source).toContain('from "next-intl/middleware"');
     expect(source).toContain('from "@/i18n/routing"');
     expect(source).toContain("createMiddleware(routing)");
+    expect(source).toContain('requestHeaders.set("x-pathname"');
   });
 
   it("matches page routes and skips api, framework and file paths", () => {
@@ -224,12 +225,12 @@ describe("application shell", () => {
 
 describe("404 pages", () => {
   it("answers unmatched paths with a full document, not a bare shell", () => {
-    // The root layout lives under [lang], so nothing wraps a path that never
-    // resolves to a locale. global-not-found.tsx has to bring its own document.
     const source = read("src/app/global-not-found.tsx");
-    expect(source).toMatch(/<html\b[^>]*\blang=/);
+    expect(source).toMatch(/<html\b[^>]*\blang=\{locale\}/);
     expect(source).toContain('import "./globals.css"');
     expect(source).toContain('namespace: "notFound"');
+    expect(source).toContain("localeFromPathname");
+    expect(source).toContain('get("x-pathname")');
   });
 
   it("turns the global-not-found convention on", () => {

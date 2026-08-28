@@ -10,6 +10,7 @@ import { getUntranslatedPaths, type Locale } from "@/lib/content";
 import { buildOpenGraph } from "@/lib/seo/alternates";
 import { ThemeProvider } from "@/components/theme-provider";
 import { MotionProvider } from "@/components/motion-provider";
+import { UmamiScript } from "@/components/umami-script";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -100,6 +101,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             </MotionProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
+        <UmamiScript />
       </body>
     </html>
   );

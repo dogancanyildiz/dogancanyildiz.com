@@ -5,9 +5,11 @@ import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { SkillCategoryList } from "@/components/sections/skill-group-grid";
+import { AboutSubnav } from "@/components/sections/about-subnav";
 import { sortSkillGroups } from "@/lib/skills";
 import { TestimonialsBand } from "@/components/sections/testimonials-band";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { ContentEntryBody, ContentEntryIndex } from "@/components/ui/content-entry";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/layout/page-section";
 import { ContactCta } from "@/components/sections/contact-cta";
@@ -72,6 +74,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
         <PageHeader as="h1" title={t("title")} description={t("lead")} />
       </div>
 
+      <AboutSubnav locale={locale} />
+
       <div className="space-y-4">
         <p className="section-copy">{t("body1")}</p>
         <p className="section-copy">{t("body2")}</p>
@@ -100,12 +104,12 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </Button>
       ) : null}
 
-      <section className="space-y-5 border-t border-border pt-8">
+      <section id="about-skills" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
         <h2 className="section-heading">{t("skillsTitle")}</h2>
         <SkillCategoryList groups={sortSkillGroups(skills[locale])} />
       </section>
 
-      <section className="space-y-5 border-t border-border pt-8">
+      <section id="about-experience" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
         <h2 className="section-heading">{t("experienceTitle")}</h2>
         <ul className="content-stack">
           {experience[locale].map((entry, index) => (
@@ -113,10 +117,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
               key={`${entry.company}-${entry.period}`}
               className="content-entry space-y-3"
             >
-              <span className="content-index" aria-hidden="true">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div className="min-w-0 space-y-3">
+              <ContentEntryIndex index={index} />
+              <ContentEntryBody className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="tag-pill">{entry.period}</span>
                   <span className="tag-pill">{entry.location}</span>
@@ -139,13 +141,13 @@ export default async function AboutPage({ params }: AboutPageProps) {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </ContentEntryBody>
             </li>
           ))}
         </ul>
       </section>
 
-      <section className="space-y-5 border-t border-border pt-8">
+      <section id="about-community" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
         <h2 className="section-heading">{t("communityTitle")}</h2>
         <ul className="content-stack">
           {community[locale].map((entry, index) => (
@@ -153,10 +155,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
               key={`${entry.organization}-${entry.period}`}
               className="content-entry space-y-2"
             >
-              <span className="content-index" aria-hidden="true">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div className="min-w-0 space-y-2">
+              <ContentEntryIndex index={index} />
+              <ContentEntryBody className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="tag-pill">{entry.period}</span>
                 </div>
@@ -167,14 +167,14 @@ export default async function AboutPage({ params }: AboutPageProps) {
                 <p className="text-sm leading-relaxed text-foreground/90">
                   {entry.description}
                 </p>
-              </div>
+              </ContentEntryBody>
             </li>
           ))}
         </ul>
       </section>
 
       {talks.length > 0 ? (
-        <section className="space-y-5 border-t border-border pt-8">
+        <section id="about-speaking" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
           <h2 className="section-heading">{t("speakingTitle")}</h2>
           <ul className="divide-y divide-border">
             {talks.map((talk) => (
@@ -189,7 +189,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </section>
       ) : null}
 
-      <section className="space-y-5 border-t border-border pt-8">
+      <section id="about-certificates" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
         <h2 className="section-heading">{t("certificatesTitle")}</h2>
         <ul className="divide-y divide-border">
           {certificates[locale].map((certificate) => (
@@ -221,7 +221,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </ul>
       </section>
 
-      <section className="space-y-5 border-t border-border pt-8">
+      <section id="about-education" className="space-y-5 border-t border-border pt-8 scroll-mt-28">
         <h2 className="section-heading">{t("educationTitle")}</h2>
         <ul className="divide-y divide-border">
           {education[locale].map((entry) => (
@@ -238,12 +238,14 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </ul>
       </section>
 
-      <section className="space-y-3 border-t border-border pt-8">
+      <section id="about-languages" className="space-y-3 border-t border-border pt-8 scroll-mt-28">
         <h2 className="section-heading">{t("languagesTitle")}</h2>
         <p className="section-copy">{t("languages")}</p>
       </section>
 
-      <TestimonialsBand locale={locale} title={t("testimonialsTitle")} />
+      <div id="about-testimonials" className="scroll-mt-28">
+        <TestimonialsBand locale={locale} title={t("testimonialsTitle")} />
+      </div>
 
       <ContactCta />
     </PageSection>

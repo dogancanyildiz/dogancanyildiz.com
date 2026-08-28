@@ -1,7 +1,8 @@
 {
   "name": "portfolio",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "velite --watch & next dev",
     "build": "velite --clean --strict && next build",
@@ -18,24 +19,25 @@
     "vendor:fonts": "node scripts/vendor-fonts.mjs"
   },
   "engines": {
-    "node": ">=20.9"
+    "node": ">=24"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.575.0",
+    "lucide-react": "^1.34.0",
     "motion": "13.1.1",
     "next": "16.3.3",
     "next-intl": "4.13.7",
     "next-themes": "^0.4.6",
-    "radix-ui": "^1.4.3",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "resend": "^6.9.2",
+    "radix-ui": "^1.6.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "resend": "^6.22.1",
     "server-only": "^0.0.1",
-    "simple-icons": "^15.22.0",
-    "tailwind-merge": "^3.5.0",
-    "velite": "0.4.0"
+    "simple-icons": "^16.28.0",
+    "tailwind-merge": "^3.6.0",
+    "velite": "0.4.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@fontsource-variable/geist": "5.3.0",
@@ -43,7 +45,7 @@
     "@fontsource/instrument-serif": "5.3.0",
     "@shikijs/rehype": "^4.4.3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
@@ -52,7 +54,7 @@
     "rehype-autolink-headings": "^7.1.0",
     "rehype-external-links": "^3.0.0",
     "rehype-slug": "^6.0.0",
-    "shadcn": "^3.8.5",
+    "shadcn": "^4.19.0",
     "shiki": "^4.4.3",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.4.0",

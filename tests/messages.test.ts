@@ -53,18 +53,14 @@ function stringLiteralsIn(source: string): Set<string> {
   return literals;
 }
 
-// A key "a.b.c" is consumed by a file when that file contains the full
-// dotted string "a.b.c", or when for some split point the file contains
-// both the namespace half ("a" or "a.b") and the remainder half ("b.c" or
-// "c") as separate quoted string literals (the useTranslations(namespace)
-// + t(remainder) pattern used throughout this codebase).
 function isConsumedByFile(key: string, literals: Set<string>): boolean {
   if (literals.has(key)) return true;
   const parts = key.split(".");
   for (let i = 1; i < parts.length; i += 1) {
     const namespace = parts.slice(0, i).join(".");
+    if (!literals.has(namespace)) continue;
     const remainder = parts.slice(i).join(".");
-    if (literals.has(namespace) && literals.has(remainder)) return true;
+    if (literals.has(remainder)) return true;
   }
   return false;
 }

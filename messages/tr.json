@@ -33,6 +33,9 @@
   "home": {
     "featuredTitle": "Seçili işler",
     "featuredLink": "Tüm projeler",
+    "experienceTitle": "Deneyim",
+    "experienceDescription": "Özgeçmişimdeki en güncel rol. Tam geçmiş Hakkımda sayfasında.",
+    "experienceLink": "Tam özgeçmiş",
     "latestPostsTitle": "Son yazılar",
     "latestPostsLink": "Tüm yazılar",
     "skillsTitle": "Neyle çalışıyorum",
@@ -74,7 +77,8 @@
     "languagesTitle": "Diller",
     "languages": "Ana dilim Türkçe. Yazılı İngilizceyi her gün kullanıyorum: dokümantasyon, depolar ve bu sitedeki yazılar.",
     "downloadCv": "CV'yi indir",
-    "testimonialsTitle": "Referanslar"
+    "testimonialsTitle": "Referanslar",
+    "subnavLabel": "Bu sayfada"
   },
   "projects": {
     "title": "Projeler",
@@ -99,7 +103,7 @@
     "description": "İlginç projelere ve sohbetlere açığım.",
     "intro": "İlginç projelere ve sohbetlere açığım. Bana en hızlı ulaşma yolu e-posta.",
     "ctaTitle": "Bir proje mi düşünüyorsunuz?",
-    "ctaBody": "Ne geliştirmek istediğinizi yazın. Genellikle bir gün içinde yanıtlıyorum.",
+    "ctaBody": "Ne geliştirmek istediğinizi yazın. Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
     "ctaButton": "Mesaj gönder",
     "emailLabel": "E-posta",
     "locationLabel": "Konum",
@@ -116,7 +120,7 @@
       "messagePlaceholder": "Ne geliştirmek istiyorsunuz?",
       "submit": "Mesajı gönder",
       "sending": "Gönderiliyor",
-      "success": "Teşekkürler, mesajınız yola çıktı. Genellikle bir gün içinde yanıtlıyorum.",
+      "success": "Teşekkürler, mesajınız yola çıktı. Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
       "error": "Mesaj gönderilemedi. Lütfen doğrudan e-posta gönderin.",
       "honeypotLabel": "Bu alanı boş bırakın"
     }
@@ -136,7 +140,23 @@
     "invalidRequest": "Geçersiz istek. Ad, e-posta ve mesaj alanları zorunlu.",
     "emailNotConfigured": "E-posta gönderimi sunucuda yapılandırılmamış.",
     "sendFailed": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.",
-    "tooManyRequests": "Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin."
+    "tooManyRequests": "Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin.",
+    "bodyTooLarge": "İstek gövdesi çok büyük."
+  },
+  "systems": {
+    "eyebrow": "Sistemler",
+    "title": "Canlı altyapı",
+    "description": "Bu site kendi baktığım bir sunucuda çalışıyor. Aşağıdaki veriler kendi izleme sistemimden geliyor ve 60 saniyede bir yenileniyor.",
+    "siteLabel": "Site",
+    "up": "Çalışıyor",
+    "down": "Kapalı",
+    "uptimeLabel": "Son 24 saat çalışma oranı",
+    "deployLabel": "Son yayın",
+    "commitLabel": "Commit",
+    "stackLabel": "Üzerinde çalıştığı yapı",
+    "noData": "Veri yok",
+    "unavailable": "Durum bilgisi şu an alınamıyor",
+    "lastCheck": "Son kontrol {time}"
   },
   "a11y": {
     "skipToContent": "İçeriğe geç",

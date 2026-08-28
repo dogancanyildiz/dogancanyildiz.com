@@ -1,8 +1,16 @@
-import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const TRACKED_PATHS = ["src", "content", "messages", "public", ".env.example"];
+const SCAN_ROOTS = ["src", "content", "messages", "public", ".env.example"];
+
+const IGNORED_DIRS = new Set([
+  "node_modules",
+  ".next",
+  ".velite",
+  ".git",
+  "coverage",
+]);
 
 const BINARY_EXTENSIONS = [
   ".ico",
@@ -17,9 +25,6 @@ const BINARY_EXTENSIONS = [
   ".avif",
 ];
 
-// These are matched as case insensitive substrings: they only ever appear as
-// deliberate leftovers from the starter template, never as legitimate
-// content, so a raw substring match is precise enough.
 const FORBIDDEN_SUBSTRINGS = [
   "alex chen",
   "alex@example.com",
@@ -29,9 +34,6 @@ const FORBIDDEN_SUBSTRINGS = [
   "your name here",
 ];
 
-// These are common English words that could plausibly appear inside real
-// prose (a sentence ending in "tbd", a phrase like "coming soon" used
-// unironically), so they are matched as whole words only.
 const FORBIDDEN_WORDS = ["tbd", "lorem ipsum", "coming soon"];
 
 const FORBIDDEN_PATTERNS: Array<{ label: string; pattern: RegExp }> = [
@@ -46,15 +48,39 @@ const FORBIDDEN_PATTERNS: Array<{ label: string; pattern: RegExp }> = [
   },
 ];
 
-function trackedFiles(): string[] {
-  return execFileSync("git", ["ls-files", ...TRACKED_PATHS], {
-    encoding: "utf8",
-  })
-    .split("\n")
-    .filter(Boolean)
-    .filter((file) => existsSync(file))
-    .filter((file) => !BINARY_EXTENSIONS.some((ext) => file.endsWith(ext)))
-    .filter((file) => !file.endsWith(".test.ts"));
+function shouldScanFile(file: string): boolean {
+  if (!existsSync(file)) return false;
+  if (BINARY_EXTENSIONS.some((ext) => file.endsWith(ext))) return false;
+  if (file.endsWith(".test.ts")) return false;
+  return true;
+}
+
+function collectFiles(root: string): string[] {
+  if (!existsSync(root)) return [];
+
+  const stats = statSync(root);
+  if (stats.isFile()) {
+    return shouldScanFile(root) ? [root] : [];
+  }
+
+  const files: string[] = [];
+  for (const entry of readdirSync(root)) {
+    const full = join(root, entry);
+    const entryStats = statSync(full);
+    if (entryStats.isDirectory()) {
+      if (IGNORED_DIRS.has(entry)) continue;
+      files.push(...collectFiles(full));
+      continue;
+    }
+    if (shouldScanFile(full)) {
+      files.push(full);
+    }
+  }
+  return files;
+}
+
+function scannedFiles(): string[] {
+  return SCAN_ROOTS.flatMap((root) => collectFiles(root));
 }
 
 function wordPattern(word: string): RegExp {
@@ -62,7 +88,7 @@ function wordPattern(word: string): RegExp {
 }
 
 describe("no template residue", () => {
-  const files = trackedFiles();
+  const files = scannedFiles();
 
   it("tracks a non trivial set of content files", () => {
     expect(files.length).toBeGreaterThan(10);
@@ -102,7 +128,7 @@ describe("no template residue", () => {
 
   it("does not use a css gradient as a project cover", () => {
     const hits = files.filter((file) => {
-      if (!file.startsWith("src/components/sections/")) return false;
+      if (!file.includes("src/components/sections/")) return false;
       const source = readFileSync(file, "utf8");
       return (
         source.includes("radial-gradient") || source.includes("linear-gradient")
