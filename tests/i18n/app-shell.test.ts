@@ -1,6 +1,13 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+// Next's own compiler for the proxy `config.matcher` patterns. This is the
+// same module next-router-worker uses to turn a matcher string into a
+// RegExp, so testing against it (instead of a hand rolled regex) catches a
+// matcher change that Next itself would interpret differently than a naive
+// reader would.
+import { pathToRegexp } from "next/dist/compiled/path-to-regexp";
+import { config as proxyConfig } from "@/proxy";
 
 const repoPath = (relative: string) => join(process.cwd(), relative);
 const read = (relative: string) => readFileSync(repoPath(relative), "utf8");
@@ -32,29 +39,25 @@ const REMOVED_ROUTES = [
   "src/app/opengraph-image.tsx",
 ];
 
-// Parses every double quoted string literal inside the `matcher: [ ... ]`
-// array in src/proxy.ts, unescaping each one with JSON.parse (the file is
-// TypeScript source, so backslashes are still escaped there).
-function proxyMatcher(): string[] {
-  const source = read("src/proxy.ts");
-  const block = source.match(/matcher:\s*\[([\s\S]*?)\]/);
-  if (!block) throw new Error("proxy.ts does not declare an array matcher");
-  const literals = block[1].match(/"(?:[^"\\]|\\.)*"/g);
-  if (!literals) {
-    throw new Error("proxy.ts matcher array has no string literals");
-  }
-  return literals.map((literal) => JSON.parse(literal) as string);
+// The matcher array is either plain strings or { source, ... } objects (see
+// the Next proxy docs); this project only uses plain strings, so a matcher
+// entry that turned into an object is a change this test should surface
+// rather than silently skip.
+function matcherSources(): string[] {
+  return proxyConfig.matcher.map((entry) => {
+    if (typeof entry === "string") return entry;
+    throw new Error(
+      "expected every proxy config.matcher entry to be a plain string"
+    );
+  });
 }
 
-// Converts a matcher pattern to a JS regex and tests it against pathname.
-// :path* becomes .* (a bare locale path such as /tr still matches through
-// the generic catch-all pattern, so this simplification does not lose
-// coverage), and the whole pattern is anchored with ^ and $.
+// Compiles every matcher pattern with the exact path-to-regexp build Next
+// uses to interpret config.matcher, then tests pathname against each.
 function matchesAny(pathname: string): boolean {
-  return proxyMatcher().some((pattern) => {
-    const regexSource = pattern.replace(/:path\*/g, ".*");
-    return new RegExp(`^${regexSource}$`).test(pathname);
-  });
+  return matcherSources().some((pattern) =>
+    pathToRegexp(pattern).test(pathname)
+  );
 }
 
 describe("proxy", () => {
