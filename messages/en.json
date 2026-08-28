@@ -109,7 +109,7 @@
     "locationLabel": "Location",
     "location": "Konya, Türkiye",
     "trustTitle": "Privacy",
-    "trustBody": "Form data is sent only by email to me. It is not sold or shared with third parties.",
+    "trustBody": "Form data reaches me by email through Resend, the mail provider this site uses, and is not shared or sold anywhere else. Visits are counted by a self-hosted, cookieless Umami instance that keeps no personal data.",
     "responseExpectation": "I usually reply within two to three business days.",
     "form": {
       "name": "Name",
@@ -122,7 +122,16 @@
       "sending": "Sending",
       "success": "Thanks, your message is on its way. I usually reply within two to three business days.",
       "error": "The message could not be sent. Please email me directly instead.",
-      "honeypotLabel": "Leave this field empty"
+      "honeypotLabel": "Leave this field empty",
+      "errorNameRequired": "Please enter your name.",
+      "errorNameInvalid": "Please enter your name without line breaks.",
+      "errorEmailRequired": "Please enter your email address.",
+      "errorEmailInvalid": "Please enter a valid email address.",
+      "errorMessageRequired": "Please write a message.",
+      "errorMessageInvalid": "Please write your message as plain text.",
+      "errorFields": "Please check the highlighted fields.",
+      "errorTimeout": "The request took too long. It may still have reached me, so please wait a moment before sending it again.",
+      "retryAfter": "Try again in {seconds}s"
     }
   },
   "notFound": {
@@ -141,7 +150,10 @@
     "emailNotConfigured": "Email is not configured on the server.",
     "sendFailed": "The message could not be sent. Please try again later.",
     "tooManyRequests": "Too many requests. Please try again in a few minutes.",
-    "bodyTooLarge": "Request body is too large."
+    "bodyTooLarge": "Request body is too large.",
+    "unsupportedMediaType": "Unsupported content type. The contact form sends JSON.",
+    "forbiddenOrigin": "This request did not come from the contact form.",
+    "sendTimeout": "The mail service did not answer in time. The message may still have gone out, so please wait a moment before sending it again."
   },
   "systems": {
     "eyebrow": "Systems",
