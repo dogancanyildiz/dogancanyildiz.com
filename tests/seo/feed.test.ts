@@ -144,6 +144,58 @@ describe("rss feed route", () => {
   });
 });
 
+describe("lastBuildDate", () => {
+  // The channel date used to read post.date only, so a revised post moved the
+  // sitemap entry and the BlogPosting JSON-LD but left the feed claiming the
+  // site had not changed since the newest post was first published.
+  async function feedWithPosts(
+    posts: { slug: string; date: string; updated?: string }[]
+  ): Promise<string> {
+    vi.resetModules();
+    vi.doMock("@/lib/content", () => ({
+      getPosts: () =>
+        posts.map((post) => ({
+          ...post,
+          title: post.slug,
+          summary: post.slug,
+        })),
+    }));
+    const { GET } = await import("@/app/[lang]/feed.xml/route");
+    const response = await GET(new Request("https://dogancanyildiz.com"), {
+      params: Promise.resolve({ lang: "en" }),
+    });
+    const body = await response.text();
+    vi.doUnmock("@/lib/content");
+    vi.resetModules();
+    return body;
+  }
+
+  it("reports the newest revision, not the newest publish date", async () => {
+    const body = await feedWithPosts([
+      { slug: "newest", date: "2026-03-01" },
+      { slug: "older-but-revised", date: "2026-01-01", updated: "2026-06-15" },
+    ]);
+
+    expect(textInside(body, "lastBuildDate")).toEqual([
+      new Date("2026-06-15").toUTCString(),
+    ]);
+  });
+
+  it("keeps pubDate on the publish date of each item", async () => {
+    const body = await feedWithPosts([
+      { slug: "revised", date: "2026-01-01", updated: "2026-06-15" },
+    ]);
+
+    expect(textInside(body, "pubDate")).toEqual([
+      new Date("2026-01-01").toUTCString(),
+    ]);
+  });
+
+  it("omits the element when the feed carries no post", async () => {
+    expect(await feedWithPosts([])).not.toContain("lastBuildDate");
+  });
+});
+
 describe("escapeXml", () => {
   it("escapes the five xml entities", () => {
     expect(escapeXml(`<a href="x">Tom & Jerry's</a>`)).toBe(

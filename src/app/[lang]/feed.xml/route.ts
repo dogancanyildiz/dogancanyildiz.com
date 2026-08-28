@@ -44,12 +44,20 @@ export async function GET(
     })
     .join("\n");
 
-  // Posts are already sorted newest first by getPosts, so the first entry
-  // (if any) carries the most recent publish date.
-  const newest = posts[0];
-  const lastBuildDate = newest
-    ? `\n    <lastBuildDate>${new Date(newest.date).toUTCString()}</lastBuildDate>`
-    : "";
+  // lastBuildDate is the channel's freshness signal, so it has to move when a
+  // post is revised, not only when one is published. The sitemap and the
+  // BlogPosting JSON-LD already read `updated ?? date`; reading only `date`
+  // here made the three disagree about the same post. getPosts sorts by
+  // publish date, so the newest revision is a max over the whole list.
+  const newestChange = posts.reduce<number | null>((newest, post) => {
+    const changed = new Date(post.updated ?? post.date).getTime();
+    if (Number.isNaN(changed)) return newest;
+    return newest === null || changed > newest ? changed : newest;
+  }, null);
+  const lastBuildDate =
+    newestChange === null
+      ? ""
+      : `\n    <lastBuildDate>${new Date(newestChange).toUTCString()}</lastBuildDate>`;
 
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
