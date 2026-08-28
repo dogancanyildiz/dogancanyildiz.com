@@ -9,6 +9,7 @@ import {
   parseArgs,
   parseCommit,
   parseCommitSubject,
+  pickHighestTag,
   renderNotes,
 } from "../scripts/release-version.mjs";
 
@@ -275,6 +276,30 @@ describe("insertChangelogEntry", () => {
         tag: "v0.2.0",
       })
     ).toThrow(/Unreleased/);
+  });
+});
+
+describe("pickHighestTag", () => {
+  it("picks the semver max, not the first tag in the list", () => {
+    expect(pickHighestTag(["v0.3.0", "v0.3.1", "v0.2.0"])).toBe("v0.3.1");
+  });
+
+  it("does not depend on input order", () => {
+    expect(pickHighestTag(["v1.0.0", "v0.9.9", "v10.0.0"])).toBe("v10.0.0");
+  });
+
+  it("compares minor and patch numerically, not lexically", () => {
+    expect(pickHighestTag(["v0.9.0", "v0.10.0", "v0.2.0"])).toBe("v0.10.0");
+  });
+
+  it("ignores tags that are not exactly v-major.minor.patch", () => {
+    expect(pickHighestTag(["v1.0.0-beta.1", "v1.0.0", "not-a-tag"])).toBe(
+      "v1.0.0"
+    );
+  });
+
+  it("returns null for an empty list", () => {
+    expect(pickHighestTag([])).toBeNull();
   });
 });
 
