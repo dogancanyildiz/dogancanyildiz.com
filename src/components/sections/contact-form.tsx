@@ -116,7 +116,10 @@ export function ContactForm() {
     return errors;
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  // Sync on purpose: React does not observe the promise an async submit
+  // handler returns, so a rejection escaping it would surface only as an
+  // unhandled rejection and leave the form stuck on "loading".
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (status === "loading" || retrySeconds > 0) {
       return;
@@ -145,17 +148,33 @@ export function ContactForm() {
     setErrorMessage("");
     setFieldErrors({});
 
+    const payload = {
+      ...values,
+      // Posted rather than short circuited here: a bot that can tell the
+      // two apart is a bot that can tune around the field.
+      [HONEYPOT_FIELD]: String(formData.get(HONEYPOT_FIELD) ?? ""),
+    };
+
+    submitRequest(form, payload).catch(() => {
+      // submitRequest already turns a failed request into the error state;
+      // this only covers a throw from the state or translation calls around
+      // it, which would otherwise leave the button spinning forever.
+      setErrorMessage(t("error"));
+      setStatus("error");
+      requestFocus("alert");
+    });
+  }
+
+  async function submitRequest(
+    form: HTMLFormElement,
+    payload: Record<string, string>
+  ) {
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Locale": locale },
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-        body: JSON.stringify({
-          ...values,
-          // Posted rather than short circuited here: a bot that can tell the
-          // two apart is a bot that can tune around the field.
-          [HONEYPOT_FIELD]: String(formData.get(HONEYPOT_FIELD) ?? ""),
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = (await res.json().catch(() => ({}))) as {
