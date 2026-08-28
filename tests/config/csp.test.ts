@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import {
+  CSP_REPORT_LIMITS,
+  isCspMeasurementEnabled,
+} from "@/app/api/csp-report/mode";
+
 type HeaderEntry = { key: string; value: string };
 
 async function loadNextConfig(nodeEnv: "production" | "development") {
@@ -117,6 +122,7 @@ describe("violation reporting", () => {
   });
 
   it("ships a stricter report only policy that drops both unsafe-inline", async () => {
+    vi.stubEnv("CSP_REPORT_ONLY", "1");
     const { nextConfig } = await loadNextConfig("production");
     const reportOnly = await headerValue(
       nextConfig,
@@ -129,7 +135,20 @@ describe("violation reporting", () => {
     expect(reportOnly).toContain("report-to");
   });
 
+  it("leaves the report only policy off until the build opts in", async () => {
+    const { nextConfig } = await loadNextConfig("production");
+    const reportOnly = await headerValue(
+      nextConfig,
+      "Content-Security-Policy-Report-Only"
+    );
+    // Always on it would cost every visitor around twenty POSTs per page view
+    // and exhaust the collector budget within two views, so the measurement is
+    // a window the owner opens, not a permanent header.
+    expect(reportOnly).toBeUndefined();
+  });
+
   it("keeps the report only policy out of development", async () => {
+    vi.stubEnv("CSP_REPORT_ONLY", "1");
     const { nextConfig } = await loadNextConfig("development");
     const reportOnly = await headerValue(
       nextConfig,
@@ -143,5 +162,28 @@ describe("violation reporting", () => {
     const csp = await contentSecurityPolicy(nextConfig);
     expect(csp).toContain("'unsafe-eval'");
     expect(csp).toContain("connect-src 'self' ws:");
+  });
+});
+
+describe("measurement switch", () => {
+  it("only reads an explicit 1", () => {
+    expect(isCspMeasurementEnabled(undefined)).toBe(false);
+    expect(isCspMeasurementEnabled("")).toBe(false);
+    expect(isCspMeasurementEnabled("0")).toBe(false);
+    expect(isCspMeasurementEnabled("true")).toBe(false);
+    expect(isCspMeasurementEnabled(" 1 ")).toBe(true);
+  });
+
+  it("throttles the collector to the idle budget by default", async () => {
+    const { CSP_REPORT_RATE_LIMIT } =
+      await import("@/app/api/csp-report/report");
+    expect(CSP_REPORT_RATE_LIMIT.limit).toBe(CSP_REPORT_LIMITS.idle);
+  });
+
+  it("raises the collector budget while the measurement window is open", async () => {
+    vi.stubEnv("CSP_REPORT_ONLY", "1");
+    const { CSP_REPORT_RATE_LIMIT } =
+      await import("@/app/api/csp-report/report");
+    expect(CSP_REPORT_RATE_LIMIT.limit).toBe(CSP_REPORT_LIMITS.measuring);
   });
 });

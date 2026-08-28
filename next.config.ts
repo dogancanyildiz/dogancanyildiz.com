@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+import { isCspMeasurementEnabled } from "./src/app/api/csp-report/mode";
 import { UMAMI_ORIGIN } from "./src/lib/analytics";
 
 /**
@@ -59,7 +60,9 @@ type PolicyOptions = {
  *
  * The parallel Content-Security-Policy-Report-Only header drops both
  * 'unsafe-inline' values so the real cost of the strict policy can be measured
- * from the reports before anything is enforced.
+ * from the reports before anything is enforced. It is off unless the build sets
+ * CSP_REPORT_ONLY=1, see src/app/api/csp-report/mode.ts for why the measurement
+ * is a bounded window rather than a permanent header.
  */
 function buildContentSecurityPolicy({
   reportOnly,
@@ -109,6 +112,12 @@ function buildContentSecurityPolicy({
  * source of truth: once the edge layer sets HSTS, this entry is removed rather
  * than duplicated. preload is deliberately absent, the apex domain is not ready
  * for a submission that cannot be undone quickly.
+ *
+ * includeSubDomains has a blast radius beyond the apex: once a browser has seen
+ * this header it refuses plain http to dev., preview., status., analytics. and
+ * send.dogancanyildiz.com for a year, and shortening the max-age only helps the
+ * clients that come back afterwards. Every one of those hosts has to terminate
+ * TLS with a valid certificate before this ships.
  *
  * Production only: a max-age of a year pinned to https on localhost would make
  * plain http development on the same host impossible.
@@ -193,9 +202,11 @@ const nextConfig: NextConfig = {
               isProduction,
             }),
           },
-          // Measurement only, and production only: in development every HMR
-          // script would report and drown the signal.
-          ...(isProduction
+          // Measurement only. Production, and only while CSP_REPORT_ONLY=1
+          // opens a measurement window: in development every HMR script would
+          // report, and permanently on it costs every visitor around twenty
+          // extra POSTs per page view for a result we can read in an hour.
+          ...(isProduction && isCspMeasurementEnabled()
             ? [
                 {
                   key: "Content-Security-Policy-Report-Only",

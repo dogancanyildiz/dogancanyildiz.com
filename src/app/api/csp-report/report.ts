@@ -1,5 +1,7 @@
 import { createRateLimiter } from "@/lib/rate-limit";
 
+import { CSP_REPORT_LIMITS, isCspMeasurementEnabled } from "./mode";
+
 /**
  * Parsing and throttling for the CSP violation collector.
  *
@@ -18,8 +20,17 @@ const ACCEPTED_CONTENT_TYPES = [
   "application/reports+json",
 ];
 
+/**
+ * The idle budget is deliberately small: with the report-only policy switched
+ * off only a genuine break in the enforced policy reports, and a flood is then
+ * either an attack or a bug. While CSP_REPORT_ONLY=1 measures the strict
+ * policy, every page view legitimately produces around twenty reports, so the
+ * budget follows the same switch instead of throttling the measurement away.
+ */
 export const CSP_REPORT_RATE_LIMIT = {
-  limit: 30,
+  limit: isCspMeasurementEnabled()
+    ? CSP_REPORT_LIMITS.measuring
+    : CSP_REPORT_LIMITS.idle,
   windowMs: 60_000,
 } as const;
 
