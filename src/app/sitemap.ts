@@ -5,9 +5,8 @@ import {
   getPosts,
   getProjectLocales,
   getProjects,
-  type Locale,
 } from "@/lib/content";
-import { absoluteUrl } from "@/lib/seo/alternates";
+import { absoluteUrl, buildLanguageAlternates } from "@/lib/seo/alternates";
 
 const STATIC_PAGES: Array<{
   path: string;
@@ -21,20 +20,9 @@ const STATIC_PAGES: Array<{
   { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
 ];
 
-function languagesFor(
-  path: string,
-  locales: readonly Locale[]
-): Record<string, string> {
-  const languages: Record<string, string> = {};
-  for (const locale of locales) {
-    languages[locale] = absoluteUrl(locale, path);
-  }
-  const fallbackLocale: Locale = locales.includes("en")
-    ? "en"
-    : (locales[0] ?? routing.defaultLocale);
-  languages["x-default"] = absoluteUrl(fallbackLocale, path);
-  return languages;
-}
+// Same helper the page head uses, so the sitemap and the hreflang tags can
+// never advertise a different set of languages for the same path.
+const languagesFor = buildLanguageAlternates;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
