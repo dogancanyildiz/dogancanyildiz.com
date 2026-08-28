@@ -11,7 +11,7 @@ import { POST } from "./route";
 
 const SITE_ORIGIN = "https://dogancanyildiz.com";
 
-const messages: Record<string, Record<string, string>> = {
+const messages = {
   api: {
     invalidRequest: "Invalid request. Name, email, and message are required.",
     emailNotConfigured: "Email is not configured on the server.",
@@ -23,7 +23,11 @@ const messages: Record<string, Record<string, string>> = {
     forbiddenOrigin: "This request did not come from the contact form.",
     sendTimeout: "The mail service did not answer in time.",
   },
-};
+} satisfies Record<string, Record<string, string>>;
+
+// Widened view for the translator stub, which is handed an arbitrary namespace.
+const messageLookup: Record<string, Record<string, string> | undefined> =
+  messages;
 
 // The locale reaches the translator, so the mock records which one was asked
 // for and answers with a marker the assertions can read back.
@@ -33,7 +37,7 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async ({ namespace, locale }) => {
     requestedLocales.push(locale);
     return (key: string) =>
-      `${locale}:${messages[namespace]?.[key] ?? key}`.replace(/^en:/, "");
+      `${locale}:${messageLookup[namespace]?.[key] ?? key}`.replace(/^en:/, "");
   }),
 }));
 
@@ -54,6 +58,15 @@ type SendOptions = { idempotencyKey?: string };
 
 const send =
   vi.fn<(payload: SendPayload, options?: SendOptions) => Promise<SendResult>>();
+
+/** The nth recorded send, failing loudly instead of reading past the end. */
+function sendCall(index = 0): [SendPayload, (SendOptions | undefined)?] {
+  const call = send.mock.calls[index];
+  if (!call) {
+    throw new Error(`resend send was not called ${index + 1} time(s)`);
+  }
+  return call;
+}
 
 vi.mock("@/lib/resend", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/resend")>();
@@ -136,7 +149,7 @@ describe("POST /api/contact success path", () => {
 
   it("sets reply-to so the visitor can be answered from the mail client", () => {
     return POST(contactRequest()).then(() => {
-      expect(send.mock.calls[0][0]).toMatchObject({
+      expect(sendCall()[0]).toMatchObject({
         replyTo: validPayload.email,
         to: "me@mail.invalid",
         from: "site@mail.invalid",
@@ -146,7 +159,7 @@ describe("POST /api/contact success path", () => {
 
   it("writes the sender as plain labelled lines, not as a mail header", async () => {
     await POST(contactRequest());
-    const payload = send.mock.calls[0][0];
+    const payload = sendCall()[0];
 
     expect(payload.text).toBe(
       `Name: ${validPayload.name}\nEmail: ${validPayload.email}\n\n${validPayload.message}`
@@ -330,7 +343,12 @@ describe("POST /api/contact honeypot", () => {
     );
 
     expect(warn).toHaveBeenCalledTimes(1);
-    const line = JSON.parse(String(warn.mock.calls[0][0]));
+    const warned = warn.mock.calls[0];
+    if (!warned) {
+      throw new Error("console.warn was not called");
+    }
+    const line = JSON.parse(String(warned[0]));
+
     expect(line.msg).toContain("honeypot");
     expect(line.requestId).toEqual(expect.any(String));
   });
@@ -383,7 +401,12 @@ describe("POST /api/contact mail failures", () => {
 
     await POST(contactRequest());
 
-    const line = String(error.mock.calls[0][0]);
+    const logged = error.mock.calls[0];
+    if (!logged) {
+      throw new Error("console.error was not called");
+    }
+    const line = String(logged[0]);
+
     expect(line).toContain("validation_error");
     expect(line).not.toContain("visitor@mail.invalid");
     expect(line).not.toContain(validPayload.message);
@@ -534,7 +557,7 @@ describe("POST /api/contact idempotency", () => {
   it("derives the key from the payload", async () => {
     await POST(contactRequest());
 
-    expect(send.mock.calls[0][1]).toMatchObject({
+    expect(sendCall()[1]).toMatchObject({
       idempotencyKey: expect.stringMatching(/^contact-[0-9a-f]{32}$/),
     });
   });

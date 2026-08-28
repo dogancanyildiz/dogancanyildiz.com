@@ -3,11 +3,30 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   CSP_REPORT_RATE_LIMIT,
   MAX_REPORT_BYTES,
+  type NormalizedReport,
   cspReportRateLimiter,
   isAcceptedContentType,
   normalizeReports,
 } from "./report";
 import { POST } from "./route";
+
+/** First normalized report, failing loudly when the body produced none. */
+function firstReport(body: unknown): NormalizedReport {
+  const [report] = normalizeReports(body);
+  if (!report) {
+    throw new Error("normalizeReports returned no entries");
+  }
+  return report;
+}
+
+/** First console.warn argument, failing loudly when the spy never ran. */
+function firstWarning(warn: { mock: { calls: unknown[][] } }): string {
+  const call = warn.mock.calls[0];
+  if (!call) {
+    throw new Error("console.warn was not called");
+  }
+  return String(call[0]);
+}
 
 function post(
   body: unknown,
@@ -65,7 +84,8 @@ describe("POST /api/csp-report", () => {
     await POST(post(violation));
 
     expect(warn).toHaveBeenCalledTimes(1);
-    const logged = JSON.parse(warn.mock.calls[0][0] as string);
+    const logged = JSON.parse(firstWarning(warn));
+
     expect(logged).toMatchObject({
       event: "csp-violation",
       directive: "script-src-elem",
@@ -97,7 +117,7 @@ describe("POST /api/csp-report", () => {
 
     expect(response.status).toBe(204);
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(warn.mock.calls[0][0] as string)).toMatchObject({
+    expect(JSON.parse(firstWarning(warn))).toMatchObject({
       directive: "style-src-attr",
     });
   });
@@ -161,19 +181,21 @@ describe("POST /api/csp-report", () => {
 
 describe("report parsing", () => {
   it("truncates attacker controlled strings before they reach the log", () => {
-    const [report] = normalizeReports({
+    const report = firstReport({
       "csp-report": { "document-uri": "x".repeat(5000) },
     });
+
     expect(report.documentUrl.length).toBe(300);
   });
 
   it("drops non string and non finite fields", () => {
-    const [report] = normalizeReports({
+    const report = firstReport({
       "csp-report": {
         "document-uri": { nested: true },
         "line-number": Number.NaN,
       },
     });
+
     expect(report.documentUrl).toBe("");
     expect(report.lineNumber).toBeNull();
   });
