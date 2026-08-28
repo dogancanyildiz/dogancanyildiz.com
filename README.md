@@ -47,7 +47,7 @@ missing, because a silent fallback would put a wrong host into `robots.txt` and
 | `npm run format`        | Prettier in check mode                                                                                                 |
 | `npm run format:write`  | Prettier in write mode                                                                                                 |
 | `npm run verify:routes` | Reads `.next/prerender-manifest.json` after a build: every content route prerendered in both locales, `/api/*` dynamic |
-| `npm run verify:links`  | HEAD/GET audit of project live demo URLs and certificate verify links (requires `npm run build:content` first)           |
+| `npm run verify:links`  | HEAD/GET audit of project live demo URLs and certificate verify links (requires `npm run build:content` first)         |
 | `npm run release:check` | Dry run of `scripts/release-version.mjs`: prints the version the next merge to `main` would cut, writes nothing        |
 | `npm run vendor:fonts`  | Copies the woff2 and woff font files from the @fontsource packages into src/fonts and public/fonts/og                  |
 
@@ -91,6 +91,12 @@ into image layers and build logs.
 - `/api/contact` checks `Content-Length`, rate limits per visitor IP, validates
   the body server side including the honeypot field, and returns a generic error
   on every failure. Details go to the server log only.
+- Dependency and code scanning: Dependabot (`.github/dependabot.yml`, weekly
+  grouped PRs against `dev`, security updates on demand) and CodeQL
+  (`.github/workflows/codeql.yml`, javascript-typescript, on every PR and
+  weekly). Both report to the repository Security tab.
+- Found a vulnerability? See [SECURITY.md](./SECURITY.md) or
+  `/.well-known/security.txt` on the live site.
 
 ## Deployment
 
@@ -230,3 +236,8 @@ build time and dev time against the schemas in `velite.config.ts`.
 content changes are picked up without a restart. `npm run build:content`
 runs Velite once in strict mode and is the fastest way to check that new
 front matter matches the schema before running the full build.
+
+## License
+
+The code is MIT licensed. The written content, the CV, the images and the
+personal branding are not, see [LICENSE](./LICENSE) for the exact split.

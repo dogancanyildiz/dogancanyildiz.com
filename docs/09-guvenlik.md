@@ -1,5 +1,5 @@
 # Güvenlik ve Bakım Operasyonu
-Durum: Kısmen uygulandı (Faz 0, PR #2; Faz 1, PR #3), kalan: Renovate GitHub App kurulumu ve aylık güvenlik takibi (Faz 5) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Kısmen uygulandı (Faz 0, PR #2; Faz 1, PR #3), bakım otomasyonu Dependabot + CodeQL ile kuruldu (2026-08-28, renovate.json kaldırıldı), kalan: aylık güvenlik takibi (Faz 5) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -140,7 +140,7 @@ Kanıt: repodaki `package.json`, `next.config.ts`, `.dockerignore`, `.env.exampl
 - **Env sırları Build/Runtime ayrımı** (madde 4, Karar 4): `.env.example` tabloyla birebir örtüşüyor: `NEXT_PUBLIC_SITE_URL` Build (zorunlu, `src/lib/env.ts` build'de doğruluyor), `RESEND_API_KEY`/`CONTACT_EMAIL`/`FROM_EMAIL`/`GATUS_URL` Runtime-only. `CONTACT_EMAIL`/`FROM_EMAIL` prod'da eksikse sessiz fallback yerine hata fırlatıyor (Faz 0 kararı, `src/lib/env.ts`).
 - **CI: hadolint + image build** (karar 5): `.github/workflows/ci.yml`'de `checks` (`lint, typecheck, test, build`) ve `docker` (`hadolint and image build`) job'ları var; Dockerfile Faz 4'te değişmedi, hadolint yalnızca `DL3066 info` üretiyor (`USER node`, bilinçli), `exit 0`. Registry'ye push yok.
 - **npm audit, Faz 0'daki 17 bulgudan büyüdü, hâlâ ayrı PR bekliyor**: bu doküman güncellenirken çalıştırılan `npm audit`, güncel `feature/faz-4-icerik-ve-yayin` dalında **19 bulgu** veriyor (2 low, 4 moderate, 13 high), Faz 0'daki 17'den (2 low, 4 moderate, 11 high) fazla. Fark, Faz 4'ün eklediği `velite` bağımlılık ağacından geliyor: `velite` -> `sharp <0.35.0`, libvips CVE'leri (CVE-2026-33327/33328/35590/35591, high, `GHSA-f88m-g3jw-g9cj`), `npm audit fix --force` velite'ı `0.0.0`'a düşürüyor (kırıcı, uygulanmadı). Faz 0'daki `shadcn`/`hono` zinciri ve `resend`/`svix`/`uuid` (moderate) bulguları da hâlâ duruyor. Karar değişmedi: ayrı bir PR'da ele alınacak, `npm audit fix` (force olmadan) uygulanabilir kısmı kapatabilir.
-- **Renovate GitHub App kurulmadı**: `renovate.json` dosyası Faz 0'da eklendi ama App'in kendisi GitHub'a kurulmadı; Faz 4 devir notunun "Faz 2 ve 3'ten devralınıp hâlâ açık" listesinde `TRUST_CF_CONNECTING_IP`, `npm audit` ile birlikte "Renovate" olarak tekrar teyit edildi. Faz 5'e kaldı.
+- **Renovate GitHub App kurulmadı** (2026-08-28: Renovate yerine Dependabot + CodeQL kuruldu, `renovate.json` silindi; bu madde kapandı): `renovate.json` dosyası Faz 0'da eklendi ama App'in kendisi GitHub'a kurulmadı; Faz 4 devir notunun "Faz 2 ve 3'ten devralınıp hâlâ açık" listesinde `TRUST_CF_CONNECTING_IP`, `npm audit` ile birlikte "Renovate" olarak tekrar teyit edildi. Faz 5'e kaldı.
 - **Status widget ve Umami henüz yok**: Faz 5 başlamadı; bu dokümandaki karar 3 ve son paragrafın Umami notu hâlâ öneri aşamasında.
 
 ## Riskler ve tripwire'lar
