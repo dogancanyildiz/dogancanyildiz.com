@@ -160,11 +160,18 @@ describe("getSiteStatus", () => {
     expect(status?.lastCheck).toBe("2026-08-27T09:20:00Z");
   });
 
-  it("returns null when GATUS_URL is not configured", async () => {
+  it("returns null and logs when GATUS_URL is not configured", async () => {
     vi.stubEnv("GATUS_URL", "");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     mockFetch(() => okJson(statusesFixture));
 
     expect(await getSiteStatus()).toBeNull();
+    expect(warn).toHaveBeenCalledTimes(1);
+    const [line] = warn.mock.calls[0] as [string];
+    const logged = JSON.parse(line);
+    expect(logged.reason).toBe("gatus-url-unset");
+    expect(logged.gatusHost).toBe("unset");
+    warn.mockRestore();
   });
 
   it("returns null when Gatus is unreachable", async () => {
@@ -251,6 +258,29 @@ describe("getSiteStatus", () => {
     expect(typeof logged.gatusHost).toBe("string");
     expect(logged.gatusHost).not.toBe(GATUS_URL);
     expect(logged.gatusHost).not.toContain("dogancanyildiz");
+    expect(line).not.toContain("dogancanyildiz");
+    warn.mockRestore();
+  });
+
+  it("scrubs the Gatus host out of an error message that embeds the request URL", async () => {
+    vi.stubEnv("GATUS_URL", GATUS_URL);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        // Some fetch wrappers (and DNS errors) put the full URL in the
+        // message; the log must not carry it through unmasked.
+        throw new Error(
+          `request to ${GATUS_URL}/api/v1/endpoints/statuses?page=1&pageSize=20 failed`
+        );
+      })
+    );
+
+    expect(await getSiteStatus()).toBeNull();
+    expect(warn).toHaveBeenCalledTimes(1);
+    const [line] = warn.mock.calls[0] as [string];
+    expect(line).not.toContain("dogancanyildiz");
+    expect(line).not.toContain(GATUS_URL);
     warn.mockRestore();
   });
 

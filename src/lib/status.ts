@@ -70,9 +70,26 @@ function isValidTimestamp(value: string): boolean {
   return !Number.isNaN(Date.parse(value));
 }
 
+/**
+ * Stringifies a caught error for logging with the GATUS_URL host scrubbed
+ * out. Some fetch failures (DNS errors, custom fetch wrappers) embed the
+ * full request URL in their message, which would defeat maskHost() if the
+ * message were logged verbatim.
+ */
+function safeErrorMessage(error: unknown, base: string): string {
+  const raw = String(error);
+  let host: string;
+  try {
+    host = new URL(base).hostname;
+  } catch {
+    return raw;
+  }
+  return host ? raw.split(host).join(maskHost(base)) : raw;
+}
+
 /** Single-line, secret-free warning so misconfiguration leaves a trace. */
 function logStatusIssue(
-  base: string,
+  base: string | undefined,
   reason: string,
   extra?: Record<string, unknown>
 ): void {
@@ -80,7 +97,7 @@ function logStatusIssue(
     JSON.stringify({
       scope: "status",
       reason,
-      gatusHost: maskHost(base),
+      gatusHost: base ? maskHost(base) : "unset",
       ...extra,
     })
   );
@@ -122,7 +139,10 @@ function parseUptimePayload(raw: string): number | null {
  */
 export async function getSiteStatus(): Promise<SiteStatus | null> {
   const base = process.env.GATUS_URL;
-  if (!base) return null;
+  if (!base) {
+    logStatusIssue(base, "gatus-url-unset");
+    return null;
+  }
 
   try {
     const [statusesOutcome, uptimeOutcome] = await Promise.allSettled([
@@ -143,7 +163,7 @@ export async function getSiteStatus(): Promise<SiteStatus | null> {
     // nothing to render, so its failure still aborts the whole panel.
     if (statusesOutcome.status === "rejected") {
       logStatusIssue(base, "statuses-fetch-failed", {
-        message: String(statusesOutcome.reason),
+        message: safeErrorMessage(statusesOutcome.reason, base),
       });
       return null;
     }
@@ -182,7 +202,7 @@ export async function getSiteStatus(): Promise<SiteStatus | null> {
       uptime24h = parseUptimePayload(await uptimeOutcome.value.text());
     } else if (uptimeOutcome.status === "rejected") {
       logStatusIssue(base, "uptime-fetch-failed", {
-        message: String(uptimeOutcome.reason),
+        message: safeErrorMessage(uptimeOutcome.reason, base),
       });
     } else if (uptimeOutcome.status === "fulfilled") {
       logStatusIssue(base, "uptime-http-error", {
@@ -206,7 +226,9 @@ export async function getSiteStatus(): Promise<SiteStatus | null> {
         : null,
     };
   } catch (error) {
-    logStatusIssue(base, "unexpected-error", { message: String(error) });
+    logStatusIssue(base, "unexpected-error", {
+      message: safeErrorMessage(error, base),
+    });
     return null;
   }
 }
