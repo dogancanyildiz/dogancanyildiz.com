@@ -315,7 +315,6 @@ describe("small uppercase labels", () => {
     ".eyebrow",
     ".meta-label",
     ".tag-pill",
-    ".section-label",
     ".prose-content th",
   ];
 
@@ -341,7 +340,7 @@ describe("small uppercase labels", () => {
       const body = rule.slice(0, rule.indexOf("}"));
       return Number(body.match(/text-\[([\d.]+)rem\]/)?.[1]);
     };
-    for (const lead of [".eyebrow", ".section-label"]) {
+    for (const lead of [".eyebrow"]) {
       for (const inline of [".meta-label", ".tag-pill"]) {
         expect(
           sizeOf(lead),
@@ -476,20 +475,8 @@ describe("no dead classes in the shipped stylesheet", () => {
     { state: "unused" | "retiring"; why: string }
   >([
     [
-      "list-row",
-      { state: "retiring", why: "consumers go with the layout clean-up" },
-    ],
-    [
-      "display-hero",
-      { state: "retiring", why: "consumer goes with the hero rework" },
-    ],
-    [
       "pull-quote",
       { state: "unused", why: "quote surface, wired up by the content branch" },
-    ],
-    [
-      "table-wrap",
-      { state: "unused", why: "table wrapper, wired up by the content branch" },
     ],
   ]);
 

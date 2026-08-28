@@ -49,16 +49,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function GlobalNotFound() {
   const locale = await documentLocale();
   const t = await messages(locale);
-  const secondary = secondaryLocale && secondaryLocale !== locale
-    ? await messages(secondaryLocale)
-    : null;
+  const secondary =
+    secondaryLocale && secondaryLocale !== locale
+      ? await messages(secondaryLocale)
+      : null;
 
   return (
-    <html
-      lang={locale}
-      className={fontVariables}
-      suppressHydrationWarning
-    >
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"

@@ -219,17 +219,13 @@
 
   /* 0.75rem is the floor for uppercase mono that carries information: below
      it the wide tracking and the caps stop being readable at arm's length.
-     Section level labels (.eyebrow, .section-label) sit one step above that
-     floor so the hierarchy against inline meta text survives the raise. */
+     The section level label (.eyebrow) sits one step above that floor so
+     the hierarchy against inline meta text survives the raise. */
   .eyebrow {
     @apply font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-muted-foreground;
   }
 
-  /* Home-only display scale - restrained, not billboard-sized. */
-  .display-hero {
-    @apply text-4xl font-semibold tracking-tight text-balance leading-tight sm:text-5xl lg:text-6xl;
-  }
-
+  /* Display scale - restrained, not billboard-sized. */
   .display-section {
     @apply text-2xl font-semibold tracking-tight text-balance leading-snug sm:text-3xl lg:text-4xl;
   }
@@ -250,25 +246,12 @@
     @apply text-2xl font-semibold leading-snug tracking-tight sm:text-3xl;
   }
 
-  .section-label {
-    @apply mb-4 inline-flex items-center gap-2 font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-muted-foreground;
-  }
-  .section-label::before {
-    content: "";
-    @apply size-1.5 shrink-0 rounded-full bg-foreground;
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
-
   .section-copy {
     @apply text-base leading-relaxed text-muted-foreground;
   }
 
   .meta-label {
     @apply font-mono text-[0.75rem] font-medium uppercase tracking-[0.1em] text-muted-foreground;
-  }
-
-  .list-row {
-    @apply relative py-5 transition-colors;
   }
 
   .content-stack {
@@ -434,24 +417,6 @@
   .dark .prose-content .shiki span {
     color: var(--shiki-dark);
     background-color: var(--shiki-dark-bg);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .section-label::before {
-      animation: none;
-    }
-  }
-}
-
-@keyframes pulse-dot {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(0.6);
-    opacity: 0.6;
   }
 }
 

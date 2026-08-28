@@ -63,6 +63,7 @@ const CLIENT_MESSAGE_NAMESPACES = [
   "projects",
   "blog",
   "contact",
+  "errorPage",
   "a11y",
 ] as const;
 
