@@ -17,9 +17,11 @@ Bu dizin, portfolio modernizasyon projesinin her fazından sonra teslim edilen d
 | faz-3.md | 3 | Devir notu: Tasarım sistemi, tipografi, palet, hareket | Uygulandı, PR #5 merged |
 | faz-3-notlar.md | 3 | Ara notlar: Task 0 doğrulaması ve plan düzeltmeleri | Bilgi amaçlı |
 | faz-3-manual-checklist.md | 3 | Site sahibine yapması gereken manuel adımlar | Tamamlanacak |
-| faz-4.md | 4 | Devir notu: İçerik pipeline, Velite, gerçek içerik, blog | Yazıldı (commit `2ffa35b`), PR #6 açık, merge kararı sahibinde |
+| faz-4.md | 4 | Devir notu: İçerik pipeline, Velite, gerçek içerik, blog | Yazıldı (commit `2ffa35b`), PR #6 merged (2026-08-27) |
 | faz-4-brief.md | 4 | Görev brief'i: Faz 4 uygulanacak işlerin özeti | Başlangıç referansı |
 | faz-4-manual-checklist.md | 4 | Site sahibine yapması gereken manuel adımlar | Tamamlanacak |
+| faz-5-manual-checklist.md | 5 | Cloudflare DNS, Coolify Gatus/Umami kaynakları, Umami paneli, env ve canlı doğrulama | Panel adımları tamamlanacak (kod PR #31 ile merged) |
+| denetim-kapanisi-2026-08-28.md | denetim | 28 Ağustos denetim raporundaki açık bulguların kapanış devir notu: kümeler, kararlar, sahibine kalanlar | Yazıldı |
 
 ## Okuma sırası
 
@@ -56,8 +58,9 @@ Her manuel checklist şunu içerir:
 - **Faz 1**: Deploy hattı (✓ merged PR #3)
 - **Faz 2**: i18n mimarisi (✓ merged PR #4)
 - **Faz 3**: Tasarım sistemi (✓ merged PR #5)
-- **Faz 4**: İçerik pipeline (⏳ PR #6 açık, CI yeşil, HEAD `8b4fe40`, 21 commit; merge kararı sahibinde)
-- **Faz 5**: Altyapı vitrini, otomasyonlar (⧗ henüz başlamadı; devir notu ve manuel checklist'i yok)
+- **Faz 4**: İçerik pipeline (✓ merged PR #6, 2026-08-27)
+- **Faz 5**: Altyapı vitrini, otomasyonlar (✓ kod merged PR #31, 2026-08-28, v0.3.1; panel adımları `faz-5-manual-checklist.md`'de açık; ayrı bir faz-5.md devir notu yazılmadı, kapsam PR #31 gövdesinde ve `docs/10-yol-haritasi.md` Faz 5 bölümünde)
+- **Denetim kapanışı**: 28 Ağustos denetimindeki açık bulgular (`denetim-kapanisi-2026-08-28.md`)
 
 ## Notlar
 

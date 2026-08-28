@@ -1,6 +1,6 @@
 # Faz Planları
 
-Durum: Tarihsel kayıt · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Tarihsel kayıt · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
 
 Bu klasör, `docs/`'taki karar dokümanlarından türetilen faz başına uygulama
 planlarını tutar (writing-plans formatı). Her `2026-08-27-faz-N-*.md` dosyası
@@ -27,6 +27,17 @@ kararıyla yapıldı; bkz. `docs/00-ozet-ve-karar.md`, `docs/06-devops-ve-deploy
 Bir plan dosyasını okurken domain örneklerine güvenmeyin, güncel karar için
 her zaman `docs/` altındaki numaralı karar dokümanlarına bakın.
 
+**Ek not (2026-08-28):** 28 Ağustos denetimi `dogancanyildiz.sh` alan adının
+hiç kayıtlı olmadığını gösterdi (DNS'te zone yok). Faz 5 planı 90 yerde `.sh`
+hostname'i kullanıyor (`status.dogancanyildiz.sh`, `analytics.dogancanyildiz.sh`);
+uygulama `.com` ile yapıldı (`infra/gatus`, `infra/umami`, `.env.example`).
+`.sh` için karar sahibinde: ya alan adı kaydedilip Cloudflare'a eklenir ve
+`docs/deploy/cloudflare-kurulum.md` bölüm "Zone: dogancanyildiz.sh" uygulanır,
+ya da `.sh` kapsam dışı ilan edilir ve README, launch-checklist, cloudflare-kurulum,
+traefik-ve-origin'deki 301 satırları kaldırılır. Karar gelene kadar `.sh -> .com`
+301'i "canlıya alınmadı, alan adı kayıtsız" olarak okunmalı (bkz.
+`docs/plans/handoffs/denetim-kapanisi-2026-08-28.md`).
+
 ## Dosyalar
 
 | Dosya | Faz | Durum |
@@ -35,8 +46,8 @@ her zaman `docs/` altındaki numaralı karar dokümanlarına bakın.
 | [2026-08-27-faz-1-deploy-hatti.md](2026-08-27-faz-1-deploy-hatti.md) | 1. Deploy hattı | Uygulandı, PR #3 merged; panel adımları sahibinde |
 | [2026-08-27-faz-2-i18n-app-lang.md](2026-08-27-faz-2-i18n-app-lang.md) | 2. i18n yeniden mimarisi | Uygulandı, PR #4 merged |
 | [2026-08-27-faz-3-tasarim-sistemi.md](2026-08-27-faz-3-tasarim-sistemi.md) | 3. Tasarım sistemi | Uygulandı, PR #5 merged |
-| [2026-08-27-faz-4-icerik-ve-yayin.md](2026-08-27-faz-4-icerik-ve-yayin.md) | 4. İçerik ve yayın | Uygulandı, PR #6 açık, merge kararı sahibinde |
-| [2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md](2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md) | 5. Altyapı vitrini ve ölçüm | Başlamadı |
+| [2026-08-27-faz-4-icerik-ve-yayin.md](2026-08-27-faz-4-icerik-ve-yayin.md) | 4. İçerik ve yayın | Uygulandı, PR #6 merged (2026-08-27) |
+| [2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md](2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md) | 5. Altyapı vitrini ve ölçüm | Kod tarafı uygulandı, PR #31 merged (2026-08-28, v0.3.1); Coolify/Cloudflare panel adımları `handoffs/faz-5-manual-checklist.md`'de sahibinde |
 
 ## İlgili dokümanlar
 

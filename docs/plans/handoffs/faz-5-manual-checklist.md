@@ -2,13 +2,13 @@
 
 Bu adımlar kodla yapılamaz, site sahibi veya kontrol oturumu uygular. Kod tarafı (infra compose dosyaları, `status.ts`, Systems bölümü, Umami script, CSP) repoda hazır; burada kalan iş Cloudflare, Coolify ve Umami panel adımlarıdır.
 
-Dal: `feature/faz-5-altyapi-vitrini` (veya eşdeğer). Tek PR, `main` hedefi.
+Durum (2026-08-28): Faz 5 kodu `dev` üzerinden `main`'e PR #31 ile merge edildi ve v0.3.1 olarak yayınlandı; bölüm 1 ve 9 bu yüzden kapandı. Bölüm 2-8 hâlâ sahibinin panel adımları. Sıra önemli: Umami paneli varsayılan `admin` / `umami` kimlik bilgisiyle açıldığı için bölüm 4'te deploy ile bölüm 5'teki parola değişikliği arasında panel herkese açık kalmamalı; bölüm 4'ün son adımı olan domain bağlamayı, parola değiştirilene kadar erteleyin.
 
 ## 1. PR ve CI
 
-- [ ] PR gövdesinde Faz 5 kapsamı, bitti kriteri ve `docs/runbooks/infrastructure.md` referansı var.
-- [ ] `gh pr checks --watch`: `lint`, `typecheck`, `test`, `build`, `hadolint and image build` yeşil.
-- [ ] Vitest özetinde `tests/lib/status.test.ts` ve `tests/config/csp.test.ts` geçiyor.
+- [x] Faz 5 PR #31 (`dev -> main`) 2026-08-28'de merge edildi; kapsam ve `docs/runbooks/infrastructure.md` referansı PR gövdesinde.
+- [x] Zorunlu check'ler yeşil geçti. Güncel adlar: `Quality checks`, `Docker image` (`ci.yml`) ve `CodeQL analysis` (`codeql.yml`); eski `lint`, `typecheck`, `test`, `build`, `hadolint and image build` job adları artık yok.
+- [x] Vitest özetinde `tests/lib/status.test.ts` ve `tests/config/csp.test.ts` geçiyor.
 
 ## 2. Cloudflare DNS
 
@@ -37,8 +37,8 @@ Beklenen: `public_site`, `public_umami`
 
 - [ ] + New Resource > Docker Compose.
 - [ ] Base Directory: `/infra/umami`
-- [ ] Domain: `umami` servisi için `https://analytics.dogancanyildiz.com`
-- [ ] İlk deploy sonrası Coolify `SERVICE_PASSWORD_*` magic değişkenlerini üretmiş olmalı.
+- [ ] İlk deploy'u domain BAĞLAMADAN yap (Coolify'ın verdiği geçici adres veya yalnızca iç ağ); `SERVICE_PASSWORD_*` magic değişkenlerinin üretildiğini doğrula.
+- [ ] Bölüm 5'teki parola değişikliğini tamamla, ancak ondan sonra `umami` servisine `https://analytics.dogancanyildiz.com` domain'ini bağla ve redeploy et. Varsayılan `admin` / `umami` çifti public domain'de bir saniye bile açık kalmamalı.
 - [ ] Doğrula:
 
 ```bash
@@ -50,8 +50,8 @@ Beklenen: iki satır `200`
 
 ## 5. Umami paneli
 
-- [ ] `https://analytics.dogancanyildiz.com` adresine gir.
-- [ ] Varsayılan `admin` / `umami` ile giriş, parolayı hemen değiştir.
+- [ ] Panele geçici adresten (domain bağlanmadan önce, bkz. bölüm 4) gir.
+- [ ] Varsayılan `admin` / `umami` ile giriş, parolayı hemen değiştir; sonra bölüm 4'e dönüp domain'i bağla.
 - [ ] Settings > Websites > Add website: Name `dogancanyildiz.com`, Domain `dogancanyildiz.com`
 - [ ] Website UUID'yi not al.
 
@@ -88,14 +88,14 @@ Ana sayfada Systems bölümü: up/down, 24s uptime yüzdesi, son deploy tarihi v
 - [ ] CodeQL workflow PR/push/schedule koşuyor.
 - [ ] En az bir Dependabot PR (açık veya merged) `npm`, `github-actions` veya `docker` için mevcut veya beklenen schedule sonrası oluşacak.
 
-## 9. Release v0.2.0 (merge sonrası)
+## 9. Release (merge sonrası)
 
-- [ ] `feat:` / `fix:` commit'lerle squash merge → `main`.
-- [ ] `release.yml` tag ve GitHub Release oluşturur.
-- [ ] `release/sync-v*` PR'ını dev'e merge et (workflow notundaki reopen trick ile CI tetiklenebilir).
+- [x] Faz 5 `main`'e PR #31 ile girdi; PR #31'in squash başlığı Conventional Commits biçiminde olmadığı için o push sürüm üretmedi, hemen ardından gelen PR #32 (`fix(deps)`) ile `release.yml` v0.3.1 tag'ini ve GitHub Release'i kesti, Faz 5 bu sürümün içinde (v0.2.0 ve v0.3.0 daha önce kesilmişti).
+- [x] `release/sync-v0.3.1` PR #33 `dev`'e merge edildi.
 
 ## Açık / opsiyonel
 
 - Umami 2FA isteniyor mu?
-- `twinproduction/gatus:v5` major pin; digest pin istenirse Dependabot docker ecosystem ile takip edilebilir.
+- Gatus, Umami ve Postgres imajlarının sürüm pinleri ve Dependabot'un `infra/` dizinlerini taraması 2026-08-28 denetim kapanışında ele alındı; bkz. `docs/plans/handoffs/denetim-kapanisi-2026-08-28.md`.
+- Gatus uyarı kanalı: `infra/gatus` compose'unda `GATUS_ALERT_WEBHOOK_URL` boşsa uyarı gönderilmez; Coolify'da bu değişkeni doldurmadan kesinti kimseye bildirilmez.
 - Runtime `GIT_SHA` entrypoint migration bilinçli olarak yapılmadı; footer ve Systems `NEXT_PUBLIC_BUILD_SHA/DATE` kullanıyor.
