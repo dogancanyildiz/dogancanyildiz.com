@@ -80,6 +80,13 @@ export function buildBreadcrumbList(
 /**
  * WebSite node for one locale. Rendered by the home page of each locale rather
  * than by the shared layout, so every subpage does not repeat it.
+ *
+ * `url` is `identityUrl()` and not the locale root, for the same reason the
+ * Person node is pinned: one `@id` carrying two different urls is the split
+ * identity the shared id exists to prevent, and a consumer merging the english
+ * and turkish pages would see exactly that. The language of this particular
+ * description is carried by `inLanguage` and by the localized name and
+ * description, which is what actually differs between the two.
  */
 export function buildWebSite(
   locale: Locale,
@@ -90,7 +97,7 @@ export function buildWebSite(
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": websiteId(),
-    url: absoluteUrl(locale, "/"),
+    url: identityUrl(),
     name,
     description,
     inLanguage: locale,

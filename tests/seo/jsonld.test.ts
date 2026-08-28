@@ -45,10 +45,15 @@ describe("identity nodes", () => {
     expect(ids[0]).toBe(websiteId());
   });
 
-  it("points the turkish website url at the turkish root", () => {
-    expect(buildWebSite("tr", "Name", "Description").url).toBe(
-      "https://dogancanyildiz.com/tr"
-    );
+  it("gives that one website id a single url, whichever locale renders it", () => {
+    // A node id is a claim about identity. Handing the same @id a different
+    // url per locale is the split identity the shared id exists to prevent;
+    // the language of the page is carried by inLanguage instead.
+    for (const locale of routing.locales) {
+      expect(buildWebSite(locale, "Name", "Description").url).toBe(
+        identityUrl()
+      );
+    }
   });
 });
 
