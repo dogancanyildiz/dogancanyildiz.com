@@ -2,7 +2,8 @@
 
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
-import { ArrowRight, Download, Github, Linkedin } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icon";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -122,7 +123,7 @@ export function Hero({ showCv, profileImageSrc }: HeroProps) {
               aria-label={t("footer.github")}
               className="tap-target text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Github className="size-4" aria-hidden="true" />
+              <GithubIcon className="size-4" aria-hidden="true" />
             </a>
             <a
               href={SOCIAL.linkedin}
@@ -131,7 +132,7 @@ export function Hero({ showCv, profileImageSrc }: HeroProps) {
               aria-label={t("footer.linkedin")}
               className="tap-target text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Linkedin className="size-4" aria-hidden="true" />
+              <LinkedinIcon className="size-4" aria-hidden="true" />
             </a>
           </m.div>
         </m.div>

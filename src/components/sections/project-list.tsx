@@ -2,7 +2,8 @@
 
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
-import { ArrowUpRight, ExternalLink, Github } from "lucide-react";
+import { ArrowUpRight, ExternalLink } from "lucide-react";
+import { GithubIcon } from "@/components/ui/brand-icon";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -104,7 +105,7 @@ export function ProjectList({
                     rel="noopener noreferrer"
                     className="tag-pill inline-flex items-center gap-1.5 normal-case tracking-normal transition-colors hover:border-primary/40 hover:text-primary"
                   >
-                    <Github className="size-3" aria-hidden="true" />
+                    <GithubIcon className="size-3" aria-hidden="true" />
                     {t("viewSource")}
                   </a>
                 ) : null}
