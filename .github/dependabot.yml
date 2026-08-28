@@ -32,6 +32,10 @@ updates:
         update-types: [version-update:semver-major]
       # Exact pin, see docs/02-stack-karari.md. Bumped by hand.
       - dependency-name: velite
+      # eslint-plugin-react (via eslint-config-next) does not run on ESLint 10
+      # yet; bumped by hand when eslint-config-next supports the next major.
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
       # Until typescript-eslint supports the next major.
       - dependency-name: typescript
         update-types: [version-update:semver-major]
