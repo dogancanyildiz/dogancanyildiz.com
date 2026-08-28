@@ -39,18 +39,10 @@ const WOFF2 = [
   ],
 ];
 
-// satori (next/og) cannot read woff2. Geist variable ships woff2 only, so the
-// OG image gets woff copies converted from the vendored woff2 subsets.
-const OG_WOFF_FROM_WOFF2 = [
-  ["geist-latin.woff2", "geist-latin.woff"],
-  ["geist-latin-ext.woff2", "geist-latin-ext.woff"],
-  ["geist-mono-latin.woff2", "geist-mono-latin.woff"],
-];
-
-// satori also refuses a variable font: the woff copies above still carry fvar
-// and gvar, and satori's parser walks the glyf table with the static outline
-// layout, which throws "Cannot read properties of undefined" and turns the OG
-// route into a 500. fontTools pins the weight axis to a single value and drops
+// satori (next/og) cannot read woff2 and refuses a variable font: a plain
+// woff copy of Geist still carries fvar and gvar, and satori's parser walks
+// the glyf table with the static outline layout, which throws "Cannot read
+// properties of undefined" and turns the OG route into a 500. fontTools pins the weight axis to a single value and drops
 // fvar/gvar, so these static instances are what the route actually loads. Two
 // weights because the card mixes 400 body text with a 600 headline, and satori
 // picks a face by exact name + weight + style.
@@ -76,34 +68,6 @@ function copyAll(entries, targetDir) {
     console.log(
       `${targetName} <- ${specifier} (${statSync(target).size} bytes)`
     );
-  }
-}
-
-function convertOgWoff() {
-  mkdirSync(ogFontsDir, { recursive: true });
-  for (const [woff2Name, woffName] of OG_WOFF_FROM_WOFF2) {
-    const woff2Path = join(fontsDir, woff2Name);
-    const woffPath = join(ogFontsDir, woffName);
-    const result = spawnSync(
-      "python3",
-      [
-        "-c",
-        `from fontTools.ttLib import TTFont, woff2
-from pathlib import Path
-src, dst = ${JSON.stringify([woff2Path, woffPath])}
-tmp = Path(dst).with_suffix(".ttf")
-woff2.decompress(src, str(tmp))
-font = TTFont(str(tmp))
-font.flavor = "woff"
-font.save(dst)
-tmp.unlink()
-print(f"{Path(dst).name} ({Path(dst).stat().st_size} bytes)")`,
-      ],
-      { stdio: "inherit" }
-    );
-    if (result.status !== 0) {
-      throw new Error(`Failed to convert ${woff2Name} to ${woffName}`);
-    }
   }
 }
 
@@ -145,8 +109,7 @@ print(f"{Path(dst).name} (wght {weight}, {Path(dst).stat().st_size} bytes)")`,
 
 copyAll(WOFF2, fontsDir);
 copyAll(LICENSES, fontsDir);
-convertOgWoff();
 buildOgStaticInstances();
 console.log(
-  `Vendored ${WOFF2.length + LICENSES.length} files into src/fonts and ${OG_WOFF_FROM_WOFF2.length + OG_STATIC_FROM_WOFF2.length} into public/fonts/og.`
+  `Vendored ${WOFF2.length + LICENSES.length} files into src/fonts and ${OG_STATIC_FROM_WOFF2.length} into public/fonts/og.`
 );

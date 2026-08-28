@@ -62,21 +62,18 @@ describe("ci workflow", () => {
     );
   });
 
-  it("runs the audit as the last checks step, tolerating its known-red result", () => {
-    // The audit is expected to fail until velite (owned outside this
-    // cluster) drops its sub-0.35.0 sharp dependency. continue-on-error
-    // keeps that from failing the required check; placing it after every
-    // other step keeps lint/typecheck/test/build feedback visible in the
-    // log regardless of the audit's outcome.
+  it("runs the audit as the last checks step and lets it fail the check", () => {
+    // velite moved to devDependencies, so the production graph audits clean
+    // and the step is a real gate again (no continue-on-error). Placing it
+    // after every other step keeps lint/typecheck/test/build feedback
+    // visible in the log regardless of the audit's outcome.
     const content = workflow();
     const auditIndex = content.indexOf("run: npm audit --omit=dev");
     const testIndex = content.indexOf("run: npm run test");
     const buildIndex = content.indexOf("run: npm run build:app");
     expect(auditIndex).toBeGreaterThan(testIndex);
     expect(auditIndex).toBeGreaterThan(buildIndex);
-    expect(content).toMatch(
-      /run: npm audit --omit=dev --audit-level=high\s*\n\s*continue-on-error: true/
-    );
+    expect(content).not.toContain("continue-on-error");
   });
 
   it("lints the Dockerfile with a digest pinned hadolint image", () => {

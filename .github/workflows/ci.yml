@@ -68,16 +68,11 @@ jobs:
       # High severity vulnerabilities in a runtime dependency ship straight to
       # production; a devDependency only ever runs on a developer's or CI's
       # own machine. --omit=dev keeps the gate on the risk that matters here.
-      # Known failing as of 2026-08-28: velite lists sharp <0.35.0 as a
-      # dependency (GHSA-f88m-g3jw-g9cj), and --omit=dev only elides it once
-      # velite itself moves to devDependencies in package.json (owned outside
-      # this cluster), or once a velite release depends on sharp >=0.35.0.
-      # continue-on-error keeps this step from failing the whole required
-      # check on a vulnerability this repo cannot yet fix; the raw npm audit
-      # output still prints above for anyone checking the log.
+      # velite (and its sharp <0.35.0 chain, GHSA-f88m-g3jw-g9cj) lives in
+      # devDependencies since 2026-08-28, so the production graph audits clean
+      # and this step is a real gate: a new high finding fails the check.
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
-        continue-on-error: true
 
   docker:
     name: Docker image

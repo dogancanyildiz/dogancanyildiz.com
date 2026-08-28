@@ -29,6 +29,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "coverage/**",
     "next-env.d.ts",
     // Velite content pipeline output and test fixture output:
     ".velite/**",

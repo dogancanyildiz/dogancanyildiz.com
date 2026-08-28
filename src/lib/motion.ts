@@ -28,23 +28,3 @@ export function fadeUp(reduced: boolean): Variants {
     }),
   };
 }
-
-/** Parent variant for a group whose children animate in sequence. */
-export function staggerContainer(reduced: boolean): Variants {
-  return {
-    hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : STAGGER_SECONDS } },
-  };
-}
-
-/** Child variant used together with staggerContainer. */
-export function staggerItem(reduced: boolean): Variants {
-  return {
-    hidden: { opacity: reduced ? 1 : 0, y: reduced ? 0 : 4 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: reduced ? 0 : DURATION_SECONDS, ease: "easeOut" },
-    },
-  };
-}

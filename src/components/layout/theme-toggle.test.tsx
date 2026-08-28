@@ -19,6 +19,10 @@ describe("ThemeToggle", () => {
     const button = screen.getByRole("button", { name: "Toggle theme" });
     expect(container.querySelectorAll("button")).toHaveLength(1);
     expect(button).toHaveAttribute("aria-pressed", "false");
+    // Never a disabled placeholder: the pre-hydration button is the same
+    // element, it only lacks the resolved theme until mount.
+    expect(button).not.toHaveAttribute("disabled");
+    expect(button).not.toHaveAttribute("aria-disabled");
     // The size/border classes come from the same Button element on every
     // mount state: nothing here differs between the pre-hydration render and
     // the one after resolvedTheme settles, so there is no layout jump.

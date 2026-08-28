@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -13,10 +13,13 @@ const VENDORED_WOFF2 = [
   "src/fonts/instrument-serif-latin-ext.woff2",
 ];
 
-const VENDORED_OG_WOFF = [
-  "public/fonts/og/geist-latin.woff",
-  "public/fonts/og/geist-latin-ext.woff",
-  "public/fonts/og/geist-mono-latin.woff",
+// Static instances (fontTools instancer) that the OG route actually loads;
+// satori reads neither woff2 nor a variable font.
+const VENDORED_OG_TTF = [
+  "public/fonts/og/geist-latin-400.ttf",
+  "public/fonts/og/geist-latin-600.ttf",
+  "public/fonts/og/geist-latin-ext-400.ttf",
+  "public/fonts/og/geist-latin-ext-600.ttf",
 ];
 
 describe("vendored fonts", () => {
@@ -28,12 +31,25 @@ describe("vendored fonts", () => {
     expect(readFileSync(file).subarray(0, 4).toString("latin1")).toBe("wOF2");
   });
 
-  it.each(VENDORED_OG_WOFF)("%s exists and is a real woff file", (relative) => {
-    const file = join(root, relative);
-    expect(existsSync(file)).toBe(true);
-    expect(statSync(file).size).toBeGreaterThan(5000);
-    // woff magic number: "wOFF"
-    expect(readFileSync(file).subarray(0, 4).toString("latin1")).toBe("wOFF");
+  it.each(VENDORED_OG_TTF)(
+    "%s exists and is a static TrueType file",
+    (relative) => {
+      const file = join(root, relative);
+      expect(existsSync(file)).toBe(true);
+      expect(statSync(file).size).toBeGreaterThan(5000);
+      const bytes = readFileSync(file);
+      // TrueType sfnt version 1.0
+      expect(bytes.subarray(0, 4).toString("hex")).toBe("00010000");
+      // No variation tables: satori cannot parse fvar/gvar outlines.
+      expect(bytes.includes("fvar")).toBe(false);
+      expect(bytes.includes("gvar")).toBe(false);
+    }
+  );
+
+  it("ships no leftover woff copies in the OG font directory", () => {
+    const dir = join(root, "public", "fonts", "og");
+    const leftovers = readdirSync(dir).filter((name) => name.endsWith(".woff"));
+    expect(leftovers).toEqual([]);
   });
 
   it("ships the OFL licence next to the vendored files", () => {

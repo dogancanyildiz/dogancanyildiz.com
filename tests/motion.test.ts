@@ -5,9 +5,7 @@ import {
   MAX_STAGGER_ITEMS,
   STAGGER_SECONDS,
   fadeUp,
-  staggerContainer,
   staggerDelay,
-  staggerItem,
 } from "@/lib/motion";
 
 describe("stagger budget", () => {
@@ -51,10 +49,6 @@ describe("reduced motion variants", () => {
     const transition = show.transition as { duration: number; delay: number };
     expect(transition.duration).toBe(0);
     expect(transition.delay).toBe(0);
-    expect(staggerContainer(true).show).toEqual({
-      transition: { staggerChildren: 0 },
-    });
-    expect(staggerItem(true).hidden).toEqual({ opacity: 1, y: 0 });
   });
 });
 
