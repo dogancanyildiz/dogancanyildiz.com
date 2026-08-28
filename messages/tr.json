@@ -111,7 +111,7 @@
     "locationLabel": "Konum",
     "location": "Konya, Türkiye",
     "trustTitle": "Gizlilik",
-    "trustBody": "Form verileri, bu sitenin kullandığı posta sağlayıcısı Resend üzerinden bana e-posta olarak ulaşır; bunun dışında paylaşılmaz ya da satılmaz. Ziyaretler, kendi sunucumuzda çalışan çerezsiz Umami ile sayılır ve kişisel veri tutulmaz.",
+    "trustBody": "Form verileri, bu sitenin kullandığı posta sağlayıcısı Resend üzerinden bana e-posta olarak ulaşır; bunun dışında paylaşılmaz ya da satılmaz. Ziyaretler, kendi sunucumda çalışan çerezsiz Umami ile sayılır ve kişisel veri tutulmaz.",
     "responseExpectation": "Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
     "form": {
       "name": "Ad",
