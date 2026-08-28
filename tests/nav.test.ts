@@ -100,7 +100,7 @@ describe("footer", () => {
 
   it("exposes the public email in the footer", () => {
     expect(source).toContain("CONTACT_EMAIL_PUBLIC");
-    expect(source).toContain('href={`mailto:${CONTACT_EMAIL_PUBLIC}`}');
+    expect(source).toContain("href={`mailto:${CONTACT_EMAIL_PUBLIC}`}");
   });
 
   it("has no leftover template contact details", () => {
@@ -114,6 +114,75 @@ describe("footer", () => {
     expect(source).toContain("CONTACT_EMAIL_PUBLIC");
     expect(source).toContain("SOCIAL");
     expect(source).not.toContain("github.com/");
+  });
+
+  it("is a server component: no client directive, no siteUrl in the bundle", () => {
+    expect(source).not.toContain('"use client"');
+    expect(source).not.toContain("siteUrl");
+    expect(source).not.toContain("/api/health");
+    expect(source).toContain('from "next-intl/server"');
+  });
+
+  it("links feed.xml directly instead of through the next-intl Link helper", () => {
+    expect(source).not.toContain('href="/feed.xml"');
+    expect(source).toContain(
+      'locale === routing.defaultLocale ? "/feed.xml" : `/${locale}/feed.xml`'
+    );
+  });
+});
+
+describe("mobile menu panel", () => {
+  it("stays aligned under the h-16 header and keeps one full-width treatment at every mobile width", () => {
+    const source = read("src/components/layout/mobile-menu.tsx");
+    expect(source).toContain("top-16");
+    expect(source).not.toContain("sm:inset-x-4");
+    expect(source).not.toContain("sm:rounded-none");
+  });
+});
+
+describe("header height", () => {
+  it("gives the header row enough height that its controls are not flush against the edges", () => {
+    expect(read("src/components/layout/header.tsx")).toMatch(
+      /className="page-shell flex h-16\b/
+    );
+  });
+});
+
+describe("skill category list", () => {
+  it("groups skills in a div, not a section, so each group stops being its own landmark", () => {
+    const source = read("src/components/sections/skill-group-grid.tsx");
+    expect(source).not.toMatch(/<section\b/);
+    expect(source).toContain("<div");
+  });
+});
+
+describe("page header titleId", () => {
+  it("lets a caller point a landmark's aria-labelledby at the rendered heading", () => {
+    const pageHeader = read("src/components/ui/page-header.tsx");
+    expect(pageHeader).toContain("titleId?: string");
+    expect(pageHeader).toContain("<Tag id={titleId}");
+  });
+
+  it("no longer ships the unused label/labelIndex/display props or the deprecated alias", () => {
+    const pageHeader = read("src/components/ui/page-header.tsx");
+    expect(pageHeader).not.toContain("labelIndex");
+    expect(pageHeader).not.toContain("display?:");
+    expect(pageHeader).not.toContain("SectionHeading");
+    expect(exists("src/components/ui/section-label.tsx")).toBe(false);
+  });
+
+  it("wires the experience section's landmark name to the rendered heading, not the job title", () => {
+    const summary = read("src/components/sections/experience-summary.tsx");
+    expect(summary).toContain('titleId="home-experience-heading"');
+    // The job title h3 used to carry this id itself; PageHeader's own
+    // heading owns it now, so the h3 goes back to being a plain heading.
+    expect(summary).not.toMatch(/<h3\s+id=/);
+  });
+});
+
+describe("dead code removal", () => {
+  it("drops hasProfileImage now that only profileImagePath is used", () => {
+    expect(read("src/lib/profile-image.ts")).not.toContain("hasProfileImage");
   });
 });
 
