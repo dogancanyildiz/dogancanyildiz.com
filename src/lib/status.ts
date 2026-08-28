@@ -13,6 +13,7 @@ export const SITE_ENDPOINT_KEY = "public_site";
 export const SITE_ENDPOINT_ALIAS = "site";
 
 const REVALIDATE_SECONDS = 60;
+const FETCH_TIMEOUT_MS = 3000;
 
 const gatusResultSchema = z.object({
   success: z.boolean(),
@@ -43,11 +44,63 @@ export interface SiteStatus {
   name: string;
   up: boolean;
   uptime24h: number | null;
-  lastCheck: string;
+  lastCheck: string | null;
 }
 
 function apiUrl(base: string, path: string): string {
   return `${base.replace(/\/+$/, "")}${path}`;
+}
+
+/**
+ * Masks a URL down to a hostname fragment safe for logs: enough to tell
+ * entries apart across environments, never enough to reconstruct GATUS_URL.
+ */
+function maskHost(rawUrl: string): string {
+  let host: string;
+  try {
+    host = new URL(rawUrl).hostname;
+  } catch {
+    return "invalid";
+  }
+  if (host.length <= 4) return "*".repeat(host.length);
+  return `${host.slice(0, 2)}***${host.slice(-2)}`;
+}
+
+function isValidTimestamp(value: string): boolean {
+  return !Number.isNaN(Date.parse(value));
+}
+
+/**
+ * Stringifies a caught error for logging with the GATUS_URL host scrubbed
+ * out. Some fetch failures (DNS errors, custom fetch wrappers) embed the
+ * full request URL in their message, which would defeat maskHost() if the
+ * message were logged verbatim.
+ */
+function safeErrorMessage(error: unknown, base: string): string {
+  const raw = String(error);
+  let host: string;
+  try {
+    host = new URL(base).hostname;
+  } catch {
+    return raw;
+  }
+  return host ? raw.split(host).join(maskHost(base)) : raw;
+}
+
+/** Single-line, secret-free warning so misconfiguration leaves a trace. */
+function logStatusIssue(
+  base: string | undefined,
+  reason: string,
+  extra?: Record<string, unknown>
+): void {
+  console.warn(
+    JSON.stringify({
+      scope: "status",
+      reason,
+      gatusHost: base ? maskHost(base) : "unset",
+      ...extra,
+    })
+  );
 }
 
 /**
@@ -86,44 +139,96 @@ function parseUptimePayload(raw: string): number | null {
  */
 export async function getSiteStatus(): Promise<SiteStatus | null> {
   const base = process.env.GATUS_URL;
-  if (!base) return null;
+  if (!base) {
+    logStatusIssue(base, "gatus-url-unset");
+    return null;
+  }
 
   try {
-    const [statusesResponse, uptimeResponse] = await Promise.all([
+    const [statusesOutcome, uptimeOutcome] = await Promise.allSettled([
       fetch(apiUrl(base, "/api/v1/endpoints/statuses?page=1&pageSize=20"), {
         next: { revalidate: REVALIDATE_SECONDS },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       }),
-      fetch(apiUrl(base, `/api/v1/endpoints/${SITE_ENDPOINT_KEY}/uptimes/24h`), {
-        next: { revalidate: REVALIDATE_SECONDS },
-      }),
+      fetch(
+        apiUrl(base, `/api/v1/endpoints/${SITE_ENDPOINT_KEY}/uptimes/24h`),
+        {
+          next: { revalidate: REVALIDATE_SECONDS },
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        }
+      ),
     ]);
 
-    if (!statusesResponse.ok) return null;
+    // The statuses request carries up/down and lastCheck: without it there is
+    // nothing to render, so its failure still aborts the whole panel.
+    if (statusesOutcome.status === "rejected") {
+      logStatusIssue(base, "statuses-fetch-failed", {
+        message: safeErrorMessage(statusesOutcome.reason, base),
+      });
+      return null;
+    }
+    const statusesResponse = statusesOutcome.value;
+    if (!statusesResponse.ok) {
+      logStatusIssue(base, "statuses-http-error", {
+        status: statusesResponse.status,
+      });
+      return null;
+    }
 
     const parsed = gatusStatusesSchema.safeParse(await statusesResponse.json());
-    if (!parsed.success) return null;
+    if (!parsed.success) {
+      logStatusIssue(base, "statuses-schema-mismatch");
+      return null;
+    }
 
-    const endpoint = parsed.data.results.find((entry) => entry.key === SITE_ENDPOINT_KEY);
-    if (!endpoint) return null;
+    const endpoint = parsed.data.results.find(
+      (entry) => entry.key === SITE_ENDPOINT_KEY
+    );
+    if (!endpoint) {
+      logStatusIssue(base, "endpoint-not-found", { key: SITE_ENDPOINT_KEY });
+      return null;
+    }
 
     const lastResult = endpoint.results.at(-1);
-    if (!lastResult) return null;
+    if (!lastResult) {
+      logStatusIssue(base, "no-results");
+      return null;
+    }
 
+    // The 24h uptime request is best-effort: a timeout or network error here
+    // must not take the whole panel down, only its uptime figure.
     let uptime24h: number | null = null;
-    if (uptimeResponse.ok) {
-      uptime24h = parseUptimePayload(await uptimeResponse.text());
+    if (uptimeOutcome.status === "fulfilled" && uptimeOutcome.value.ok) {
+      uptime24h = parseUptimePayload(await uptimeOutcome.value.text());
+    } else if (uptimeOutcome.status === "rejected") {
+      logStatusIssue(base, "uptime-fetch-failed", {
+        message: safeErrorMessage(uptimeOutcome.reason, base),
+      });
+    } else if (uptimeOutcome.status === "fulfilled") {
+      logStatusIssue(base, "uptime-http-error", {
+        status: uptimeOutcome.value.status,
+      });
     }
     if (uptime24h === null && endpoint.uptime?.["24h"] !== undefined) {
       uptime24h = toPercent(endpoint.uptime["24h"]);
+    }
+
+    if (!isValidTimestamp(lastResult.timestamp)) {
+      logStatusIssue(base, "invalid-timestamp");
     }
 
     return {
       name: SITE_ENDPOINT_ALIAS,
       up: lastResult.success,
       uptime24h,
-      lastCheck: lastResult.timestamp,
+      lastCheck: isValidTimestamp(lastResult.timestamp)
+        ? lastResult.timestamp
+        : null,
     };
-  } catch {
+  } catch (error) {
+    logStatusIssue(base, "unexpected-error", {
+      message: safeErrorMessage(error, base),
+    });
     return null;
   }
 }

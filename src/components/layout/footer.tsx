@@ -31,7 +31,10 @@ export async function Footer() {
             {t("footer.tagline")}
           </p>
           <p className="pt-2 font-mono text-xs text-muted-foreground">
-            © {year} {tBrand("name")}. {t("footer.copyright")}
+            {/* buildInfo.year is "" when NEXT_PUBLIC_BUILD_DATE was not set
+                at build time (see src/lib/build-info.ts); the line reads
+                fine without a year rather than guessing one at runtime. */}
+            {`© ${year ? `${year} ` : ""}${tBrand("name")}. ${t("footer.copyright")}`}
           </p>
           <div className="space-y-1 pt-3 font-mono text-xs text-muted-foreground">
             <p>{t("footer.selfHosted")}</p>
