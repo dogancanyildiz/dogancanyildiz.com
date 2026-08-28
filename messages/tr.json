@@ -109,7 +109,7 @@
     "locationLabel": "Konum",
     "location": "Konya, Türkiye",
     "trustTitle": "Gizlilik",
-    "trustBody": "Form verileri yalnızca bana e-posta ile iletilir; üçüncü taraflarla satılmaz veya paylaşılmaz.",
+    "trustBody": "Form verileri, bu sitenin kullandığı posta sağlayıcısı Resend üzerinden bana e-posta olarak ulaşır; bunun dışında paylaşılmaz ya da satılmaz. Ziyaretler, kendi sunucumuzda çalışan çerezsiz Umami ile sayılır ve kişisel veri tutulmaz.",
     "responseExpectation": "Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
     "form": {
       "name": "Ad",
@@ -122,7 +122,14 @@
       "sending": "Gönderiliyor",
       "success": "Teşekkürler, mesajınız yola çıktı. Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
       "error": "Mesaj gönderilemedi. Lütfen doğrudan e-posta gönderin.",
-      "honeypotLabel": "Bu alanı boş bırakın"
+      "honeypotLabel": "Bu alanı boş bırakın",
+      "errorNameRequired": "Lütfen adınızı yazın.",
+      "errorEmailRequired": "Lütfen e-posta adresinizi yazın.",
+      "errorEmailInvalid": "Lütfen geçerli bir e-posta adresi yazın.",
+      "errorMessageRequired": "Lütfen bir mesaj yazın.",
+      "errorFields": "Lütfen işaretlenen alanları kontrol edin.",
+      "errorTimeout": "İstek çok uzun sürdü. Lütfen tekrar deneyin.",
+      "retryAfter": "{seconds} sn sonra tekrar deneyin"
     }
   },
   "notFound": {
