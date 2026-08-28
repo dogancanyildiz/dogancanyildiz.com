@@ -123,7 +123,7 @@ async function metadataFor(
   page: (typeof PAGES)[number],
   locale: AppLocale
 ): Promise<Metadata> {
-  const mod = (await page.load()) as { generateMetadata: MetadataFn };
+  const mod = await page.load();
   const slug = page.extraParams ? page.extraParams.slug : "";
   return mod.generateMetadata({
     params: Promise.resolve({ lang: locale, slug }),
@@ -134,7 +134,7 @@ function pageTitle(metadata: Metadata): string {
   const title = metadata.title;
   if (typeof title === "string") return title;
   if (title && typeof title === "object" && "absolute" in title) {
-    return title.absolute as string;
+    return title.absolute;
   }
   throw new Error("page metadata has no plain title");
 }

@@ -89,7 +89,7 @@ describe("blog posting schema", () => {
       expect(posts.length).toBeGreaterThan(0);
 
       for (const post of posts) {
-        const data = buildBlogPosting(locale, post) as Record<string, unknown>;
+        const data = buildBlogPosting(locale, post);
 
         expect(data["@type"]).toBe("BlogPosting");
         expect(data.author).toEqual(personRef());
@@ -115,7 +115,7 @@ describe("blog posting schema", () => {
     }
     const post = { ...firstPost, updated: "2026-08-27" };
 
-    const data = buildBlogPosting("en", post) as Record<string, unknown>;
+    const data = buildBlogPosting("en", post);
 
     expect(data.dateModified).toBe("2026-08-27");
     expect(data.datePublished).toBe(post.date);
@@ -128,10 +128,7 @@ describe("project schema", () => {
     const { getProjects } = await import("@/lib/content");
 
     for (const project of getProjects("en")) {
-      const data = buildProjectCreativeWork("en", project) as Record<
-        string,
-        unknown
-      >;
+      const data = buildProjectCreativeWork("en", project);
 
       expect(data["@type"]).toBe("CreativeWork");
       expect((data.creator as Record<string, unknown>)["@id"]).toBe(personId());
