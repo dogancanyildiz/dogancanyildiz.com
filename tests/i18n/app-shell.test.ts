@@ -331,8 +331,16 @@ describe("content components", () => {
     "reads messages through next-intl in %s",
     (component) => {
       const source = read(component);
-      expect(source, component).toContain('from "next-intl"');
-      expect(source, component).toContain("useTranslations(");
+      // Client sections read messages through the hook, server rendered ones
+      // through next-intl/server. Both must go through next-intl, never
+      // through a hand rolled locale context.
+      const viaHook =
+        source.includes('from "next-intl"') &&
+        source.includes("useTranslations(");
+      const viaServerApi =
+        source.includes('from "next-intl/server"') &&
+        source.includes("getTranslations(");
+      expect(viaHook || viaServerApi, component).toBe(true);
       expect(source, component).not.toContain(
         'from "@/components/locale-provider"'
       );
