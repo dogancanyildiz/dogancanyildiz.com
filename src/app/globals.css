@@ -196,7 +196,15 @@
   }
 }
 
-@layer utilities {
+/* These are component classes, not utilities, and they belong in the
+   components layer. Tailwind appends anything a project writes in the
+   utilities layer after its own generated utilities, so a class such as
+   .content-entry used to outrank every utility of equal specificity written on
+   the same element: `lg:grid-cols-[...]` on a row and `normal-case
+   tracking-normal` on a pill both compiled and both lost. The components layer
+   sits below utilities, so a utility on the element now wins, which is what
+   every call site assumes. */
+@layer components {
   .page-shell {
     @apply relative mx-auto w-full max-w-6xl px-4 sm:px-6;
   }
@@ -328,26 +336,6 @@
     padding: 0.5rem 1rem;
   }
 
-  @keyframes pulse-dot {
-    0%,
-    100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(0.6);
-      opacity: 0.6;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .section-label::before {
-      animation: none;
-    }
-  }
-}
-
-@layer components {
   .prose-content {
     @apply space-y-5 text-base leading-[1.6] text-foreground/85 sm:text-lg;
     max-width: 66ch;
@@ -391,5 +379,23 @@
   .dark .prose-content .shiki span {
     color: var(--shiki-dark);
     background-color: var(--shiki-dark-bg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-label::before {
+      animation: none;
+    }
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.6);
+    opacity: 0.6;
   }
 }
