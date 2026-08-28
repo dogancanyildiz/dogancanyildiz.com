@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from "react";
+import type { ComponentProps, ComponentType } from "react";
 
 /**
  * Element overrides handed to every compiled MDX body.
@@ -16,10 +16,13 @@ import type { ComponentType, ReactNode } from "react";
  * Without the wrapper the whole document scrolls sideways on a phone, which
  * moves the body text out from under the reader.
  */
-function MdxTable({ children }: { children?: ReactNode }) {
+function MdxTable(props: ComponentProps<"table">) {
+  // Every prop is forwarded rather than only children: remark hands the table
+  // whatever the markdown produced (align, className, a generated id), and
+  // dropping those silently changes the rendering of a table that used them.
   return (
     <div className="table-wrap">
-      <table>{children}</table>
+      <table {...props} />
     </div>
   );
 }
