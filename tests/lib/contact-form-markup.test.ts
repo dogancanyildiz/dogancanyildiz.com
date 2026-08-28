@@ -10,28 +10,18 @@ import {
 } from "@/lib/contact-validation";
 
 /**
- * Source level assertions on the contact form. There is no jsdom or React
- * testing library in this project yet, so these guard the attributes a render
- * test would otherwise cover: they are cheap and they fail loudly the moment
- * an attribute is dropped in a refactor.
+ * Source level assertions on the contact form, for the handful of properties
+ * a render test genuinely does not observe any better than a grep: autofill
+ * attributes, the honeypot name and the maxLength constants are all static
+ * markup, not behaviour.
  *
- * They are a stopgap, not the destination. Matching the source text passes on
- * any refactor that keeps the strings while breaking the behaviour, and fails
- * on a harmless reflow of the same code. Once jsdom and @testing-library are
- * installed, these describes have to be replaced by render tests rather than
- * kept alongside them:
- *
- * - "contact form validation feedback": that focus actually lands on the first
- *   invalid field, and that aria-describedby points at the rendered message.
- * - "contact form live regions": the order the live regions announce in, that
- *   the inputs are locked with readOnly while the request is in flight, and
- *   that the submit button keeps focus while it is aria-disabled.
- * - "contact form request": that the Retry-After countdown ticks down and
- *   unlocks the button when it reaches zero.
- *
- * What can stay as source assertions: the autofill attributes, the honeypot
- * name, and the maxLength constants, none of which a render test observes any
- * better than a grep.
+ * Everything else that used to live here as a source-text stand-in (focus
+ * landing on the first invalid field, the live regions staying mounted
+ * through every status, the readOnly/aria-disabled lock, the Retry-After
+ * countdown, the X-Locale header, the per field server error) is now a real
+ * jsdom render test in src/components/sections/contact-form.test.tsx, which
+ * exercises the actual behaviour instead of matching the string that used to
+ * produce it.
  */
 const form = readFileSync(
   join(process.cwd(), "src/components/sections/contact-form.tsx"),
@@ -72,81 +62,15 @@ describe("contact form limits", () => {
   });
 });
 
-describe("contact form validation feedback", () => {
-  it("runs its own validation instead of the browser's", () => {
-    expect(form).toContain("noValidate");
-  });
-
-  it("wires aria-invalid and aria-describedby to the field errors", () => {
-    for (const field of ["name", "email", "message"]) {
-      expect(form).toContain(
-        `aria-invalid={fieldErrors.${field} ? true : undefined}`
-      );
-      expect(form).toContain(`aria-describedby={describedBy("${field}")}`);
-    }
-  });
-
-  it("moves focus to the first field that failed", () => {
-    expect(form).toContain(
-      "requestFocus(FIELDS.find((field) => errors[field])"
-    );
-  });
-});
-
-describe("contact form live regions", () => {
-  it("keeps both live regions mounted rather than rendering them with the message", () => {
-    expect(form).toContain('aria-live="polite"');
-    expect(form).not.toMatch(/\{status === "error" && \(/);
-    expect(form).not.toMatch(/\{status === "success" && \(/);
-  });
-
-  it("announces the in flight state", () => {
-    expect(form).toContain('{busy ? t("sending")');
-  });
-
-  it("locks the inputs with readOnly instead of disabled", () => {
-    expect(form).toContain("readOnly: busy");
-    expect(form).toContain('"aria-disabled": busy || undefined');
-    expect(form).not.toMatch(/disabled=\{status === "loading"\}/);
-  });
-
-  it("locks the submit button without taking the focus off it", () => {
-    // A keyboard submit leaves the focus on the button, so disabling it while
-    // the request runs drops that focus to the document.
-    expect(form).toContain("aria-disabled={locked || undefined}");
-    expect(form).not.toMatch(/(^|[\s{])disabled=\{/m);
-    // The guard that makes the missing disabled attribute safe.
-    expect(form).toContain('if (status === "loading" || retrySeconds > 0)');
-  });
-
-  it("moves focus to the status message after the response", () => {
-    expect(form).toContain('requestFocus("status")');
-    expect(form).toContain('requestFocus("alert")');
-    expect(form).toContain("tabIndex={-1}");
-  });
-});
-
 describe("contact form request", () => {
-  it("tells the API which language to answer in", () => {
-    expect(form).toContain('"X-Locale": locale');
-  });
-
   it("gives the request a timeout with its own message", () => {
+    // The timeout duration and its wiring into the fetch signal are not
+    // observable from outside a jsdom render (asserting it would mean
+    // advancing a fake clock to exactly REQUEST_TIMEOUT_MS while the fetch
+    // mock watches for an abort), so this stays a source assertion; the
+    // message it produces once the request does time out is covered by
+    // contact-form.test.tsx's "shows the timeout message" case.
     expect(form).toContain("AbortSignal.timeout(REQUEST_TIMEOUT_MS)");
     expect(form).toContain('t("errorTimeout")');
-  });
-
-  it("honours Retry-After on a 429", () => {
-    expect(form).toContain('res.headers.get("Retry-After")');
-    expect(form).toContain("const locked = busy || retrySeconds > 0");
-    expect(form).toContain('t("retryAfter", { seconds: retrySeconds })');
-  });
-
-  it("shows a field specific message when the server names a field", () => {
-    // The server sends one generic sentence for the alert region; repeating it
-    // under the input would tell a visitor with a rejected address that every
-    // field is required.
-    expect(form).toContain("t(SERVER_FIELD_ERROR[data.field])");
-    expect(form).not.toContain("setFieldErrors({ [data.field]: message })");
   });
 });

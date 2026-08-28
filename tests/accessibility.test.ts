@@ -6,26 +6,13 @@ import { isNavItemActive } from "@/lib/nav";
 const read = (relative: string) =>
   readFileSync(join(process.cwd(), relative), "utf8");
 
-describe("contact form live regions", () => {
-  const form = read("src/components/sections/contact-form.tsx");
-
-  it("announces the error state assertively", () => {
-    expect(form).toContain('role="alert"');
-  });
-
-  it("announces the success state politely", () => {
-    expect(form).toContain('role="status"');
-  });
-
-  it("marks the submit button busy while the request is in flight", () => {
-    expect(form).toContain('aria-busy={status === "loading"}');
-  });
-
-  it("keeps the honeypot hidden from assistive tech", () => {
-    expect(form).toContain('aria-hidden="true"');
-    expect(form).toContain("tabIndex={-1}");
-  });
-});
+// The former "contact form live regions" describe here (role=status/alert
+// present, aria-busy wired to the loading state, the honeypot hidden from
+// assistive tech) is now exercised as real behaviour in
+// src/components/sections/contact-form.test.tsx: the live regions are
+// asserted present and their text checked across the idle, loading and
+// error states, aria-busy is asserted true while a request is in flight, and
+// the honeypot's aria-hidden wrapper and tabIndex are asserted directly.
 
 describe("focus ring", () => {
   const css = read("src/app/globals.css");
@@ -100,22 +87,17 @@ describe("theme toggle reflects the resolved theme", () => {
     ).toHaveLength(1);
   });
 
-  it("renders a single button, not a separate pre-mount fallback", () => {
-    // The icon swap is a CSS dark: variant, so there is nothing left that
-    // has to differ between the server render and the hydrated client
-    // render: one Button, not a disabled placeholder plus a live one.
-    expect(source).not.toContain("disabled");
-    expect(source.match(/<Button/g)).toHaveLength(1);
-  });
-
   it("swaps icons with the dark: variant instead of a JS branch", () => {
     expect(source).toContain("dark:hidden");
     expect(source).toContain("dark:block");
   });
 
-  it("reports its state via aria-pressed", () => {
-    expect(source).toContain('aria-pressed={resolvedTheme === "dark"}');
-  });
+  // "renders a single button, not a separate pre-mount fallback" and
+  // "reports its state via aria-pressed" used to live here as source-text
+  // checks; src/components/layout/theme-toggle.test.tsx now renders the
+  // component and asserts exactly one button with aria-pressed tracking
+  // resolvedTheme across the unmounted, dark and light states, which is
+  // both a stronger and a more direct check on the same behaviour.
 });
 
 describe("skip link", () => {
@@ -279,22 +261,12 @@ describe("client message payload", () => {
   });
 });
 
-describe("language switcher", () => {
-  const source = read("src/components/layout/language-switcher.tsx");
-
-  it("keeps the visible TR/EN label instead of letting aria-label override it", () => {
-    expect(source).not.toContain("aria-label={localeNames[locale]}");
-    expect(source).toContain("{localeLabels[locale]}");
-    expect(source).toContain(
-      '<span className="sr-only"> ({localeNames[locale]})</span>'
-    );
-  });
-
-  it("sets lang alongside hrefLang on each locale link", () => {
-    expect(source).toContain("hrefLang={locale}");
-    expect(source).toContain("lang={locale}");
-  });
-});
+// The former "language switcher" describe here (visible TR/EN label not
+// overridden by aria-label, lang/hrefLang on each link) is now
+// src/components/layout/language-switcher.test.tsx: it renders the
+// component and reads the link's computed accessible name and attributes
+// directly, which an aria-label override would fail the same way a real
+// screen reader user would notice it.
 
 describe("brand link", () => {
   it("stops the aria-label from overriding the sr-only brand name", () => {
@@ -331,33 +303,21 @@ describe("isNavItemActive", () => {
   });
 });
 
-describe("mobile menu active state", () => {
-  it("marks the current route with aria-current, driven by the shared nav pathname helper", () => {
-    const source = read("src/components/layout/mobile-menu.tsx");
-    expect(source).toContain("usePathname");
-    expect(source).toContain("isNavItemActive(pathname, href)");
-    expect(source).toContain('aria-current={isActive ? "page" : undefined}');
-  });
-});
+// The former "mobile menu active state" describe here (usePathname,
+// isNavItemActive, aria-current on the active link) is now
+// src/components/layout/mobile-menu.test.tsx, which opens the panel and
+// asserts aria-current="page" lands on the link matching the current route
+// and nowhere else.
 
 describe("about subnav", () => {
-  it("tracks the section in view instead of never marking anything current", () => {
-    const list = read("src/components/sections/about-subnav-list.tsx");
-    expect(list).toContain("IntersectionObserver");
-    expect(list).toContain('aria-current={isActive ? "location" : undefined}');
-  });
-
-  it("resolves the active section from a tracked set in items order, and clears it once nothing intersects", () => {
-    const list = read("src/components/sections/about-subnav-list.tsx");
-    // A batch's entry order is not document order, and the callback only
-    // reports entries whose intersection changed, so the active id has to
-    // come from a set built up across calls, resolved against the caller's
-    // own item order, rather than from whichever entry the batch names last.
-    expect(list).toContain("new Set<string>()");
-    expect(list).toContain("intersecting.delete(entry.target.id)");
-    expect(list).toContain("items.find((item) => intersecting.has(item.id))");
-    expect(list).toContain("setActiveId(topmost?.id ?? null)");
-  });
+  // "tracks the section in view instead of never marking anything current"
+  // and "resolves the active section from a tracked set in items order, and
+  // clears it once nothing intersects" used to live here as source-text
+  // checks on about-subnav-list.tsx; src/components/sections/about-subnav-list.test.tsx
+  // now drives a stand-in IntersectionObserver by hand and asserts
+  // aria-current="location" lands on the right item, including the
+  // topmost-of-several-intersecting and clears-when-nothing-intersects
+  // cases the source checks could only infer from the code shape.
 
   it("filters optional sections through an isVisible predicate, not a hard coded id", () => {
     const source = read("src/components/sections/about-subnav.tsx");
