@@ -29,4 +29,15 @@ describe("velite content schema", () => {
     const result = runVelite("tests/fixtures/velite.valid.config.ts");
     expect(result.status).toBe(0);
   }, 60_000);
+
+  // s.string().url() accepts javascript: and data: as happily as https, and
+  // links.live goes straight into an href. The repo is public and takes
+  // content pull requests, so the schema is the gate that has to hold.
+  it("rejects a javascript: url in links.live", () => {
+    const result = runVelite("tests/fixtures/velite.invalid-links.config.ts");
+    expect(result.status).not.toBe(0);
+    expect(result.output).toMatch(/bad-link\.mdx/);
+    expect(result.output).toMatch(/links\.live/);
+    expect(result.output).toMatch(/https:\/\//);
+  }, 60_000);
 });
