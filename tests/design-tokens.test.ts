@@ -236,6 +236,26 @@ describe("control boundary contrast (WCAG 1.4.11)", () => {
     expect(button).toContain("border-border-strong");
     expect(button).not.toMatch(/outline:\s*\n?\s*"border border-border /);
   });
+
+  // The header controls draw a full box border and that border is the only
+  // thing marking them as controls, so they belong to the same rule as the
+  // outline button. They live in another branch's files; if one of them is
+  // reworked, this is the assertion that says why the token matters.
+  const boxedControls = [
+    "src/components/layout/theme-toggle.tsx",
+    "src/components/layout/language-switcher.tsx",
+  ];
+
+  it.each(boxedControls)("draws %s from the strong token", (path) => {
+    const source = read(path);
+    expect(source).toContain("border-border-strong");
+    // No alpha either: --border-strong clears 3:1 at full opacity and nowhere
+    // near it once it is faded into the background.
+    expect(
+      source,
+      `${path} still has a weak or faded control border`
+    ).not.toMatch(/border-border(?!-strong)|border-border-strong\//);
+  });
 });
 
 describe("stylesheet imports", () => {
@@ -288,7 +308,9 @@ describe("content entry affordances", () => {
 describe("small uppercase labels", () => {
   // 10px uppercase mono with 0.2em tracking is decoration, not a readable
   // date, reading time or skill group heading. 0.75rem is the floor and the
-  // tracking comes down with it.
+  // tracking comes down with it. Section level labels keep one step of size
+  // and tracking above the floor, so the raise does not flatten every
+  // uppercase label into the same rank.
   const informational = [
     ".eyebrow",
     ".meta-label",
@@ -310,7 +332,23 @@ describe("small uppercase labels", () => {
     expect(
       Number(tracking),
       `${selector} tracks ${tracking}em`
-    ).toBeLessThanOrEqual(0.1);
+    ).toBeLessThanOrEqual(0.12);
+  });
+
+  it("keeps section level labels a step above the inline meta labels", () => {
+    const sizeOf = (selector: string) => {
+      const rule = css.slice(css.indexOf(`${selector} {`));
+      const body = rule.slice(0, rule.indexOf("}"));
+      return Number(body.match(/text-\[([\d.]+)rem\]/)?.[1]);
+    };
+    for (const lead of [".eyebrow", ".section-label"]) {
+      for (const inline of [".meta-label", ".tag-pill"]) {
+        expect(
+          sizeOf(lead),
+          `${lead} does not outrank ${inline}`
+        ).toBeGreaterThan(sizeOf(inline));
+      }
+    }
   });
 });
 
@@ -341,6 +379,13 @@ describe("long form prose", () => {
     expect(css).toMatch(/\.prose-content \.table-wrap > table\s*\{[^}]*min-w-/);
     const bare = css.slice(css.indexOf(".prose-content table {"));
     expect(bare.slice(0, bare.indexOf("}"))).not.toContain("min-w-");
+    // Auto table layout still sizes to the sum of the cells' min-content
+    // widths, so a long URL would widen an unwrapped table past the viewport
+    // unless the cells are allowed to break anywhere.
+    const cells = css.slice(css.indexOf(".prose-content th,"));
+    expect(cells.slice(0, cells.indexOf("}"))).toContain(
+      "overflow-wrap: anywhere"
+    );
   });
 });
 
@@ -351,6 +396,12 @@ describe("forced colours", () => {
     expect(block).toContain("display: none");
     expect(block).toContain("border-color: CanvasText");
     expect(block).toContain("outline-color: Highlight");
+  });
+
+  it("restates the row hover cue as an outline as well as the focus cue", () => {
+    expect(css).toMatch(
+      /@media \(forced-colors: active\) and \(hover: hover\) \{\s*\.content-entry:hover\s*\{[^}]*outline:/
+    );
   });
 
   it("keeps the block unlayered so it outranks every component class", () => {
@@ -411,16 +462,35 @@ describe("no dead classes in the shipped stylesheet", () => {
     "dark", // next-themes writes it on <html>
     "shiki", // emitted by the syntax highlighter
   ]);
-  // Classes with no call site yet, kept on purpose. Anything added here needs
-  // a reason and a removal trigger.
-  const PENDING = new Map([
-    // Both lose their last consumer in the current audit round; the second
-    // round deletes the rules once those branches land.
-    ["list-row", "consumers are being removed by the layout clean-up"],
-    ["display-hero", "consumer is being removed by the hero rework"],
-    // Reserved for surfaces that land in a sibling branch.
-    ["pull-quote", "editorial quote surface, wired up by the content branch"],
-    ["table-wrap", "mdx table wrapper, wired up by the content branch"],
+  // Classes exempt from the usage assertion, each with the state it is
+  // exempted for, because an allowlist that never checks itself just hides
+  // what it was meant to flag.
+  //   unused:   no call site yet and none expected until a sibling branch
+  //             lands. The check below asserts it really is unused, so the
+  //             entry cannot outlive its reason.
+  //   retiring: still used today; a sibling branch removes the last consumer
+  //             and the second audit round deletes the rule. The check below
+  //             asserts it really is still used.
+  const PENDING = new Map<
+    string,
+    { state: "unused" | "retiring"; why: string }
+  >([
+    [
+      "list-row",
+      { state: "retiring", why: "consumers go with the layout clean-up" },
+    ],
+    [
+      "display-hero",
+      { state: "retiring", why: "consumer goes with the hero rework" },
+    ],
+    [
+      "pull-quote",
+      { state: "unused", why: "quote surface, wired up by the content branch" },
+    ],
+    [
+      "table-wrap",
+      { state: "unused", why: "table wrapper, wired up by the content branch" },
+    ],
   ]);
 
   const declared = new Set<string>();
@@ -441,10 +511,14 @@ describe("no dead classes in the shipped stylesheet", () => {
     const used = sourceFiles.some(({ body }) =>
       new RegExp(`(?<![\\w-])${name}(?![\\w-])`).test(body)
     );
-    if (PENDING.has(name)) {
-      // Kept deliberately; the assertion below only guards the allowlist from
-      // growing stale silently.
-      expect(PENDING.get(name)).toBeTruthy();
+    const pending = PENDING.get(name);
+    if (pending) {
+      expect(
+        used,
+        pending.state === "unused"
+          ? `.${name} is allowlisted as unused but has a call site now; drop it from PENDING`
+          : `.${name} is allowlisted as retiring but has no call site left; delete the rule`
+      ).toBe(pending.state === "retiring");
       return;
     }
     expect(used, `.${name} is defined in globals.css but never used`).toBe(
@@ -452,7 +526,7 @@ describe("no dead classes in the shipped stylesheet", () => {
     );
   });
 
-  it("keeps the pending allowlist to classes that really are unused", () => {
+  it("keeps the pending allowlist to classes the stylesheet still defines", () => {
     for (const name of PENDING.keys()) {
       expect(
         declared.has(name),

@@ -218,9 +218,11 @@
   }
 
   /* 0.75rem is the floor for uppercase mono that carries information: below
-     it the wide tracking and the caps stop being readable at arm's length. */
+     it the wide tracking and the caps stop being readable at arm's length.
+     Section level labels (.eyebrow, .section-label) sit one step above that
+     floor so the hierarchy against inline meta text survives the raise. */
   .eyebrow {
-    @apply font-mono text-[0.75rem] font-medium uppercase tracking-[0.1em] text-muted-foreground;
+    @apply font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-muted-foreground;
   }
 
   /* Home-only display scale - restrained, not billboard-sized. */
@@ -249,7 +251,7 @@
   }
 
   .section-label {
-    @apply mb-4 inline-flex items-center gap-2 font-mono text-[0.75rem] font-medium uppercase tracking-[0.1em] text-muted-foreground;
+    @apply mb-4 inline-flex items-center gap-2 font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-muted-foreground;
   }
   .section-label::before {
     content: "";
@@ -385,6 +387,9 @@
   .prose-content hr {
     @apply my-8 border-0 border-t border-border;
   }
+  /* kbd draws a key cap: the boundary is the meaning, so it takes the strong
+     token. The code surfaces below are panels with their own fill, where the
+     hairline is decoration and --border is the right weight. */
   .prose-content kbd {
     @apply rounded border border-border-strong px-1.5 py-0.5 font-mono text-[0.8em] text-foreground;
   }
@@ -394,15 +399,19 @@
   .prose-content :not(pre) > code {
     @apply rounded border border-border px-1.5 py-0.5 font-mono text-[0.85em];
   }
-  /* A bare table stays inside the reading measure and wraps, so it never
-     overflows a 375px viewport on its own. Wrapped in .table-wrap it gets the
-     comfortable minimum width and scrolls inside the wrapper instead. */
+  /* A bare table carries no minimum width and its cells break long words, so
+     it wraps down to a 375px viewport instead of pushing the page sideways.
+     Wrapped in .table-wrap it gets the comfortable minimum width and scrolls
+     inside the wrapper instead. */
   .prose-content table {
     @apply w-full border-collapse text-left text-sm;
   }
   .prose-content th,
   .prose-content td {
     @apply border-b border-border px-3 py-2 align-top;
+    /* anywhere, not break-word: only anywhere lowers the cell's min-content
+       width, which is what keeps a long URL from widening the whole table. */
+    overflow-wrap: anywhere;
   }
   .prose-content th {
     @apply font-mono text-[0.75rem] font-medium uppercase tracking-[0.1em] text-muted-foreground;
@@ -476,6 +485,12 @@
   /* The row tint is the only hover and focus cue on a content entry and
      forced colours flatten it, so restate it as a visible outline. */
   .content-entry:focus-within {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+@media (forced-colors: active) and (hover: hover) {
+  .content-entry:hover {
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }
