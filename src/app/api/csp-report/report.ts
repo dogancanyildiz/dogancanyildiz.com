@@ -132,6 +132,7 @@ export function normalizeReports(body: unknown): NormalizedReport[] {
 }
 
 export function isAcceptedContentType(header: string | null): boolean {
-  const type = (header ?? "").split(";")[0].trim().toLowerCase();
+  const type = (header ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
+
   return ACCEPTED_CONTENT_TYPES.includes(type);
 }

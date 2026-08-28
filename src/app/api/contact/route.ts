@@ -117,13 +117,15 @@ function localeFromAcceptLanguage(value: string | null): AppLocale | null {
   const entries = value
     .split(",")
     .map((part, index) => {
-      const [tag, ...parameters] = part.trim().split(";");
+      const [tag = "", ...parameters] = part.trim().split(";");
+
       const quality = parameters
         .map((parameter) => parameter.trim().toLowerCase())
         .find((parameter) => parameter.startsWith("q="));
       const parsed = quality ? Number.parseFloat(quality.slice(2)) : 1;
       return {
-        base: tag.trim().toLowerCase().split("-")[0],
+        base: tag.trim().toLowerCase().split("-")[0] ?? "",
+
         quality: Number.isFinite(parsed) ? parsed : 0,
         index,
       };
@@ -155,7 +157,8 @@ function resolveLocale(request: Request): AppLocale {
 }
 
 function isJsonRequest(contentType: string | null): boolean {
-  const mediaType = (contentType ?? "").split(";")[0].trim().toLowerCase();
+  const mediaType = (contentType ?? "").split(";")[0]?.trim().toLowerCase();
+
   return mediaType === "application/json";
 }
 

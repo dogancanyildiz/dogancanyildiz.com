@@ -46,10 +46,10 @@ export async function GET(
 
   // Posts are already sorted newest first by getPosts, so the first entry
   // (if any) carries the most recent publish date.
-  const lastBuildDate =
-    posts.length > 0
-      ? `\n    <lastBuildDate>${new Date(posts[0].date).toUTCString()}</lastBuildDate>`
-      : "";
+  const newest = posts[0];
+  const lastBuildDate = newest
+    ? `\n    <lastBuildDate>${new Date(newest.date).toUTCString()}</lastBuildDate>`
+    : "";
 
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',

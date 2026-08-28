@@ -68,7 +68,9 @@ export function createRateLimiter(options: RateLimiterOptions): RateLimiter {
   }
 
   function blocked(stamps: number[], now: number): RateLimitResult {
-    const oldest = stamps[0];
+    // Callers only reach this branch with a full window, so stamps is never
+    // empty; falling back to now yields a full window wait if that ever changes.
+    const oldest = stamps[0] ?? now;
     return {
       allowed: false,
       remaining: 0,
