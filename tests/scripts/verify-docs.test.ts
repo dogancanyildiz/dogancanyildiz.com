@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import * as prettier from "prettier";
@@ -30,13 +29,11 @@ describe("scripts/verify-docs.mjs", () => {
     expect(content).toContain("Doc verification failed:");
   });
 
-  it("passes against the repository's actual docs", () => {
-    // Runs the real script against the real docs/ tree, the same way
-    // `npm run verify:docs` does, so a doc that drifts from the behaviour it
-    // describes fails here too instead of only showing up in CI.
-    const output = execFileSync("node", [scriptPath], { encoding: "utf8" });
-    expect(output).toMatch(
-      /^Doc verification passed \(\d+ files scanned\)\.$/m
-    );
-  });
+  // Deliberately not running the script against the real docs/ tree here:
+  // the script's own header comment states the point of moving these checks
+  // out of vitest was that "a doc going stale is not the kind of failure a
+  // developer needs surfaced on every `npm run test` inner loop". Executing
+  // it in this suite would recreate exactly that coupling. The CI "Verify
+  // docs" step (`npm run verify:docs`) still runs it for real on every push
+  // and pull request.
 });
