@@ -28,13 +28,25 @@ export function AboutSubnavList({ items, ariaLabel }: AboutSubnavListProps) {
       .filter((section): section is HTMLElement => section !== null);
     if (sections.length === 0) return;
 
+    // A callback batch is not guaranteed to arrive in document order, and
+    // more than one section can sit inside the root margin band at once, so
+    // the intersecting set is tracked independently of entry order. The
+    // active id is then resolved from `items`' own order (the topmost
+    // intersecting section wins), and cleared once nothing intersects
+    // instead of holding on to whatever section was last seen.
+    const intersecting = new Set<string>();
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
+            intersecting.add(entry.target.id);
+          } else {
+            intersecting.delete(entry.target.id);
           }
         }
+        const topmost = items.find((item) => intersecting.has(item.id));
+        setActiveId(topmost?.id ?? null);
       },
       { rootMargin: OBSERVER_ROOT_MARGIN, threshold: 0 }
     );

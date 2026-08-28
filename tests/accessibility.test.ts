@@ -275,6 +275,18 @@ describe("about subnav", () => {
     expect(list).toContain('aria-current={isActive ? "location" : undefined}');
   });
 
+  it("resolves the active section from a tracked set in items order, and clears it once nothing intersects", () => {
+    const list = read("src/components/sections/about-subnav-list.tsx");
+    // A batch's entry order is not document order, and the callback only
+    // reports entries whose intersection changed, so the active id has to
+    // come from a set built up across calls, resolved against the caller's
+    // own item order, rather than from whichever entry the batch names last.
+    expect(list).toContain("new Set<string>()");
+    expect(list).toContain("intersecting.delete(entry.target.id)");
+    expect(list).toContain("items.find((item) => intersecting.has(item.id))");
+    expect(list).toContain("setActiveId(topmost?.id ?? null)");
+  });
+
   it("filters optional sections through an isVisible predicate, not a hard coded id", () => {
     const source = read("src/components/sections/about-subnav.tsx");
     expect(source).not.toContain("optional");
