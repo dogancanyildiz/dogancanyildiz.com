@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+import { UMAMI_ORIGIN } from "./src/lib/analytics";
+
 /**
- * Single source of truth for the self-hosted Umami origin.
- * The CSP below, src/components/umami-script.tsx and tests/config/csp.test.ts
- * all read this constant, so the policy and the analytics host can never drift
- * apart.
+ * Re-exported so the CSP below, src/components/umami-script.tsx and the tests
+ * all read one constant and the policy can never drift from the analytics host
+ * the tag actually loads.
  */
-export const UMAMI_ORIGIN = "https://analytics.dogancanyildiz.com";
+export { UMAMI_ORIGIN };
 
 /** Route handler that collects CSP violation reports (src/app/api/csp-report). */
 export const CSP_REPORT_PATH = "/api/csp-report";

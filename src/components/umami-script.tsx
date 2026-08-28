@@ -1,3 +1,5 @@
+import { resolveUmamiTag } from "@/lib/analytics";
+
 /**
  * Self-hosted, cookieless Umami tracker.
  *
@@ -7,22 +9,28 @@
  * image as Docker build arguments (see Dockerfile), because this layout is
  * prerendered: a runtime-only variable would render an empty tag.
  *
- * The origin used here must stay identical to UMAMI_ORIGIN in next.config.ts,
- * otherwise the CSP blocks the request.
+ * resolveUmamiTag enforces that the configured script URL sits on the origin
+ * the CSP allows, and pins data-domains to the site hostname so another host
+ * running the same image cannot write into this site's statistics.
  */
 export function UmamiScript() {
-  const scriptUrl = process.env.UMAMI_SCRIPT_URL?.trim();
-  const websiteId = process.env.UMAMI_WEBSITE_ID?.trim();
+  const tag = resolveUmamiTag({
+    scriptUrl: process.env.UMAMI_SCRIPT_URL,
+    websiteId: process.env.UMAMI_WEBSITE_ID,
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+    isProduction: process.env.NODE_ENV === "production",
+  });
 
-  if (!scriptUrl || !websiteId) {
+  if (!tag) {
     return null;
   }
 
   return (
     <script
       async
-      src={`${scriptUrl.replace(/\/+$/, "")}/script.js`}
-      data-website-id={websiteId}
+      src={tag.src}
+      data-website-id={tag.websiteId}
+      data-domains={tag.domains}
     />
   );
 }
