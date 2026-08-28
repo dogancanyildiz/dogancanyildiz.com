@@ -20,29 +20,11 @@ import { hasCv } from "@/lib/cv";
 import { featuredSkillGroups } from "@/lib/skills";
 import { profileImagePath } from "@/lib/profile-image";
 import {
-  getFeaturedProjects,
+  getHomeProjects,
   getPosts,
-  getProjects,
   toPostCardData,
   toProjectCardData,
-  type Locale,
 } from "@/lib/content";
-
-/** Fallback size when no project is flagged as featured. */
-const FEATURED_FALLBACK_COUNT = 3;
-
-/**
- * Home page selection: the projects marked `featured` in frontmatter, or the
- * first few by list order when nothing is marked. Without the fallback a
- * content edit that clears the last `featured: true` would silently empty the
- * section; without the filter the home page just repeats the projects page.
- */
-function homeProjects(locale: Locale) {
-  const featured = getFeaturedProjects(locale);
-  return featured.length > 0
-    ? featured
-    : getProjects(locale).slice(0, FEATURED_FALLBACK_COUNT);
-}
 
 // GATUS_URL is a runtime variable, so the Gatus fetch does not run during the
 // Docker build. Without this the route would be frozen as fully static and the
@@ -82,7 +64,7 @@ export default async function HomePage({
   const tHome = await getTranslations({ locale, namespace: "home" });
   const tMeta = await getTranslations({ locale, namespace: "metadata" });
   const tProjects = await getTranslations({ locale, namespace: "projects" });
-  const projects = homeProjects(locale).map(toProjectCardData);
+  const projects = getHomeProjects(locale).map(toProjectCardData);
   const latestPosts = getPosts(locale).slice(0, 3).map(toPostCardData);
 
   return (

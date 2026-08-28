@@ -80,6 +80,27 @@ export function getFeaturedProjects(locale: Locale): Project[] {
   return getProjects(locale).filter((project) => project.featured);
 }
 
+/** How many projects the home page shows when nothing is flagged featured. */
+export const HOME_PROJECT_FALLBACK_COUNT = 3;
+
+/**
+ * Projects for the home page: the ones marked `featured` in frontmatter, or
+ * the first few by list order when nothing is marked.
+ *
+ * Without the filter the home page just repeats the projects page, which is
+ * what it used to do. Without the fallback a content edit that clears the last
+ * `featured: true` would silently empty the section instead. It lives here
+ * rather than inside the page component so the rule can be tested against a
+ * synthetic collection.
+ */
+export function getHomeProjects(
+  locale: Locale,
+  limit: number = HOME_PROJECT_FALLBACK_COUNT
+): Project[] {
+  const featured = getFeaturedProjects(locale);
+  return featured.length > 0 ? featured : getProjects(locale).slice(0, limit);
+}
+
 export function getProject(locale: Locale, slug: string): Project | undefined {
   return getProjects(locale).find((project) => project.slug === slug);
 }

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { routing } from "@/i18n/routing";
 import {
+  getHomeProjects,
   getPost,
   getPostLocales,
   getPosts,
@@ -311,5 +312,86 @@ describe("content translated into one locale only", () => {
       content.getPostLocales("en-only")
     );
     expect(Object.keys(languages).sort()).toEqual(["en", "x-default"]);
+  });
+});
+
+// The home page used to render getProjects(locale) in full, so the "Selected
+// work" section was a copy of the projects page. The selection rule now lives
+// in the content layer instead of inside the page component, because this is
+// the part that has to keep working: a synthetic collection can show both the
+// featured branch and the fallback, which the real content (two featured
+// projects, always) cannot.
+describe("home page project selection", () => {
+  const featuredProject = {
+    ...FIXTURE_PROJECT,
+    slug: "featured",
+    featured: true,
+    order: 1,
+  };
+  const plain = (slug: string, order: number) => ({
+    ...FIXTURE_PROJECT,
+    slug,
+    order,
+  });
+
+  it("shows only the featured projects when frontmatter marks any", async () => {
+    const content = await contentWith(
+      {
+        projects: [
+          featuredProject,
+          plain("second", 2),
+          plain("third", 3),
+          plain("fourth", 4),
+        ],
+      },
+      "production"
+    );
+
+    expect(content.getHomeProjects("en").map((p) => p.slug)).toEqual([
+      "featured",
+    ]);
+  });
+
+  it("falls back to the first few by list order when nothing is featured", async () => {
+    const content = await contentWith(
+      {
+        projects: [
+          plain("first", 1),
+          plain("second", 2),
+          plain("third", 3),
+          plain("fourth", 4),
+        ],
+      },
+      "production"
+    );
+
+    expect(content.getHomeProjects("en").map((p) => p.slug)).toEqual([
+      "first",
+      "second",
+      "third",
+    ]);
+    expect(content.HOME_PROJECT_FALLBACK_COUNT).toBe(3);
+  });
+
+  it("returns nothing for an empty collection, so the page can show its empty state", async () => {
+    const content = await contentWith({ projects: [] }, "production");
+
+    expect(content.getHomeProjects("en")).toEqual([]);
+    expect(content.getHomeProjects("tr")).toEqual([]);
+  });
+
+  it("never shows a draft and never shows the whole projects page", () => {
+    for (const locale of routing.locales) {
+      const home = getHomeProjects(locale);
+      const all = getProjects(locale);
+      expect(home.length).toBeGreaterThan(0);
+      expect(home.length).toBeLessThanOrEqual(all.length);
+      for (const project of home) {
+        expect(project.draft).toBe(false);
+        expect(all.some((candidate) => candidate.slug === project.slug)).toBe(
+          true
+        );
+      }
+    }
   });
 });
