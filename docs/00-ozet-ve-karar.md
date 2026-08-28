@@ -56,7 +56,7 @@ Hızlı referans için ana bağımlılıkların hedef sürümleri:
 | next-intl | yok | 4.13.7 | Uygulandı, package.json'da 4.13.7 |
 | velite | yok | 0.4.0 (exact pin) | Uygulandı, package.json'da exact 0.4.0 |
 | motion (framer-motion) | ^12.34.3 | motion 13.1.1 | Uygulandı, package.json'da motion 13.1.1 |
-| node | pin yok | 24 (.nvmrc), engines.node >=20.9 | Uygulandı, .nvmrc 24 ve engines.node >=20.9 |
+| node | pin yok | 24 (.nvmrc), engines.node >=24 | Uygulandı, .nvmrc 24 ve engines.node >=24 |
 
 typescript ve lucide-react major yükseltmeleri kasten bu listede yok; breaking değişiklik riski taşıdıkları için güvenlik yamasından ayrı, sonraki bir PR'a bırakıldı. Tam gerekçe ve yükseltme sırası: [02-stack-karari.md](./02-stack-karari.md).
 

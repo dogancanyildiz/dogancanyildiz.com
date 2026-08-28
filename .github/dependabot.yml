@@ -32,6 +32,12 @@ updates:
         update-types: [version-update:semver-major]
       # Exact pin, see docs/02-stack-karari.md. Bumped by hand.
       - dependency-name: velite
+      # Until typescript-eslint supports the next major.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # Must track the runtime major in .nvmrc.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
@@ -55,3 +61,7 @@ updates:
       timezone: Europe/Istanbul
     target-branch: dev
     labels: [dependencies, docker]
+    ignore:
+      # LTS line only, bumped by hand together with .nvmrc and engines.
+      - dependency-name: node
+        update-types: [version-update:semver-major]
