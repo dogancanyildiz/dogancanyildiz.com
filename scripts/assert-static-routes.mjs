@@ -46,6 +46,17 @@ const required = [
   "/tr/contact",
   "/en/feed.xml",
   "/tr/feed.xml",
+  // Root level metadata routes, outside the [lang] segment so they carry no
+  // locale prefix.
+  "/robots.txt",
+  "/sitemap.xml",
+  "/icon",
+  "/apple-icon",
+  // opengraph-image is intentionally excluded: /[lang]/opengraph-image/[id]
+  // shows as prerendered (SSG) in the build output, but its per-locale,
+  // per-id paths live under prerender-manifest.json's dynamicRoutes, not the
+  // flat routes map this script checks, so there is nothing stable to list
+  // here. Verify it by hand: `curl -I <site>/en/opengraph-image/default`.
 ];
 
 const missing = required.filter((route) => !routes.includes(route));
