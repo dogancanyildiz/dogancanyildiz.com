@@ -190,6 +190,25 @@ describe("page openGraph metadata", () => {
     }
   );
 
+  it.each([...routing.locales])(
+    "%s default title says what he does, not only who he is",
+    async (locale) => {
+      const messages = (await import(`../../messages/${locale}.json`)).default;
+      const defaultTitle = messages.metadata.defaultTitle as string;
+      const siteName = messages.metadata.siteName as string;
+
+      // The branded check above is satisfied by the name alone, which is what
+      // the home title used to be: a search result that named a person and
+      // said nothing about the work. The title has to carry the name and a
+      // role signal on top of it, and still fit in what a result page shows.
+      expect(defaultTitle).toContain(siteName);
+      expect(defaultTitle.length).toBeGreaterThan(siteName.length + 10);
+      expect(defaultTitle.length).toBeLessThan(70);
+      expect(defaultTitle).toMatch(/Developer|Geliştirici/);
+      expect(defaultTitle).toMatch(/DevOps/);
+    }
+  );
+
   it.each(CASES)(
     "$page.name in $locale keeps the og image of its own locale",
     async ({ locale, page }) => {
