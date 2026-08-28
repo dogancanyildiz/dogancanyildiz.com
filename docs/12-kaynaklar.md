@@ -1,6 +1,6 @@
 # Kaynaklar
 
-Durum: Uygulandı (Faz 0-4 kararlarının dayanağı, PR #2-#6) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.sh
+Durum: Uygulandı (Faz 0-5 kararlarının dayanağı, PR #2-#6, #31) · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
 
 Bu dosya karar üretmez, diğer dokümanların dayandığı kaynakları toplar. Faz 5 (Gatus, Umami, Renovate) başladığında o fazın kaynakları buraya eklenir.
 

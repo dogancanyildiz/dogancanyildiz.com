@@ -1,11 +1,12 @@
 # Trust maintenance checklist
 
 Quarterly and release-time checks that keep the portfolio's trust signals accurate.
-Code automates live demo URLs in CI (`npm run verify:links`); the rest stays manual.
+Code automates live demo URLs on a weekly schedule (`.github/workflows/links.yml` runs
+`npm run verify:links`, it is not a merge gate any more); the rest stays manual.
 
-## Every release (CI)
+## Every release
 
-- [ ] `npm run verify:links` passes after `npm run build:content` (live demo URLs from project frontmatter).
+- [ ] The latest `Live links` workflow run is green, or `npm run verify:links` passes locally after `npm run build:content` (live demo URLs and certificate verify links from the content).
 - [ ] Person JSON-LD on `/` includes `knowsAbout`, `alumniOf`, `worksFor`, and `sameAs` (Rich Results Test when schema changes).
 - [ ] `siteConfig.person.name` matches `brand.name` in `messages/en.json` and `messages/tr.json` (covered by `tests/trust.test.ts`).
 
@@ -19,7 +20,8 @@ Code automates live demo URLs in CI (`npm run verify:links`); the rest stays man
 ## Owner content (when delivered)
 
 - [ ] Profile photo at `public/images/profile.jpg` (or `.webp`) shows in Hero and About; Person schema `image` populates automatically.
-- [ ] Project covers in `content/images/<slug>-cover.png` with `cover:` in MDX frontmatter.
+- [ ] Project covers in `content/images/<slug>-cover.png` with `cover:` and `coverAlt:` in MDX frontmatter.
+- [ ] A new CV goes to the same path; purge `/cv/*` in Cloudflare after the upload (the file is served with a one day cache and the name is not versioned).
 - [ ] Speaking entries in `src/content/profile.ts` (`speaking.en` / `speaking.tr`).
 - [ ] Testimonials in `src/content/testimonials.ts` after references are approved.
 - [ ] CV at `public/cv/dogancanyildiz-cv.pdf` (download button appears when the file exists).

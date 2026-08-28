@@ -1,5 +1,5 @@
 # SEO, Metadata ve Yapılandırılmış Veri
-Durum: Uygulandı (Faz 2 ve Faz 4) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı (Faz 2 ve Faz 4; 2026-08-28 denetim kapanışı: OG görseli, JSON-LD kimlikleri, sitemap lastmod, başlık şablonu, CV noindex), kalan: Search Console ve hreflang canlı doğrulaması · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -71,6 +71,18 @@ Kararın dokuz maddesi de uygulandı, Faz 2 (`app/[lang]` + next-intl geçişi) 
 - **Yayın öncesi elle doğrulama**: henüz yapılmadı. Search Console kaydı (iki property: `.com` ana, `.sh` yalnızca yönlendirme izleme), sitemap gönderimi, üçüncü parti hreflang test aracı taraması ve Lighthouse SEO kontrolü `docs/plans/handoffs/faz-4-manual-checklist.md`'de sahibinin bekleyen adımları arasında; hepsi canlı URL gerektiriyor, staging/PR preview'da tam doğrulanamıyor.
 
 **RSS eklentisi (kararda yoktu, Faz 4'te eklendi).** `buildAlternates` her sayfaya kendi locale'inin `/feed.xml`'ine (TR için `/tr/feed.xml`) bir `application/rss+xml` keşif linki ekliyor; `src/app/[lang]/feed.xml/route.ts` locale başına RSS üretiyor. Bu, kararın kapsamında yazılmamış ama JSON-LD ile aynı "ucuz, doğrudan getirisi olan" mantığa uyan bir ek.
+
+## Uygulama durumu (2026-08-28)
+
+Dal `feature/audit-closure`; kanıt `src/app/[lang]/opengraph-image.tsx`, `src/lib/seo/**`, `src/components/seo/**`, `src/app/sitemap.ts`, `tests/seo/**`.
+
+- **OG görseli düzeldi (denetimin kritik bulgusu).** Rota üretimde 500 veriyordu: satori değişken (fvar/gvar) font okuyamıyor. `scripts/vendor-fonts.mjs` fontTools ile Geist'in wght 400 ve 600 statik TTF instance'larını üretiyor (`public/fonts/og/*.ttf`), rota bunları yüklüyor; `tests/og-image.test.ts` gerçek render yapıp PNG imzasını doğruluyor. Eski `public/fonts/og/*.woff` kopyaları ölü, temizlenecek.
+- **Başlıklar.** `metadata.defaultTitle` "Doğan Can Yıldız | Full-Stack Web Developer and DevOps Engineer" (TR karşılığı), `metadata.siteName` yalın ad; alt sayfa `og:title` `"<başlık> | <siteName>"`, ana sayfa `buildPageMetadata(..., { absoluteTitle: true })` ortak yolunda. TR varsayılan açıklama 155 karakterin altında, iletişim açıklamaları 120-155.
+- **JSON-LD kimlikleri.** Person `@id` `https://dogancanyildiz.com/#person`, WebSite `@id` `/#website` (ana sayfada, locale başına `inLanguage`), ikisinin `url`'i locale'den bağımsız EN kökü (varlık kimliği tek; sayfa URL'leri locale'e duyarlı kalır). BlogPosting `image` (OG görselinin mutlak adresi), `publisher`/`author` `#person`'a referans, `dateModified = updated ?? date`; blog ve proje detaylarında `BreadcrumbList`; `buildOpenGraph` `article:author`, `article:tag`, `modified_time` üretiyor. `person-jsonld` ortak `JsonLd` bileşenini kullanıyor.
+- **Sitemap.** Statik sayfalar `lastmod` taşımıyor; içerik girdileri `updated ?? date`. `x-default` Faz 5'ten beri var; tek dilli içerik sızmaz (fixture ile test, `tests/seo/**`). RSS rotası her locale için 200 + XML parse + item sayısı testiyle doğrulanıyor.
+- **Bilinçli kabuller.** Kök canonical/hreflang eğik çizgisiz, sitemap `loc`'u eğik çizgili (tutarlılık iddiası yok, F-154). `/en/*` yinelenen URL'ler tek 307 ile öneksiz karşılığına düşer; dışarıdan `/en/*` linki gözlenmedikçe kalıcı yönlendirme eklenmez (F-155). **CV indekslenmez:** `/cv/*` `X-Robots-Tag: noindex, nofollow` (karar, `robots.ts` değişmedi).
+- **Hata sınırları.** `src/app/[lang]/error.tsx` (client, next-intl `errorPage` namespace'i, Next 16.3'ün kararlı `retry` prop'u) ve `src/app/global-error.tsx` (kendi html/body, fontlar).
+- **Canlı doğrulama hâlâ yok:** Search Console, hreflang aracı, paylaşım önizlemesi ve Rich Results Test site 526 verdiği için koşulmadı.
 
 ## Riskler ve tripwire'lar
 

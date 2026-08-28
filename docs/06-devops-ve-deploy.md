@@ -1,6 +1,6 @@
 # DevOps, Docker, Coolify ve Deploy Hattı
 
-Durum: Kısmen uygulandı: kod ve checklist'ler (Faz 1, PR #3), panel adımları sahibinde · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Kod tarafı uygulandı: Dockerfile, CI, compose, checklist'ler (Faz 1, PR #3), release akışı (PR #7/#8), 2026-08-28 CI/Docker/release sertleştirmesi (`feature/audit-closure`); panel adımları sahibinde, canlı site 2026-08-28'de 526 · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -221,6 +221,17 @@ Bu setin merkezinde tek bir zorunlu koşul var: PR önizlemesi. Coolify'da bu ö
 
 **Panel adımları henüz uygulanmadı.** Coolify GitHub App kurulumu, Preview Deployments, health check bağlama, rolling update doğrulaması, DNS/Cloudflare kayıtları, origin kilidi (yukarıdaki DOCKER-USER): hepsi `docs/plans/handoffs/faz-1-manual-checklist.md`'de sahibinin manuel listesi olarak duruyor, kod tarafı (Dockerfile/CI/compose/docs) tamamlandı ama sunucuda/Coolify panelinde/Cloudflare panelinde henüz koşulmadı.
 
+## Uygulama durumu (2026-08-28)
+
+Kanıt: `.github/workflows/ci.yml`, `release.yml`, `links.yml`, `dependabot.yml`, `Dockerfile`, `docker-compose.yml`, `.dockerignore`, `scripts/*.mjs`, `tests/deploy/**`; dal `feature/audit-closure`.
+
+- **CI `Quality checks` job'u:** `npm ci`, `dependency-review-action` (PR'larda, high şiddette durdurur), `build:content`, lint (`--max-warnings=0`, tipli kurallar), typecheck, `vitest --coverage` (eşikler `vitest.config.mts`'te), `verify:docs` (doküman tutarlılık kontrolleri vitest'ten `scripts/verify-docs.mjs`'e taşındı, `tests/plans/` silindi), build, `verify:routes` (required listesinde `/robots.txt`, `/sitemap.xml`, `/icon`, `/apple-icon` da var), `npm run format` (repo bir kez `format:write` ile düzeltildi), `npm audit --omit=dev --audit-level=high` (prod grafiği 0 bulgu; dev zinciri velite -> sharp kabul edildi). `verify:links` merge kapısından çıktı, `links.yml` haftalık (Pazartesi 05:30 UTC) ve `workflow_dispatch` ile koşuyor.
+- **CI `Docker image` job'u:** hadolint (digest pinli imaj), `docker/build-push-action` ile gha cache'li build (push yok, `load: true`), sonra imaj `3131:3000` ile çalıştırılır, `Healthcheck` config'inin boş olmadığı assert edilir, `docker inspect` ile `healthy` beklenir ve `/api/health` dışarıdan curl'lenir, container temizlenir. Job'larda `timeout-minutes` var. Tüm action'lar commit SHA'sına pinli (`# vX.Y.Z` yorumuyla).
+- **Dockerfile:** `node:24-alpine` digest'e pinli, `RUN --mount=type=cache,target=/root/.npm`, build tek `npm run build` (velite artık iki kez koşmuyor), `NEXT_PUBLIC_BUILD_SHA`/`NEXT_PUBLIC_BUILD_DATE` ARG'ları varsayılansız. `docker-compose.yml` bu iki arg'ı geçiyor, imaj adı faz numarasından bağımsız. `.dockerignore` `audit` ve `.cursor` dizinlerini de dışlıyor.
+- **Release:** `release.yml` `workflow_run` + `conclusion == success`; `scripts/release-version.mjs` son tag'i `git tag --sort=-v:refname` ile semver'e göre seçiyor (dev dalında da doğru), dev'de çalışınca uyarı basıyor. `package.json` `predev` ile velite yarışı kapandı.
+- **Dependabot:** docker ekosistemi `/`, `/infra/gatus`, `/infra/umami`; npm haftalık gruplu; majorlar (`next`, `eslint`, `typescript`) ignore'da.
+- **Panel tarafı hâlâ uygulanmadı ve canlı site kapalı (526):** Coolify env katmanları (`NEXT_PUBLIC_BUILD_SHA/DATE` için `SOURCE_COMMIT`), Gatus/Umami kaynakları, Cloudflare (Always Use HTTPS, Min TLS 1.2, CAA, managed robots.txt, Cache Rule, rate limiting), Traefik (trustedIPs, HSTS middleware, origin kilidi), preview wildcard DNS kararı, merge edilmiş `release/sync-v0.3.0` ve `feature/public-repo-security` uzak dallarının silinmesi, `main` için `enforce_admins`. Preview deployment'lar kendi `NEXT_PUBLIC_SITE_URL` değerini almalı (contact API `Origin`'i bu değerle karşılaştırıyor).
+
 ## Riskler ve tripwire'lar
 
 - **next.config.ts'de output: "standalone" eksikse**: Dockerfile .next/standalone klasörünü bulamaz, build başarısız olur ya da yanlış (şişkin) çıktı kopyalanır. Faz 0'da bu değişiklik Dockerfile'dan önce yapılmalı.
@@ -257,8 +268,10 @@ feature/*  --PR-->  dev  --PR-->  main  --push-->  release.yml
 - **dev**: entegrasyon dalı. Bütün feature PR'ları buraya iner, CI burada da
   zorunlu koşar.
 - **main**: yayınlanan durum. Yalnızca `dev`'den gelen PR ile ilerler.
-- `main`'e her merge `release.yml`'i tetikler: tag, GitHub Release ve `dev`'e
-  geri dönen sürüm senkron PR'ı.
+- `main`'e her merge CI'ı koşturur; `release.yml` o CI koşusunun başarıyla
+  bitmesini (`workflow_run`, `conclusion == success`, `head_branch == main`)
+  bekleyip tag, GitHub Release ve `dev`'e geri dönen sürüm senkron PR'ını
+  üretir (2026-08-28'den beri; önce doğrudan `main`'e push tetikliyordu).
 
 `.github/workflows/ci.yml` artık hem `dev` hem `main` için `pull_request` ve
 `push` olaylarında koşuyor; iki job adı (`Quality checks` ve
@@ -267,8 +280,10 @@ tutulmalı, yeniden adlandırmak korumayı sessizce boşa düşürür.
 
 ### release.yml ne yapıyor
 
-`.github/workflows/release.yml`, `main`'e push ve `workflow_dispatch` ile
-çalışır. `workflow_dispatch` isteğe bağlı bir `version` girdisi alır; 1.0.0
+`.github/workflows/release.yml`, `main` üzerindeki CI workflow'unun başarılı
+tamamlanması (`workflow_run`) ve `workflow_dispatch` ile çalışır; `main`'e
+push tetikleyicisi 2026-08-28'de kaldırıldı, böylece CI'ı bypass eden bir push
+sürüm üretemez (`enforce_admins` hâlâ kapalı, sahibinin repo ayarı). `workflow_dispatch` isteğe bağlı bir `version` girdisi alır; 1.0.0
 gibi bir sürümü sahibi bu girdiyle elle keser.
 
 1. `actions/checkout@v7` ile `fetch-depth: 0`, tüm geçmiş ve tag'ler alınır.

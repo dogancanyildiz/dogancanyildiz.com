@@ -1,5 +1,5 @@
 # Backend, İçerik Pipeline ve Servisler
-Durum: Kısmen uygulandı: içerik pipeline ve contact (Faz 0, Faz 4); status widget ve Umami Faz 5'te · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı: içerik pipeline ve contact (Faz 0, Faz 4), status widget ve Umami kodu (Faz 5, PR #31), contact API 2026-08-28 denetim kapanışında yeniden sertleştirildi; kalan: Gatus ve Umami container'larının Coolify'da açılması · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -144,6 +144,14 @@ Gatus seçimi dokümante JSON API'sine dayanıyor; özel tasarımlı, sunucu tar
 **Turnstile**: hâlâ ertelenmiş, kod tabanında hiçbir Turnstile referansı yok; kararda tarif edilen seam (validation seam) açık bırakıldı.
 
 **Gatus / Umami**: ikisi de başlamadı (Faz 5). `GATUS_URL` `.env.example`'da runtime env olarak tanımlı ama boş; Gatus container'ı, status widget'ı ve Umami container'ı henüz kurulmadı.
+
+## Uygulama durumu (2026-08-28)
+
+- **Contact API sözleşmesi değişti** (dal `feature/audit-closure`, ayrıntı [09-guvenlik.md](./09-guvenlik.md) "Uygulama durumu (2026-08-28)"): gövde yalnızca `name`, `email`, `message` ve honeypot alanı `extra_field` taşır; `subject` kaldırıldı, `locale` gövdeden çıkıp `X-Locale` başlığına taşındı; bilinmeyen alan 400. Yeni durum kodları 415 (JSON değil), 403 (`Origin` yok veya farklı), 504 (Resend 10 sn içinde cevap vermedi); 400 gövdesi hatalı alanı `field` ile adlandırır. Rate limit çözümlenmiş IP için 5/10 dk, `unknown` için 30/10 dk. Honeypot artık istemcide sessiz başarıya düşmez: istek gönderilir, sunucu 200 döner ama posta gitmez ve loglar. Form `noValidate` ile kendi doğrulamasını site dilinde yapar, `aria-invalid`/`aria-describedby`, kalıcı `aria-live`, `readOnly` kilidi, 429'da `Retry-After` geri sayımı, `autoComplete="name"`/`"email"`, alan `maxLength` değerleri `contact-validation.ts` sabitlerinden gelir. Gizlilik metni Resend'i işleyici, Umami'yi çerezsiz ölçüm olarak belirtir.
+- **Health endpoint'i** `{ status, checks: { content, mail }, timestamp }`; Gatus koşulu değişmedi (`[BODY].status == ok`), mail env eksikse `degraded`.
+- **Status okuyucusu (`src/lib/status.ts`) sertleşti:** iki Gatus isteği 3 sn `AbortSignal.timeout` ve `Promise.allSettled` ile (uptime isteği düşerse durum yine gelir), her hata host'u maskelenmiş tek satır JSON uyarı olarak loglanır (`GATUS_URL` boşsa sessiz, bilinçli), `timestamp` doğrulanır (geçersizse alan düşer). Systems paneli tek `PageSection` içinde, etiket kontrastı iki temada 4.5:1 (test hesaplıyor), "son yayın" ve "son kontrol" locale'e göre `timeZoneName: "short"` ile biçimlenir. `buildInfo.year` yalnızca `NEXT_PUBLIC_BUILD_DATE`'ten türer; tarih yoksa footer yıl basmaz (istemci tarafı `new Date()` fallback'i kaldırıldı).
+- **Gatus/Umami altyapısı:** `infra/gatus/config/gatus.yaml` artık bir `alerting` bloğu taşıyor (`GATUS_ALERT_WEBHOOK_URL` boşsa uyarı gitmez; failure-threshold 3, success-threshold 2, send-on-resolved), dashboard public kalıyor (yalnızca public URL'ler listelenir, kural `infra/README.md`'de). Umami imajı sabit sürüme, Postgres minor tag'e pinli; Dependabot docker ekosistemi `infra/gatus` ve `infra/umami` dizinlerini de tarıyor. Container'lar Coolify'da henüz açılmadı (`docs/plans/handoffs/faz-5-manual-checklist.md`).
+- **İçerik şeması genişledi:** posts ve projects için opsiyonel `updated` (isodate), `coverAlt`; projects için `draft` (prod'da filtrelenir); `links.live`/`links.repo` yalnızca `https://`. `ProjectMeta` ve `Screenshot` MDX kısayolları hiçbir içerik kullanmadığı ve planlanmadığı için kaldırıldı; tablo `.table-wrap` ile sarılır.
 
 ## Riskler ve tripwire'lar
 

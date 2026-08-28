@@ -1,5 +1,5 @@
 # İçerik Stratejisi ve Sektör Araştırması
-Durum: Uygulandı (Faz 4, PR #6), sahibinin teslimatı bekleniyor · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı (Faz 4, PR #6, merged; Faz 5 ile iki EN çeviri daha; içerik şeması 2026-08-28'de `updated`, `coverAlt`, `draft`, `https://` kısıtı ile genişledi), sahibinin teslimatı ve metin onayı bekleniyor · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -56,7 +56,7 @@ Karma karar: omurga case study (4-5 proje, Cargo Pilot ve Bilet Satın Alma önc
 
 ## Uygulama durumu (2026-08-27)
 
-Bu dokümandaki kararlar `feature/faz-4-icerik-ve-yayin` dalında (PR #6, CI yeşil, henüz merge edilmedi) uygulandı. Kanıt: `docs/plans/handoffs/faz-4.md`, repodaki içerik ve kod dosyaları.
+Bu dokümandaki kararlar `feature/faz-4-icerik-ve-yayin` dalında (PR #6, main'e merge 2026-08-27) uygulandı. **Ek (2026-08-28):** Faz 5 (PR #31) `capt-sinavina-hazirlik` ve `ccna-dan-web-guvenligine` yazılarının EN çevirilerini ekledi (EN blog 3 yazı); denetim kapanışı içerik şemasına opsiyonel `updated` (sitemap `lastmod` ve BlogPosting `dateModified`), `coverAlt` (kapak alt metni, kapak gelince zorunlu), projeler için `draft` ekledi; `links.live`/`links.repo` yalnızca `https://`; `self-hosting-with-coolify` TR özetindeki Vercel atfı EN ile aynı bilgi seviyesine çekildi; ana sayfa `featured` projeleri (yoksa ilk üç) gösteriyor; `ProjectMeta`/`Screenshot` MDX kısayolları kaldırıldı. Kanıt: `docs/plans/handoffs/faz-4.md`, repodaki içerik ve kod dosyaları.
 
 - **5 case study yayında** (karar 2), `content/projects/{en,tr}/` altında 10 MDX dosyası: `cargo-pilot.mdx` (Rol "DevOps Chapter Lead", `year: 2025`, live `cargopilot.divizyon.org`, order 1), `ticket-purchasing-system.mdx` (Bilet Satın Alma, Rol "Cybersecurity project, Siber Vatan program", `year: 2025`, repo `github.com/dogancanyildiz/bilet-satin-alma`, order 2), `wikonya.mdx` (`year: 2025`, live `wikonya.vercel.app` + repo, order 3), `hubit.mdx` (`year: 2025`, Three.js, canlı/repo linki yok, order 4), `gpa-calculator.mdx` (`year: 2025`, live + repo, order 5). Her dosyada mono künye alanları (`role`, `stack`, `year`, `outcome`) ve opsiyonel `links.live`/`links.repo` var; `cover` alanı hiçbirinde dolu değil (`covers=0`, `content/images/` boş), karar 2'nin "görsel yoksa kapaksız yayın" kuralı fiilen uygulanıyor.
   **Karar değişikliği:** Aşağıdaki "Proje adayları" tablosu Sportlink'i 3. öneri olarak listeliyordu; uygulamada Sportlink dahil edilmedi, yerine GPA girdi. Gerekçe (`docs/plans/2026-08-27-faz-4-icerik-ve-yayin.md:4741`): "Sportlink yerine GPA seçildi çünkü GPA'nın public linki ve deposu var, Sportlink'in ise canlı linki yok." Cargo Pilot ve Bilet Satın Alma'nın 1-2. sırada sabit kalması kararı aynen uygulandı.

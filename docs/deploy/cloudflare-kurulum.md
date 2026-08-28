@@ -21,7 +21,12 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 - [ ] **Uyarı:** `me@dogancanyildiz.com` alıcı adresini taşıyan MX kayıtlarına dokunulmaz; A/CNAME kayıtlarının eklenmesi mevcut postayı etkilemez.
 - [ ] `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi bu zone'daki bir Redirect Rule ile yapılır (bölüm 3), Coolify'ın dahili www ayarı kullanılmaz.
 
+- [ ] **CAA kaydı** (2026-08-28 denetimi, yoktu): `CAA 0 issue "letsencrypt.org"`, `CAA 0 issue "pki.goog"`, `CAA 0 iodef "mailto:me@dogancanyildiz.com"`. Origin CA'ya geçilirse `letsencrypt.org` satırı kaldırılabilir.
+- [ ] `*.preview` kaydı yalnızca PR preview kullanılacaksa eklenir; kullanılmayacaksa bu satır ve `docs/deploy/coolify-kurulum.md` bölüm 5 kaldırılır (karar sahibinde, 2026-08-28 denetimi F-029).
+
 ### Zone: dogancanyildiz.sh (yalnızca redirect, origin'e ulaşmaz)
+
+**Not (2026-08-28):** `dogancanyildiz.sh` kayıtlı değil, bu zone Cloudflare'da yok. Aşağıdaki tablo ve bölüm 3'teki kural, sahibi alan adını kaydederse uygulanır; kapsam dışı ilan edilirse bu bölüm silinir (`docs/plans/README.md`).
 
 | Tip | Ad | İçerik | Proxy |
 |---|---|---|---|
@@ -33,9 +38,10 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 ## 2. SSL/TLS
 
 - [ ] SSL/TLS -> Overview -> Encryption mode: **Full (strict)**. Flexible seçilirse Cloudflare ile origin arası düz HTTP'ye düşer.
-- [ ] SSL/TLS -> Edge Certificates -> "Always Use HTTPS": açık.
-- [ ] Origin sertifikası Traefik'in Let's Encrypt HTTP-01 akışıyla kalır. Cloudflare proxied modda `/.well-known/acme-challenge` yolunu geçirir, "Always Use HTTPS" bu yolu engellemez.
-- [ ] HSTS Cloudflare'da **açılmaz**. Tek kaynak Traefik'teki `security-headers` middleware'i, bkz. `docs/deploy/traefik-ve-origin.md`. İki yerde tanımlamak tutarsızlık riski taşır.
+- [ ] SSL/TLS -> Edge Certificates -> "Always Use HTTPS": açık. 2026-08-28 denetimi: `http://` istekler 301 almıyordu, ayar kapalıydı. Doğrulama: `curl -sI http://dogancanyildiz.com/ | grep -i -E '^(HTTP|location)'` -> `301` ve `https://` hedef.
+- [ ] SSL/TLS -> Edge Certificates -> "Minimum TLS Version": **1.2** (2026-08-28 denetimi: edge TLS 1.0/1.1 kabul ediyordu). Doğrulama: `curl -sI --tls-max 1.1 https://dogancanyildiz.com/` başarısız olmalı.
+- [ ] Origin sertifikası Traefik'in Let's Encrypt HTTP-01 akışıyla kalır. Cloudflare proxied modda `/.well-known/acme-challenge` yolunu geçirir, "Always Use HTTPS" bu yolu engellemez. **Kesinti notu (2026-08-28):** site her HTTPS yolda 526 (Invalid SSL certificate) veriyor ve origin'de port 80 Traefik router'sız 404 dönüyor; Coolify'da uygulamanın çalıştığı ve Custom Labels'taki router satırları doğrulanmalı, kalıcı çözüm olarak Cloudflare Origin CA sertifikası (15 yıl, yalnızca Cloudflare güvenir) değerlendirilmeli.
+- [ ] HSTS Cloudflare'da **açılmaz**. Şu an uygulama (`next.config.ts`, production) `max-age=31536000; includeSubDomains` gönderiyor; Traefik'teki `security-headers` middleware'i devreye alınınca uygulama satırı kaldırılır ve tek kaynak Traefik olur, bkz. `docs/deploy/traefik-ve-origin.md`. Yayından önce tüm alt alanların (dev, preview, status, analytics, send) TLS sonlandırdığı doğrulanmalı, `includeSubDomains` hepsini bir yıl https'e kilitler.
 
 ## 3. Redirect Rule: `sh to com`
 
@@ -94,7 +100,11 @@ Caching -> Cache Rules -> Create rule.
 - [ ] Edge TTL: **Use cache-control header if present, bypass cache if not**
 - [ ] Browser TTL: **Respect origin TTL**
 
-Next.js `/_next/static/` altına zaten `cache-control: public, max-age=31536000, immutable` gönderiyor; bu kural o header'ı edge'de de geçerli kılıyor.
+Next.js `/_next/static/` altına zaten `cache-control: public, max-age=31536000, immutable` gönderiyor; bu kural o header'ı edge'de de geçerli kılıyor. `/cv/*` ve `/fonts/*` origin'den `max-age=86400` alıyor (dosya adları hash'li olmadığı için immutable değil); istenirse ikinci bir Cache Rule ile edge'de daha uzun tutulabilir, CV yenilenince `/cv/*` purge edilmeli.
+
+## 4b. Managed robots.txt
+
+- [ ] AI Crawl Control veya Security -> Bots altında "Managed robots.txt" **kapalı** (2026-08-28 denetimi: yayınlanan `robots.txt` uygulamanınki değildi, `Sitemap:` ve `Disallow: /api/` satırları yoktu). Uygulamanın `src/app/robots.ts` çıktısı tek kaynak. Doğrulama: `curl -s https://dogancanyildiz.com/robots.txt` içinde `Sitemap: https://dogancanyildiz.com/sitemap.xml` ve `Disallow: /api/` var.
 
 Doğrulama (build sonrası gerçek bir asset yolu ile, ikinci istekte `HIT` beklenir):
 
@@ -123,7 +133,7 @@ Security -> WAF -> Rate limiting rules -> Create rule.
 - [ ] Period: `10 seconds`
 - [ ] Requests: `3`
 - [ ] Action: `Block`, Duration: `10 seconds`
-- [ ] Bu yalnızca dış katman. Uygulama içindeki in-memory sliding window limiti (Faz 0'ın contact sertleştirmesi) aynen yerinde kalır, biri diğerinin yerine geçmez.
+- [ ] Bu yalnızca dış katman. Uygulama içindeki in-memory sliding window limiti (çözümlenmiş IP için 5 istek / 10 dakika, paylaşılan `unknown` anahtarı için 30 / 10 dakika; 2026-08-28) aynen yerinde kalır, biri diğerinin yerine geçmez. `TRUST_CF_CONNECTING_IP` `false` kaldığı sürece uygulama kovası edge IP başına sayar; origin kilidi tamamlanıp bayrak `true` yapılınca ziyaretçi başına olur.
 
 Doğrulama:
 
@@ -134,7 +144,7 @@ for i in 1 2 3 4 5 6; do
 done
 ```
 
-Beklenen: ilk istekler uygulamadan `400` döner (boş gövde), altıncı istekte Cloudflare `429` verir.
+Beklenen: ilk istekler uygulamadan `403` döner (curl `Origin` göndermediği için; `-H 'origin: https://dogancanyildiz.com'` eklenirse boş gövde `400` olur), altıncı istekte Cloudflare `429` verir.
 
 ## 6. Bot Fight Mode
 

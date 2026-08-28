@@ -1,6 +1,6 @@
 # Site Sahibine Açık Sorular
 
-Durum: Uygulandı (11/11 soru cevaplandı, açık soru sayısı 0; cevaplar Faz 0-4'e yansıdı, soru 5'in `.sh -> .com` 301'inin panelde canlıya alınması ayrı bir yürütme adımı olarak hâlâ bekliyor) · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı (11/11 soru cevaplandı; cevaplar Faz 0-5'e yansıdı). Yeni açık soru (2026-08-28 denetimi): `dogancanyildiz.sh` hiç kayıtlı değil, soru 5'teki `.sh -> .com` 301 için alan adı ya kaydedilmeli ya `.sh` kapsam dışı ilan edilmeli (bkz. `plans/README.md` ek notu). Ayrıca sahibinin görsel onayı bekleyen dört tasarım sonucu var (`03-tasarim-ui-ux.md` "Uygulama durumu (2026-08-28)") · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
