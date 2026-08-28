@@ -45,6 +45,22 @@ describe("scripts/assert-static-routes.mjs", () => {
     }
   });
 
+  it("requires the root level static metadata routes", () => {
+    const content = script();
+    for (const route of [
+      "/robots.txt",
+      "/sitemap.xml",
+      "/icon",
+      "/apple-icon",
+    ]) {
+      expect(content).toContain(`"${route}"`);
+    }
+  });
+
+  it("documents why opengraph-image is not in the required list", () => {
+    expect(script()).toContain("opengraph-image is intentionally excluded");
+  });
+
   it("fails the check when api routes are prerendered", () => {
     const content = script();
     expect(content).toContain("apiRoutes.length > 0");

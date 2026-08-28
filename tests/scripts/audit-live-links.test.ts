@@ -29,4 +29,18 @@ describe("scripts/audit-live-links.mjs", () => {
   it("exits non zero when a URL check fails", () => {
     expect(script()).toContain("process.exit(1)");
   });
+
+  it("audits every locale's live links, not just en", () => {
+    expect(script()).not.toContain('project.locale !== "en"');
+  });
+
+  it("does not crash when profile.ts is missing or unreadable", () => {
+    const content = script();
+    expect(content).toContain("try {");
+    expect(content).toContain("readFile(join(root");
+  });
+
+  it("says so when no certificate URL was found", () => {
+    expect(script()).toContain("No certificate verifyUrl found");
+  });
 });

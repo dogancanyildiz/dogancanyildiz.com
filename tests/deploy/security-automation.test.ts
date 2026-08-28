@@ -28,6 +28,19 @@ describe("dependency and code scanning", () => {
     expect(content).toMatch(/dependency-name: velite\s*$/m);
   });
 
+  it("scans the Faz 5 side service compose files, not only the root Dockerfile", () => {
+    // infra/gatus and infra/umami each carry their own docker-compose.yml
+    // with a floating image tag; without these Dependabot only ever looked
+    // at the root Dockerfile and neither image got a version bump PR.
+    const content = read(".github/dependabot.yml");
+    const dockerSection = content.slice(
+      content.indexOf("package-ecosystem: docker")
+    );
+    expect(dockerSection).toMatch(/directories:\s*\n\s*- \//);
+    expect(dockerSection).toContain("- /infra/gatus");
+    expect(dockerSection).toContain("- /infra/umami");
+  });
+
   it("runs codeql on pull requests, pushes and a weekly schedule", () => {
     const content = read(".github/workflows/codeql.yml");
     expect(content).toMatch(/pull_request:\s*\n\s*branches: \[dev, main\]/);
@@ -36,6 +49,16 @@ describe("dependency and code scanning", () => {
     expect(content).toContain("languages: javascript-typescript");
     expect(content).toContain("security-events: write");
     expect(content).toContain("name: CodeQL analysis");
+  });
+
+  it("pins every codeql workflow action to a commit sha", () => {
+    const content = read(".github/workflows/codeql.yml");
+    const uses = [...content.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
+    expect(uses.length).toBeGreaterThan(0);
+    for (const use of uses) {
+      expect(use, use).toMatch(/@[0-9a-f]{40}$/);
+    }
+    expect(content).toMatch(/@[0-9a-f]{40} # v\d/);
   });
 });
 

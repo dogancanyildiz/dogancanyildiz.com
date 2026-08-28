@@ -8,6 +8,7 @@
     "dev": "velite --watch & next dev",
     "build": "velite --clean --strict && next build",
     "build:content": "velite --clean --strict",
+    "build:app": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
@@ -16,6 +17,7 @@
     "format:write": "prettier --write .",
     "verify:routes": "node scripts/assert-static-routes.mjs",
     "verify:links": "node scripts/audit-live-links.mjs",
+    "verify:docs": "node scripts/verify-docs.mjs",
     "release:check": "node scripts/release-version.mjs --dry-run",
     "vendor:fonts": "node scripts/vendor-fonts.mjs"
   },
@@ -48,6 +50,7 @@
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
     "prettier": "^3.9.6",

@@ -21,6 +21,8 @@ describe(".dockerignore", () => {
     ".local",
     ".nodeterm",
     ".superpowers",
+    "audit",
+    ".cursor",
     ".env",
     ".env.*",
     "docs",

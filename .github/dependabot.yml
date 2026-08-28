@@ -57,7 +57,15 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: docker
-    directory: /
+    # The root Dockerfile plus the Faz 5 side service stacks: infra/gatus and
+    # infra/umami each carry their own docker-compose.yml with a floating
+    # image tag (twinproduction/gatus, ghcr.io/umami-software/umami). Without
+    # these two, Dependabot only ever saw the root Dockerfile and neither
+    # compose file's image got a version bump PR.
+    directories:
+      - /
+      - /infra/gatus
+      - /infra/umami
     schedule:
       interval: weekly
       day: monday
