@@ -6,7 +6,7 @@
 # not invalidate the npm cache. devDependencies are required here because the
 # Next build runs in the next stage.
 # ---------------------------------------------------------------------------
-FROM node:24-alpine AS deps
+FROM node:25-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
@@ -24,7 +24,7 @@ RUN npm ci --no-audit --no-fund
 # resolveSiteUrl instead of silently inlining the production url into a
 # preview bundle. CI, docker compose and Coolify all pass it explicitly.
 # ---------------------------------------------------------------------------
-FROM node:24-alpine AS builder
+FROM node:25-alpine AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_BUILD_SHA
@@ -44,7 +44,7 @@ RUN npm run build
 # image already provides an unprivileged "node" user, so no extra addgroup or
 # adduser call is needed.
 # ---------------------------------------------------------------------------
-FROM node:24-alpine AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
