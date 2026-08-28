@@ -12,6 +12,7 @@ import {
   isAcceptedContentType,
   normalizeReports,
 } from "./report";
+import { methodNotAllowed } from "@/lib/api-methods";
 
 /**
  * Collector for the CSP violation reports produced by the policies in
@@ -71,3 +72,12 @@ export async function POST(request: Request): Promise<Response> {
 
   return new Response(null, { status: 204 });
 }
+
+// Every other verb answers 405 with an Allow header (see @/lib/api-methods).
+const rejectMethod = methodNotAllowed("POST, OPTIONS");
+export {
+  rejectMethod as GET,
+  rejectMethod as PUT,
+  rejectMethod as PATCH,
+  rejectMethod as DELETE,
+};

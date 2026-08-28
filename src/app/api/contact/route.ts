@@ -27,6 +27,7 @@ import {
 } from "@/lib/request-body";
 import { resend } from "@/lib/resend";
 import { routing, type AppLocale } from "@/i18n/routing";
+import { methodNotAllowed } from "@/lib/api-methods";
 
 const ROUTE = "/api/contact";
 
@@ -427,3 +428,12 @@ export async function POST(request: Request) {
   });
   return jsonResponse({ ok: true }, { status: 200, requestId, budget: spent });
 }
+
+// Every other verb answers 405 with an Allow header (see @/lib/api-methods).
+const rejectMethod = methodNotAllowed("POST, OPTIONS");
+export {
+  rejectMethod as GET,
+  rejectMethod as PUT,
+  rejectMethod as PATCH,
+  rejectMethod as DELETE,
+};

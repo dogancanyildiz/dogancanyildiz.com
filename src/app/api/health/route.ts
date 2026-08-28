@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { posts, projects } from "#site/content";
 
 import { missingMailEnv } from "@/lib/resend";
+import { methodNotAllowed } from "@/lib/api-methods";
 
 // Never prerendered, never cached: a cached 200 would keep reporting healthy
 // after the process stopped answering.
@@ -44,3 +45,12 @@ export async function GET() {
     { headers: { "Cache-Control": "no-store" } }
   );
 }
+
+// Every other verb answers 405 with an Allow header (see @/lib/api-methods).
+const rejectMethod = methodNotAllowed("GET, HEAD, OPTIONS");
+export {
+  rejectMethod as POST,
+  rejectMethod as PUT,
+  rejectMethod as PATCH,
+  rejectMethod as DELETE,
+};
