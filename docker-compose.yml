@@ -15,7 +15,19 @@ services:
       context: .
       args:
         NEXT_PUBLIC_SITE_URL: http://localhost:3000
-    image: portfolio-local:faz1
+        # Optional, empty by default: the build still succeeds without them,
+        # the footer's build info just renders blank (see
+        # src/lib/build-info.ts). Export them before `docker compose up
+        # --build` to exercise the real values, e.g.:
+        #   NEXT_PUBLIC_BUILD_SHA=$(git rev-parse --short HEAD) \
+        #   NEXT_PUBLIC_BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+        #     docker compose up --build -d
+        NEXT_PUBLIC_BUILD_SHA: "${NEXT_PUBLIC_BUILD_SHA:-}"
+        NEXT_PUBLIC_BUILD_DATE: "${NEXT_PUBLIC_BUILD_DATE:-}"
+    # Not faz-numbered: the phases that named earlier builds are closed, and
+    # "local" describes what this image is for regardless of which phase
+    # touches it next.
+    image: portfolio-local:latest
     container_name: portfolio-local
     ports:
       - "3000:3000"
