@@ -18,8 +18,20 @@ export default defineConfig({
     },
   },
   test: {
+    // Base environment stays "node": most test files are source/behaviour
+    // checks that never touch the DOM, and jsdom setup cost is not free.
+    // Files that render components opt into jsdom individually with a
+    // "// @vitest-environment jsdom" comment on their first line (Vitest 4
+    // dropped environmentMatchGlobs; per-file overrides are the replacement
+    // for a single project, see node_modules/vitest/dist/chunks/config.*.d.ts).
     environment: "node",
-    include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
+    include: [
+      "src/**/*.test.ts",
+      "src/**/*.test.tsx",
+      "tests/**/*.test.ts",
+      "tests/**/*.test.tsx",
+    ],
+    setupFiles: ["./tests/setup/vitest.setup.ts"],
     watch: false,
     env: {
       NEXT_PUBLIC_SITE_URL: "https://dogancanyildiz.com",
@@ -46,11 +58,16 @@ export default defineConfig({
       // `npm run test -- --coverage` for the current numbers), so the gate
       // catches a real regression without chasing 100% on files nobody has
       // reached to test yet.
+      // Raised alongside the jsdom render tests added for the contact form,
+      // mobile menu, theme toggle, language switcher, about subnav list,
+      // systems panel, error boundary, umami script and brand/skill icons
+      // (measured baseline: ~77% statements, ~72% branches, ~69% functions,
+      // ~79% lines; see `npm run test -- --coverage` for the current numbers).
       thresholds: {
-        lines: 50,
-        statements: 48,
-        functions: 36,
-        branches: 38,
+        lines: 76,
+        statements: 74,
+        functions: 65,
+        branches: 68,
       },
     },
   },
