@@ -34,7 +34,6 @@ const eslintConfig = defineConfig([
     // Velite content pipeline output and test fixture output:
     ".velite/**",
     "public/static/**",
-    "tests/fixtures/.velite-valid/**",
     "tests/fixtures/.velite-invalid/**",
     "tests/fixtures/.velite-invalid-links/**",
     "tests/fixtures/.velite-schema-fields/**",

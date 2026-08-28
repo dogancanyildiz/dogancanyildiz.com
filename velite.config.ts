@@ -90,10 +90,11 @@ const posts = defineCollection({
     .transform((data) => ({ ...data, locale: localeFromPath(data.path) })),
 });
 
-// Exported so a test fixture (tests/fixtures/velite.valid.config.ts) can
-// reuse the real collections and mdx pipeline without duplicating the
-// schema. That fixture writes to its own output directory, so the real
-// .velite output is never touched by a test run.
+// Exported so the test fixtures (tests/fixtures/velite.invalid.config.ts,
+// velite.invalid-links.config.ts, velite.schema-fields.config.ts) can reuse
+// the real collections and mdx pipeline without duplicating the schema. Each
+// fixture writes to its own output directory, so the real .velite output is
+// never touched by a test run.
 export const collections = { projects, posts };
 
 export const mdx: MdxOptions = {

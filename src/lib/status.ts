@@ -1,4 +1,7 @@
+import "server-only";
 import { z } from "zod";
+
+import { log, type LogFields } from "@/lib/log";
 
 /**
  * Gatus endpoint key, derived by Gatus as "<group>_<name>".
@@ -87,20 +90,25 @@ function safeErrorMessage(error: unknown, base: string): string {
   return host ? raw.split(host).join(maskHost(base)) : raw;
 }
 
-/** Single-line, secret-free warning so misconfiguration leaves a trace. */
+/**
+ * Single-line, secret-free warning so misconfiguration leaves a trace.
+ *
+ * It goes through log() rather than console.warn with a hand built object:
+ * src/lib/log.ts documents the line shape as the whole observability contract,
+ * and a line without time, level and msg is dropped by any Coolify filter that
+ * selects on level or sorts on time.
+ */
 function logStatusIssue(
   base: string | undefined,
   reason: string,
-  extra?: Record<string, unknown>
+  extra?: LogFields
 ): void {
-  console.warn(
-    JSON.stringify({
-      scope: "status",
-      reason,
-      gatusHost: base ? maskHost(base) : "unset",
-      ...extra,
-    })
-  );
+  log("warn", "site status unavailable", {
+    scope: "status",
+    reason,
+    gatusHost: base ? maskHost(base) : "unset",
+    ...extra,
+  });
 }
 
 /**

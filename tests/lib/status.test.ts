@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import statusesFixture from "../fixtures/gatus-statuses.json";
 import { getSiteStatus } from "@/lib/status";
@@ -174,6 +176,25 @@ describe("getSiteStatus", () => {
     warn.mockRestore();
   });
 
+  it("keeps every warning on the shared log line shape", async () => {
+    // src/lib/log.ts documents time, level and msg as the line contract: a
+    // hand rolled JSON.stringify here dropped all three, so a Coolify filter
+    // on level or a sort on time silently lost these lines.
+    vi.stubEnv("GATUS_URL", "");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockFetch(() => okJson(statusesFixture));
+
+    await getSiteStatus();
+
+    const [line] = warn.mock.calls[0] as [string];
+    const logged = JSON.parse(line) as Record<string, unknown>;
+    expect(logged.level).toBe("warn");
+    expect(logged.msg).toBe("site status unavailable");
+    expect(typeof logged.time).toBe("string");
+    expect(new Date(String(logged.time)).toISOString()).toBe(logged.time);
+    warn.mockRestore();
+  });
+
   it("returns null when Gatus is unreachable", async () => {
     vi.stubEnv("GATUS_URL", GATUS_URL);
     vi.stubGlobal(
@@ -317,5 +338,31 @@ describe("getSiteStatus", () => {
     expect(status?.lastCheck).toBeNull();
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
+  });
+});
+
+describe("server-only modules", () => {
+  // status.ts read GATUS_URL and said "Server-only" in its docstring while
+  // nothing enforced it: a "use client" component could have imported it and
+  // the build would have stayed green. server-only is how the rest of the
+  // repo states that contract (cv.ts, profile-image.ts, mdx-content.tsx).
+  function collect(dir: string, out: string[] = []): string[] {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) collect(full, out);
+      else if (/\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name))
+        out.push(full);
+    }
+    return out;
+  }
+
+  it("backs every server-only claim with the import that enforces it", () => {
+    const offenders = collect(join(process.cwd(), "src")).filter((file) => {
+      const body = readFileSync(file, "utf8");
+      return (
+        /\*\s*Server-only:/.test(body) && !body.includes('import "server-only"')
+      );
+    });
+    expect(offenders).toEqual([]);
   });
 });
