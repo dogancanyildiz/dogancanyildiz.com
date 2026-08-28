@@ -50,6 +50,16 @@ describe("dependency and code scanning", () => {
     expect(content).toContain("security-events: write");
     expect(content).toContain("name: CodeQL analysis");
   });
+
+  it("pins every codeql workflow action to a commit sha", () => {
+    const content = read(".github/workflows/codeql.yml");
+    const uses = [...content.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
+    expect(uses.length).toBeGreaterThan(0);
+    for (const use of uses) {
+      expect(use, use).toMatch(/@[0-9a-f]{40}$/);
+    }
+    expect(content).toMatch(/@[0-9a-f]{40} # v\d/);
+  });
 });
 
 describe("security contact", () => {
