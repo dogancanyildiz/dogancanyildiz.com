@@ -14,9 +14,7 @@ import { PageSection } from "@/components/layout/page-section";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getPost, getPostLocales, getPostSlugs } from "@/lib/content";
-import { absoluteUrl } from "@/lib/seo/alternates";
-import { OG_IMAGE_PATH } from "@/lib/seo/og-image";
-import { buildBreadcrumbList, personRef } from "@/lib/seo/jsonld";
+import { buildBlogPosting, buildBreadcrumbList } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocaleAndSlug } from "@/lib/route-params";
@@ -61,30 +59,7 @@ export default async function PostPage({ params }: PostPageProps) {
   const t = await getTranslations({ locale, namespace: "blog" });
   const format = await getFormatter({ locale });
 
-  // author and publisher are the same human, referenced through the shared
-  // Person node instead of two inline copies. See src/lib/seo/jsonld.ts.
-  const author = personRef();
-
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.summary,
-    datePublished: post.date,
-    // Falls back to the publish date so an untouched post never claims a
-    // revision it did not have.
-    dateModified: post.updated ?? post.date,
-    inLanguage: locale,
-    keywords: post.tags.join(", "),
-    wordCount: post.metadata.wordCount,
-    image: absoluteUrl(locale, OG_IMAGE_PATH),
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": absoluteUrl(locale, `/blog/${slug}`),
-    },
-    author,
-    publisher: author,
-  };
+  const structuredData = buildBlogPosting(locale, post);
 
   const breadcrumb = buildBreadcrumbList(locale, [
     { name: t("title"), path: "/blog" },

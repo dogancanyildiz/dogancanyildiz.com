@@ -1,6 +1,7 @@
 import { siteUrl } from "@/lib/env";
-import type { Locale } from "@/lib/content";
+import type { Locale, Post, Project } from "@/lib/content";
 import { absoluteUrl } from "@/lib/seo/alternates";
+import { OG_IMAGE_PATH } from "@/lib/seo/og-image";
 import { siteConfig } from "@/lib/site-config";
 
 /**
@@ -94,5 +95,60 @@ export function buildWebSite(
     description,
     inLanguage: locale,
     publisher: personRef(),
+  };
+}
+
+/**
+ * BlogPosting for one post.
+ *
+ * author and publisher are the same node, referenced by `@id` rather than
+ * repeated inline: one human wrote and published it. dateModified falls back
+ * to the publish date, so an untouched post never advertises a revision it
+ * never had. image is the absolute url of the generated OG card, which is the
+ * only image every post is guaranteed to have.
+ */
+export function buildBlogPosting(
+  locale: Locale,
+  post: Post
+): Record<string, unknown> {
+  const author = personRef();
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.summary,
+    datePublished: post.date,
+    dateModified: post.updated ?? post.date,
+    inLanguage: locale,
+    keywords: post.tags.join(", "),
+    wordCount: post.metadata.wordCount,
+    image: absoluteUrl(locale, OG_IMAGE_PATH),
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": absoluteUrl(locale, `/blog/${post.slug}`),
+    },
+    author,
+    publisher: author,
+  };
+}
+
+/** CreativeWork for one project, with the same shared creator node. */
+export function buildProjectCreativeWork(
+  locale: Locale,
+  project: Project
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.title,
+    abstract: project.summary,
+    inLanguage: locale,
+    dateCreated: String(project.year),
+    ...(project.updated ? { dateModified: project.updated } : {}),
+    keywords: project.stack.join(", "),
+    url: absoluteUrl(locale, `/projects/${project.slug}`),
+    image: absoluteUrl(locale, OG_IMAGE_PATH),
+    creator: personRef(),
   };
 }

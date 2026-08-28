@@ -14,8 +14,10 @@ import { SkillTag } from "@/components/ui/skill-tag";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getProject, getProjectLocales, getProjectSlugs } from "@/lib/content";
-import { absoluteUrl } from "@/lib/seo/alternates";
-import { buildBreadcrumbList, personRef } from "@/lib/seo/jsonld";
+import {
+  buildBreadcrumbList,
+  buildProjectCreativeWork,
+} from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocaleAndSlug } from "@/lib/route-params";
@@ -58,19 +60,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const t = await getTranslations({ locale, namespace: "projects" });
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "CreativeWork",
-    name: project.title,
-    abstract: project.summary,
-    inLanguage: locale,
-    dateCreated: String(project.year),
-    ...(project.updated ? { dateModified: project.updated } : {}),
-    keywords: project.stack.join(", "),
-    url: absoluteUrl(locale, `/projects/${slug}`),
-    // The shared Person node, not a fourth inline copy of the same human.
-    creator: personRef(),
-  };
+  const structuredData = buildProjectCreativeWork(locale, project);
 
   const breadcrumb = buildBreadcrumbList(locale, [
     { name: t("title"), path: "/projects" },
