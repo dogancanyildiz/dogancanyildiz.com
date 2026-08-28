@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { isLocalizedRoutePath } from "@/lib/locale-from-pathname";
 
 const repoPath = (relative: string) => join(process.cwd(), relative);
 const read = (relative: string) => readFileSync(repoPath(relative), "utf8");
@@ -71,7 +72,26 @@ describe("proxy", () => {
     expect(source).toContain('requestHeaders.set("x-pathname"');
   });
 
-  it("matches page routes and skips api, framework and file paths", () => {
+  it("runs on every path so x-pathname is always written by the server", () => {
+    // The matcher no longer excludes anything: global-not-found reads
+    // x-pathname, and a path the proxy skipped was a path where the client
+    // could send that header itself. The i18n exclusions moved into
+    // isLocalizedRoutePath.
+    for (const pathname of [
+      "/",
+      "/tr",
+      "/about",
+      "/api/contact",
+      "/_next/static/chunk.js",
+      "/favicon.ico",
+      "/cv/dogancanyildiz-cv.pdf",
+      "/icon",
+    ]) {
+      expect(matchesAny(pathname), pathname).toBe(true);
+    }
+  });
+
+  it("hands page routes to next-intl and passes the rest through", () => {
     for (const pathname of [
       "/",
       "/tr",
@@ -83,7 +103,7 @@ describe("proxy", () => {
       "/icons",
       "/blog/x",
     ]) {
-      expect(matchesAny(pathname), pathname).toBe(true);
+      expect(isLocalizedRoutePath(pathname), pathname).toBe(true);
     }
 
     for (const pathname of [
@@ -97,18 +117,17 @@ describe("proxy", () => {
       "/cv/dogancanyildiz-cv.pdf",
       "/icon",
     ]) {
-      expect(matchesAny(pathname), pathname).toBe(false);
+      expect(isLocalizedRoutePath(pathname), pathname).toBe(false);
     }
   });
 
   it("skips exactly /icon and /apple-icon but not /icons", () => {
     // /icon and /apple-icon live outside app/[lang], so a rewrite to
-    // /en/icon or /tr/icon would 404. The icon$ / apple-icon$ anchors narrow
-    // the exclusion to those exact paths, so a future /icons route stays
-    // locale rewritten like any other path.
-    expect(matchesAny("/icon")).toBe(false);
-    expect(matchesAny("/apple-icon")).toBe(false);
-    expect(matchesAny("/icons")).toBe(true);
+    // /en/icon or /tr/icon would 404. The exclusion is anchored to those exact
+    // paths, so a future /icons route stays locale rewritten like any other.
+    expect(isLocalizedRoutePath("/icon")).toBe(false);
+    expect(isLocalizedRoutePath("/apple-icon")).toBe(false);
+    expect(isLocalizedRoutePath("/icons")).toBe(true);
   });
 
   it("redirects the legacy favicon path to the single icon source", () => {
