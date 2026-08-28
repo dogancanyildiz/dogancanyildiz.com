@@ -13,7 +13,7 @@ export const UMAMI_ORIGIN = "https://analytics.dogancanyildiz.com";
 export class UmamiOriginMismatchError extends Error {
   constructor(scriptUrl: string) {
     super(
-      `UMAMI_SCRIPT_URL points at "${scriptUrl}", but the Content-Security-Policy only allows ${UMAMI_ORIGIN}. Change the build argument or update UMAMI_ORIGIN in src/lib/analytics.ts.`
+      `UMAMI_SCRIPT_URL points at "${scriptUrl}", but the tracker has to be served from ${UMAMI_ORIGIN} with no path of its own: that is the only origin the Content-Security-Policy allows and /script.js is appended here. Change the build argument or update UMAMI_ORIGIN in src/lib/analytics.ts.`
     );
     this.name = "UmamiOriginMismatchError";
   }
@@ -49,6 +49,21 @@ function hostnameOf(value: string | undefined): string | undefined {
 }
 
 /**
+ * The variable is a base url and /script.js is appended below, so the only
+ * accepted shapes are the bare origin and the full tag url. Writing the tag url
+ * is the obvious misreading of a name that ends in SCRIPT_URL and the old check
+ * let it through, producing a silent .../script.js/script.js 404. Anything else
+ * on the path is a different Umami install, not a shape we can normalise.
+ */
+function isBareTrackerPath(url: URL): boolean {
+  if (url.search || url.hash) {
+    return false;
+  }
+  const path = url.pathname.replace(/\/+$/, "").replace(/\/script\.js$/, "");
+  return path === "";
+}
+
+/**
  * Returns the tag to render, or null when analytics is not configured.
  *
  * A configured but wrong origin is a deployment mistake, not a missing
@@ -64,14 +79,14 @@ export function resolveUmamiTag(input: UmamiInput): UmamiTag | null {
     return null;
   }
 
-  let origin: string | null = null;
+  let url: URL | null = null;
   try {
-    origin = new URL(scriptUrl).origin;
+    url = new URL(scriptUrl);
   } catch {
-    origin = null;
+    url = null;
   }
 
-  if (origin !== UMAMI_ORIGIN) {
+  if (!url || url.origin !== UMAMI_ORIGIN || !isBareTrackerPath(url)) {
     if (input.isProduction) {
       throw new UmamiOriginMismatchError(scriptUrl);
     }
@@ -80,7 +95,7 @@ export function resolveUmamiTag(input: UmamiInput): UmamiTag | null {
   }
 
   return {
-    src: `${scriptUrl.replace(/\/+$/, "")}/script.js`,
+    src: `${UMAMI_ORIGIN}/script.js`,
     websiteId,
     domains: hostnameOf(input.siteUrl),
   };

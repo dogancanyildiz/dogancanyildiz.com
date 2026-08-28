@@ -34,6 +34,24 @@ describe("umami tag", () => {
     ).toBe(`${UMAMI_ORIGIN}/script.js`);
   });
 
+  it("accepts the full tag url, the natural misreading of the variable name", () => {
+    expect(
+      resolveUmamiTag({ ...base, scriptUrl: `${UMAMI_ORIGIN}/script.js` })?.src
+    ).toBe(`${UMAMI_ORIGIN}/script.js`);
+  });
+
+  it("rejects any other path on the allowed origin", () => {
+    for (const scriptUrl of [
+      `${UMAMI_ORIGIN}/umami`,
+      `${UMAMI_ORIGIN}/umami/script.js`,
+      `${UMAMI_ORIGIN}/script.js?v=2`,
+    ]) {
+      expect(() => resolveUmamiTag({ ...base, scriptUrl })).toThrow(
+        UmamiOriginMismatchError
+      );
+    }
+  });
+
   it("pins data-domains to the site hostname", () => {
     expect(
       resolveUmamiTag({ ...base, siteUrl: "https://staging.example.com" })
