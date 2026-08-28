@@ -42,11 +42,49 @@ export interface SpeakingEntry {
   date: string;
 }
 
+/**
+ * A verification link is rendered straight into an href on the About page, so
+ * the scheme is part of the contract rather than a formatting preference: a
+ * javascript: or data: value contributed through a content pull request would
+ * execute in the visitor's page. The template literal type rejects the obvious
+ * cases at compile time and isHttpsUrl covers what the type cannot see, for
+ * example a value that arrives through a cast. scripts/audit-live-links.mjs
+ * already assumes the same https prefix.
+ */
+export type HttpsUrl = `https://${string}`;
+
+export function isHttpsUrl(value: string): value is HttpsUrl {
+  if (!value.startsWith("https://")) {
+    return false;
+  }
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export interface CertificateEntry {
   name: string;
   issuer: string;
   detail?: string;
-  verifyUrl?: string;
+  verifyUrl?: HttpsUrl;
+}
+
+/** Fails the build when a certificate carries a link the About page must not render. */
+export function withCheckedVerifyUrls(
+  entries: Record<Locale, CertificateEntry[]>
+): Record<Locale, CertificateEntry[]> {
+  for (const [locale, list] of Object.entries(entries)) {
+    for (const entry of list) {
+      if (entry.verifyUrl !== undefined && !isHttpsUrl(entry.verifyUrl)) {
+        throw new Error(
+          `certificates.${locale}: "${entry.name}" has a verifyUrl that is not https: ${entry.verifyUrl}`
+        );
+      }
+    }
+  }
+  return entries;
 }
 
 export interface EducationEntry {
@@ -399,36 +437,37 @@ export const speaking: Record<Locale, SpeakingEntry[]> = {
 // verifyUrl fields are filled in once the site owner provides verification
 // links. Until then the field stays undefined; the entry itself is never
 // dropped from the list.
-export const certificates: Record<Locale, CertificateEntry[]> = {
-  en: [
-    { name: "Certified Associate Penetration Tester (CAPT)", issuer: "Hackviser" },
-    {
-      name: "CCNA complete track",
-      issuer: "Cisco Networking Academy",
-      detail:
-        "Introduction to Networks · Switching, Routing and Wireless Essentials · Enterprise Networking, Security and Automation",
-    },
-    { name: "CyberOps Associate", issuer: "Cisco Networking Academy" },
-    { name: "Network Technician Career Path", issuer: "Cisco Networking Academy" },
-    { name: "Linux Unhatched", issuer: "Cisco Networking Academy" },
-    { name: "Introduction to Cybersecurity", issuer: "Cisco Networking Academy" },
-    { name: "Version Control Systems and Portfolio", issuer: "Global AI Hub" },
-  ],
-  tr: [
-    { name: "Certified Associate Penetration Tester (CAPT)", issuer: "Hackviser" },
-    {
-      name: "CCNA tam hattı",
-      issuer: "Cisco Networking Academy",
-      detail:
-        "Introduction to Networks · Switching, Routing and Wireless Essentials · Enterprise Networking, Security and Automation",
-    },
-    { name: "CyberOps Associate", issuer: "Cisco Networking Academy" },
-    { name: "Network Technician Career Path", issuer: "Cisco Networking Academy" },
-    { name: "Linux Unhatched", issuer: "Cisco Networking Academy" },
-    { name: "Introduction to Cybersecurity", issuer: "Cisco Networking Academy" },
-    { name: "Version Control Systems and Portfolio", issuer: "Global AI Hub" },
-  ],
-};
+export const certificates: Record<Locale, CertificateEntry[]> =
+  withCheckedVerifyUrls({
+    en: [
+      { name: "Certified Associate Penetration Tester (CAPT)", issuer: "Hackviser" },
+      {
+        name: "CCNA complete track",
+        issuer: "Cisco Networking Academy",
+        detail:
+          "Introduction to Networks · Switching, Routing and Wireless Essentials · Enterprise Networking, Security and Automation",
+      },
+      { name: "CyberOps Associate", issuer: "Cisco Networking Academy" },
+      { name: "Network Technician Career Path", issuer: "Cisco Networking Academy" },
+      { name: "Linux Unhatched", issuer: "Cisco Networking Academy" },
+      { name: "Introduction to Cybersecurity", issuer: "Cisco Networking Academy" },
+      { name: "Version Control Systems and Portfolio", issuer: "Global AI Hub" },
+    ],
+    tr: [
+      { name: "Certified Associate Penetration Tester (CAPT)", issuer: "Hackviser" },
+      {
+        name: "CCNA tam hattı",
+        issuer: "Cisco Networking Academy",
+        detail:
+          "Introduction to Networks · Switching, Routing and Wireless Essentials · Enterprise Networking, Security and Automation",
+      },
+      { name: "CyberOps Associate", issuer: "Cisco Networking Academy" },
+      { name: "Network Technician Career Path", issuer: "Cisco Networking Academy" },
+      { name: "Linux Unhatched", issuer: "Cisco Networking Academy" },
+      { name: "Introduction to Cybersecurity", issuer: "Cisco Networking Academy" },
+      { name: "Version Control Systems and Portfolio", issuer: "Global AI Hub" },
+    ],
+  });
 
 export const education: Record<Locale, EducationEntry[]> = {
   en: [

@@ -4,9 +4,12 @@ import {
   community,
   education,
   experience,
+  isHttpsUrl,
   skills,
   speaking,
+  withCheckedVerifyUrls,
 } from "@/content/profile";
+import type { HttpsUrl } from "@/content/profile";
 
 const LOCALES = ["en", "tr"] as const;
 const FORBIDDEN = [
@@ -40,6 +43,42 @@ describe("profile data", () => {
         }
       }
     }
+  });
+
+  it("refuses every scheme a verification link must never carry", () => {
+    for (const hostile of [
+      "javascript:alert(1)",
+      "JavaScript:alert(1)",
+      " javascript:alert(1)",
+      "data:text/html;base64,PHNjcmlwdD4=",
+      "vbscript:msgbox(1)",
+      "http://credly.com/badges/1",
+      "//credly.com/badges/1",
+      "/badges/1",
+      "https:/credly.com",
+      "",
+    ]) {
+      expect(isHttpsUrl(hostile)).toBe(false);
+    }
+  });
+
+  it("accepts a real https verification link", () => {
+    expect(isHttpsUrl("https://www.credly.com/badges/1")).toBe(true);
+  });
+
+  it("fails the build when a hostile link is cast past the type", () => {
+    expect(() =>
+      withCheckedVerifyUrls({
+        en: [
+          {
+            name: "Fake",
+            issuer: "Fake",
+            verifyUrl: "javascript:alert(1)" as HttpsUrl,
+          },
+        ],
+        tr: [],
+      })
+    ).toThrow(/not https/);
   });
 
   it("keeps the military academy line neutral and drops cefr levels", () => {
