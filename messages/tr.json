@@ -78,7 +78,9 @@
     "languages": "Ana dilim Türkçe. Yazılı İngilizceyi her gün kullanıyorum: dokümantasyon, depolar ve bu sitedeki yazılar.",
     "downloadCv": "CV'yi indir",
     "testimonialsTitle": "Referanslar",
-    "subnavLabel": "Bu sayfada"
+    "subnavLabel": "Bu sayfada",
+    "profileImageAlt": "Doğan Can Yıldız, portre fotoğrafı",
+    "emptyList": "Burada henüz bir kayıt yok."
   },
   "projects": {
     "title": "Projeler",
@@ -89,7 +91,8 @@
     "outcome": "Sonuç",
     "viewLive": "Canlı site",
     "viewSource": "Kaynak kod",
-    "back": "Tüm projeler"
+    "back": "Tüm projeler",
+    "empty": "Henüz yayımlanmış proje yok."
   },
   "blog": {
     "title": "Yazılar",
@@ -100,7 +103,7 @@
   },
   "contact": {
     "title": "İletişim",
-    "description": "İlginç projelere ve sohbetlere açığım.",
+    "description": "Bir proje, bir pozisyon ya da kendi sunucusunda barındırma üzerine bir soru için yazın. Her mesajı okuyorum ve birkaç gün içinde yanıtlıyorum.",
     "intro": "İlginç projelere ve sohbetlere açığım. Bana en hızlı ulaşma yolu e-posta.",
     "ctaTitle": "Bir proje mi düşünüyorsunuz?",
     "ctaBody": "Ne geliştirmek istediğinizi yazın. Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
@@ -131,9 +134,17 @@
     "description": "Aradığınız sayfa yok ya da yeni bir adrese taşınmış.",
     "backHome": "Ana sayfaya dön"
   },
+  "errorPage": {
+    "title": "Bir şeyler ters gitti",
+    "description": "Bu sayfa yüklenemedi. Yeniden denemek çoğu zaman yeterli oluyor; olmazsa hata sunucuda kayda alındı.",
+    "retry": "Yeniden dene",
+    "backHome": "Ana sayfaya dön",
+    "digestLabel": "Hata referansı"
+  },
   "metadata": {
-    "defaultTitle": "Doğan Can Yıldız",
-    "defaultDescription": "Next.js ve Node.js ile ölçeklenebilir web uygulamaları geliştiren, bunları kendi Docker altyapısında yayına alan full-stack geliştirici. CAPT sertifikalı. Konya, Türkiye.",
+    "defaultTitle": "Doğan Can Yıldız | Full-Stack Web Geliştirici ve DevOps Mühendisi",
+    "siteName": "Doğan Can Yıldız",
+    "defaultDescription": "Next.js ve Node.js ile web uygulamaları geliştiren, kendi Docker altyapısında yayına alan full-stack geliştirici. CAPT sertifikalı, Konya.",
     "ogAlt": "Doğan Can Yıldız, Full-Stack Web Geliştirici ve DevOps Mühendisi"
   },
   "api": {

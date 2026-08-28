@@ -54,8 +54,16 @@ export function buildOpenGraph(
     imageAlt: string;
     type?: "website" | "article";
     publishedTime?: string;
+    modifiedTime?: string;
+    authors?: string[];
+    tags?: string[];
   }
 ): NonNullable<Metadata["openGraph"]> {
+  // article:author, article:modified_time and article:tag only mean anything
+  // on an article, and Next emits whatever it is handed, so an article-only
+  // field on a website object would produce a meta tag no consumer reads.
+  const isArticle = content.type === "article";
+
   return {
     type: content.type ?? "website",
     siteName: content.siteName,
@@ -66,7 +74,16 @@ export function buildOpenGraph(
     alternateLocale: routing.locales
       .filter((candidate) => candidate !== locale)
       .map((candidate) => OG_LOCALES[candidate]),
-    ...(content.publishedTime ? { publishedTime: content.publishedTime } : {}),
+    ...(isArticle && content.publishedTime
+      ? { publishedTime: content.publishedTime }
+      : {}),
+    ...(isArticle && content.modifiedTime
+      ? { modifiedTime: content.modifiedTime }
+      : {}),
+    ...(isArticle && content.authors?.length
+      ? { authors: content.authors }
+      : {}),
+    ...(isArticle && content.tags?.length ? { tags: content.tags } : {}),
     // Named explicitly because the openGraph object replaces the inherited
     // one, image included. See src/lib/seo/og-image.ts.
     images: [

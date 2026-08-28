@@ -159,8 +159,10 @@ describe("page openGraph metadata", () => {
   );
 
   it.each(CASES)(
-    "$page.name in $locale repeats its own title and description in og",
+    "$page.name in $locale carries its own title, branded, and its description in og",
     async ({ locale, page }) => {
+      const messages = (await import(`../../messages/${locale}.json`)).default;
+      const siteName = messages.metadata.siteName as string;
       const metadata = await metadataFor(page, locale);
       const openGraph = metadata.openGraph as {
         title: string;
@@ -170,9 +172,19 @@ describe("page openGraph metadata", () => {
         alternateLocale: string[];
       };
 
-      expect(openGraph.title).toBe(pageTitle(metadata));
+      // The document title picks up the brand from the layout's title
+      // template. openGraph has no template, so a share card would have shown
+      // a bare "About" unless the same suffix is applied here. The home page
+      // is the exception: its title is already the full brand line.
+      const title = pageTitle(metadata);
+      const branded = title.includes(siteName)
+        ? title
+        : `${title} | ${siteName}`;
+
+      expect(openGraph.title).toBe(branded);
+      expect(openGraph.title).toContain(siteName);
       expect(openGraph.description).toBe(metadata.description);
-      expect(openGraph.siteName).toBeTruthy();
+      expect(openGraph.siteName).toBe(siteName);
       expect(openGraph.locale).toBe(locale === "tr" ? "tr_TR" : "en_US");
       expect(openGraph.alternateLocale).not.toContain(openGraph.locale);
     }
