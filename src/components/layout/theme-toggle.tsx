@@ -21,7 +21,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon-sm"
-      className="tap-target border border-border bg-background"
+      className="tap-target border border-border-strong bg-background"
       aria-label={t("a11y.toggleTheme")}
       aria-pressed={resolvedTheme === "dark"}
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}

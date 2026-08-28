@@ -13,8 +13,11 @@ const buttonVariants = cva(
           "border border-primary bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
           "border border-destructive/80 bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+        // --border is a decorative hairline and sits at 1.19:1 on the page
+        // ground; an outline button is the control boundary itself, so it
+        // takes the 3:1 token instead.
         outline:
-          "border border-border bg-background text-foreground hover:bg-muted",
+          "border border-border-strong bg-background text-foreground hover:bg-muted",
         secondary:
           "border border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "text-muted-foreground hover:bg-muted hover:text-foreground",

@@ -31,7 +31,7 @@ export function LanguageSwitcher({ untranslated }: LanguageSwitcherProps) {
   return (
     <nav
       aria-label={t("languageLabel")}
-      className="flex rounded-full border border-border/70 bg-background/60 p-1"
+      className="flex rounded-full border border-border-strong bg-background/60 p-1"
     >
       {routing.locales.map((locale) => {
         const isActive = locale === activeLocale;
