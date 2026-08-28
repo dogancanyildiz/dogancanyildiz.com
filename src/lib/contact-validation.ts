@@ -15,8 +15,30 @@ export const MAX_NAME_LENGTH = 100;
 export const MAX_EMAIL_LENGTH = 200;
 export const MAX_MESSAGE_LENGTH = 5000;
 
-/** Upper bound for the raw request body, checked through Content-Length. */
-export const MAX_BODY_BYTES = 16384;
+/**
+ * Worst case cost in body bytes of one UTF-16 code unit, which is the unit
+ * maxLength and String.length count. Three bytes for a U+0800..U+FFFF
+ * character, four for a surrogate pair (two units), two for the ASCII
+ * characters JSON escapes, and six for a \\uXXXX escape, which is the ceiling.
+ */
+const MAX_BYTES_PER_CODE_UNIT = 6;
+
+/** Key names, quotes, braces and the empty honeypot value. */
+const BODY_ENVELOPE_BYTES = 1024;
+
+/**
+ * Upper bound for the raw request body, checked through Content-Length and
+ * again while the stream is read.
+ *
+ * It is derived from the field limits rather than picked, so a message the
+ * form accepts can never be one the API refuses: the form counts characters,
+ * the body cap counts bytes, and a Turkish or emoji message fills the byte
+ * budget long before it fills the character budget.
+ */
+export const MAX_BODY_BYTES =
+  (MAX_NAME_LENGTH + MAX_EMAIL_LENGTH + MAX_MESSAGE_LENGTH) *
+    MAX_BYTES_PER_CODE_UNIT +
+  BODY_ENVELOPE_BYTES;
 
 /**
  * The honeypot input name. Deliberately not "website", "url" or anything else

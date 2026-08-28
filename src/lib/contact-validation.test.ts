@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   HONEYPOT_FIELD,
+  MAX_BODY_BYTES,
   MAX_EMAIL_LENGTH,
   MAX_MESSAGE_LENGTH,
   MAX_NAME_LENGTH,
@@ -193,4 +194,41 @@ describe("stripControlCharacters", () => {
   it("drops nul, bell and delete", () => {
     expect(stripControlCharacters("a\u0000b\u0007c\u007fd")).toBe("abcd");
   });
+});
+
+describe("MAX_BODY_BYTES", () => {
+  // The form caps every field with maxLength, which counts UTF-16 code units,
+  // while the API caps the request in bytes. A Turkish, CJK or emoji message
+  // costs several bytes per accepted code unit, so the byte cap has to cover
+  // the largest payload the form is willing to produce.
+  function fill(character: string, codeUnits: number): string {
+    return character.repeat(Math.floor(codeUnits / character.length));
+  }
+
+  function worstCaseBody(character: string): string {
+    return JSON.stringify({
+      name: fill(character, MAX_NAME_LENGTH),
+      email: fill(character, MAX_EMAIL_LENGTH),
+      message: fill(character, MAX_MESSAGE_LENGTH),
+      [HONEYPOT_FIELD]: "",
+    });
+  }
+
+  for (const [label, character] of [
+    ["Turkish", "ğ"],
+    ["three byte", "康"],
+    ["emoji", "🙂"],
+    ["escaped quote", '"'],
+    // The ceiling the constant is derived from: a code unit that JSON writes
+    // as a six byte \uXXXX escape.
+    ["escaped control", "\u0001"],
+  ] as const) {
+    it(`accepts a full ${label} payload within the byte cap`, () => {
+      const body = worstCaseBody(character);
+      expect(body.length).toBeGreaterThan(MAX_MESSAGE_LENGTH);
+      expect(new TextEncoder().encode(body).length).toBeLessThanOrEqual(
+        MAX_BODY_BYTES
+      );
+    });
+  }
 });
