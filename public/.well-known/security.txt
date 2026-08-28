@@ -1,0 +1,8 @@
+# RFC 9116 security contact for dogancanyildiz.com.
+# Keep in sync with SECURITY.md in the repository and renew Expires yearly.
+Contact: mailto:me@dogancanyildiz.com
+Contact: https://github.com/dogancanyildiz/portfolio/security/advisories/new
+Expires: 2027-08-28T00:00:00.000Z
+Preferred-Languages: tr, en
+Canonical: https://dogancanyildiz.com/.well-known/security.txt
+Policy: https://github.com/dogancanyildiz/portfolio/blob/main/SECURITY.md

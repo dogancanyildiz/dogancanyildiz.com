@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 # Every merge into main cuts a version. The version itself comes from the
 # Conventional Commits made since the last v* tag, so a batch that only carries
@@ -9,7 +9,7 @@ name: release
 #     approve pull requests" must be on, otherwise the sync pull request step
 #     fails with a 403.
 #   - A pull request opened with GITHUB_TOKEN does not start other workflows,
-#     so the sync pull request arrives without the ci checks. Close and reopen
+#     so the sync pull request arrives without the CI checks. Close and reopen
 #     it once to make the required checks run before merging it into dev.
 
 on:
@@ -38,19 +38,21 @@ defaults:
 
 jobs:
   release:
-    name: tag and publish
+    name: Tag and publish
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v7
+      - name: Check out the full history
+        uses: actions/checkout@v7
         with:
           # The whole history and every tag: the version is derived from the
           # range between the last v* tag and this commit.
           fetch-depth: 0
 
-      - uses: actions/setup-node@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
 
@@ -152,7 +154,7 @@ jobs:
             printf '%s\n\n' "This pull request carries the version metadata back to dev so the two branches do not drift:"
             printf '%s\n' "- \`package.json\` and \`package-lock.json\` set to $VERSION"
             printf '%s\n\n' "- the $VERSION entry prepended to \`CHANGELOG.md\`"
-            printf '%s\n' "Opened by the release workflow with GITHUB_TOKEN, so the ci checks did not start on their own. Close and reopen this pull request once to run them."
+            printf '%s\n' "Opened by the release workflow with GITHUB_TOKEN, so the CI checks did not start on their own. Close and reopen this pull request once to run them."
           } > "$body"
 
           existing=$(gh pr list --head "$branch" --base dev --state open --json number --jq '.[0].number // ""')

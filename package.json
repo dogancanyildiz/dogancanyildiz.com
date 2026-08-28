@@ -2,6 +2,7 @@
   "name": "portfolio",
   "version": "0.3.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "velite --watch & next dev",
     "build": "velite --clean --strict && next build",

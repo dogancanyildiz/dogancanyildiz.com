@@ -261,8 +261,8 @@ feature/*  --PR-->  dev  --PR-->  main  --push-->  release.yml
   geri dönen sürüm senkron PR'ı.
 
 `.github/workflows/ci.yml` artık hem `dev` hem `main` için `pull_request` ve
-`push` olaylarında koşuyor; iki job adı (`lint, typecheck, test, build` ve
-`hadolint and image build`) branch protection'a bağlandığı için sabit
+`push` olaylarında koşuyor; iki job adı (`Quality checks` ve
+`Docker image`, 2026-08-28'de yeniden adlandırıldı) branch protection'a bağlandığı için sabit
 tutulmalı, yeniden adlandırmak korumayı sessizce boşa düşürür.
 
 ### release.yml ne yapıyor
@@ -330,8 +330,9 @@ Ana oturum `gh api` ile uygular, iki dalda da aynı iskelet:
 | Ayar | `main` | `dev` |
 |---|---|---|
 | Pull request zorunlu | evet | evet |
-| Zorunlu status check: `lint, typecheck, test, build` | evet | evet |
-| Zorunlu status check: `hadolint and image build` | evet | evet |
+| Zorunlu status check: `Quality checks` | evet | evet |
+| Zorunlu status check: `Docker image` | evet | evet |
+| Zorunlu status check: `CodeQL analysis` | evet | evet |
 | Check'ler güncel dal üzerinde koşsun (strict) | evet | evet |
 | Force push | kapalı | kapalı |
 | Dal silme | kapalı | kapalı |
@@ -392,7 +393,7 @@ arasını (PR #2 ile #6) özetleyen taban girdisidir, sonraki her sürümü
 
 ### Depo ayarları ve ilk sürüm kaydı (2026-08-27)
 
-- GitHub varsayılan dalı `dev`; `main` ve `dev` korumalı: PR zorunlu, "lint, typecheck, test, build" ve "hadolint and image build" kontrolleri güncel ve yeşil olmalı, force push ve silme kapalı (`gh api repos/.../branches/<dal>/protection`).
+- GitHub varsayılan dalı `dev`; `main` ve `dev` korumalı: PR zorunlu, "Quality checks", "Docker image" ve "CodeQL analysis" kontrolleri güncel ve yeşil olmalı, force push ve silme kapalı (`gh api repos/.../branches/<dal>/protection`).
 - Actions izinleri: workflow varsayılan token'ı salt okunur (`default_workflow_permissions: read`), iş akışları ihtiyaç duydukları izni kendi `permissions` bloğunda ister; "Allow GitHub Actions to create and approve pull requests" AÇIK, aksi halde release.yml'in dev'e açtığı sürüm senkron PR'ı "GitHub Actions is not permitted to create or approve pull requests" hatasıyla düşer. İlk sürümde (v0.2.0) tam bu oldu: tag ve Release oluştu, PR elle açıldı (#9), ayar sonra açıldı.
 - v0.1.0 tag'i Faz 0-4'ün merge commit'ine (`12a14f3`) elle atıldı; böylece v0.2.0 notları yalnızca sonraki 8 commit'i taşıdı.
 - GITHUB_TOKEN ile açılan PR'larda CI kendiliğinden başlamaz; senkron PR'ını bir kez kapatıp açmak veya boş bir commit atmak kontrolleri tetikler. Alternatif (PAT veya GitHub App token'ı) bilinçli olarak kullanılmadı, sırlar yönetimi eklemek istenmedi.
