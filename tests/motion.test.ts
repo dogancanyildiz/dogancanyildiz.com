@@ -8,7 +8,7 @@ import {
   staggerContainer,
   staggerDelay,
   staggerItem,
-} from "../src/lib/motion";
+} from "@/lib/motion";
 
 describe("stagger budget", () => {
   it("uses a 40ms step", () => {

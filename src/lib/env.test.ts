@@ -74,14 +74,17 @@ describe("resolveRequiredEmail", () => {
 });
 
 describe("resolveTrustCloudflare", () => {
-  it("is enabled only for the literal string true", () => {
+  it("is enabled only for the literal string true, case and whitespace insensitive", () => {
     expect(resolveTrustCloudflare("true")).toBe(true);
     expect(resolveTrustCloudflare("TRUE")).toBe(true);
+    expect(resolveTrustCloudflare(" true ")).toBe(true);
   });
 
   it("is disabled for anything else", () => {
     expect(resolveTrustCloudflare(undefined)).toBe(false);
+    expect(resolveTrustCloudflare("")).toBe(false);
     expect(resolveTrustCloudflare("false")).toBe(false);
     expect(resolveTrustCloudflare("1")).toBe(false);
+    expect(resolveTrustCloudflare("yes")).toBe(false);
   });
 });
