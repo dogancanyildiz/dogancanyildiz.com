@@ -37,7 +37,15 @@ export interface PostCardData {
   href: string;
 }
 
-const includeDrafts = process.env.NODE_ENV === "development";
+/**
+ * Drafts are authored and reviewed with `next dev` and never reach a
+ * production build, a sitemap entry or the rss feed. Read per call rather
+ * than captured at module scope so a test can flip NODE_ENV and observe the
+ * production behaviour.
+ */
+function includeDrafts(): boolean {
+  return process.env.NODE_ENV === "development";
+}
 
 function byProjectOrder(a: Project, b: Project): number {
   if (a.order !== b.order) return a.order - b.order;
@@ -61,7 +69,10 @@ function toCover(cover: Project["cover"] | Post["cover"]): CoverImage | null {
 
 export function getProjects(locale: Locale): Project[] {
   return projects
-    .filter((project) => project.locale === locale)
+    .filter(
+      (project) =>
+        project.locale === locale && (includeDrafts() || !project.draft)
+    )
     .sort(byProjectOrder);
 }
 
@@ -70,9 +81,7 @@ export function getFeaturedProjects(locale: Locale): Project[] {
 }
 
 export function getProject(locale: Locale, slug: string): Project | undefined {
-  return projects.find(
-    (project) => project.locale === locale && project.slug === slug
-  );
+  return getProjects(locale).find((project) => project.slug === slug);
 }
 
 export function getProjectSlugs(locale: Locale): string[] {
@@ -89,7 +98,9 @@ export function getProjectLocales(slug: string): Locale[] {
 
 export function getPosts(locale: Locale): Post[] {
   return posts
-    .filter((post) => post.locale === locale && (includeDrafts || !post.draft))
+    .filter(
+      (post) => post.locale === locale && (includeDrafts() || !post.draft)
+    )
     .sort(byPostDateDesc);
 }
 
