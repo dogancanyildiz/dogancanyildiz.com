@@ -1,12 +1,13 @@
 "use client";
 
 import { buildInfo, formatBuildSha } from "@/lib/build-info";
-import { Github, Linkedin, Mail, Rss } from "lucide-react";
+import { Mail, Rss } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { navItems } from "@/lib/nav";
 import { siteUrl } from "@/lib/env";
 import { CONTACT_EMAIL_PUBLIC, SOCIAL } from "@/lib/site";
+import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icon";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -20,7 +21,9 @@ export function Footer() {
       <div className="page-shell grid gap-10 py-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
         <div className="space-y-3">
           <p className="eyebrow">{t("footer.availability")}</p>
-          <h2 className="text-lg font-semibold tracking-tight">{tBrand("name")}</h2>
+          <h2 className="text-lg font-semibold tracking-tight">
+            {tBrand("name")}
+          </h2>
           <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
             {t("footer.tagline")}
           </p>
@@ -87,7 +90,7 @@ export function Footer() {
                 aria-label={t("footer.github")}
                 className="tap-target text-muted-foreground transition-colors hover:text-foreground"
               >
-                <Github className="size-4" aria-hidden="true" />
+                <GithubIcon className="size-4" />
               </a>
               <a
                 href={SOCIAL.linkedin}
@@ -96,7 +99,7 @@ export function Footer() {
                 aria-label={t("footer.linkedin")}
                 className="tap-target text-muted-foreground transition-colors hover:text-foreground"
               >
-                <Linkedin className="size-4" aria-hidden="true" />
+                <LinkedinIcon className="size-4" />
               </a>
               <Link
                 href="/feed.xml"
