@@ -5,6 +5,7 @@ import { useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { ContentEntryBody, ContentEntryIndex } from "@/components/ui/content-entry";
 import type { PostCardData } from "@/lib/content";
 import { fadeUp, MOTION_ITEM_CLASS } from "@/lib/motion";
 
@@ -35,11 +36,9 @@ export function PostList({
           custom={index}
           className={`content-entry group list-row ${MOTION_ITEM_CLASS}`}
         >
-          <span className="content-index" aria-hidden="true">
-            {String(index + 1).padStart(2, "0")}
-          </span>
+          <ContentEntryIndex index={index} />
 
-          <div className="min-w-0 space-y-3">
+          <ContentEntryBody>
             <div className="flex flex-wrap items-center gap-2">
               <span className="tag-pill">
                 <time dateTime={post.date}>
@@ -84,7 +83,7 @@ export function PostList({
                 ))}
               </ul>
             ) : null}
-          </div>
+          </ContentEntryBody>
         </m.li>
       ))}
     </ul>

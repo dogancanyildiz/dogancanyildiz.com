@@ -62,8 +62,8 @@
     var(--font-sans-latin), var(--font-sans-ext), ui-sans-serif, system-ui,
     "Segoe UI", sans-serif;
   --font-display-stack:
-    var(--font-sans-latin), var(--font-sans-ext), ui-sans-serif, system-ui,
-    "Segoe UI", sans-serif;
+    var(--font-display-latin), var(--font-display-ext), var(--font-sans-latin),
+    var(--font-sans-ext), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
   --font-mono-stack:
     var(--font-mono-latin), var(--font-mono-ext), ui-monospace,
     "SFMono-Regular", "SF Mono", Consolas, monospace;
@@ -375,7 +375,7 @@
   }
 
   .entry-arrow {
-    @apply ml-auto size-4 shrink-0 translate-x-0 text-muted-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-primary group-hover:opacity-100;
+    @apply ml-auto size-4 shrink-0 translate-x-0 text-muted-foreground opacity-100 transition-all duration-200 sm:opacity-0 sm:group-hover:translate-x-0.5 sm:group-hover:text-primary sm:group-hover:opacity-100;
   }
 
   .metric-strip {
@@ -412,6 +412,7 @@
 
   .pull-quote {
     @apply text-2xl font-semibold leading-snug tracking-tight text-foreground sm:text-3xl;
+    font-family: var(--font-display-stack);
   }
 
   /* WCAG 2.2 SC 2.5.8 wants 24x24 CSS px minimum. 44px is the comfortable

@@ -9,6 +9,7 @@ import {
 } from "next-intl/server";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { MDXContent } from "@/components/content/mdx-content";
+import { mdxComponents } from "@/components/content/mdx-components";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
 import { Link } from "@/i18n/navigation";
@@ -20,6 +21,7 @@ import {
   type Locale,
 } from "@/lib/content";
 import { absoluteUrl } from "@/lib/seo/alternates";
+import { OG_IMAGE_PATH } from "@/lib/seo/og-image";
 import { siteConfig } from "@/lib/site-config";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 
@@ -71,12 +73,18 @@ export default async function PostPage({ params }: PostPageProps) {
     inLanguage: lang,
     keywords: post.tags.join(", "),
     wordCount: post.metadata.wordCount,
+    image: absoluteUrl(lang as Locale, OG_IMAGE_PATH),
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": absoluteUrl(lang as Locale, `/blog/${slug}`),
     },
     author: {
       "@type": "Person",
+      name: siteConfig.person.name,
+      url: absoluteUrl("en", "/"),
+    },
+    publisher: {
+      "@type": "Organization",
       name: siteConfig.person.name,
       url: absoluteUrl("en", "/"),
     },
@@ -123,7 +131,7 @@ export default async function PostPage({ params }: PostPageProps) {
         </header>
 
         <div className="prose-content">
-          <MDXContent code={post.code} />
+          <MDXContent code={post.code} components={mdxComponents} />
         </div>
 
         <ContactCta />

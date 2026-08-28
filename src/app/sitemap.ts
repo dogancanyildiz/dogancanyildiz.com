@@ -29,6 +29,10 @@ function languagesFor(
   for (const locale of locales) {
     languages[locale] = absoluteUrl(locale, path);
   }
+  const fallbackLocale: Locale = locales.includes("en")
+    ? "en"
+    : (locales[0] ?? routing.defaultLocale);
+  languages["x-default"] = absoluteUrl(fallbackLocale, path);
   return languages;
 }
 

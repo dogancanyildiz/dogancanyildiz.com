@@ -2,10 +2,11 @@
 
 import * as m from "motion/react-m";
 import { useReducedMotion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ExternalLink, Github } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { ContentEntryBody, ContentEntryIndex } from "@/components/ui/content-entry";
 import { SkillTag } from "@/components/ui/skill-tag";
 import type { ProjectCardData } from "@/lib/content";
 import { fadeUp, MOTION_ITEM_CLASS } from "@/lib/motion";
@@ -38,11 +39,9 @@ export function ProjectList({
             project.cover ? "lg:grid-cols-[3.5rem_minmax(0,1fr)_7rem]" : ""
           }`}
         >
-          <span className="content-index" aria-hidden="true">
-            {String(index + 1).padStart(2, "0")}
-          </span>
+          <ContentEntryIndex index={index} />
 
-          <div className="min-w-0 space-y-3">
+          <ContentEntryBody>
             <div className="flex flex-wrap items-center gap-2">
               <span className="tag-pill">{project.year}</span>
               <span className="tag-pill max-w-full truncate">{project.role}</span>
@@ -84,7 +83,34 @@ export function ProjectList({
                 </li>
               ) : null}
             </ul>
-          </div>
+
+            {project.liveUrl || project.repoUrl ? (
+              <div className="relative z-10 flex flex-wrap gap-2 pt-1">
+                {project.liveUrl ? (
+                  <a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tag-pill inline-flex items-center gap-1.5 normal-case tracking-normal transition-colors hover:border-primary/40 hover:text-primary"
+                  >
+                    <ExternalLink className="size-3" aria-hidden="true" />
+                    {t("viewLive")}
+                  </a>
+                ) : null}
+                {project.repoUrl ? (
+                  <a
+                    href={project.repoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tag-pill inline-flex items-center gap-1.5 normal-case tracking-normal transition-colors hover:border-primary/40 hover:text-primary"
+                  >
+                    <Github className="size-3" aria-hidden="true" />
+                    {t("viewSource")}
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
+          </ContentEntryBody>
 
           {project.cover ? (
             <div className="relative hidden aspect-[4/3] overflow-hidden rounded-lg border border-border/70 lg:block">

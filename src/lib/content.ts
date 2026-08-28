@@ -22,6 +22,8 @@ export interface ProjectCardData {
   year: number;
   outcome: string;
   href: string;
+  liveUrl: string | null;
+  repoUrl: string | null;
   cover: CoverImage | null;
 }
 
@@ -148,6 +150,8 @@ export function toProjectCardData(project: Project): ProjectCardData {
     year: project.year,
     outcome: project.outcome,
     href: `/projects/${project.slug}`,
+    liveUrl: project.links.live ?? null,
+    repoUrl: project.links.repo ?? null,
     cover: toCover(project.cover),
   };
 }

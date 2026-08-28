@@ -5,10 +5,12 @@
  * full page load is the correct exit from a 404.
  */
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import "./globals.css";
 import { fontVariables } from "@/fonts";
 import { routing } from "@/i18n/routing";
+import { localeFromPathname } from "@/lib/locale-from-pathname";
 import { ThemeProvider } from "@/components/theme-provider";
 
 /**
@@ -20,31 +22,40 @@ import { ThemeProvider } from "@/components/theme-provider";
  * This file therefore renders its own html and body and cannot reuse the
  * locale layout or its header and footer.
  *
- * There is no locale to read here, so the document is English and repeats the
- * message in Turkish with its own lang attribute. Enabled by
- * experimental.globalNotFound in next.config.ts.
+ * There is no [lang] segment here, so the locale is inferred from the
+ * request pathname (x-pathname, set in src/proxy.ts). When that header is
+ * missing, the document falls back to the default locale.
  */
 
 const secondaryLocale = routing.locales.find(
   (locale) => locale !== routing.defaultLocale
 );
 
+async function documentLocale(): Promise<(typeof routing.locales)[number]> {
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  return localeFromPathname(pathname);
+}
+
 async function messages(locale: string) {
   return getTranslations({ locale, namespace: "notFound" });
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await messages(routing.defaultLocale);
+  const locale = await documentLocale();
+  const t = await messages(locale);
   return { title: t("title") };
 }
 
 export default async function GlobalNotFound() {
-  const t = await messages(routing.defaultLocale);
-  const secondary = secondaryLocale ? await messages(secondaryLocale) : null;
+  const locale = await documentLocale();
+  const t = await messages(locale);
+  const secondary = secondaryLocale && secondaryLocale !== locale
+    ? await messages(secondaryLocale)
+    : null;
 
   return (
     <html
-      lang={routing.defaultLocale}
+      lang={locale}
       className={fontVariables}
       suppressHydrationWarning
     >

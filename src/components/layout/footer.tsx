@@ -10,7 +10,7 @@ import { CONTACT_EMAIL_PUBLIC, SOCIAL } from "@/lib/site";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icon";
 
 export function Footer() {
-  const year = new Date().getFullYear();
+  const year = buildInfo.year;
   const t = useTranslations();
   const tBrand = useTranslations("brand");
   const buildSha = formatBuildSha(buildInfo.sha);

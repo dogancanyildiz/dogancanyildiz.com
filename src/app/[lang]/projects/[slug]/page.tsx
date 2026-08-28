@@ -6,6 +6,7 @@ import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { MDXContent } from "@/components/content/mdx-content";
+import { mdxComponents } from "@/components/content/mdx-components";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
 import { Button } from "@/components/ui/button";
@@ -155,7 +156,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       ) : null}
 
       <div className="prose-content">
-        <MDXContent code={project.code} />
+        <MDXContent code={project.code} components={mdxComponents} />
       </div>
 
       <ContactCta />

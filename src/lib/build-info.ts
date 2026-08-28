@@ -6,6 +6,10 @@
 export const buildInfo = {
   sha: process.env.NEXT_PUBLIC_BUILD_SHA?.trim() ?? "",
   date: process.env.NEXT_PUBLIC_BUILD_DATE?.trim() ?? "",
+  year:
+    process.env.NEXT_PUBLIC_BUILD_YEAR?.trim() ||
+    process.env.NEXT_PUBLIC_BUILD_DATE?.slice(0, 4) ||
+    "2026",
 } as const;
 
 export function formatBuildSha(sha: string): string {
