@@ -16,6 +16,8 @@
   --color-status-down: var(--status-down);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input-border: var(--input-border);
   --color-destructive: var(--destructive);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -57,8 +59,15 @@
   --muted-foreground: oklch(0.5044 0.0114 252.9);
   --accent: oklch(0.9265 0.0052 247.9);
   --destructive: oklch(0.5054 0.1905 27.5);
+  /* Decorative hairlines only. Anything that has to be perceivable as a
+     control boundary uses --border-strong instead. */
   --border: oklch(0.9265 0.0052 247.9);
   --input: oklch(0.9265 0.0052 247.9);
+  /* WCAG 1.4.11 wants 3:1 against the adjacent surface for the boundary of a
+     control. This lands at 3.28:1 on --background and 3.43:1 on --card; the
+     old --border sat at 1.19:1. */
+  --border-strong: oklch(0.635 0.0114 252.9);
+  --input-border: var(--border-strong);
   --ring: oklch(0.4794 0.1156 156.3);
   --status-up: oklch(0.4794 0.1156 156.3);
   --status-down: oklch(0.5054 0.1905 27.5);
@@ -82,6 +91,9 @@
   --destructive: oklch(0.7106 0.1661 22.2);
   --border: oklch(0.2993 0.0107 254);
   --input: oklch(0.2993 0.0107 254);
+  /* 3.56:1 against the dark --background; the old --border sat at 1.43:1. */
+  --border-strong: oklch(0.52 0.0146 254);
+  --input-border: var(--border-strong);
   --ring: oklch(0.7591 0.1444 158);
   --status-up: oklch(0.7591 0.1444 158);
   --status-down: oklch(0.7106 0.1661 22.2);
