@@ -266,9 +266,9 @@ export async function POST(request: Request) {
     );
   }
 
-  // From here the caller looks like the site's own form, so it spends a slot
-  // even if the payload turns out to be junk. That is what stops a scripted
-  // probe from hammering the endpoint for free.
+  // From here the caller looks like a submission from the form itself, so it
+  // spends a slot even if the payload turns out to be junk. That is what stops
+  // a scripted probe from hammering the endpoint for free.
   const spent = contactRateLimiter.check(ip);
   if (!spent.allowed) {
     log("warn", "contact request rate limited", {
@@ -364,7 +364,7 @@ export async function POST(request: Request) {
       log("error", "contact provider rejected the message", {
         requestId,
         route: ROUTE,
-        // The provider's own message can quote the payload, the code cannot.
+        // The provider message can quote the payload, the error code cannot.
         detail: error.name,
       });
       return jsonResponse(
