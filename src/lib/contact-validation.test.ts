@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  HONEYPOT_FIELD,
   MAX_EMAIL_LENGTH,
   MAX_MESSAGE_LENGTH,
   MAX_NAME_LENGTH,
-  MAX_SUBJECT_LENGTH,
+  stripControlCharacters,
   validateBody,
 } from "./contact-validation";
 
 const validBody = {
   name: "Doğan Can",
   email: "visitor@mail.invalid",
-  subject: "Hello",
   message: "I would like to talk about a project.",
 };
 
@@ -20,7 +20,6 @@ describe("validateBody", () => {
     const result = validateBody({
       name: "  Doğan Can  ",
       email: "  visitor@mail.invalid ",
-      subject: "  Hello  ",
       message: "  I would like to talk about a project.  ",
     });
     expect(result).toEqual({
@@ -28,24 +27,7 @@ describe("validateBody", () => {
       data: {
         name: "Doğan Can",
         email: "visitor@mail.invalid",
-        subject: "Hello",
         message: "I would like to talk about a project.",
-      },
-    });
-  });
-
-  it("treats a missing subject as absent instead of empty", () => {
-    const result = validateBody({
-      name: validBody.name,
-      email: validBody.email,
-      message: validBody.message,
-    });
-    expect(result).toEqual({
-      ok: true,
-      data: {
-        name: validBody.name,
-        email: validBody.email,
-        message: validBody.message,
       },
     });
   });
@@ -53,32 +35,65 @@ describe("validateBody", () => {
   it("rejects a filled honeypot field with its own reason", () => {
     const result = validateBody({
       ...validBody,
-      website: "http://spam.invalid",
+      [HONEYPOT_FIELD]: "http://spam.invalid",
     });
     expect(result).toEqual({ ok: false, reason: "honeypot" });
   });
 
   it("ignores an empty honeypot field", () => {
-    const result = validateBody({ ...validBody, website: "   " });
+    const result = validateBody({ ...validBody, [HONEYPOT_FIELD]: "   " });
     expect(result.ok).toBe(true);
+  });
+
+  it("does not use a honeypot name a browser autofill would recognise", () => {
+    expect(HONEYPOT_FIELD).not.toMatch(/website|url|company|organization/i);
+    // A field the browser fills is a field that silently eats real messages.
+    expect(validateBody({ ...validBody, website: "filled" })).toEqual({
+      ok: false,
+      reason: "invalid",
+    });
   });
 
   it("rejects a non object body", () => {
     expect(validateBody(null)).toEqual({ ok: false, reason: "invalid" });
     expect(validateBody("hello")).toEqual({ ok: false, reason: "invalid" });
+    expect(validateBody([validBody])).toEqual({ ok: false, reason: "invalid" });
+  });
+
+  it("rejects an unknown field instead of ignoring it", () => {
+    expect(validateBody({ ...validBody, subject: "Hello" })).toEqual({
+      ok: false,
+      reason: "invalid",
+    });
+    expect(validateBody({ ...validBody, locale: "tr" })).toEqual({
+      ok: false,
+      reason: "invalid",
+    });
+  });
+
+  it("names the field that failed", () => {
+    expect(validateBody({ ...validBody, name: "" })).toEqual({
+      ok: false,
+      reason: "invalid",
+      field: "name",
+    });
+    expect(validateBody({ ...validBody, email: "nope" })).toEqual({
+      ok: false,
+      reason: "invalid",
+      field: "email",
+    });
+    expect(validateBody({ ...validBody, message: "   " })).toEqual({
+      ok: false,
+      reason: "invalid",
+      field: "message",
+    });
   });
 
   it("rejects missing required fields", () => {
     expect(validateBody({ name: "a", email: "a@b.co" })).toEqual({
       ok: false,
       reason: "invalid",
-    });
-  });
-
-  it("rejects whitespace only fields", () => {
-    expect(validateBody({ ...validBody, message: "   " })).toEqual({
-      ok: false,
-      reason: "invalid",
+      field: "message",
     });
   });
 
@@ -86,35 +101,27 @@ describe("validateBody", () => {
     expect(validateBody({ ...validBody, email: "visitor@localhost" })).toEqual({
       ok: false,
       reason: "invalid",
+      field: "email",
     });
   });
 
   it("rejects an address with a space in it", () => {
     expect(
       validateBody({ ...validBody, email: "vis itor@mail.invalid" })
-    ).toEqual({ ok: false, reason: "invalid" });
+    ).toEqual({ ok: false, reason: "invalid", field: "email" });
   });
 
   it("rejects an over long name", () => {
     expect(
       validateBody({ ...validBody, name: "n".repeat(MAX_NAME_LENGTH + 1) })
-    ).toEqual({ ok: false, reason: "invalid" });
+    ).toEqual({ ok: false, reason: "invalid", field: "name" });
   });
 
   it("rejects an over long email", () => {
     const longLocal = "e".repeat(MAX_EMAIL_LENGTH);
     expect(
       validateBody({ ...validBody, email: `${longLocal}@mail.invalid` })
-    ).toEqual({ ok: false, reason: "invalid" });
-  });
-
-  it("rejects an over long subject", () => {
-    expect(
-      validateBody({
-        ...validBody,
-        subject: "s".repeat(MAX_SUBJECT_LENGTH + 1),
-      })
-    ).toEqual({ ok: false, reason: "invalid" });
+    ).toEqual({ ok: false, reason: "invalid", field: "email" });
   });
 
   it("rejects an over long message", () => {
@@ -123,7 +130,7 @@ describe("validateBody", () => {
         ...validBody,
         message: "m".repeat(MAX_MESSAGE_LENGTH + 1),
       })
-    ).toEqual({ ok: false, reason: "invalid" });
+    ).toEqual({ ok: false, reason: "invalid", field: "message" });
   });
 
   it("accepts a message that sits exactly on the limit", () => {
@@ -132,5 +139,58 @@ describe("validateBody", () => {
       message: "m".repeat(MAX_MESSAGE_LENGTH),
     });
     expect(result.ok).toBe(true);
+  });
+});
+
+describe("validateBody header injection", () => {
+  const injections = [
+    "Doğan\r\nBcc: victim@mail.invalid",
+    "Doğan\nSubject: forged",
+    "Doğan\rX-Header: forged",
+    "Doğan\u0000Can",
+  ];
+
+  it.each(injections)("rejects %j in the name", (name) => {
+    expect(validateBody({ ...validBody, name })).toEqual({
+      ok: false,
+      reason: "invalid",
+      field: "name",
+    });
+  });
+
+  it.each(injections)("rejects %j in the email", (value) => {
+    expect(
+      validateBody({ ...validBody, email: `visitor@mail.invalid${value}` })
+    ).toEqual({ ok: false, reason: "invalid", field: "email" });
+  });
+
+  it("keeps the newlines a real message needs", () => {
+    const message = "First line.\r\n\tIndented second line.\nThird line.";
+    const result = validateBody({ ...validBody, message });
+    expect(result).toEqual({
+      ok: true,
+      data: { ...validBody, message },
+    });
+  });
+
+  it("strips the control characters a message has no use for", () => {
+    const result = validateBody({
+      ...validBody,
+      message: "Hello\u0000\u0007 there\u007f.",
+    });
+    expect(result).toEqual({
+      ok: true,
+      data: { ...validBody, message: "Hello there." },
+    });
+  });
+});
+
+describe("stripControlCharacters", () => {
+  it("keeps tab, carriage return and newline", () => {
+    expect(stripControlCharacters("a\tb\r\nc")).toBe("a\tb\r\nc");
+  });
+
+  it("drops nul, bell and delete", () => {
+    expect(stripControlCharacters("a\u0000b\u0007c\u007fd")).toBe("abcd");
   });
 });
