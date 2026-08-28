@@ -2,8 +2,6 @@
    scans docs/ and tests/, and class names quoted in the plan documents (the
    retired emerald shadow among them) end up in the compiled stylesheet. */
 @import "tailwindcss" source("../");
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -13,26 +11,12 @@
   --font-sans: var(--font-sans-stack);
   --font-display: var(--font-display-stack);
   --font-mono: var(--font-mono-stack);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-status-up: var(--status-up);
   --color-status-down: var(--status-down);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
@@ -40,17 +24,10 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
 }
 
 :root {
@@ -71,9 +48,6 @@
   --background: oklch(0.9846 0.0017 247.8);
   --foreground: oklch(0.2066 0.0101 248.3);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2066 0.0101 248.3);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2066 0.0101 248.3);
   /* Emerald survives in exactly three roles: primary, ring and status. */
   --primary: oklch(0.4794 0.1156 156.3);
   --primary-foreground: oklch(1 0 0);
@@ -82,30 +56,12 @@
   --muted: oklch(0.9482 0.0034 247.9);
   --muted-foreground: oklch(0.5044 0.0114 252.9);
   --accent: oklch(0.9265 0.0052 247.9);
-  --accent-foreground: oklch(0.2066 0.0101 248.3);
   --destructive: oklch(0.5054 0.1905 27.5);
-  --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.9265 0.0052 247.9);
   --input: oklch(0.9265 0.0052 247.9);
   --ring: oklch(0.4794 0.1156 156.3);
   --status-up: oklch(0.4794 0.1156 156.3);
   --status-down: oklch(0.5054 0.1905 27.5);
-  /* Panels and cards mix their shadow from this. --foreground would do in
-     light mode but is near white in dark mode and paints a halo instead. */
-  --shadow-color: oklch(0.2066 0.0101 248.3);
-  --chart-1: oklch(0.4794 0.1156 156.3);
-  --chart-2: oklch(0.5044 0.0114 252.9);
-  --chart-3: oklch(0.6998 0.0123 252.1);
-  --chart-4: oklch(0.9265 0.0052 247.9);
-  --chart-5: oklch(0.2066 0.0101 248.3);
-  --sidebar: oklch(0.9846 0.0017 247.8);
-  --sidebar-foreground: oklch(0.2066 0.0101 248.3);
-  --sidebar-primary: oklch(0.4794 0.1156 156.3);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.9482 0.0034 247.9);
-  --sidebar-accent-foreground: oklch(0.2066 0.0101 248.3);
-  --sidebar-border: oklch(0.9265 0.0052 247.9);
-  --sidebar-ring: oklch(0.4794 0.1156 156.3);
   --ambient-grid-line: color-mix(in oklab, var(--foreground) 8%, transparent);
   --ambient-grid-opacity: 0.55;
   --ambient-glow: color-mix(in oklab, var(--foreground) 10%, transparent);
@@ -116,9 +72,6 @@
   --background: oklch(0.1535 0.0072 258.4);
   --foreground: oklch(0.9629 0.0025 228.8);
   --card: oklch(0.2032 0.0093 255.6);
-  --card-foreground: oklch(0.9629 0.0025 228.8);
-  --popover: oklch(0.2032 0.0093 255.6);
-  --popover-foreground: oklch(0.9629 0.0025 228.8);
   --primary: oklch(0.7591 0.1444 158);
   --primary-foreground: oklch(0.1535 0.0072 258.4);
   --secondary: oklch(0.2373 0.0113 254.1);
@@ -126,28 +79,12 @@
   --muted: oklch(0.2373 0.0113 254.1);
   --muted-foreground: oklch(0.6998 0.0123 252.1);
   --accent: oklch(0.2667 0.011 254);
-  --accent-foreground: oklch(0.9629 0.0025 228.8);
   --destructive: oklch(0.7106 0.1661 22.2);
-  --destructive-foreground: oklch(0.1535 0.0072 258.4);
   --border: oklch(0.2993 0.0107 254);
   --input: oklch(0.2993 0.0107 254);
   --ring: oklch(0.7591 0.1444 158);
   --status-up: oklch(0.7591 0.1444 158);
   --status-down: oklch(0.7106 0.1661 22.2);
-  --shadow-color: oklch(0 0 0);
-  --chart-1: oklch(0.7591 0.1444 158);
-  --chart-2: oklch(0.6998 0.0123 252.1);
-  --chart-3: oklch(0.5044 0.0114 252.9);
-  --chart-4: oklch(0.2993 0.0107 254);
-  --chart-5: oklch(0.9629 0.0025 228.8);
-  --sidebar: oklch(0.1535 0.0072 258.4);
-  --sidebar-foreground: oklch(0.9629 0.0025 228.8);
-  --sidebar-primary: oklch(0.7591 0.1444 158);
-  --sidebar-primary-foreground: oklch(0.1535 0.0072 258.4);
-  --sidebar-accent: oklch(0.2373 0.0113 254.1);
-  --sidebar-accent-foreground: oklch(0.9629 0.0025 228.8);
-  --sidebar-border: oklch(0.2993 0.0107 254);
-  --sidebar-ring: oklch(0.7591 0.1444 158);
   --ambient-grid-line: color-mix(in oklab, var(--foreground) 4%, transparent);
   --ambient-grid-opacity: 0.5;
   --ambient-glow: color-mix(in oklab, oklch(1 0 0) 10%, transparent);
@@ -182,16 +119,8 @@
     z-index: -1;
     pointer-events: none;
     background-image:
-      linear-gradient(
-        to right,
-        var(--ambient-grid-line) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        to bottom,
-        var(--ambient-grid-line) 1px,
-        transparent 1px
-      );
+      linear-gradient(to right, var(--ambient-grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--ambient-grid-line) 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: linear-gradient(to bottom, black 0%, transparent 45%);
     opacity: var(--ambient-grid-opacity);
@@ -233,8 +162,8 @@
   button {
     -webkit-tap-highlight-color: transparent;
   }
-  /* Covers everything motion does not: CSS transitions, tw-animate-css classes
-     and the smooth scroll behaviour on html. */
+  /* Covers everything motion does not: CSS transitions and the smooth scroll
+     behaviour on html. */
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -260,24 +189,8 @@
     @apply relative mx-auto w-full max-w-6xl px-4 sm:px-6;
   }
 
-  .page-shell-narrow {
-    @apply relative mx-auto w-full max-w-4xl px-4 sm:px-6;
-  }
-
-  .page-shell-reading {
-    @apply relative mx-auto w-full max-w-5xl px-4 sm:px-6;
-  }
-
   .section-space {
     @apply py-12 sm:py-16 lg:py-20;
-  }
-
-  .section-space-lg {
-    @apply py-14 sm:py-16 lg:py-24;
-  }
-
-  .section-divider {
-    @apply border-t border-border;
   }
 
   .surface-panel {
@@ -309,10 +222,6 @@
     @apply text-3xl font-semibold tracking-tight leading-tight sm:text-4xl;
   }
 
-  .section-title {
-    @apply text-4xl font-semibold tracking-tight leading-tight sm:text-5xl;
-  }
-
   .section-heading {
     @apply text-2xl font-semibold leading-snug tracking-tight sm:text-3xl;
   }
@@ -332,18 +241,6 @@
 
   .meta-label {
     @apply font-mono text-[0.65rem] font-medium uppercase tracking-[0.2em] text-muted-foreground;
-  }
-
-  .info-tile {
-    @apply relative py-5 transition-colors;
-  }
-
-  .inset-panel {
-    @apply space-y-3;
-  }
-
-  .list-divider > * + * {
-    @apply border-t border-border;
   }
 
   .list-row {
@@ -386,14 +283,6 @@
     @apply sm:px-6 first:sm:pl-0 last:sm:pr-0;
   }
 
-  .tech-logo-strip {
-    @apply flex flex-wrap items-center gap-2 sm:gap-3;
-  }
-
-  .tech-logo-chip {
-    @apply inline-flex size-10 items-center justify-center rounded-xl border border-border/70 bg-background/60 transition-colors hover:border-primary/30 hover:bg-accent/40;
-  }
-
   .skill-category-list {
     @apply grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2;
   }
@@ -404,10 +293,6 @@
 
   .skill-item-list {
     @apply flex flex-wrap gap-2;
-  }
-
-  .prose-measure {
-    max-width: 66ch;
   }
 
   .pull-quote {
