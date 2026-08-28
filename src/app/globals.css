@@ -445,3 +445,38 @@
     opacity: 0.6;
   }
 }
+
+/* Deliberately unlayered: unlayered rules outrank every @layer, so these hold
+   no matter which component class or utility painted the element. Forced
+   colours repaint backgrounds and borders from the system palette, which turns
+   the ambient grid and glow into flat blocks and drops token borders into the
+   background. */
+@media (forced-colors: active) {
+  body::before,
+  body::after {
+    display: none;
+  }
+  input,
+  textarea,
+  select,
+  .surface-panel,
+  .tag-pill,
+  .skip-link,
+  .prose-content pre,
+  .prose-content blockquote,
+  .prose-content :not(pre) > code,
+  .prose-content th,
+  .prose-content td,
+  .prose-content kbd {
+    border-color: CanvasText;
+  }
+  :focus-visible {
+    outline-color: Highlight;
+  }
+  /* The row tint is the only hover and focus cue on a content entry and
+     forced colours flatten it, so restate it as a visible outline. */
+  .content-entry:focus-within {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
