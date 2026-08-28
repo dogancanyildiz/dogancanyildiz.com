@@ -7,6 +7,7 @@
     "dev": "velite --watch & next dev",
     "build": "velite --clean --strict && next build",
     "build:content": "velite --clean --strict",
+    "build:app": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

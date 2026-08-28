@@ -26,27 +26,96 @@ describe("ci workflow", () => {
     const content = workflow();
     for (const command of [
       "npm ci",
+      "npm run format",
       "npm run lint",
       "npm run typecheck",
-      "npm run test",
-      "npm run build",
+      "npm run test -- --coverage",
+      "npm run verify:docs",
+      "npm run build:app",
       "npm run verify:routes",
-      "npm run verify:links",
     ]) {
       expect(content).toContain(`run: ${command}`);
     }
   });
 
-  it("lints the Dockerfile with a pinned hadolint image", () => {
-    expect(workflow()).toContain("hadolint/hadolint:v2.15.1-alpine");
+  it("never runs verify:links as part of the merge gate", () => {
+    // Moved to .github/workflows/links.yml: a third party outage should not
+    // block every merge to dev or main. See tests/deploy/links-workflow.test.ts.
+    expect(workflow()).not.toContain("verify:links");
   });
 
-  it("builds the image but never pushes it to a registry", () => {
+  it("compiles content once and never re-runs velite inside next build", () => {
     const content = workflow();
-    expect(content).toContain("docker build");
+    expect(content).toContain("run: npm run build:content");
+    // build:app is "next build" alone; the full "build" script (velite &&
+    // next build) would compile the same MDX a second time here.
+    expect(content).not.toMatch(/run: npm run build\n/);
+  });
+
+  it("audits production dependencies and reviews PR dependency changes", () => {
+    const content = workflow();
+    expect(content).toContain("run: npm audit --omit=dev --audit-level=high");
+    expect(content).toContain("dependency-review-action");
+    expect(content).toContain("fail-on-severity: high");
+    expect(content).toMatch(
+      /if: github\.event_name == 'pull_request'\s*\n\s*uses: actions\/dependency-review-action/
+    );
+  });
+
+  it("lints the Dockerfile with a digest pinned hadolint image", () => {
+    const content = workflow();
+    expect(content).not.toContain("hadolint/hadolint:v2.15.1-alpine");
+    expect(content).toMatch(/hadolint\/hadolint@sha256:[a-f0-9]{64}/);
+  });
+
+  it("builds the image through buildx with a cache, but never pushes it", () => {
+    const content = workflow();
+    expect(content).toContain("docker/build-push-action");
+    expect(content).toContain("docker/setup-buildx-action");
+    expect(content).toContain("push: false");
+    expect(content).toContain("load: true");
+    expect(content).toContain("cache-from: type=gha");
+    expect(content).toContain("cache-to: type=gha,mode=max");
     expect(content).not.toContain("docker push");
     expect(content).not.toContain("docker/login-action");
     expect(content).not.toContain("ghcr.io");
+  });
+
+  it("runs the built image, waits for it to report healthy, and probes it", () => {
+    const content = workflow();
+    expect(content).toContain("docker run -d --name portfolio-smoke");
+    expect(content).toMatch(
+      /docker inspect --format '\{\{\.State\.Health\.Status\}\}'/
+    );
+    expect(content).toContain("curl -fsS http://127.0.0.1:3131/api/health");
+    expect(content).toMatch(
+      /docker inspect --format '\{\{json \.Config\.Healthcheck\}\}'/
+    );
+    expect(content).toContain('if [ "$config" = "null" ]');
+  });
+
+  it("always removes the smoke container, even after a failed step", () => {
+    const content = workflow();
+    expect(content).toMatch(
+      /if: always\(\)\s*\n\s*run: docker rm -f portfolio-smoke/
+    );
+  });
+
+  it("pins every action to a commit sha with a version comment", () => {
+    const content = workflow();
+    const uses = [...content.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
+    expect(uses.length).toBeGreaterThan(0);
+    for (const use of uses) {
+      expect(use, use).toMatch(/@[0-9a-f]{40}$/);
+    }
+    expect(content).toMatch(/@[0-9a-f]{40} # v\d/);
+  });
+
+  it("has a timeout on every job", () => {
+    const content = workflow();
+    expect(
+      content.match(/timeout-minutes: \d+/g)?.length
+    ).toBeGreaterThanOrEqual(2);
   });
 
   it("grants the workflow read only repository access", () => {
