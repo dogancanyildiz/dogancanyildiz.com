@@ -141,7 +141,10 @@
     "emailNotConfigured": "Email is not configured on the server.",
     "sendFailed": "The message could not be sent. Please try again later.",
     "tooManyRequests": "Too many requests. Please try again in a few minutes.",
-    "bodyTooLarge": "Request body is too large."
+    "bodyTooLarge": "Request body is too large.",
+    "unsupportedMediaType": "Unsupported content type. The contact form sends JSON.",
+    "forbiddenOrigin": "This request did not come from the contact form.",
+    "sendTimeout": "The mail service did not answer in time. Please try again in a moment."
   },
   "systems": {
     "eyebrow": "Systems",

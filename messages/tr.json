@@ -141,7 +141,10 @@
     "emailNotConfigured": "E-posta gönderimi sunucuda yapılandırılmamış.",
     "sendFailed": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.",
     "tooManyRequests": "Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin.",
-    "bodyTooLarge": "İstek gövdesi çok büyük."
+    "bodyTooLarge": "İstek gövdesi çok büyük.",
+    "unsupportedMediaType": "Desteklenmeyen içerik türü. İletişim formu JSON gönderir.",
+    "forbiddenOrigin": "Bu istek iletişim formundan gelmedi.",
+    "sendTimeout": "Posta servisi zamanında yanıt vermedi. Lütfen biraz sonra tekrar deneyin."
   },
   "systems": {
     "eyebrow": "Sistemler",
