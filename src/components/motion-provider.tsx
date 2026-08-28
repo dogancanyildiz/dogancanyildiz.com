@@ -8,9 +8,12 @@ import { LazyMotion } from "motion/react";
  * gestures. Layout animations and drag live in domMax and are deliberately not
  * loaded: nothing in this site needs them.
  *
- * The feature bundle is loaded lazily, so the routes that animate nothing (the
- * home page and every listing, since those sections render on the server) never
- * pay for it during the initial load.
+ * The feature bundle is a separate chunk now, so it is off the initial script
+ * set on every route. It is not free: LazyMotion requests it from a mount
+ * effect, and this provider still wraps the whole tree in the root layout, so
+ * every route still fetches it right after hydration. Moving the provider down
+ * to the one boundary that still animates (the contact page) belongs to
+ * whoever owns that layout, see docs handoff.
  */
 const loadDomAnimation = () =>
   import("motion/react").then((mod) => mod.domAnimation);

@@ -68,6 +68,39 @@ function collectSourceFiles(dir: string): string[] {
   return out;
 }
 
+/**
+ * Returns the full opening tag of every `<m.*>` element in a source file.
+ * Attribute values are skipped as units (braces are counted, quoted and
+ * template strings are consumed whole) so that a `>` inside an arrow function
+ * or a template literal does not end the tag early.
+ */
+function collectOpeningTags(body: string): string[] {
+  const tags: string[] = [];
+  for (const match of body.matchAll(/<m\.[A-Za-z]+\b/g)) {
+    const start = match.index;
+    let depth = 0;
+    let quote: string | null = null;
+    for (let i = start + match[0].length; i < body.length; i++) {
+      const char = body[i];
+      if (quote) {
+        if (char === quote) quote = null;
+        continue;
+      }
+      if (char === '"' || char === "'" || char === "`") {
+        quote = char;
+      } else if (char === "{") {
+        depth += 1;
+      } else if (char === "}") {
+        depth -= 1;
+      } else if (char === ">" && depth === 0) {
+        tags.push(body.slice(start, i + 1));
+        break;
+      }
+    }
+  }
+  return tags;
+}
+
 const files = collectSourceFiles(join(process.cwd(), "src")).map((file) => ({
   file,
   body: readFileSync(file, "utf8"),
@@ -121,11 +154,24 @@ describe("hidden variants and the CSS escape hatch", () => {
   // MOTION_ITEM_CLASS is what the reduced-motion rule in globals.css keys off
   // to force those elements back to visible, so the two must never drift apart.
   const openingTags = files.flatMap(({ file, body }) =>
-    [...body.matchAll(/<m\.[A-Za-z]+\b[^>]*>/g)].map((match) => ({
-      file,
-      tag: match[0],
-    }))
+    collectOpeningTags(body).map((tag) => ({ file, tag }))
   );
+
+  it("reads the whole opening tag even when a prop holds an arrow function", () => {
+    // A naive /<m\.[A-Za-z]+\b[^>]*>/ stops at the > of an arrow function, so
+    // reordering the props past an onSubmit would hide the initial="hidden"
+    // that follows it and the guard below would pass on an unclassed element.
+    const source = [
+      "<m.form",
+      "  onSubmit={(event) => handleSubmit(event)}",
+      '  initial="hidden"',
+      "  className={`space-y-6 ${MOTION_ITEM_CLASS}`}",
+      ">",
+    ].join("\n");
+    const [tag] = collectOpeningTags(source);
+    expect(tag).toContain('initial="hidden"');
+    expect(tag).toContain("MOTION_ITEM_CLASS");
+  });
 
   it("gives every element that mounts hidden the motion item class", () => {
     const offenders = openingTags
