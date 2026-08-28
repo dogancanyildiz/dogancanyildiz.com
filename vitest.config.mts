@@ -32,5 +32,26 @@ export default defineConfig({
         inline: ["next-intl"],
       },
     },
+    // Every test file starts from the same clean slate instead of whatever a
+    // previous file left behind: a stray vi.stubEnv or vi.spyOn used to only
+    // fail depending on run order.
+    restoreMocks: true,
+    unstubEnvs: true,
+    unstubGlobals: true,
+    coverage: {
+      provider: "v8",
+      include: ["src/**"],
+      exclude: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+      // Set a little below the measured baseline (see docs/plans/handoffs or
+      // `npm run test -- --coverage` for the current numbers), so the gate
+      // catches a real regression without chasing 100% on files nobody has
+      // reached to test yet.
+      thresholds: {
+        lines: 50,
+        statements: 48,
+        functions: 36,
+        branches: 38,
+      },
+    },
   },
 });
