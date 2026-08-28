@@ -95,10 +95,16 @@ describe("empty states", () => {
 });
 
 describe("mdx element overrides", () => {
+  const tableOverride = mdxComponents.table;
+  if (!tableOverride) {
+    throw new Error("mdxComponents no longer overrides table");
+  }
+
   it("wraps a table so a wide one scrolls in its own box", () => {
     const html = renderToStaticMarkup(
       createElement(
-        mdxComponents.table,
+        tableOverride,
+
         {},
         createElement("tbody", null, createElement("tr", null))
       )
@@ -111,7 +117,7 @@ describe("mdx element overrides", () => {
 
   it("forwards the props remark put on the table", () => {
     const html = renderToStaticMarkup(
-      createElement(mdxComponents.table, { id: "prices" })
+      createElement(tableOverride, { id: "prices" })
     );
 
     expect(html).toContain('<table id="prices">');

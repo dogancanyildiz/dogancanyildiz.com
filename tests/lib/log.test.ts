@@ -60,7 +60,9 @@ describe("log", () => {
     expect(info).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalledTimes(1);
     expect(error).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(String(error.mock.calls[0][0]))).toMatchObject({
+    const logged = error.mock.calls[0];
+    if (!logged) throw new Error("console.error was not called");
+    expect(JSON.parse(String(logged[0]))).toMatchObject({
       level: "error",
       msg: "c",
     });

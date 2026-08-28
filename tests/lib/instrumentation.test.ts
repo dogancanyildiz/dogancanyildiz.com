@@ -63,7 +63,10 @@ describe("register", () => {
     expect(() => register()).not.toThrow();
 
     expect(error).toHaveBeenCalledTimes(1);
-    const line = JSON.parse(String(error.mock.calls[0][0]));
+    const logged = error.mock.calls[0];
+    if (!logged) throw new Error("console.error was not called");
+    const line = JSON.parse(String(logged[0]));
+
     expect(line.level).toBe("error");
     expect(line.missing).toBe("CONTACT_EMAIL,FROM_EMAIL");
   });

@@ -109,7 +109,11 @@ describe("blog posting schema", () => {
 
   it("prefers updated over the publish date once frontmatter sets it", async () => {
     const { getPosts } = await import("@/lib/content");
-    const post = { ...getPosts("en")[0], updated: "2026-08-27" };
+    const [firstPost] = getPosts("en");
+    if (!firstPost) {
+      throw new Error("the en blog collection is empty");
+    }
+    const post = { ...firstPost, updated: "2026-08-27" };
 
     const data = buildBlogPosting("en", post) as Record<string, unknown>;
 

@@ -62,13 +62,13 @@ async function feedFor(lang: string): Promise<{
 function tagsOf(xml: string): string[] {
   return [...xml.matchAll(/<(\/?)([a-zA-Z:]+)[^>]*?(\/?)>/g)]
     .filter((match) => match[1] === "" && match[3] === "")
-    .map((match) => match[2]);
+    .flatMap((match) => match[2] ?? []);
 }
 
 function textInside(xml: string, tag: string): string[] {
   return [
     ...xml.matchAll(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, "g")),
-  ].map((match) => match[1]);
+  ].flatMap((match) => match[1] ?? []);
 }
 
 describe("rss feed route", () => {

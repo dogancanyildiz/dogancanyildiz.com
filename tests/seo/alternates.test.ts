@@ -47,7 +47,7 @@ describe("buildAlternates", () => {
       tr: "https://dogancanyildiz.com/tr/blog/self-hosting-with-coolify",
       "x-default": "https://dogancanyildiz.com/blog/self-hosting-with-coolify",
     });
-    expect(result.types["application/rss+xml"][0].url).toBe(
+    expect(result.types["application/rss+xml"][0]?.url).toBe(
       "https://dogancanyildiz.com/tr/feed.xml"
     );
   });
@@ -64,7 +64,7 @@ describe("buildAlternates", () => {
       "x-default": "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik",
     });
     expect(result.languages.en).toBeUndefined();
-    expect(result.types["application/rss+xml"][0].url).toBe(
+    expect(result.types["application/rss+xml"][0]?.url).toBe(
       "https://dogancanyildiz.com/tr/feed.xml"
     );
   });

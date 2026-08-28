@@ -115,6 +115,7 @@ describe("sitemap", () => {
       matchedAny = true;
 
       const [, trPrefix, section, slug] = match;
+      if (!slug) throw new Error(`no slug captured from ${entry.url}`);
       const locale = trPrefix ? "tr" : "en";
 
       if (section === "blog") {

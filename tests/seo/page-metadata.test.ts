@@ -223,13 +223,15 @@ describe("page openGraph metadata", () => {
       // segment. A page that returns its own openGraph drops the inherited
       // image unless it names it again.
       expect(images).toHaveLength(1);
-      expect(images[0].url).toBe(
+      const [ogImage] = images;
+      if (!ogImage) throw new Error(`${page.name} published no og image`);
+      expect(ogImage.url).toBe(
         locale === "en"
           ? "https://dogancanyildiz.com/opengraph-image/default"
           : "https://dogancanyildiz.com/tr/opengraph-image/default"
       );
-      expect(images[0].width).toBe(1200);
-      expect(images[0].alt).toBeTruthy();
+      expect(ogImage.width).toBe(1200);
+      expect(ogImage.alt).toBeTruthy();
     }
   );
 
@@ -246,6 +248,7 @@ describe("page openGraph metadata", () => {
     const [image] = await route.generateImageMetadata({
       params: Promise.resolve({ lang: "tr" }),
     });
+    if (!image) throw new Error("generateImageMetadata returned no image");
     expect(image.id).toBe(descriptor.OG_IMAGE_ID);
   });
 
@@ -261,9 +264,13 @@ describe("page openGraph metadata", () => {
   });
 
   it("gives every locale a distinct og:url for the same page", async () => {
+    const aboutPage = PAGES.find((page) => page.name === "about");
+    if (!aboutPage) throw new Error("no about page case found");
+
     const urls = await Promise.all(
       routing.locales.map(async (locale) => {
-        const metadata = await metadataFor(PAGES[1], locale);
+        const metadata = await metadataFor(aboutPage, locale);
+
         return (metadata.openGraph as { url: string }).url;
       })
     );
