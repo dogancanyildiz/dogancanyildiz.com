@@ -32,6 +32,19 @@ const REQUEST_TIMEOUT_MS = 15_000;
 /** Field order, which is also the order the first error is focused in. */
 const FIELDS: ContactField[] = ["name", "email", "message"];
 
+/**
+ * The API answers a 400 with the field that failed and one generic sentence
+ * for the alert region. Repeating that sentence under the input would tell a
+ * visitor with a rejected address that name, email and message are required,
+ * so the text attached to the field comes from the same catalog the client
+ * validation uses.
+ */
+const SERVER_FIELD_ERROR: Record<ContactField, string> = {
+  name: "errorNameInvalid",
+  email: "errorEmailInvalid",
+  message: "errorMessageInvalid",
+};
+
 export function ContactForm() {
   const t = useTranslations("contact.form");
   const locale = useLocale();
@@ -167,7 +180,7 @@ export function ContactForm() {
         const message = data.error || t("error");
         setErrorMessage(message);
         if (data.field && FIELDS.includes(data.field)) {
-          setFieldErrors({ [data.field]: message });
+          setFieldErrors({ [data.field]: t(SERVER_FIELD_ERROR[data.field]) });
         }
         setStatus("error");
         requestFocus(data.field ?? "alert");
@@ -186,6 +199,9 @@ export function ContactForm() {
   }
 
   const busy = status === "loading";
+  // Everything that would otherwise be disabled: the request is in flight, or
+  // the 429 window has not run out yet.
+  const locked = busy || retrySeconds > 0;
   const errorId = (field: ContactField) => `contact-${field}-error`;
   const describedBy = (field: ContactField) =>
     fieldErrors[field] ? errorId(field) : undefined;
@@ -304,11 +320,16 @@ export function ContactForm() {
       >
         {status === "error" ? errorMessage : ""}
       </div>
+      {/* aria-disabled rather than disabled, for the same reason as the
+          inputs: a keyboard submit leaves the focus on this button, and
+          disabling it mid request would drop that focus to the document.
+          The submit handler swallows the extra submit instead. */}
       <Button
         type="submit"
         size="lg"
-        disabled={busy || retrySeconds > 0}
+        aria-disabled={locked || undefined}
         aria-busy={status === "loading"}
+        className="aria-disabled:opacity-50"
       >
         {busy
           ? t("sending")

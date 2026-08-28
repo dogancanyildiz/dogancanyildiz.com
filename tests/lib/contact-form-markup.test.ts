@@ -14,6 +14,24 @@ import {
  * testing library in this project yet, so these guard the attributes a render
  * test would otherwise cover: they are cheap and they fail loudly the moment
  * an attribute is dropped in a refactor.
+ *
+ * They are a stopgap, not the destination. Matching the source text passes on
+ * any refactor that keeps the strings while breaking the behaviour, and fails
+ * on a harmless reflow of the same code. Once jsdom and @testing-library are
+ * installed, these describes have to be replaced by render tests rather than
+ * kept alongside them:
+ *
+ * - "contact form validation feedback": that focus actually lands on the first
+ *   invalid field, and that aria-describedby points at the rendered message.
+ * - "contact form live regions": the order the live regions announce in, that
+ *   the inputs are locked with readOnly while the request is in flight, and
+ *   that the submit button keeps focus while it is aria-disabled.
+ * - "contact form request": that the Retry-After countdown ticks down and
+ *   unlocks the button when it reaches zero.
+ *
+ * What can stay as source assertions: the autofill attributes, the honeypot
+ * name, and the maxLength constants, none of which a render test observes any
+ * better than a grep.
  */
 const form = readFileSync(
   join(process.cwd(), "src/components/sections/contact-form.tsx"),
@@ -92,6 +110,15 @@ describe("contact form live regions", () => {
     expect(form).not.toMatch(/disabled=\{status === "loading"\}/);
   });
 
+  it("locks the submit button without taking the focus off it", () => {
+    // A keyboard submit leaves the focus on the button, so disabling it while
+    // the request runs drops that focus to the document.
+    expect(form).toContain("aria-disabled={locked || undefined}");
+    expect(form).not.toMatch(/(^|[\s{])disabled=\{/m);
+    // The guard that makes the missing disabled attribute safe.
+    expect(form).toContain('if (status === "loading" || retrySeconds > 0)');
+  });
+
   it("moves focus to the status message after the response", () => {
     expect(form).toContain('requestFocus("status")');
     expect(form).toContain('requestFocus("alert")');
@@ -111,7 +138,15 @@ describe("contact form request", () => {
 
   it("honours Retry-After on a 429", () => {
     expect(form).toContain('res.headers.get("Retry-After")');
-    expect(form).toContain("disabled={busy || retrySeconds > 0}");
+    expect(form).toContain("const locked = busy || retrySeconds > 0");
     expect(form).toContain('t("retryAfter", { seconds: retrySeconds })');
+  });
+
+  it("shows a field specific message when the server names a field", () => {
+    // The server sends one generic sentence for the alert region; repeating it
+    // under the input would tell a visitor with a rejected address that every
+    // field is required.
+    expect(form).toContain("t(SERVER_FIELD_ERROR[data.field])");
+    expect(form).not.toContain("setFieldErrors({ [data.field]: message })");
   });
 });

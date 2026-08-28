@@ -124,11 +124,13 @@
       "error": "The message could not be sent. Please email me directly instead.",
       "honeypotLabel": "Leave this field empty",
       "errorNameRequired": "Please enter your name.",
+      "errorNameInvalid": "Please enter your name without line breaks.",
       "errorEmailRequired": "Please enter your email address.",
       "errorEmailInvalid": "Please enter a valid email address.",
       "errorMessageRequired": "Please write a message.",
+      "errorMessageInvalid": "Please write your message as plain text.",
       "errorFields": "Please check the highlighted fields.",
-      "errorTimeout": "The request took too long. Please try again.",
+      "errorTimeout": "The request took too long. It may still have reached me, so please wait a moment before sending it again.",
       "retryAfter": "Try again in {seconds}s"
     }
   },
@@ -151,7 +153,7 @@
     "bodyTooLarge": "Request body is too large.",
     "unsupportedMediaType": "Unsupported content type. The contact form sends JSON.",
     "forbiddenOrigin": "This request did not come from the contact form.",
-    "sendTimeout": "The mail service did not answer in time. Please try again in a moment."
+    "sendTimeout": "The mail service did not answer in time. The message may still have gone out, so please wait a moment before sending it again."
   },
   "systems": {
     "eyebrow": "Systems",

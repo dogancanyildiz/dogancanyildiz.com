@@ -124,11 +124,13 @@
       "error": "Mesaj gönderilemedi. Lütfen doğrudan e-posta gönderin.",
       "honeypotLabel": "Bu alanı boş bırakın",
       "errorNameRequired": "Lütfen adınızı yazın.",
+      "errorNameInvalid": "Adınızı satır sonu içermeden yazın.",
       "errorEmailRequired": "Lütfen e-posta adresinizi yazın.",
       "errorEmailInvalid": "Lütfen geçerli bir e-posta adresi yazın.",
       "errorMessageRequired": "Lütfen bir mesaj yazın.",
+      "errorMessageInvalid": "Mesajınızı düz metin olarak yazın.",
       "errorFields": "Lütfen işaretlenen alanları kontrol edin.",
-      "errorTimeout": "İstek çok uzun sürdü. Lütfen tekrar deneyin.",
+      "errorTimeout": "İstek çok uzun sürdü. Mesajınız yine de bana ulaşmış olabilir, tekrar göndermeden önce biraz bekleyin.",
       "retryAfter": "{seconds} sn sonra tekrar deneyin"
     }
   },
@@ -151,7 +153,7 @@
     "bodyTooLarge": "İstek gövdesi çok büyük.",
     "unsupportedMediaType": "Desteklenmeyen içerik türü. İletişim formu JSON gönderir.",
     "forbiddenOrigin": "Bu istek iletişim formundan gelmedi.",
-    "sendTimeout": "Posta servisi zamanında yanıt vermedi. Lütfen biraz sonra tekrar deneyin."
+    "sendTimeout": "Posta servisi zamanında yanıt vermedi. Mesaj yine de gönderilmiş olabilir, tekrar göndermeden önce biraz bekleyin."
   },
   "systems": {
     "eyebrow": "Sistemler",
