@@ -1,8 +1,15 @@
 name: Release
 
-# Every merge into main cuts a version. The version itself comes from the
-# Conventional Commits made since the last v* tag, so a batch that only carries
-# chore, docs, ci or test commits finishes without tagging anything.
+# Every green CI run on main cuts a version. The version itself comes from
+# the Conventional Commits made since the last v* tag, so a batch that only
+# carries chore, docs, ci or test commits finishes without tagging anything.
+#
+# This waits for the CI workflow to finish (workflow_run) rather than
+# reacting to the push directly: a merge whose Quality checks or Docker image
+# job fails must never get tagged and released. enforce_admins on main
+# additionally decides whether a human can push straight past that gate; this
+# workflow only ever sees main after CI has already run against it, either
+# way.
 #
 # Two repository settings this workflow depends on:
 #   - Settings > Actions > General > "Allow GitHub Actions to create and
@@ -13,7 +20,9 @@ name: Release
 #     it once to make the required checks run before merging it into dev.
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
     inputs:
@@ -39,20 +48,32 @@ defaults:
 jobs:
   release:
     name: Tag and publish
-    if: github.ref == 'refs/heads/main'
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
+      # The commit to release. For workflow_run, github.sha and the default
+      # checkout ref both resolve to the workflow FILE's own ref (main's
+      # current HEAD when this run starts), not the commit CI actually
+      # verified, which is a well known GitHub Actions quirk for this
+      # trigger. github.event.workflow_run.head_sha is that verified commit;
+      # workflow_dispatch has no workflow_run event, so it falls back to the
+      # ordinary github.sha.
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - name: Check out the full history
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ env.RELEASE_SHA }}
           # The whole history and every tag: the version is derived from the
           # range between the last v* tag and this commit.
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version-file: ".nvmrc"
 
@@ -102,7 +123,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "$TAG" "$GITHUB_SHA"
+          git tag -a "$TAG" -m "$TAG" "$RELEASE_SHA"
           git push origin "refs/tags/$TAG"
 
       - name: Publish the GitHub Release
