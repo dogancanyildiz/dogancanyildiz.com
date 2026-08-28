@@ -13,6 +13,7 @@ import {
 // This reads the live tokens from globals.css so a token edit that regresses
 // contrast fails here instead of only being caught by eye.
 const CSS_PATH = join(process.cwd(), "src/app/globals.css");
+const SYSTEMS_PATH = join(process.cwd(), "src/components/sections/systems.tsx");
 const PANEL_ALPHA = 0.5;
 const MIN_CONTRAST = 4.5;
 
@@ -35,4 +36,18 @@ describe("systems panel label contrast", () => {
       expect(ratio).toBeGreaterThanOrEqual(MIN_CONTRAST);
     }
   );
+
+  // The contrast math above only re-derives the number from the token
+  // values; it never looks at the component. This regression-locks the
+  // other half: the field labels must stay at full opacity, since any
+  // `text-muted-foreground/NN` opacity modifier reintroduces the
+  // sub-4.5:1 contrast this suite exists to prevent, and the math above
+  // would keep passing (it does not read the component either way).
+  it("systems.tsx field labels use full-opacity text-muted-foreground, no opacity modifier", () => {
+    const source = readFileSync(SYSTEMS_PATH, "utf-8");
+    const opacityModifier = /text-muted-foreground\/\d/;
+
+    expect(source).toMatch(/text-muted-foreground(?!\/)/);
+    expect(source).not.toMatch(opacityModifier);
+  });
 });
