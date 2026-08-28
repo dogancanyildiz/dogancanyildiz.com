@@ -62,6 +62,23 @@ describe("ci workflow", () => {
     );
   });
 
+  it("runs the audit as the last checks step, tolerating its known-red result", () => {
+    // The audit is expected to fail until velite (owned outside this
+    // cluster) drops its sub-0.35.0 sharp dependency. continue-on-error
+    // keeps that from failing the required check; placing it after every
+    // other step keeps lint/typecheck/test/build feedback visible in the
+    // log regardless of the audit's outcome.
+    const content = workflow();
+    const auditIndex = content.indexOf("run: npm audit --omit=dev");
+    const testIndex = content.indexOf("run: npm run test");
+    const buildIndex = content.indexOf("run: npm run build:app");
+    expect(auditIndex).toBeGreaterThan(testIndex);
+    expect(auditIndex).toBeGreaterThan(buildIndex);
+    expect(content).toMatch(
+      /run: npm audit --omit=dev --audit-level=high\s*\n\s*continue-on-error: true/
+    );
+  });
+
   it("lints the Dockerfile with a digest pinned hadolint image", () => {
     const content = workflow();
     expect(content).not.toContain("hadolint/hadolint:v2.15.1-alpine");
@@ -113,9 +130,17 @@ describe("ci workflow", () => {
 
   it("has a timeout on every job", () => {
     const content = workflow();
-    expect(
-      content.match(/timeout-minutes: \d+/g)?.length
-    ).toBeGreaterThanOrEqual(2);
+    // Split on top level "  <job-id>:" lines (two-space indent under
+    // "jobs:") so a job added without its own timeout-minutes is caught,
+    // rather than just counting timeout-minutes anywhere in the file.
+    const jobBodies = content
+      .split(/\n(?=  [a-zA-Z0-9_-]+:\n)/)
+      .filter((block) => /^  [a-zA-Z0-9_-]+:\n {4}name:/.test(block));
+    expect(jobBodies.length).toBeGreaterThanOrEqual(2);
+    for (const job of jobBodies) {
+      const jobName = job.match(/name: (.+)/)?.[1] ?? "unknown job";
+      expect(job, jobName).toMatch(/\n {4}timeout-minutes: \d+/);
+    }
   });
 
   it("grants the workflow read only repository access", () => {
