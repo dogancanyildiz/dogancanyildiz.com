@@ -288,11 +288,21 @@ describe("global-not-found font parity", () => {
     expect(source).not.toMatch(/<body\b[^>]*fontVariables/);
   });
 
-  it("has a localized boundary for notFound() thrown inside a locale", () => {
+  it("keeps a localized boundary ready for when globalNotFound is off", () => {
     const source = read("src/app/[lang]/not-found.tsx");
     expect(source).toContain('useTranslations("notFound")');
     expect(source).toContain('from "@/i18n/navigation"');
     expect(source).not.toContain('from "next/link"');
+  });
+
+  it("says out loud that the [lang] boundary is inert today", () => {
+    // globalNotFound routes a notFound() thrown inside a locale to the global
+    // document too, so this file renders for nobody. Its docstring used to
+    // promise the header and footer that the global 404 does not have.
+    const source = read("src/app/[lang]/not-found.tsx");
+    expect(source).toMatch(/Inert while experimental\.globalNotFound is on/);
+    expect(source).not.toContain("never reach this file");
+    expect(read("src/app/global-not-found.tsx")).toMatch(/only 404 in the app/);
   });
 
   it("carries the same notFound keys in both catalogs", () => {

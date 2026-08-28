@@ -30,6 +30,11 @@ import { ThemeProvider } from "@/components/theme-provider";
  * There is no [lang] segment here, so the locale is inferred from the
  * request pathname (x-pathname, set in src/proxy.ts). When that header is
  * missing, the document falls back to the default locale.
+ *
+ * While experimental.globalNotFound is on this is the only 404 in the app: a
+ * notFound() thrown inside a locale lands here too, not on
+ * src/app/[lang]/not-found.tsx, so a bad slug also gets this bare document
+ * rather than the header and footer.
  */
 
 type Locale = (typeof routing.locales)[number];
