@@ -181,7 +181,7 @@ describe("project list layout", () => {
     const path = "src/components/sections/project-list.tsx";
     expect(existsSync(repoPath(path))).toBe(true);
     const source = read(path);
-    expect(source).toContain("export function ProjectList");
+    expect(source).toMatch(/export (async )?function ProjectList/);
     expect(source).toContain("content-stack");
     expect(source).toContain("content-entry");
     expect(source).toContain("after:absolute after:inset-0");
@@ -189,12 +189,12 @@ describe("project list layout", () => {
   });
 
   it("does not ship a card grid wrapper for project lists", () => {
-    expect(existsSync(repoPath("src/components/sections/project-grid.tsx"))).toBe(
-      false
-    );
-    expect(existsSync(repoPath("src/components/sections/project-card.tsx"))).toBe(
-      false
-    );
+    expect(
+      existsSync(repoPath("src/components/sections/project-grid.tsx"))
+    ).toBe(false);
+    expect(
+      existsSync(repoPath("src/components/sections/project-card.tsx"))
+    ).toBe(false);
   });
 });
 

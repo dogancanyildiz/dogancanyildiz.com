@@ -1,13 +1,11 @@
-"use client";
-
-import * as m from "motion/react-m";
-import { useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { ContentEntryBody, ContentEntryIndex } from "@/components/ui/content-entry";
+import {
+  ContentEntryBody,
+  ContentEntryIndex,
+} from "@/components/ui/content-entry";
 import type { PostCardData } from "@/lib/content";
-import { fadeUp, MOTION_ITEM_CLASS } from "@/lib/motion";
 
 interface PostListProps {
   posts: PostCardData[];
@@ -15,27 +13,21 @@ interface PostListProps {
   headingLevel?: "h2" | "h3";
 }
 
-export function PostList({
-  posts,
-  headingLevel = "h2",
-}: PostListProps) {
+/**
+ * Server rendered on purpose: nothing here reacts to the user, and the entrance
+ * animation it used to run wrote `opacity: 0` into the prerendered HTML. Card
+ * links opt out of prefetching so a long listing does not pull an RSC payload
+ * per row as it scrolls into view.
+ */
+export async function PostList({ posts, headingLevel = "h2" }: PostListProps) {
   const Heading = headingLevel;
-  const t = useTranslations("blog");
-  const format = useFormatter();
-  const reduced = useReducedMotion() ?? false;
-  const variants = fadeUp(reduced);
+  const t = await getTranslations("blog");
+  const format = await getFormatter();
 
   return (
     <ul className="content-stack">
       {posts.map((post, index) => (
-        <m.li
-          key={post.slug}
-          variants={variants}
-          initial="hidden"
-          animate="show"
-          custom={index}
-          className={`content-entry group list-row ${MOTION_ITEM_CLASS}`}
-        >
+        <li key={post.slug} className="content-entry group">
           <ContentEntryIndex index={index} />
 
           <ContentEntryBody>
@@ -57,15 +49,13 @@ export function PostList({
               <Heading className="min-w-0 flex-1 text-lg font-semibold leading-snug tracking-tight sm:text-xl">
                 <Link
                   href={post.href}
+                  prefetch={false}
                   className="after:absolute after:inset-0 text-foreground no-underline transition-colors group-hover:text-primary"
                 >
                   {post.title}
                 </Link>
               </Heading>
-              <ArrowUpRight
-                className="entry-arrow mt-1"
-                aria-hidden="true"
-              />
+              <ArrowUpRight className="entry-arrow mt-1" aria-hidden="true" />
             </div>
 
             <p className="text-sm leading-relaxed text-muted-foreground">
@@ -84,7 +74,7 @@ export function PostList({
               </ul>
             ) : null}
           </ContentEntryBody>
-        </m.li>
+        </li>
       ))}
     </ul>
   );

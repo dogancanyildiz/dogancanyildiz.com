@@ -109,8 +109,45 @@ describe("motion imports", () => {
   });
 
   it("exports a motion item class for the CSS fallback", () => {
-    expect(readFileSync(join(process.cwd(), "src/lib/motion.ts"), "utf8")).toContain(
-      'MOTION_ITEM_CLASS = "motion-item"'
-    );
+    expect(
+      readFileSync(join(process.cwd(), "src/lib/motion.ts"), "utf8")
+    ).toContain('MOTION_ITEM_CLASS = "motion-item"');
+  });
+});
+
+describe("hidden variants and the CSS escape hatch", () => {
+  // An element that mounts in the hidden variant is written into the
+  // prerendered HTML with opacity:0, so it stays invisible until hydration.
+  // MOTION_ITEM_CLASS is what the reduced-motion rule in globals.css keys off
+  // to force those elements back to visible, so the two must never drift apart.
+  const openingTags = files.flatMap(({ file, body }) =>
+    [...body.matchAll(/<m\.[A-Za-z]+\b[^>]*>/g)].map((match) => ({
+      file,
+      tag: match[0],
+    }))
+  );
+
+  it("gives every element that mounts hidden the motion item class", () => {
+    const offenders = openingTags
+      .filter(({ tag }) => tag.includes('initial="hidden"'))
+      .filter(
+        ({ tag }) =>
+          !tag.includes("MOTION_ITEM_CLASS") && !tag.includes("motion-item")
+      )
+      .map(({ file }) => file);
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps the LCP sections off the motion path entirely", () => {
+    for (const path of [
+      "src/components/sections/hero.tsx",
+      "src/components/sections/skills-strip.tsx",
+      "src/components/sections/project-list.tsx",
+      "src/components/sections/post-list.tsx",
+    ]) {
+      const source = readFileSync(join(process.cwd(), path), "utf8");
+      expect(source, path).not.toContain("motion/react");
+      expect(source, path).not.toContain('"use client"');
+    }
   });
 });
