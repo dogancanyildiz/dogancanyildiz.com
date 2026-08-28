@@ -1,15 +1,22 @@
 # syntax=docker/dockerfile:1
 
+# Pinned to a digest, not a floating tag: node:24-alpine can point at a
+# different image tomorrow, a digest cannot. Dependabot's docker ecosystem
+# (directory: /) tracks this line and opens a pull request when a new
+# node:24-alpine build is published.
+# node:24-alpine
+
 # ---------------------------------------------------------------------------
 # Stage 1: deps
 # Install dependencies in an isolated layer so that a source only change does
 # not invalidate the npm cache. devDependencies are required here because the
-# Next build runs in the next stage.
+# Next build runs in the next stage. The cache mount keeps npm's download
+# cache across builds without baking it into any image layer.
 # ---------------------------------------------------------------------------
-FROM node:24-alpine AS deps
+FROM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 # ---------------------------------------------------------------------------
 # Stage 2: builder
@@ -24,7 +31,7 @@ RUN npm ci --no-audit --no-fund
 # resolveSiteUrl instead of silently inlining the production url into a
 # preview bundle. CI, docker compose and Coolify all pass it explicitly.
 # ---------------------------------------------------------------------------
-FROM node:24-alpine AS builder
+FROM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_BUILD_SHA
@@ -48,7 +55,7 @@ RUN npm run build
 # image already provides an unprivileged "node" user, so no extra addgroup or
 # adduser call is needed.
 # ---------------------------------------------------------------------------
-FROM node:24-alpine AS runner
+FROM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
