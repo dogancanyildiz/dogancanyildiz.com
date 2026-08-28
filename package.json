@@ -19,7 +19,7 @@
     "vendor:fonts": "node scripts/vendor-fonts.mjs"
   },
   "engines": {
-    "node": ">=20.9"
+    "node": ">=24"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
@@ -44,7 +44,7 @@
     "@fontsource/instrument-serif": "5.3.0",
     "@shikijs/rehype": "^4.4.3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
