@@ -45,7 +45,7 @@ function flattenLeaves(
 // right after the opening brace.
 const ICU_PLACEHOLDER_PATTERN = /\{\s*(\w+)/g;
 
-function placeholdersIn(value: Json | undefined): Set<string> {
+function placeholdersIn(value: unknown): Set<string> {
   if (typeof value !== "string") return new Set();
   return new Set(
     [...value.matchAll(ICU_PLACEHOLDER_PATTERN)].map((match) => match[1])
