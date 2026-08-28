@@ -226,6 +226,10 @@
   }
 
   /* Display scale - restrained, not billboard-sized. */
+  .display-hero {
+    @apply text-4xl font-semibold tracking-tight text-balance leading-tight sm:text-5xl lg:text-6xl;
+  }
+
   .display-section {
     @apply text-2xl font-semibold tracking-tight text-balance leading-snug sm:text-3xl lg:text-4xl;
   }

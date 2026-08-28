@@ -6,6 +6,7 @@ const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 
 const PROJECT_LIST = "src/components/sections/project-list.tsx";
 const POST_LIST = "src/components/sections/post-list.tsx";
+const EXPERIENCE_SUMMARY = "src/components/sections/experience-summary.tsx";
 
 describe("project card badge links", () => {
   it("clears the 24px target floor WCAG 2.2 SC 2.5.8 asks for", () => {
@@ -27,7 +28,7 @@ describe("project card badge links", () => {
 
 describe("list row classes", () => {
   it("leaves the row geometry to content-entry alone", () => {
-    for (const path of [PROJECT_LIST, POST_LIST]) {
+    for (const path of [PROJECT_LIST, POST_LIST, EXPERIENCE_SUMMARY]) {
       const source = read(path);
       expect(source, path).toContain("content-entry");
       // .list-row repeated the same relative/py-5/transition-colors trio.

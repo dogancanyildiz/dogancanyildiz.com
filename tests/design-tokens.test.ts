@@ -457,15 +457,26 @@ describe("component colour hygiene", () => {
   });
 });
 
+const NOT_OURS = new Set([
+  "dark", // next-themes writes it on <html>
+  "shiki", // emitted by the syntax highlighter
+]);
+
+const declared = new Set<string>();
+for (const prelude of cssRules.split("{").slice(0, -1)) {
+  const selector = prelude.slice(prelude.lastIndexOf("}") + 1);
+  if (selector.trimStart().startsWith("@")) continue;
+  for (const match of selector.matchAll(/\.([a-z][a-z0-9-]*)/g)) {
+    const className = match[1];
+    if (className && !NOT_OURS.has(className)) declared.add(className);
+  }
+}
+
 describe("no dead classes in the shipped stylesheet", () => {
   // Every class globals.css defines has to reach the browser through some
   // call site, otherwise it is bytes on every page for nothing. This used to
   // be an existence assertion, which kept retired utilities alive instead of
   // catching them.
-  const NOT_OURS = new Set([
-    "dark", // next-themes writes it on <html>
-    "shiki", // emitted by the syntax highlighter
-  ]);
   // Classes exempt from the usage assertion, each with the state it is
   // exempted for, because an allowlist that never checks itself just hides
   // what it was meant to flag.
@@ -484,16 +495,6 @@ describe("no dead classes in the shipped stylesheet", () => {
       { state: "unused", why: "quote surface, wired up by the content branch" },
     ],
   ]);
-
-  const declared = new Set<string>();
-  for (const prelude of cssRules.split("{").slice(0, -1)) {
-    const selector = prelude.slice(prelude.lastIndexOf("}") + 1);
-    if (selector.trimStart().startsWith("@")) continue;
-    for (const match of selector.matchAll(/\.([a-z][a-z0-9-]*)/g)) {
-      const className = match[1];
-      if (className && !NOT_OURS.has(className)) declared.add(className);
-    }
-  }
 
   it("finds the classes it is supposed to check", () => {
     expect(declared.size).toBeGreaterThan(20);
@@ -526,6 +527,61 @@ describe("no dead classes in the shipped stylesheet", () => {
         `.${name} is allowlisted but no longer defined`
       ).toBe(true);
     }
+  });
+});
+
+describe("no undefined project classes in src", () => {
+  // The suite above only walks CSS -> source. The other direction was never
+  // checked, so deleting .display-hero from the stylesheet while the class
+  // was still printed on the home page h1 passed every gate: Tailwind
+  // preflight makes an unstyled h1 inherit body size and weight, and nothing
+  // failed. A project class name is one whose first segment matches a segment
+  // the stylesheet itself owns, which keeps Tailwind utilities out without a
+  // hand written prefix list.
+  const projectPrefixes = new Set(
+    [...declared].map((name) => name.split("-")[0])
+  );
+  // Strings that share a project prefix but are not class names.
+  const NOT_CLASSES = new Set(["content-type", "content-length"]);
+
+  const offenders = new Map<string, Set<string>>();
+  for (const { file, body } of sourceFiles) {
+    // Import specifiers are file paths, not class lists: "@/components/ui/page-header".
+    const withoutImports = body.replace(
+      /^\s*import[\s\S]*?from\s+"[^"]*";$/gm,
+      ""
+    );
+    for (const literal of withoutImports.matchAll(
+      /"([^"\n]*)"|`([^`]*)`|'([^'\n]*)'/g
+    )) {
+      const text = literal[1] ?? literal[2] ?? literal[3] ?? "";
+      for (const token of text.matchAll(
+        /(?<![\w-])[a-z][a-z0-9]*(?:-[a-z0-9]+)+(?![\w-])/g
+      )) {
+        const name = token[0];
+        const prefix = name.split("-")[0];
+        if (!prefix || !projectPrefixes.has(prefix)) continue;
+        if (declared.has(name) || NOT_CLASSES.has(name)) continue;
+        const files = offenders.get(name) ?? new Set<string>();
+        files.add(file);
+        offenders.set(name, files);
+      }
+    }
+  }
+
+  it("scans the classes it is supposed to check", () => {
+    expect(projectPrefixes.has("display")).toBe(true);
+    expect(sourceFiles.length).toBeGreaterThan(20);
+  });
+
+  it("defines every project class a component prints", () => {
+    const report = [...offenders]
+      .sort()
+      .map(([name, files]) => `.${name} (${[...files].sort().join(", ")})`);
+    expect(
+      report,
+      "these class names reach the markup but globals.css defines no rule for them"
+    ).toEqual([]);
   });
 });
 

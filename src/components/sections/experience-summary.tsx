@@ -35,7 +35,7 @@ export async function ExperienceSummary({ locale }: ExperienceSummaryProps) {
         }
       />
       <ul className="content-stack">
-        <li className="content-entry list-row">
+        <li className="content-entry">
           <ContentEntryIndex index={0} />
           <ContentEntryBody className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
