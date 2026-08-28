@@ -159,8 +159,10 @@ describe("page openGraph metadata", () => {
   );
 
   it.each(CASES)(
-    "$page.name in $locale repeats its own title and description in og",
+    "$page.name in $locale carries its own title, branded, and its description in og",
     async ({ locale, page }) => {
+      const messages = (await import(`../../messages/${locale}.json`)).default;
+      const siteName = messages.metadata.siteName as string;
       const metadata = await metadataFor(page, locale);
       const openGraph = metadata.openGraph as {
         title: string;
@@ -170,11 +172,40 @@ describe("page openGraph metadata", () => {
         alternateLocale: string[];
       };
 
-      expect(openGraph.title).toBe(pageTitle(metadata));
+      // The document title picks up the brand from the layout's title
+      // template. openGraph has no template, so a share card would have shown
+      // a bare "About" unless the same suffix is applied here. The home page
+      // is the exception: its title is already the full brand line.
+      const title = pageTitle(metadata);
+      const branded = title.includes(siteName)
+        ? title
+        : `${title} | ${siteName}`;
+
+      expect(openGraph.title).toBe(branded);
+      expect(openGraph.title).toContain(siteName);
       expect(openGraph.description).toBe(metadata.description);
-      expect(openGraph.siteName).toBeTruthy();
+      expect(openGraph.siteName).toBe(siteName);
       expect(openGraph.locale).toBe(locale === "tr" ? "tr_TR" : "en_US");
       expect(openGraph.alternateLocale).not.toContain(openGraph.locale);
+    }
+  );
+
+  it.each([...routing.locales])(
+    "%s default title says what he does, not only who he is",
+    async (locale) => {
+      const messages = (await import(`../../messages/${locale}.json`)).default;
+      const defaultTitle = messages.metadata.defaultTitle as string;
+      const siteName = messages.metadata.siteName as string;
+
+      // The branded check above is satisfied by the name alone, which is what
+      // the home title used to be: a search result that named a person and
+      // said nothing about the work. The title has to carry the name and a
+      // role signal on top of it, and still fit in what a result page shows.
+      expect(defaultTitle).toContain(siteName);
+      expect(defaultTitle.length).toBeGreaterThan(siteName.length + 10);
+      expect(defaultTitle.length).toBeLessThan(70);
+      expect(defaultTitle).toMatch(/Developer|Geliştirici/);
+      expect(defaultTitle).toMatch(/DevOps/);
     }
   );
 

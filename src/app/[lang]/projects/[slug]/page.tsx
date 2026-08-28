@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { MDXContent } from "@/components/content/mdx-content";
@@ -11,17 +10,17 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
 import { Button } from "@/components/ui/button";
 import { GithubIcon } from "@/components/ui/brand-icon";
+import { SkillTag } from "@/components/ui/skill-tag";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { getProject, getProjectLocales, getProjectSlugs } from "@/lib/content";
 import {
-  getProject,
-  getProjectLocales,
-  getProjectSlugs,
-  type Locale,
-} from "@/lib/content";
-import { absoluteUrl } from "@/lib/seo/alternates";
+  buildBreadcrumbList,
+  buildProjectCreativeWork,
+} from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import { resolveLocaleAndSlug } from "@/lib/route-params";
 
 interface ProjectPageProps {
   params: Promise<{ lang: string; slug: string }>;
@@ -29,55 +28,49 @@ interface ProjectPageProps {
 
 export function generateStaticParams() {
   return routing.locales.flatMap((lang) =>
-    getProjectSlugs(lang as Locale).map((slug) => ({ lang, slug }))
+    getProjectSlugs(lang).map((slug) => ({ lang, slug }))
   );
 }
 
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
-  const { lang, slug } = await params;
-  if (!hasLocale(routing.locales, lang)) notFound();
+  const { locale, slug } = await resolveLocaleAndSlug(params);
 
-  const project = getProject(lang, slug);
+  const project = getProject(locale, slug);
   if (!project) notFound();
 
-  return buildPageMetadata(lang, `/projects/${slug}`, {
+  return buildPageMetadata(locale, `/projects/${slug}`, {
     title: project.title,
     description: project.summary,
     availableLocales: getProjectLocales(slug),
     type: "article",
+    ...(project.updated ? { modifiedTime: project.updated } : {}),
+    authors: [siteConfig.person.name],
+    tags: project.stack,
   });
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { lang, slug } = await params;
-  setRequestLocale(lang);
+  const { locale, slug } = await resolveLocaleAndSlug(params);
+  setRequestLocale(locale);
 
-  const project = getProject(lang as Locale, slug);
+  const project = getProject(locale, slug);
   if (!project) notFound();
 
-  const t = await getTranslations({ locale: lang, namespace: "projects" });
+  const t = await getTranslations({ locale, namespace: "projects" });
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "CreativeWork",
-    name: project.title,
-    abstract: project.summary,
-    inLanguage: lang,
-    dateCreated: String(project.year),
-    keywords: project.stack.join(", "),
-    url: absoluteUrl(lang as Locale, `/projects/${slug}`),
-    creator: {
-      "@type": "Person",
-      name: siteConfig.person.name,
-      url: absoluteUrl("en", "/"),
-    },
-  };
+  const structuredData = buildProjectCreativeWork(locale, project);
+
+  const breadcrumb = buildBreadcrumbList(locale, [
+    { name: t("title"), path: "/projects" },
+    { name: project.title, path: `/projects/${slug}` },
+  ]);
 
   return (
     <PageSection as="article">
       <JsonLd data={structuredData} />
+      <JsonLd data={breadcrumb} />
       <Link
         href="/projects"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -98,8 +91,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </div>
         <div className="space-y-1">
           <dt className="meta-label">{t("stack")}</dt>
-          <dd className="text-sm text-foreground">
-            {project.stack.join(" · ")}
+          <dd>
+            <ul className="flex flex-wrap gap-1.5">
+              {project.stack.map((item) => (
+                <li key={item}>
+                  <SkillTag label={item} />
+                </li>
+              ))}
+            </ul>
           </dd>
         </div>
         <div className="space-y-1">
@@ -144,7 +143,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       {project.cover ? (
         <Image
           src={project.cover.src}
-          alt={project.title}
+          // An empty alt marks the cover as decorative, which is what it is
+          // when the frontmatter says nothing about it: repeating the title
+          // that the h1 above already carries only makes a screen reader say
+          // the same words twice.
+          alt={project.coverAlt ?? ""}
           width={project.cover.width}
           height={project.cover.height}
           placeholder="blur"

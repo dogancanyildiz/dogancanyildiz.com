@@ -18,24 +18,42 @@ export async function buildPageMetadata(
     availableLocales: Locale[];
     type?: "website" | "article";
     publishedTime?: string;
+    modifiedTime?: string;
+    authors?: string[];
+    tags?: string[];
+    /**
+     * The title is already complete and must not be suffixed. Used by the
+     * home page, whose title carries the name and the role and would read
+     * "Doğan Can Yıldız | ... | Doğan Can Yıldız" under the template.
+     */
     absoluteTitle?: boolean;
   }
 ): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "metadata" });
-  const siteName = t("defaultTitle");
+  const siteName = t("siteName");
   const imageAlt = t("ogAlt");
+
+  // The document <title> gets the brand from the layout's title template, but
+  // openGraph has no template: a raw "About" is what a share card would show.
+  // Applying the same suffix here keeps the two in step.
+  const openGraphTitle = options.absoluteTitle
+    ? options.title
+    : `${options.title} | ${siteName}`;
 
   return {
     title: options.absoluteTitle ? { absolute: options.title } : options.title,
     description: options.description,
     alternates: buildAlternates(locale, path, options.availableLocales),
     openGraph: buildOpenGraph(locale, path, {
-      title: options.title,
+      title: openGraphTitle,
       description: options.description,
       siteName,
       imageAlt,
       type: options.type,
       publishedTime: options.publishedTime,
+      modifiedTime: options.modifiedTime,
+      authors: options.authors,
+      tags: options.tags,
     }),
   };
 }

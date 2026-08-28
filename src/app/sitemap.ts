@@ -5,9 +5,8 @@ import {
   getPosts,
   getProjectLocales,
   getProjects,
-  type Locale,
 } from "@/lib/content";
-import { absoluteUrl } from "@/lib/seo/alternates";
+import { absoluteUrl, buildLanguageAlternates } from "@/lib/seo/alternates";
 
 const STATIC_PAGES: Array<{
   path: string;
@@ -21,30 +20,21 @@ const STATIC_PAGES: Array<{
   { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
 ];
 
-function languagesFor(
-  path: string,
-  locales: readonly Locale[]
-): Record<string, string> {
-  const languages: Record<string, string> = {};
-  for (const locale of locales) {
-    languages[locale] = absoluteUrl(locale, path);
-  }
-  const fallbackLocale: Locale = locales.includes("en")
-    ? "en"
-    : (locales[0] ?? routing.defaultLocale);
-  languages["x-default"] = absoluteUrl(fallbackLocale, path);
-  return languages;
-}
+// Same helper the page head uses, so the sitemap and the hreflang tags can
+// never advertise a different set of languages for the same path.
+const languagesFor = buildLanguageAlternates;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
   const entries: MetadataRoute.Sitemap = [];
 
+  // No lastModified on the static pages. It used to be the build timestamp,
+  // which told a crawler that all ten of them changed on every deploy, even a
+  // deploy that only bumped a dependency. An omitted lastmod is a fact; a
+  // wrong one costs trust in the whole file.
   for (const page of STATIC_PAGES) {
     for (const locale of routing.locales) {
       entries.push({
         url: absoluteUrl(locale, page.path),
-        lastModified: now,
         changeFrequency: page.changeFrequency,
         priority: page.priority,
         alternates: { languages: languagesFor(page.path, routing.locales) },
@@ -62,7 +52,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       // link that 404s.
       entries.push({
         url: absoluteUrl(locale, path),
-        lastModified: now,
+        // Content date, not build time. A project without an `updated` field
+        // in frontmatter has no known revision date, so it carries none.
+        ...(project.updated ? { lastModified: new Date(project.updated) } : {}),
         changeFrequency: "monthly",
         priority: 0.7,
         alternates: {
@@ -75,7 +67,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       const path = `/blog/${post.slug}`;
       entries.push({
         url: absoluteUrl(locale, path),
-        lastModified: new Date(post.date),
+        lastModified: new Date(post.updated ?? post.date),
         changeFrequency: "yearly",
         priority: 0.6,
         alternates: {

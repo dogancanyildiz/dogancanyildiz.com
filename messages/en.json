@@ -77,7 +77,9 @@
     "languages": "Turkish is my native language. I work in written English every day: documentation, repositories and the posts on this site.",
     "downloadCv": "Download CV",
     "testimonialsTitle": "References",
-    "subnavLabel": "On this page"
+    "subnavLabel": "On this page",
+    "profileImageAlt": "Doğan Can Yıldız, portrait photo",
+    "emptyList": "Nothing listed here yet."
   },
   "projects": {
     "title": "Projects",
@@ -88,7 +90,8 @@
     "outcome": "Outcome",
     "viewLive": "Live site",
     "viewSource": "Source",
-    "back": "All projects"
+    "back": "All projects",
+    "empty": "No projects published yet."
   },
   "blog": {
     "title": "Writing",
@@ -99,7 +102,7 @@
   },
   "contact": {
     "title": "Contact",
-    "description": "Open to interesting projects and conversations.",
+    "description": "Send a message about a project, a role or a question on self-hosted infrastructure. I read every message and reply within a few days.",
     "intro": "Open to interesting projects and conversations. The fastest way to reach me is email.",
     "ctaTitle": "Have a project in mind?",
     "ctaBody": "Tell me what you are building. I usually reply within two to three business days.",
@@ -139,8 +142,16 @@
     "description": "The page you are looking for does not exist or has moved to a new address.",
     "backHome": "Back to home"
   },
+  "errorPage": {
+    "title": "Something went wrong",
+    "description": "This page could not be loaded. Trying again often fixes it; if it does not, the error has been logged on the server.",
+    "retry": "Try again",
+    "backHome": "Back to home",
+    "digestLabel": "Error reference"
+  },
   "metadata": {
-    "defaultTitle": "Doğan Can Yıldız",
+    "defaultTitle": "Doğan Can Yıldız | Full-Stack Web Developer and DevOps Engineer",
+    "siteName": "Doğan Can Yıldız",
     "defaultDescription": "Full-stack developer building scalable web apps with Next.js and Node.js, shipping on self-hosted Docker infrastructure. CAPT certified. Konya, Türkiye.",
     "ogAlt": "Doğan Can Yıldız, Full-Stack Web Developer and DevOps Engineer"
   },

@@ -71,6 +71,8 @@ CLAUDE.md
 /public/static/
 tests/fixtures/.velite-valid/
 tests/fixtures/.velite-invalid/
+tests/fixtures/.velite-invalid-links/
+tests/fixtures/.velite-schema-fields/
 # velite compiles a config file into <config dir>/node_modules/, so the test
 # fixture configs under tests/fixtures leave this behind
 tests/fixtures/node_modules/

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { getPosts, type Locale } from "@/lib/content";
 import { absoluteUrl } from "@/lib/seo/alternates";
+import { escapeXml } from "@/lib/seo/xml";
 import { siteConfig } from "@/lib/site-config";
 
 export const dynamic = "force-static";
@@ -13,15 +14,6 @@ export const dynamicParams = false;
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
-}
-
-function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
 }
 
 export async function GET(

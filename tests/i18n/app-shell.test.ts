@@ -170,7 +170,10 @@ describe("app/[lang] route tree", () => {
     for (const route of LANG_ROUTES.filter(
       (item) => !item.endsWith("opengraph-image.tsx")
     )) {
-      expect(read(route), route).toContain("setRequestLocale(lang)");
+      // The pages resolve the segment through resolveLocale(params), which
+      // returns a narrowed Locale named `locale`; the layout still destructures
+      // `lang` straight from params. Either name is the same call.
+      expect(read(route), route).toMatch(/setRequestLocale\((lang|locale)\)/);
     }
   });
 

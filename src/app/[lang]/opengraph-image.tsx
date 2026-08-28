@@ -45,35 +45,48 @@ export async function generateImageMetadata({
   return [{ id: OG_IMAGE_ID, size, contentType, alt: t("ogAlt") }];
 }
 
-// satori cannot parse woff2, so these are the woff copies vendored under
-// public/, which the standalone build always ships. Two subsets are passed
-// because the latin file has no g-breve or dotted capital I. They are
-// registered under two different family names: satori keys its font map by
-// name + weight + style, so two entries sharing all three collapse into one
-// (the last one registered wins the tie break) and the other subset is never
-// consulted, silently dropping Turkish glyphs to the built in fallback face.
-// Giving the extended subset its own name and listing both names in the
-// fontFamily fallback chain makes satori try each font per character instead.
+// satori cannot parse woff2, and it cannot parse a variable font either: the
+// Geist subsets ship as a wght axis, and satori's glyf reader walks a static
+// outline table, so a variable face throws and the whole route answers 500.
+// scripts/vendor-fonts.mjs therefore pins the axis with fontTools and writes
+// static ttf instances under public/fonts/og, which the standalone build
+// always ships.
+//
+// Two subsets are passed because the latin file has no g-breve or dotted
+// capital I. They are registered under two different family names: satori keys
+// its font map by name + weight + style, so two entries sharing all three
+// collapse into one (the last one registered wins the tie break) and the other
+// subset is never consulted, silently dropping Turkish glyphs to the built in
+// fallback face. Giving the extended subset its own name and listing both
+// names in the fontFamily fallback chain makes satori try each font per
+// character instead. Both weights the card uses (400 body, 600 headline) are
+// registered for both names, because satori matches a face by exact weight
+// rather than synthesising one.
+const OG_FONT_FILES = [
+  { name: "Geist Sans", file: "geist-latin-400.ttf", weight: 400 as const },
+  { name: "Geist Sans", file: "geist-latin-600.ttf", weight: 600 as const },
+  {
+    name: "Geist Sans Ext",
+    file: "geist-latin-ext-400.ttf",
+    weight: 400 as const,
+  },
+  {
+    name: "Geist Sans Ext",
+    file: "geist-latin-ext-600.ttf",
+    weight: 600 as const,
+  },
+];
+
 async function loadSansFonts() {
   const base = join(process.cwd(), "public", "fonts", "og");
-  const [latin, latinExt] = await Promise.all([
-    readFile(join(base, "geist-latin.woff")),
-    readFile(join(base, "geist-latin-ext.woff")),
-  ]);
-  return [
-    {
-      name: "Geist Sans",
-      data: latin,
-      weight: 600 as const,
+  return Promise.all(
+    OG_FONT_FILES.map(async ({ name, file, weight }) => ({
+      name,
+      data: await readFile(join(base, file)),
+      weight,
       style: "normal" as const,
-    },
-    {
-      name: "Geist Sans Ext",
-      data: latinExt,
-      weight: 600 as const,
-      style: "normal" as const,
-    },
-  ];
+    }))
+  );
 }
 
 export default async function OGImage({

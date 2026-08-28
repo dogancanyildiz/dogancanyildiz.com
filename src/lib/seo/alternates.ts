@@ -54,8 +54,16 @@ export function buildOpenGraph(
     imageAlt: string;
     type?: "website" | "article";
     publishedTime?: string;
+    modifiedTime?: string;
+    authors?: string[];
+    tags?: string[];
   }
 ): NonNullable<Metadata["openGraph"]> {
+  // article:author, article:modified_time and article:tag only mean anything
+  // on an article, and Next emits whatever it is handed, so an article-only
+  // field on a website object would produce a meta tag no consumer reads.
+  const isArticle = content.type === "article";
+
   return {
     type: content.type ?? "website",
     siteName: content.siteName,
@@ -66,7 +74,16 @@ export function buildOpenGraph(
     alternateLocale: routing.locales
       .filter((candidate) => candidate !== locale)
       .map((candidate) => OG_LOCALES[candidate]),
-    ...(content.publishedTime ? { publishedTime: content.publishedTime } : {}),
+    ...(isArticle && content.publishedTime
+      ? { publishedTime: content.publishedTime }
+      : {}),
+    ...(isArticle && content.modifiedTime
+      ? { modifiedTime: content.modifiedTime }
+      : {}),
+    ...(isArticle && content.authors?.length
+      ? { authors: content.authors }
+      : {}),
+    ...(isArticle && content.tags?.length ? { tags: content.tags } : {}),
     // Named explicitly because the openGraph object replaces the inherited
     // one, image included. See src/lib/seo/og-image.ts.
     images: [
@@ -79,6 +96,35 @@ export function buildOpenGraph(
       },
     ],
   };
+}
+
+/**
+ * hreflang map for one path: every locale that actually has the content, plus
+ * x-default.
+ *
+ * Locales without a translation are left out completely, which is the part
+ * that matters: advertising a hreflang link to a page that 404s is worse than
+ * advertising none. x-default prefers english, then falls back to whichever
+ * locale is available.
+ *
+ * Shared with src/app/sitemap.ts, which has to publish the same set: the
+ * sitemap and the page head disagreeing about which languages exist is a
+ * conflict a crawler resolves by trusting neither.
+ */
+export function buildLanguageAlternates(
+  path: string,
+  availableLocales: readonly Locale[],
+  currentLocale?: Locale
+): Record<string, string> {
+  const languages: Record<string, string> = {};
+  for (const locale of availableLocales) {
+    languages[locale] = absoluteUrl(locale, path);
+  }
+  const fallbackLocale: Locale = availableLocales.includes("en")
+    ? "en"
+    : (availableLocales[0] ?? currentLocale ?? routing.defaultLocale);
+  languages["x-default"] = absoluteUrl(fallbackLocale, path);
+  return languages;
 }
 
 /**
@@ -97,18 +143,9 @@ export function buildAlternates(
   languages: Record<string, string>;
   types: { "application/rss+xml": { url: string; title: string }[] };
 } {
-  const languages: Record<string, string> = {};
-  for (const locale of availableLocales) {
-    languages[locale] = absoluteUrl(locale, path);
-  }
-  const fallbackLocale: Locale = availableLocales.includes("en")
-    ? "en"
-    : (availableLocales[0] ?? currentLocale);
-  languages["x-default"] = absoluteUrl(fallbackLocale, path);
-
   return {
     canonical: absoluteUrl(currentLocale, path),
-    languages,
+    languages: buildLanguageAlternates(path, availableLocales, currentLocale),
     // Next replaces a child segment's alternates wholesale, so a types entry
     // declared only on the layout never reaches pages that set their own
     // alternates. Returning it here means every page that calls

@@ -91,7 +91,10 @@ export async function generateMetadata({
     metadataBase: new URL(siteUrl()),
     title: {
       default: t("defaultTitle"),
-      template: `%s | ${t("defaultTitle")}`,
+      // The suffix is the bare name, not defaultTitle: defaultTitle carries
+      // the role as well, and a subpage title under that template would run
+      // past what a search result shows.
+      template: `%s | ${t("siteName")}`,
     },
     description: t("defaultDescription"),
     // Only the home page keeps this object. Every other segment overrides it
@@ -99,7 +102,7 @@ export async function generateMetadata({
     openGraph: buildOpenGraph(lang, "/", {
       title: t("defaultTitle"),
       description: t("defaultDescription"),
-      siteName: t("defaultTitle"),
+      siteName: t("siteName"),
       imageAlt: t("ogAlt"),
     }),
   };
