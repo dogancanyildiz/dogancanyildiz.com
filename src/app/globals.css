@@ -356,14 +356,21 @@
   .prose-content h3 {
     @apply mt-8 text-xl leading-snug text-foreground;
   }
+  .prose-content h4 {
+    @apply mt-6 text-lg leading-snug text-foreground;
+  }
   .prose-content a {
     @apply text-primary underline underline-offset-4;
   }
   /* rehype-autolink-headings wraps every heading in an anchor; keep those
      looking like headings, not like inline links. */
   .prose-content h2 > a,
-  .prose-content h3 > a {
+  .prose-content h3 > a,
+  .prose-content h4 > a {
     @apply text-foreground no-underline;
+  }
+  .prose-content strong {
+    @apply font-semibold text-foreground;
   }
   .prose-content ul {
     @apply list-disc space-y-2 pl-6;
@@ -371,11 +378,40 @@
   .prose-content ol {
     @apply list-decimal space-y-2 pl-6;
   }
+  .prose-content blockquote {
+    @apply border-l-2 border-border-strong pl-4 italic text-foreground/90;
+    font-family: var(--font-display-stack);
+  }
+  .prose-content hr {
+    @apply my-8 border-0 border-t border-border;
+  }
+  .prose-content kbd {
+    @apply rounded border border-border-strong px-1.5 py-0.5 font-mono text-[0.8em] text-foreground;
+  }
   .prose-content pre {
     @apply overflow-x-auto rounded-[1.25rem] border border-border p-4 font-mono text-sm;
   }
   .prose-content :not(pre) > code {
     @apply rounded border border-border px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+  /* A bare table stays inside the reading measure and wraps, so it never
+     overflows a 375px viewport on its own. Wrapped in .table-wrap it gets the
+     comfortable minimum width and scrolls inside the wrapper instead. */
+  .prose-content table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+  .prose-content th,
+  .prose-content td {
+    @apply border-b border-border px-3 py-2 align-top;
+  }
+  .prose-content th {
+    @apply font-mono text-[0.75rem] font-medium uppercase tracking-[0.1em] text-muted-foreground;
+  }
+  .table-wrap {
+    @apply w-full max-w-full overflow-x-auto;
+  }
+  .prose-content .table-wrap > table {
+    @apply min-w-[34rem];
   }
   /* Shiki's dual theme output (themes: { light, dark }, defaultColor: false)
      only writes the --shiki-* custom properties inline; it leaves picking a
