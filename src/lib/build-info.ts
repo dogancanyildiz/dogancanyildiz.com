@@ -4,13 +4,14 @@ function resolveBuildYear(buildDate: string): string {
 
   // No NEXT_PUBLIC_BUILD_DATE (local dev, or a build that skipped the CI arg
   // / Coolify Build Variable): return an empty year instead of computing one.
-  // This module ships in the client bundle (imported by the "use client"
-  // footer), so `new Date().getFullYear()` here is NOT a build-time constant:
-  // it would run again during hydration, in the visitor's browser, at
-  // whatever moment they load the page. Right after a build that is usually
-  // the same year as the prerendered HTML, but the static pages stay served
-  // as-is until the next deploy, so any visit after the calendar year turns
-  // over reintroduces the exact hydration mismatch this was meant to avoid.
+  // `new Date().getFullYear()` here would not be a build-time constant, it
+  // would be "the year wherever this module happens to run". Both consumers
+  // are server components today (footer.tsx, systems.tsx), so that is the
+  // build machine's clock for a prerendered page and the request clock for a
+  // dynamic one; move either behind a "use client" boundary and it becomes
+  // the visitor's clock during hydration, which is a mismatch against the
+  // prerendered HTML from the first new year onward. The value the footer
+  // prints has to come from the build or not at all.
   // Footer.tsx renders the copyright line without a year when this is "".
   return "";
 }

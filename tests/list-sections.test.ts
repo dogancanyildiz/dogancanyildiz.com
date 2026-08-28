@@ -24,6 +24,20 @@ describe("project card badge links", () => {
     const source = read(PROJECT_LIST);
     expect(source.match(/className=\{BADGE_LINK_CLASS\}/g)).toHaveLength(2);
   });
+
+  it("keeps the badges above the stretched card link", () => {
+    // The title link covers the whole row with after:absolute after:inset-0.
+    // Statically positioned siblings paint and hit-test under that layer, so
+    // the badge row has to open its own stacking context or the 24px target
+    // this suite guards belongs to a link nobody can click.
+    const source = read(PROJECT_LIST);
+    const badgeRow = /<div className="([^"]*)"[^>]*>\s*\{project\.liveUrl/.exec(
+      source
+    );
+    expect(badgeRow, "badge row wrapper is missing").not.toBeNull();
+    expect(badgeRow?.[1]).toContain("relative");
+    expect(badgeRow?.[1]).toContain("z-10");
+  });
 });
 
 describe("list row classes", () => {
