@@ -10,9 +10,22 @@ import localFont from "next/font/local";
 // here, so the two ranges are repeated per call instead of factored out.
 
 // Each subset is its own localFont() call because next/font/local accepts
-// unicode-range only per font loader, never per src entry. adjustFontFallback is
-// off everywhere: an auto generated Arial fallback face has no unicode-range and
-// would swallow the Turkish glyphs before the latin-ext face is reached.
+// unicode-range only per font loader, never per src entry.
+//
+// adjustFontFallback (next/font/local takes 'Arial', 'Times New Roman' or
+// false) generates a size-adjusted local() face and appends it to that loader's
+// own font-family list. The generated face carries no unicode-range, so on a
+// latin face it would sit in front of the latin-ext face and swallow the
+// Turkish glyphs. It is therefore off on every latin face and on only for
+// geistSansExt, the last web face in --font-sans-stack: from there the adjusted
+// fallback covers the whole sans stack while it loads (both subsets are the
+// same typeface, so the metrics match) without shadowing anything.
+//
+// Preloads are deliberately narrow. Every locale renders body copy in Geist
+// Sans and Turkish puts latin-ext glyphs on the first screen, so both sans
+// subsets are preloaded. Geist Mono only dresses small secondary labels and
+// Instrument Serif renders nothing above the fold in either locale, so their
+// extra faces are discovered from the stylesheet instead.
 export const geistSans = localFont({
   src: "./geist-latin.woff2",
   weight: "100 900",
@@ -36,8 +49,8 @@ export const geistSansExt = localFont({
   style: "normal",
   display: "swap",
   variable: "--font-sans-ext",
-  preload: false,
-  adjustFontFallback: false,
+  preload: true,
+  adjustFontFallback: "Arial",
   declarations: [
     {
       prop: "unicode-range",
@@ -87,7 +100,7 @@ export const instrumentSerif = localFont({
   style: "normal",
   display: "swap",
   variable: "--font-display-latin",
-  preload: true,
+  preload: false,
   adjustFontFallback: false,
   declarations: [
     {
