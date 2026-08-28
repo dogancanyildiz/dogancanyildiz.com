@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Github } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactCta } from "@/components/sections/contact-cta";
@@ -9,6 +9,7 @@ import { MDXContent } from "@/components/content/mdx-content";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
 import { Button } from "@/components/ui/button";
+import { GithubIcon } from "@/components/ui/brand-icon";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import {
@@ -77,87 +78,87 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     <PageSection as="article">
       <JsonLd data={structuredData} />
       <Link
-          href="/projects"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          {t("back")}
-        </Link>
+        href="/projects"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        {t("back")}
+      </Link>
 
-        <header className="space-y-4">
-          <h1 className="page-title">{project.title}</h1>
-          <p className="section-copy">{project.summary}</p>
-        </header>
+      <header className="space-y-4">
+        <h1 className="page-title">{project.title}</h1>
+        <p className="section-copy">{project.summary}</p>
+      </header>
 
-        <dl className="grid gap-x-8 gap-y-4 border-y border-border py-5 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-1">
-            <dt className="meta-label">{t("role")}</dt>
-            <dd className="text-sm text-foreground">{project.role}</dd>
-          </div>
-          <div className="space-y-1">
-            <dt className="meta-label">{t("stack")}</dt>
-            <dd className="text-sm text-foreground">
-              {project.stack.join(" · ")}
-            </dd>
-          </div>
-          <div className="space-y-1">
-            <dt className="meta-label">{t("year")}</dt>
-            <dd className="text-sm text-foreground">{project.year}</dd>
-          </div>
-          <div className="space-y-1">
-            <dt className="meta-label">{t("outcome")}</dt>
-            <dd className="text-sm text-foreground">{project.outcome}</dd>
-          </div>
-        </dl>
-
-        {project.links.live || project.links.repo ? (
-          <div className="flex flex-wrap gap-3">
-            {project.links.live ? (
-              <Button asChild size="sm">
-                <a
-                  href={project.links.live}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <ExternalLink className="size-4" />
-                  {t("viewLive")}
-                </a>
-              </Button>
-            ) : null}
-            {project.links.repo ? (
-              <Button asChild variant="outline" size="sm">
-                <a
-                  href={project.links.repo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Github className="size-4" />
-                  {t("viewSource")}
-                </a>
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
-
-        {project.cover ? (
-          <Image
-            src={project.cover.src}
-            alt={project.title}
-            width={project.cover.width}
-            height={project.cover.height}
-            placeholder="blur"
-            blurDataURL={project.cover.blurDataURL}
-            sizes="(min-width: 1024px) 72rem, 100vw"
-            className="w-full rounded-lg object-cover"
-            priority
-          />
-        ) : null}
-
-        <div className="prose-content">
-          <MDXContent code={project.code} />
+      <dl className="grid gap-x-8 gap-y-4 border-y border-border py-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="space-y-1">
+          <dt className="meta-label">{t("role")}</dt>
+          <dd className="text-sm text-foreground">{project.role}</dd>
         </div>
+        <div className="space-y-1">
+          <dt className="meta-label">{t("stack")}</dt>
+          <dd className="text-sm text-foreground">
+            {project.stack.join(" · ")}
+          </dd>
+        </div>
+        <div className="space-y-1">
+          <dt className="meta-label">{t("year")}</dt>
+          <dd className="text-sm text-foreground">{project.year}</dd>
+        </div>
+        <div className="space-y-1">
+          <dt className="meta-label">{t("outcome")}</dt>
+          <dd className="text-sm text-foreground">{project.outcome}</dd>
+        </div>
+      </dl>
 
-        <ContactCta />
+      {project.links.live || project.links.repo ? (
+        <div className="flex flex-wrap gap-3">
+          {project.links.live ? (
+            <Button asChild size="sm">
+              <a
+                href={project.links.live}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="size-4" />
+                {t("viewLive")}
+              </a>
+            </Button>
+          ) : null}
+          {project.links.repo ? (
+            <Button asChild variant="outline" size="sm">
+              <a
+                href={project.links.repo}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <GithubIcon className="size-4" />
+                {t("viewSource")}
+              </a>
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {project.cover ? (
+        <Image
+          src={project.cover.src}
+          alt={project.title}
+          width={project.cover.width}
+          height={project.cover.height}
+          placeholder="blur"
+          blurDataURL={project.cover.blurDataURL}
+          sizes="(min-width: 1024px) 72rem, 100vw"
+          className="w-full rounded-lg object-cover"
+          priority
+        />
+      ) : null}
+
+      <div className="prose-content">
+        <MDXContent code={project.code} />
+      </div>
+
+      <ContactCta />
     </PageSection>
   );
 }
