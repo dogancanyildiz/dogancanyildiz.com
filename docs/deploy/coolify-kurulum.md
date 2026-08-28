@@ -78,10 +78,10 @@ Beklenen:
 
 ```
 healthy
-200 {"status":"ok","uptime":<saniye>,"timestamp":"2026-..."}
+200 {"status":"ok","checks":{"content":true,"mail":true},"timestamp":"2026-..."}
 ```
 
-Sözleşme yalnızca HTTP `200` ve gövdedeki `status` alanının `ok` olmasıdır. `uptime` ve `timestamp` her çağrıda değişir (`src/app/api/health/route.ts`), gövdenin birebir eşleşmesi beklenmez; Coolify health check'i de yalnızca status koduna bakar.
+Sözleşme yalnızca HTTP `200` ve gövdedeki `status` alanının `ok` olmasıdır. `timestamp` her çağrıda değişir, `checks.mail` üç Resend değişkeni eksikse `false` olur ve `status` `degraded`e düşer (HTTP yine 200; `src/app/api/health/route.ts`, 2026-08-28), gövdenin birebir eşleşmesi beklenmez; Coolify health check'i yalnızca status koduna bakar, Gatus ise `[BODY].status == ok` koşuluyla `degraded` durumunu alarm olarak görür.
 
 `unhealthy` görülürse rolling update yeni deploy'ları geri alır. O durumda Coolify UI'da health check geçici olarak kapatılır, sorun `#7500` referansıyla not edilir ve production'a health check bağlı halde geçilmez.
 
@@ -102,4 +102,4 @@ Dördü birden sağlanmalı:
 
 ## 9. GitHub branch protection
 
-- [ ] GitHub -> Settings -> Branches -> `main` için "Require status checks to pass": `lint, typecheck, test, build` ve `hadolint and image build` işaretlenir. Bu iki check `.github/workflows/ci.yml` içindeki `checks` ve `docker` job'larının görünen adlarıdır.
+- [ ] GitHub -> Settings -> Branches -> `main` için "Require status checks to pass": `Quality checks`, `Docker image` ve `CodeQL analysis` işaretlenir (adlar 2026-08-28'de böyle; `.github/workflows/ci.yml` ve `codeql.yml` job adları). `enforce_admins` da açılmalı, aksi halde bir admin CI'ı bypass edip doğrudan push edebilir.

@@ -158,9 +158,10 @@ function checkDeployDocs() {
     );
   }
 
-  // src/app/api/health/route.ts answers with status, uptime and timestamp. A
-  // checklist that prints the body as a literal makes a healthy deploy look
-  // broken at the gate that blocks going to production.
+  // src/app/api/health/route.ts answers with status, checks and timestamp
+  // (uptime left the body on 2026-08-28). A checklist that prints the body as
+  // a literal makes a healthy deploy look broken at the gate that blocks
+  // going to production.
   for (const path of [COOLIFY, FAZ1_HANDOFF]) {
     check(
       !/200 `?\{"status":"ok"\}`?/.test(readDoc(path)),
@@ -169,10 +170,14 @@ function checkDeployDocs() {
   }
   {
     const doc = readDoc(COOLIFY);
-    check(/uptime/.test(doc), `${COOLIFY} does not name uptime as a field`);
+    check(/checks/.test(doc), `${COOLIFY} does not name checks as a field`);
     check(
       /timestamp/.test(doc),
       `${COOLIFY} does not name timestamp as a field`
+    );
+    check(
+      !/"uptime"/.test(doc),
+      `${COOLIFY} still documents the retired uptime field`
     );
   }
 

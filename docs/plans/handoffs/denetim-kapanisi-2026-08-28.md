@@ -18,11 +18,11 @@ Bu not bir faz devir notu değil; fazlar arası çapraz kesen bir kapanış turu
 |---|---|---|---|
 | contact | opus | F-017, F-023, F-041, F-042, F-043, F-044, F-058, F-059, F-060, F-066, F-083, F-107, F-108, F-120, F-122, F-123, F-131, F-147, F-148, F-153, E-03, N-06, N-10 | API sözleşmesi: yalnızca `name`, `email`, `message`, `extra_field`; `subject` yok; locale `X-Locale` başlığında; `Content-Type` 415, `Origin` 403, Resend 10 sn 504; `Reply-To`, idempotency anahtarı; `unknown` için ayrı 30/10 dk kova; JSON log + `X-Request-Id`; üçüncü taraf hata takibi yok (karar); health `{ status, checks, timestamp }`; `instrumentation.ts`. İmzalı render damgası yapılmadı (contact sayfası statik). 37 route testi. |
 | layout-a11y | sonnet | F-039 (kısmen), F-051, F-052, F-053, F-054, F-056, F-057, F-061, F-100, F-101, F-113, F-114, F-115, F-116, F-117, F-119, F-126, F-128, F-150, E-07 | Footer server component, `/api/health` linki kaldırıldı; `about-subnav-list.tsx` (IntersectionObserver); `CLIENT_MESSAGE_NAMESPACES` listesi; tema düğmesi mevcut temanın ikonu + `aria-pressed`; `viewport.themeColor` (elle çevrilmiş hex, token değişirse güncellenmeli); DisplayHeading/SectionLabel/ölü export'lar silindi. |
-| perf-motion | opus | F-019, F-020, F-032, F-055 (yarısı), F-062, F-064, F-065, F-124, F-125, F-129, N-23 | Hero, yetkinlik şeridi, proje ve yazı listeleri sunucu bileşeni, giriş animasyonu yok (görsel karar sahibinde); simple-icons istemciden çıktı; LazyMotion dinamik import; Instrument Serif preload kapalı; latin-ext preload; `adjustFontFallback` yalnızca son web yüzünde (mono `false`, Next Arial/Times dışını kabul etmiyor); `prefetch={false}`. F-063 (`<symbol>`) yapılmadı. |
+| perf-motion | opus | F-019, F-020, F-032, F-055, F-062, F-064, F-065, F-124, F-125, F-129, N-23 | Hero, yetkinlik şeridi, proje ve yazı listeleri sunucu bileşeni, giriş animasyonu yok (görsel karar sahibinde); simple-icons istemciden çıktı; LazyMotion dinamik import; Instrument Serif preload kapalı; latin-ext preload; `adjustFontFallback` yalnızca son web yüzünde (mono `false`, Next Arial/Times dışını kabul etmiyor); `prefetch={false}`. F-063 (`<symbol>`) yapılmadı. |
 | css-tokens | opus | F-018, F-021, F-045, F-046, F-047, F-109, F-110, F-149, F-151 | `--border-strong` / `--input-border` sözleşmesi, 3:1 kontrast testi; katman düzeni düzeltildi (`.tag-pill` override'ları artık çalışıyor, pill'ler normal yazım); ölü sınıf/token testi; prose blockquote/table/hr/h4/kbd; forced-colors; `tw-animate-css` ve `shadcn/tailwind.css` import'ları kaldırıldı. |
 | security-config | opus | F-011, F-030, F-031, F-084, F-085, F-086, F-087, F-088 (yarısı), F-090, F-033, F-139 (profile), E-10, N-11, N-14, N-25 | HSTS geçici olarak uygulamada (`preload` yok); CSP `unsafe-inline` kalır, `report-uri /api/csp-report` + `Reporting-Endpoints`, `CSP_REPORT_ONLY=1` ölçüm penceresi; XFO/COOP/CORP, geniş Permissions-Policy; `/cv` noindex + 1 gün cache, `/fonts` 1 gün (immutable yok); velite devDependencies, shiki kaldırıldı, `predev`; `npm audit --omit=dev` 0; Umami origin tek sabit (`src/lib/analytics.ts`), `data-domains`; proxy `/:path*`. |
 | pages-seo | opus | F-004, F-036, F-037, F-038, F-040, F-050, F-067, F-069, F-072, F-080, F-082, F-094, F-095, F-096, F-097, F-098, F-099, F-103, F-104, F-105, F-112, F-127, F-132, F-136, F-139 (velite), F-152, F-157; F-154, F-155 kabul | OG 500 kapandı (fontTools ile Geist 400/600 statik TTF, PNG imza testi); `defaultTitle` + `siteName`; `#person`/`#website` kimlikleri, WebSite ve BreadcrumbList, BlogPosting image/publisher/dateModified; sitemap statik sayfalarda lastmod yok; `updated`/`coverAlt`/projects `draft`/`https://` şema alanları; `error.tsx` (Next 16.3 `retry`) ve `global-error.tsx`; `getHomeProjects` (featured, yoksa ilk 3), boş durumlar; `resolveLocale`; ProjectMeta/Screenshot kaldırıldı; RSS/sitemap/draft/tek dilli fixture testleri. |
-| tests-ci | sonnet | F-005, F-016, F-024, F-025, F-027, F-035, F-070, F-073, F-074, F-075, F-076, F-077, F-092, F-093, F-133, F-135, F-137, F-140, F-142, N-03, N-07; F-012/F-026 | Action'lar SHA pinli, dependency review, prod audit adımı (`continue-on-error`, prod 0 olduğu için kaldırılabilir), format ve `verify:docs` adımları, coverage eşikleri, docker smoke (imaj çalıştırılıp health dışarıdan curl), Buildx gha cache, digest pinli base, npm cache mount, `timeout-minutes`, `links.yml` haftalık, `release.yml` `workflow_run`, `release:check` semver max tag, Dependabot `infra/`. `npm ci --ignore-scripts` denendi, esbuild/sharp yüzünden vazgeçildi. |
+| tests-ci | sonnet | F-005, F-016, F-024, F-025, F-027, F-035, F-070, F-073, F-074, F-075, F-076, F-077, F-092, F-093, F-133, F-135, F-137, F-140, F-142, N-03, N-07; F-012/F-026 | Action'lar SHA pinli, dependency review, prod audit adımı (`npm audit --omit=dev --audit-level=high`, gerçek kapı; prod grafiği 0), format ve `verify:docs` adımları, coverage eşikleri, docker smoke (imaj çalıştırılıp health dışarıdan curl), Buildx gha cache, digest pinli base, npm cache mount, `timeout-minutes`, `links.yml` haftalık, `release.yml` `workflow_run`, `release:check` semver max tag, Dependabot `infra/`. `npm ci --ignore-scripts` denendi, esbuild/sharp yüzünden vazgeçildi. |
 | status-infra | sonnet | N-01, N-02, N-05, N-08, N-09, N-12, N-13, N-15, N-16, N-17, N-21, N-22, N-24 | Gatus fetch 3 sn timeout + `allSettled` + JSON uyarı + timestamp doğrulama; Systems tek PageSection, kontrast testi (oklch hesabı), `timeZoneName: "short"`; `buildInfo.year` yalnızca `NEXT_PUBLIC_BUILD_DATE`'ten (istemci `new Date()` fallback'i hidrasyon uyuşmazlığı üretiyordu, kaldırıldı; footer tarih yoksa yıl basmaz); Gatus alerting bloğu (`GATUS_ALERT_WEBHOOK_URL`), Umami ve Postgres imaj pinleri, `infra/README.md`. |
 | 2. tur | opus, sonnet | F-013, F-068, F-134, F-138, N-20 | Bkz. "2. tur" bölümü. |
 | kontrol oturumu | fable | F-006, F-034, F-078, F-091, F-146, F-156, F-015, E-04, E-12, N-04, N-18, N-19, E-09 | Doküman güncellemeleri (bu not, docs/00-12 durum bölümleri, README, deploy checklist'leri, runbook), `.gitignore` temizliği ve `.claude/` orkestrasyon dosyalarının takipten çıkarılması (yedek `.local/claude-backup/`), entegrasyon. |
@@ -35,19 +35,37 @@ Bu not bir faz devir notu değil; fazlar arası çapraz kesen bir kapanış turu
 | eslint-typed (F-013) | opus | `lint: eslint --max-warnings=0`; `parserOptions.projectService` ile tipli lint; `no-floating-promises`, `no-misused-promises`, `await-thenable`, `no-unnecessary-type-assertion`, `react/jsx-no-target-blank` error; jsx-a11y kuralları error. Gerçek bir hata yakalandı: contact formunun submit promise'i React'e verilen event handler'da gözlemlenmiyordu, düzeltildi. Lint ~9 sn. 3 commit. |
 | render-tests (F-068, F-017 istemci, N-20, F-134) | sonnet | jsdom + Testing Library + jest-dom + user-event; `*.test.tsx` dosya başı `// @vitest-environment jsdom` (Vitest 4'te `environmentMatchGlobs` yok); `tests/helpers/render.tsx` (`renderWithIntl`), next-intl navigation ve next-themes mock kalıpları. Render testleri: contact form (alan bazlı hata, odak, honeypot POST, 429 geri sayımı, zaman aşımı, kalıcı aria-live, readOnly kilidi), mobil menü, tema düğmesi, dil değiştirici, about alt-nav (IntersectionObserver), Systems paneli, Umami script, brand icon/skill tag, error boundary. Tamamen kapsanan kaynak-metin assertion'ları kaldırıldı; `client-ip` testleri birleşti, `motion.test.ts` alias'a geçti. 5 commit. |
 
-Sonuç: 66 test dosyası / 922 test (taban 39 dosya / 552 test), coverage eşikleri `vitest.config.mts`'te (satır 76). Üç incelemenin tamamı "pass" (yalnızca minor bulgular: bir tema düğmesi assertion'ı ve README satırı, kontrol oturumu kapattı).
+Sonuç: 68 test dosyası / 945 test (taban 39 dosya / 552 test; doğrulama düzeltmeleri dahil), coverage eşikleri `vitest.config.mts`'te (satır 76). Üç incelemenin tamamı "pass" (yalnızca minor bulgular: bir tema düğmesi assertion'ı ve README satırı, kontrol oturumu kapattı).
 
 ## Kapılar (birleşik ağaç, son commit)
 
-<!-- GATES -->
+Ölçüm HEAD üzerinde kontrol oturumu tarafından koşuldu (doğrulama düzeltmeleri dahil):
+
+| Kapı | Sonuç |
+|---|---|
+| `npm run typecheck` | temiz (`noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`, `noImplicitOverride`, `noFallthroughCasesInSwitch`, ES2022) |
+| `npm run lint` | temiz, `--max-warnings=0`, tipli kurallar |
+| `npm run test` | 68 dosya / 945 test, coverage eşikleri geçiyor |
+| `npm run format` | temiz |
+| `npm run build` | 35 statik sayfa, dinamik yalnızca `/api/contact`, `/api/csp-report`, `/api/health`; Proxy derlendi |
+| `npm run verify:routes` | 32 içerik rotası (5 proje x 2 locale, 3 EN + 3 TR yazı) + statik meta rotaları |
+| `npm run verify:docs` | 21 dosya |
+| `npm run release:check` | v0.4.0 (minor), yayınlanmış tag önerilmiyor |
+| `npm audit --omit=dev` | 0 bulgu (`npm audit` 2 high, yalnızca dev: velite -> sharp) |
 
 ## Doğrulama
 
-<!-- VERIFY -->
+Üç bağımsız opus doğrulayıcı paralel çalıştı (salt okunur, `.next` bir kez build edildi):
+
+- **Kapsam:** 176 kimliğin tamamı tek tek doğrulandı (40'tan fazlasında kaynak açıldı): 144 done, 9 partial, 10 skipped-ok (devir notunda gerekçeli), 13 owner, 0 open. Bir blocker: ölü CSS temizliği `.display-hero` kuralını götürmüş, sınıf hero h1'inde duruyordu (test yalnızca CSS -> kaynak yönünü denetliyordu). Ayrıca `.list-row` kalıntısı, lockfile drift (resend, zod), devir notundaki iki çelişki, `build-info.ts` yorumu.
+- **Adversarial:** diff dosya dosya, altı kapı, 3131'de canlı curl. Güvenlik yüzeyi (Origin, CRLF, gövde sınırı, kovalar, `x-pathname`, csp-report DoS) ve Next 16 API kullanımı sağlam; i18n eşitliği ve OG Türkçe glifleri temiz. Major: contact sayfası hâlâ `opacity:0` ile prerender ediliyordu (LazyMotion tembel import'u görünürlüğü ikinci chunk'a bağlamıştı); `verify-docs` eski health gövdesini (`uptime`) zorunlu kılıyordu. Minor: `status.ts` `server-only` importu ve log biçimi, RSS `lastBuildDate` `updated`'ı okumuyordu, TR gizlilik metninde tekil/çoğul şahıs, silinen fixture'a yorum atfı.
+- **Canlı HTTP:** 3132'de 60'tan fazla istek: sitemap/robots/feed, canonical/hreflang, og:title şablonu, dört JSON-LD düğümü, OG PNG imzaları (46 KB, `/en` tek 307), tüm güvenlik başlıkları, CV noindex + cache, contact ve csp-report senaryoları, 404 dilleri, a11y işaretleri, istemci chunk'larında ikon verisi yok. Major: Türkçe 404 sayfasının tek linki İngilizce ana sayfaya gidiyordu. Minor: `[lang]/not-found.tsx` `globalNotFound` altında hiç render olmuyor (doküman düzeltildi), 405 yanıtlarında `Allow` başlığı yok.
+
+Düzeltme turu (opus, 10 commit, `1e5501a..c9c85b0`): `.display-hero` geri geldi ve `design-tokens.test.ts` artık kaynak -> CSS yönünü de denetliyor; `.list-row` kalıntısı silindi; contact sayfası hareket katmanından çıkarıldı ve `motion` bağımlılığı kaldırıldı; Türkçe 404 kendi ana sayfasına ve diğer dile link veriyor (render testi); `status.ts` `server-only` + ortak log biçimi (genel "server-only iddiası olan modül importu taşır" testi); RSS `lastBuildDate` en yeni revizyona göre; TR metin birinci tekil; `Allow` başlıklı 405 yardımcısı (`src/lib/api-methods.ts`); lockfile `npm update`; `build-info.ts` ve `not-found.tsx` yorumları. Kontrol oturumu `verify-docs` health sözleşmesini (`checks` + `timestamp`, `uptime` yok) ve Coolify checklist'ini düzeltti, devir notunu tamamladı. ADV-03 (proje kartı rozet linkleri) düzeltici tarafından teknik gerekçeyle reddedildi: sarmalayıcı zaten `relative z-10` taşıyor, canlıda tıklanabilir.
 
 ## Plandan sapmalar ve bilinçli kabuller
 
-- **Giriş animasyonları kaldırıldı** (F-019): tasarım kararının 5. maddesi "minimum hareket" diyordu; ana sayfadaki dört bölümde artık hiç yok. Geri getirmek CSS ile mümkün, sahibinin kararı.
+- **Hareket katmanı tamamen kaldırıldı** (F-019, F-055, doğrulama ADV-01): tasarım kararının 5. maddesi "minimum hareket, LazyMotion + m" diyordu. Önce ana sayfadaki dört bölüm (SSR'da `opacity:0` LCP'yi hidrasyona kilitliyordu), doğrulama turunda da contact sayfası (tek kalan `m.*` tüketicisi, form hidrasyon + ikinci chunk'a kadar görünmezdi) sunucu bileşenine döndü; `motion` bağımlılığı, `MotionProvider`, `src/lib/motion.ts` ve `.motion-item` kuralı gitti. Sitede JS animasyonu yok; `prefers-reduced-motion` CSS kuralı duruyor. Geri getirilecekse CSS geçişleriyle (`@starting-style` veya sınıf tabanlı) yapılmalı, sahibinin kararı.
 - **HSTS uygulamada** (F-011): karar "yalnızca Traefik" idi; Traefik kurulmadığı için geçici olarak `next.config.ts`. Traefik middleware'i gelince kaldırılır.
 - **CSP nonce'a geçilmedi** (F-030): statik rotalar korunur; ölçüm penceresi ve raporlama eklendi.
 - **Üçüncü taraf hata takibi yok** (E-03): Coolify log + Gatus.
@@ -59,7 +77,6 @@ Sonuç: 66 test dosyası / 922 test (taban 39 dosya / 552 test), coverage eşikl
 - **CV indekslenmez** (E-10): `X-Robots-Tag: noindex, nofollow`.
 - **`.pull-quote` allowlist'te**: sınıfın tüketicisi yok; blockquote display fontunu doğrudan alıyor.
 - **Umami `data-domains`** (N-14): tracker yalnızca `dogancanyildiz.com`'da çalışır; preview/dev veri yazmaz.
-- **`GATUS_URL` boşken uyarı yok** (N-09): yerel ve preview yapılandırması sayılır.
 - **npm audit dev 2 high** (F-015): velite -> sharp <0.35.0, yalnızca build zamanı; `--force` velite'ı kırıyor; velite güncellenince kapanır.
 - **F-154 / F-155**: kök URL eğik çizgi farkı ve `/en/*` 307 kabul edildi.
 - **Tarihsel plan dosyaları düzeltilmedi** (E-04, T-3, T-32): Faz 5 planı `.sh` hostname'leriyle duruyor, başına düzeltme notu kondu; `plans/README.md` ek notu.
@@ -82,7 +99,6 @@ Tam liste yerel `audit/acik-kalanlar.md` defterinde (P-, O-, M- maddeleri). Önc
 
 ## Kalan teknik borç (küçük, sıralı PR'lara uygun)
 
-- Contact sayfasında `m.*` elemanlarının `opacity:0` prerender'ı; `MotionProvider`'ın contact sınırına indirilmesi; `staggerContainer`/`staggerItem` ölü export'ları.
 - `localePath` önek koruması; `assert-static-routes.mjs` locale listesi `routing.ts`'ten türetilmiyor; `readingTime` yuvarlaması iki yerde; `untranslated` dizisi her sayfanın payload'ında.
 - `contact` namespace'i her sayfanın client kataloğunda (rota bazlı provider gerekir).
 - `next dev` çökünce yetim `velite --watch`.

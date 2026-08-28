@@ -56,7 +56,7 @@ Hızlı referans için ana bağımlılıkların hedef sürümleri:
 | tailwindcss | 4.x | 4.3.x | Uygulandı, package-lock'ta çözülen sürüm 4.3.3 |
 | next-intl | yok | 4.13.7 | Uygulandı, package.json'da 4.13.7 |
 | velite | yok | 0.4.0 (exact pin) | Uygulandı, package.json'da exact 0.4.0 |
-| motion (framer-motion) | ^12.34.3 | motion 13.1.1 | Uygulandı, package.json'da motion 13.1.1 |
+| motion (framer-motion) | ^12.34.3 | motion 13.1.1 | Uygulandı (Faz 0-3); **2026-08-28'de kaldırıldı**: JS animasyonu SSR görünürlüğünü hidrasyona bağlıyordu, sitede artık motion bağımlılığı yok (bkz. 03) |
 | node | pin yok | 24 (.nvmrc), engines.node >=24 | Uygulandı, .nvmrc 24 ve engines.node >=24 |
 
 typescript ve lucide-react major yükseltmeleri kasten bu listede yok; breaking değişiklik riski taşıdıkları için güvenlik yamasından ayrı, sonraki bir PR'a bırakıldı. Tam gerekçe ve yükseltme sırası: [02-stack-karari.md](./02-stack-karari.md).
@@ -147,7 +147,7 @@ Bu bölüm 2026-08-27 tarihli bölümün üstünde geçerlidir; o bölüm tarihs
 - **`.sh` alan adı kararı:** kayıtlı değil; ya kaydedilir ya kapsam dışı ilan edilir.
 - **Sahibinin teslimatları ve onayları:** proje kapakları (`cover` + `coverAlt`), sertifika `verifyUrl` değerleri (yalnızca `https://`), Konuşmalar verisi, profil fotoğrafı, blog/case study metin onayı (üç EN çeviri dahil), CV içeriği, Wikonya adı, ticket repo linki; görsel onaylar: ana sayfa giriş animasyonlarının kaldırılması, tema düğmesi ikon anlamı, pill'lerin normal yazımı, footer/CTA başlık ölçeği.
 - **Ölçüm penceresi:** `CSP_REPORT_ONLY=1` ile bir deploy, sıkı CSP'nin maliyeti loglardan okunur.
-- **Kalan teknik borç** (küçük): contact sayfasının `opacity:0` prerender'ı ve `MotionProvider` sınırı, `localePath` önek koruması, `assert-static-routes` locale listesi, yetim `velite --watch`, typescript 7 / eslint 10 majorları, dev `npm audit` 2 high (velite -> sharp, build zamanı, kabul edildi). Tam liste yerel `audit/acik-kalanlar.md` defterinde.
+- **Kalan teknik borç** (küçük): `localePath` önek koruması, `assert-static-routes` locale listesi, yetim `velite --watch`, typescript 7 / eslint 10 majorları, dev `npm audit` 2 high (velite -> sharp, build zamanı, kabul edildi). Tam liste yerel `audit/acik-kalanlar.md` defterinde.
 
 ## Uygulama notları
 

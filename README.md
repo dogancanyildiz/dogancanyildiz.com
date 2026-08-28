@@ -9,7 +9,7 @@ Coolify managed server behind Traefik and Cloudflare, without Vercel.
 | Layer     | Choice                                                              |
 | --------- | ------------------------------------------------------------------- |
 | Framework | Next.js 16.3.3, App Router, `output: 'standalone'`                  |
-| UI        | React 19.2, Tailwind CSS 4, shadcn/ui, motion 13                    |
+| UI        | React 19.2, Tailwind CSS 4, shadcn/ui, no JS animation layer        |
 | Email     | Resend, through `/api/contact`                                      |
 | Runtime   | Node 24, single container                                           |
 | Hosting   | Docker image built by Coolify, Traefik in front, Cloudflare proxied |
