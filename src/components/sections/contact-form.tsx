@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import * as m from "motion/react-m";
-import { useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +14,6 @@ import {
   MAX_NAME_LENGTH,
   type ContactField,
 } from "@/lib/contact-validation";
-import { fadeUp, MOTION_ITEM_CLASS } from "@/lib/motion";
 
 type Status = "idle" | "loading" | "success" | "error";
 type FieldErrors = Partial<Record<ContactField, string>>;
@@ -48,8 +45,6 @@ const SERVER_FIELD_ERROR: Record<ContactField, string> = {
 export function ContactForm() {
   const t = useTranslations("contact.form");
   const locale = useLocale();
-  const reduced = useReducedMotion() ?? false;
-  const variants = fadeUp(reduced);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -229,14 +224,10 @@ export function ContactForm() {
   const lock = { readOnly: busy, "aria-disabled": busy || undefined };
 
   return (
-    <m.form
-      variants={variants}
-      initial="hidden"
-      animate="show"
-      custom={0}
+    <form
       onSubmit={handleSubmit}
       noValidate
-      className={`w-full max-w-2xl space-y-6 ${MOTION_ITEM_CLASS}`}
+      className="w-full max-w-2xl space-y-6"
     >
       <div className="grid gap-2">
         <Label htmlFor="name">{t("name")}</Label>
@@ -356,6 +347,6 @@ export function ContactForm() {
             ? t("retryAfter", { seconds: retrySeconds })
             : t("submit")}
       </Button>
-    </m.form>
+    </form>
   );
 }

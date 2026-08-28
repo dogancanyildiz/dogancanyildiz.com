@@ -13,7 +13,6 @@ import { siteUrl } from "@/lib/env";
 import { getUntranslatedPaths, type Locale } from "@/lib/content";
 import { buildOpenGraph } from "@/lib/seo/alternates";
 import { ThemeProvider } from "@/components/theme-provider";
-import { MotionProvider } from "@/components/motion-provider";
 import { UmamiScript } from "@/components/umami-script";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -137,20 +136,18 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
           disableTransitionOnChange
         >
           <NextIntlClientProvider messages={clientMessages}>
-            <MotionProvider>
-              <a href="#main" className="skip-link">
-                {t("skipToContent")}
-              </a>
-              <Header untranslated={untranslated} />
-              <main
-                id="main"
-                tabIndex={-1}
-                className="flex-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
-              >
-                {children}
-              </main>
-              <Footer />
-            </MotionProvider>
+            <a href="#main" className="skip-link">
+              {t("skipToContent")}
+            </a>
+            <Header untranslated={untranslated} />
+            <main
+              id="main"
+              tabIndex={-1}
+              className="flex-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+            >
+              {children}
+            </main>
+            <Footer />
           </NextIntlClientProvider>
         </ThemeProvider>
         <UmamiScript />

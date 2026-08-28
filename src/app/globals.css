@@ -174,8 +174,8 @@
   button {
     -webkit-tap-highlight-color: transparent;
   }
-  /* Covers everything motion does not: CSS transitions and the smooth scroll
-     behaviour on html. */
+  /* The site animates through CSS alone, so this is the whole reduced-motion
+     surface: transitions, keyframes and the smooth scroll behaviour on html. */
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -187,11 +187,6 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       transition-delay: 0ms !important;
-    }
-    /* Motion sets opacity:0 in hidden before hydration; keep content visible. */
-    .motion-item {
-      opacity: 1 !important;
-      transform: none !important;
     }
   }
 }

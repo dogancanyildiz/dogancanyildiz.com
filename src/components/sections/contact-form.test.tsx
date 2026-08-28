@@ -14,35 +14,6 @@ import { renderWithIntl } from "../../../tests/helpers/render";
 import { HONEYPOT_FIELD } from "@/lib/contact-validation";
 import { ContactForm } from "./contact-form";
 
-// motion/react-m's `m.form` needs LazyMotion's async feature bundle to
-// animate; none of that is under test here, so it is replaced with a plain
-// form that forwards only the ordinary form props ContactForm passes.
-// Naming the motion-only ones (variants, initial, animate, custom) instead,
-// to drop them from a rest spread, would print as unknown-attribute
-// warnings and as unused-var lint errors alike.
-vi.mock("motion/react-m", () => ({
-  form: ({
-    className,
-    children,
-    onSubmit,
-    noValidate,
-  }: {
-    className?: string;
-    children?: React.ReactNode;
-    onSubmit?: React.FormEventHandler<HTMLFormElement>;
-    noValidate?: boolean;
-  }) => (
-    <form className={className} onSubmit={onSubmit} noValidate={noValidate}>
-      {children}
-    </form>
-  ),
-}));
-
-vi.mock("motion/react", () => ({
-  // The real hook reads window.matchMedia, which jsdom does not implement.
-  useReducedMotion: () => false,
-}));
-
 function jsonResponse(
   status: number,
   body: unknown,
