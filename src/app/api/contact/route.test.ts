@@ -50,7 +50,10 @@ type SendResult = {
   error: { name: string; message: string } | null;
 };
 
-const send = vi.fn<(payload: SendPayload) => Promise<SendResult>>();
+type SendOptions = { idempotencyKey?: string };
+
+const send =
+  vi.fn<(payload: SendPayload, options?: SendOptions) => Promise<SendResult>>();
 
 vi.mock("@/lib/resend", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/resend")>();
@@ -58,7 +61,12 @@ vi.mock("@/lib/resend", async (importOriginal) => {
     ...actual,
     // The factory is hoisted above the `send` binding, so the stub reaches it
     // through a closure that only runs when the route calls it.
-    resend: { emails: { send: (payload: SendPayload) => send(payload) } },
+    resend: {
+      emails: {
+        send: (payload: SendPayload, options?: SendOptions) =>
+          send(payload, options),
+      },
+    },
   };
 });
 
@@ -481,6 +489,33 @@ describe("POST /api/contact rate limit", () => {
     );
   });
 
+  it("spends a slot on a body that never finishes", async () => {
+    const ip = "203.0.113.44";
+    const stalled = new Request(`${SITE_ORIGIN}/api/contact`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: SITE_ORIGIN,
+        "x-forwarded-for": ip,
+      },
+      // A body that is opened and never closed. Node needs duplex for a
+      // streamed request body.
+      body: new ReadableStream<Uint8Array>({ start() {} }),
+      duplex: "half",
+    } as RequestInit & { duplex: "half" });
+
+    // The handler parks on the read and never answers, which is exactly the
+    // shape that used to cost nothing: the slot has to be gone before the
+    // body is read, not after.
+    void POST(stalled);
+
+    await vi.waitFor(() =>
+      expect(contactRateLimiter.peek(ip).remaining).toBe(
+        CONTACT_RATE_LIMIT.limit - 1
+      )
+    );
+  });
+
   it("keeps separate ip budgets apart", async () => {
     for (let i = 0; i < CONTACT_RATE_LIMIT.limit + 1; i += 1) {
       await POST(contactRequest({ ip: "203.0.113.7", body: "{}" }));
@@ -489,6 +524,37 @@ describe("POST /api/contact rate limit", () => {
     expect((await POST(contactRequest({ ip: "198.51.100.4" }))).status).toBe(
       200
     );
+  });
+});
+
+describe("POST /api/contact idempotency", () => {
+  // The send timeout only stops the handler waiting; the upstream request can
+  // still deliver, so the retry the visitor is invited to make has to collapse
+  // onto the same send at the provider.
+  it("derives the key from the payload", async () => {
+    await POST(contactRequest());
+
+    expect(send.mock.calls[0][1]).toMatchObject({
+      idempotencyKey: expect.stringMatching(/^contact-[0-9a-f]{32}$/),
+    });
+  });
+
+  it("reuses the key for the same message and not for another", async () => {
+    await POST(contactRequest());
+    await POST(contactRequest({ ip: "198.51.100.4" }));
+    await POST(
+      contactRequest({
+        ip: "198.51.100.5",
+        body: JSON.stringify({
+          ...validPayload,
+          message: "A different message.",
+        }),
+      })
+    );
+
+    const keys = send.mock.calls.map((call) => call[1]?.idempotencyKey);
+    expect(keys[1]).toBe(keys[0]);
+    expect(keys[2]).not.toBe(keys[0]);
   });
 });
 

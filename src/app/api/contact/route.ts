@@ -1,8 +1,14 @@
+import { createHash } from "node:crypto";
+
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
 import { getClientIp } from "@/lib/client-ip";
-import { MAX_BODY_BYTES, validateBody } from "@/lib/contact-validation";
+import {
+  MAX_BODY_BYTES,
+  validateBody,
+  type ContactPayload,
+} from "@/lib/contact-validation";
 import {
   contactEmail,
   fromEmail,
@@ -29,8 +35,26 @@ const ROUTE = "/api/contact";
  * emails.send (checked against node_modules/resend types), so the timeout is a
  * race: the visitor gets an answer, while the upstream request is left to
  * finish or fail on its own instead of holding the handler open for minutes.
+ *
+ * A send that lands after the race is lost is still delivered, so the visitor
+ * who has been told to try again would otherwise produce a second copy of the
+ * same mail. The retry carries the idempotency key below, which is what makes
+ * the provider collapse the two attempts into one delivery.
  */
 const SEND_TIMEOUT_MS = 10_000;
+
+/**
+ * Stable per message key for the provider's idempotency window. Derived from
+ * the payload, so a retry of the same message reuses it while a different
+ * message never does; a hash rather than the values themselves, because the
+ * key travels in a header.
+ */
+function idempotencyKey(payload: ContactPayload): string {
+  const digest = createHash("sha256")
+    .update(`${payload.name}\n${payload.email}\n${payload.message}`)
+    .digest("hex");
+  return `contact-${digest.slice(0, 32)}`;
+}
 
 class SendTimeoutError extends Error {
   constructor() {
@@ -201,8 +225,9 @@ export async function POST(request: Request) {
 
   // The rate limit is the first decision, so no cheaper rejection can be used
   // to walk past it. The slot itself is spent further down, once the request
-  // has proved to be a real submission attempt: a 415, a 403 or a 413 should
-  // not eat the budget of the visitor behind that ip.
+  // has proved to be a real submission attempt: a 415, a 403 or a 413 refused
+  // on its declared length should not eat the budget of the visitor behind
+  // that ip.
   const budget = contactRateLimiter.peek(ip);
   if (!budget.allowed) {
     log("warn", "contact request rate limited", {
@@ -250,25 +275,12 @@ export async function POST(request: Request) {
     );
   }
 
-  let rawBody: string;
-  try {
-    rawBody = await readBodyWithLimit(request, MAX_BODY_BYTES);
-  } catch (error) {
-    if (error instanceof BodyTooLargeError) {
-      return jsonResponse(
-        { error: t("bodyTooLarge") },
-        { status: 413, requestId }
-      );
-    }
-    return jsonResponse(
-      { error: t("invalidRequest") },
-      { status: 400, requestId }
-    );
-  }
-
   // From here the caller looks like a submission from the form itself, so it
   // spends a slot even if the payload turns out to be junk. That is what stops
-  // a scripted probe from hammering the endpoint for free.
+  // a scripted probe from hammering the endpoint for free. The slot is spent
+  // before the body is read rather than after: a caller that opens the POST
+  // and never finishes its body holds a handler open, and it has to pay for
+  // that out of the same budget as a completed request.
   const spent = contactRateLimiter.check(ip);
   if (!spent.allowed) {
     log("warn", "contact request rate limited", {
@@ -284,6 +296,22 @@ export async function POST(request: Request) {
         budget: spent,
         retryAfterSeconds: spent.retryAfterSeconds,
       }
+    );
+  }
+
+  let rawBody: string;
+  try {
+    rawBody = await readBodyWithLimit(request, MAX_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) {
+      return jsonResponse(
+        { error: t("bodyTooLarge") },
+        { status: 413, requestId, budget: spent }
+      );
+    }
+    return jsonResponse(
+      { error: t("invalidRequest") },
+      { status: 400, requestId, budget: spent }
     );
   }
 
@@ -348,15 +376,18 @@ export async function POST(request: Request) {
 
   try {
     const { error } = await withTimeout(
-      resend.emails.send({
-        from,
-        to,
-        subject: `Portfolio contact from ${parsed.data.name}`,
-        text,
-        // Answering the visitor is a reply in the mail client, not a copy and
-        // paste out of the body.
-        replyTo: parsed.data.email,
-      }),
+      resend.emails.send(
+        {
+          from,
+          to,
+          subject: `Portfolio contact from ${parsed.data.name}`,
+          text,
+          // Answering the visitor is a reply in the mail client, not a copy
+          // and paste out of the body.
+          replyTo: parsed.data.email,
+        },
+        { idempotencyKey: idempotencyKey(parsed.data) }
+      ),
       SEND_TIMEOUT_MS
     );
 
