@@ -27,7 +27,10 @@ export function MobileMenu() {
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-background/85 backdrop-blur-sm" />
+        {/* Starts below the h-16 header (top-16) instead of covering it, so
+            the header (z-40) and its own trigger stay legible above the
+            overlay while the panel is open. */}
+        <Dialog.Overlay className="fixed inset-x-0 top-16 bottom-0 z-50 bg-background/85 backdrop-blur-sm" />
         <Dialog.Content
           aria-describedby={undefined}
           className="fixed inset-x-0 top-16 z-50 border-b border-border bg-background p-4 outline-none"

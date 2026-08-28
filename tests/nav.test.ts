@@ -138,6 +138,12 @@ describe("mobile menu panel", () => {
     expect(source).not.toContain("sm:inset-x-4");
     expect(source).not.toContain("sm:rounded-none");
   });
+
+  it("keeps the overlay below the header instead of dimming it", () => {
+    const source = read("src/components/layout/mobile-menu.tsx");
+    expect(source).not.toMatch(/Dialog\.Overlay className="fixed inset-0\b/);
+    expect(source).toMatch(/Dialog\.Overlay className="fixed inset-x-0 top-16/);
+  });
 });
 
 describe("header height", () => {
