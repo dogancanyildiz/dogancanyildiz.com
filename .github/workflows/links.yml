@@ -1,0 +1,54 @@
+name: Live links
+
+# Audits external URLs (project live demos, certificate verify links) that
+# the app itself does not control. A weekly schedule instead of a merge gate:
+# a third party outage should not block shipping an unrelated change, so this
+# never runs on pull_request or push and is never a required check.
+
+on:
+  schedule:
+    # Monday 05:30 UTC, ahead of the CodeQL 06:30 weekly run.
+    - cron: "30 5 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: links-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Audit live links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Compile content
+        run: npm run build:content
+      - name: Verify live links
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          attempts=3
+          for attempt in $(seq 1 "$attempts"); do
+            if npm run verify:links; then
+              exit 0
+            fi
+            echo "verify:links failed (attempt $attempt/$attempts)" >&2
+            if [ "$attempt" -lt "$attempts" ]; then
+              backoff=$((attempt * 30))
+              echo "retrying in ${backoff}s" >&2
+              sleep "$backoff"
+            fi
+          done
+          exit 1
