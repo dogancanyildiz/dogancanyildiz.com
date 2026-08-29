@@ -41,7 +41,7 @@ Aşağıdaki kararlar kategori bazında gruplandı; her biri kendi detay doküma
 | 3. Tasarım sistemi | Font gerçekten yüklensin, palet nötrlensin, mobil menü gelsin, hareket ve erişilebilirlik toparlansın. | Uygulandı (main, PR #5) |
 | 4. İçerik ve yayın | Şablon persona tamamen gitsin, gerçek case study'ler ve ilk blog yazıları iki dilde yayına çıksın; bu fazın sonu launch. | Uygulandı (main, PR #6, 2026-08-27); sahibinin teslim edeceği içerikler (kapaklar, sertifika linkleri, Konuşmalar) ve metin onayı bekleniyor, launch kapısının manuel maddeleri koşulmadı |
 | 5. Altyapı vitrini ve ölçüm | Gatus tabanlı status widget, Umami, Dependabot + CodeQL otomasyonu; yayın sonrası. | Kod tarafı uygulandı (main, PR #31, v0.3.1, 2026-08-28); Coolify/Cloudflare panel adımları `plans/handoffs/faz-5-manual-checklist.md`'de sahibinde |
-| Denetim kapanışı (2026-08-28) | 16 boyutlu denetimin 162 bulgusundan kod tarafında kapatılabilen her şey: contact API sertleştirme, erişilebilirlik, performans, güvenlik başlıkları, SEO/JSON-LD, CI/Docker, test altyapısı. | `feature/audit-closure` dalında tamamlandı, dev'e PR ile girecek; ayrıntı `plans/handoffs/denetim-kapanisi-2026-08-28.md` |
+| Denetim kapanışı (2026-08-28) | 16 boyutlu denetimin 162 bulgusundan kod tarafında kapatılabilen her şey: contact API sertleştirme, erişilebilirlik, performans, güvenlik başlıkları, SEO/JSON-LD, CI/Docker, test altyapısı. | `feature/audit-closure` dalında tamamlandı, PR #34 (dev) 2026-08-30'da açıldı; ayrıntı `plans/handoffs/denetim-kapanisi-2026-08-28.md` |
 
 Detay: [10-yol-haritasi.md](./10-yol-haritasi.md).
 
@@ -112,7 +112,7 @@ Bu bölüm kontrol oturumu tarafından repodaki gerçek duruma bakılarak doğru
 | Güven sinyalleri, editoryal UI, DCY marka işareti | feature/trust-ui-brand-refresh | #11 (dev), #12 (main) | Merged, v0.3.0 |
 | Repo public: Dependabot, CodeQL, güvenlik politikası, lisans | feature/public-repo-security | #14 | Merged -> dev |
 | 5. Altyapı vitrini ve ölçüm | dev | #31 (main) | Merged, v0.3.1 (2026-08-28) |
-| Denetim kapanışı | feature/audit-closure | açılacak | Kod tamam, dev'e PR ile girer |
+| Denetim kapanışı | feature/audit-closure | #34 (dev) | Açık, 2026-08-30 |
 
 Bunların dışında, bir faz sayılmayan çapraz kesen bir altyapı değişikliği daha var: **ana domainin dogancanyildiz.com'a sabitlenmesi ve dallanma/sürüm otomasyonu** (dal `feature/com-primary-and-release-flow`, PR #7 dev'e, PR #8 main'e, ilk otomatik sürüm v0.2.0). Kapsamı: `NEXT_PUBLIC_SITE_URL`/sitemap/robots/testlerin `.com`'a geçirilmesi, `ci.yml`'in `dev` ve `main`'de zorunlu koşması, `main`'e her merge'de otomatik tag + GitHub Release + `CHANGELOG.md` üreten `release.yml` (2026-08-28'den beri CI'ın başarılı bitmesini `workflow_run` ile bekliyor). Detay: [06-devops-ve-deploy.md](./06-devops-ve-deploy.md) "Dallanma ve sürüm akışı".
 

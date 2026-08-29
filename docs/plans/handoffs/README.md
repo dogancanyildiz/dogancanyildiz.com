@@ -21,7 +21,7 @@ Bu dizin, portfolio modernizasyon projesinin her fazından sonra teslim edilen d
 | faz-4-brief.md | 4 | Görev brief'i: Faz 4 uygulanacak işlerin özeti | Başlangıç referansı |
 | faz-4-manual-checklist.md | 4 | Site sahibine yapması gereken manuel adımlar | Tamamlanacak |
 | faz-5-manual-checklist.md | 5 | Cloudflare DNS, Coolify Gatus/Umami kaynakları, Umami paneli, env ve canlı doğrulama | Panel adımları tamamlanacak (kod PR #31 ile merged) |
-| denetim-kapanisi-2026-08-28.md | denetim | 28 Ağustos denetim raporundaki açık bulguların kapanış devir notu: kümeler, kararlar, sahibine kalanlar | Yazıldı |
+| denetim-kapanisi-2026-08-28.md | denetim | 28 Ağustos denetim raporundaki açık bulguların kapanış devir notu: kümeler, kararlar, sahibine kalanlar | Yazıldı, PR #34 (dev) açık |
 
 ## Okuma sırası
 

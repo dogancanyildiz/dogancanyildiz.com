@@ -1,6 +1,6 @@
 # Denetim kapanışı devir notu (28 Ağustos 2026)
 
-Durum: Kod tarafı tamamlandı, dal `feature/audit-closure`, dev'e PR ile girer · Tarih: 2026-08-28 · Kaynak: 28 Ağustos denetim raporu (sahibinin Claude artifact'ı "dogancanyildiz.com denetimi": 16 boyut, 162 bulgu, adversarial doğrulama) · Kapsam: raporun kod tarafında kapatılabilen bütün açık ve kısmi bulguları; panel/DNS adımları ve sahibinin kararları bu notun "Sahibine kalanlar" bölümünde.
+Durum: Kod tarafı tamamlandı, dal `feature/audit-closure`, PR #34 (dev) 2026-08-30'da açıldı · Tarih: 2026-08-28 · Kaynak: 28 Ağustos denetim raporu (sahibinin Claude artifact'ı "dogancanyildiz.com denetimi": 16 boyut, 162 bulgu, adversarial doğrulama) · Kapsam: raporun kod tarafında kapatılabilen bütün açık ve kısmi bulguları; panel/DNS adımları ve sahibinin kararları bu notun "Sahibine kalanlar" bölümünde.
 
 Bu not bir faz devir notu değil; fazlar arası çapraz kesen bir kapanış turunun kaydıdır. Faz notlarıyla aynı biçimde okunur: neler yapıldı, kararlar ve sapmalar, kapılar, sahibine kalanlar.
 
