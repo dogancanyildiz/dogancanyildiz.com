@@ -31,7 +31,7 @@ export function LanguageSwitcher({ untranslated }: LanguageSwitcherProps) {
   return (
     <nav
       aria-label={t("languageLabel")}
-      className="flex rounded-full border border-border/70 bg-background/60 p-1"
+      className="flex rounded-full border border-border-strong bg-background/60 p-1"
     >
       {routing.locales.map((locale) => {
         const isActive = locale === activeLocale;
@@ -42,8 +42,8 @@ export function LanguageSwitcher({ untranslated }: LanguageSwitcherProps) {
             key={locale}
             href={href}
             hrefLang={locale}
+            lang={locale}
             aria-current={isActive ? "true" : undefined}
-            aria-label={localeNames[locale]}
             className={cn(
               "tap-target inline-flex items-center rounded-full px-3 text-[0.72rem] font-semibold uppercase tracking-[0.2em] no-underline transition-colors",
               isActive
@@ -52,6 +52,7 @@ export function LanguageSwitcher({ untranslated }: LanguageSwitcherProps) {
             )}
           >
             {localeLabels[locale]}
+            <span className="sr-only"> ({localeNames[locale]})</span>
           </a>
         );
       })}

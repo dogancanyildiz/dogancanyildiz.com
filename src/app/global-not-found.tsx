@@ -1,8 +1,13 @@
-/* eslint-disable @next/next/no-html-link-for-pages --
+/*
  * The links below have to be plain anchors. This document renders its own html
  * element and so does src/app/[lang]/layout.tsx, so a client side navigation
  * from here into the app would try to swap one document root for another. A
  * full page load is the correct exit from a 404.
+ *
+ * Both hrefs are computed, so @next/next/no-html-link-for-pages (which only
+ * inspects literal href strings) has nothing to report and an eslint-disable
+ * for it would itself be flagged as unused. Put the directive back if a
+ * literal path ever returns here.
  */
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -25,13 +30,28 @@ import { ThemeProvider } from "@/components/theme-provider";
  * There is no [lang] segment here, so the locale is inferred from the
  * request pathname (x-pathname, set in src/proxy.ts). When that header is
  * missing, the document falls back to the default locale.
+ *
+ * While experimental.globalNotFound is on this is the only 404 in the app: a
+ * notFound() thrown inside a locale lands here too, not on
+ * src/app/[lang]/not-found.tsx, so a bad slug also gets this bare document
+ * rather than the header and footer.
  */
 
-const secondaryLocale = routing.locales.find(
-  (locale) => locale !== routing.defaultLocale
-);
+type Locale = (typeof routing.locales)[number];
 
-async function documentLocale(): Promise<(typeof routing.locales)[number]> {
+/**
+ * The other locale has to be derived from the locale actually being rendered,
+ * not from the default one. Picking `locales.find(l => l !== defaultLocale)`
+ * at module scope resolved to "tr" for every request, so on a Turkish 404 the
+ * secondary block was suppressed as a duplicate and the only remaining link
+ * was the hardcoded "/" carrying the Turkish label: it sent the reader to the
+ * English home page and offered no way across to the Turkish one.
+ */
+function homeHref(locale: Locale): string {
+  return locale === routing.defaultLocale ? "/" : `/${locale}`;
+}
+
+async function documentLocale(): Promise<Locale> {
   const pathname = (await headers()).get("x-pathname") ?? "";
   return localeFromPathname(pathname);
 }
@@ -49,16 +69,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function GlobalNotFound() {
   const locale = await documentLocale();
   const t = await messages(locale);
-  const secondary = secondaryLocale && secondaryLocale !== locale
-    ? await messages(secondaryLocale)
-    : null;
+  const secondaryLocale = routing.locales.find((other) => other !== locale);
+  const secondary = secondaryLocale ? await messages(secondaryLocale) : null;
 
   return (
-    <html
-      lang={locale}
-      className={fontVariables}
-      suppressHydrationWarning
-    >
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
@@ -87,7 +102,7 @@ export default async function GlobalNotFound() {
                 <div className="flex flex-wrap gap-5">
                   <a
                     className="text-base font-semibold text-primary underline-offset-4 hover:underline"
-                    href="/"
+                    href={homeHref(locale)}
                   >
                     {t("backHome")}
                   </a>
@@ -96,7 +111,7 @@ export default async function GlobalNotFound() {
                       className="text-base font-semibold text-primary underline-offset-4 hover:underline"
                       hrefLang={secondaryLocale}
                       lang={secondaryLocale}
-                      href={`/${secondaryLocale}`}
+                      href={homeHref(secondaryLocale)}
                     >
                       {secondary("backHome")}
                     </a>

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { skills } from "@/content/profile";
 import {
@@ -69,5 +71,30 @@ describe("skill categories", () => {
   it("formats category indices with a leading zero", () => {
     expect(formatCategoryIndex(1)).toBe("01");
     expect(formatCategoryIndex(8)).toBe("08");
+  });
+});
+
+describe("inline icon svg props", () => {
+  const read = (path: string) =>
+    readFileSync(join(process.cwd(), path), "utf8");
+
+  it("types the brand icons over the whole svg surface", () => {
+    // Callers pass aria-hidden. JSX exempts hyphenated attribute names from
+    // excess property checks, so a className-only props type accepted it and
+    // then dropped it.
+    const source = read("src/components/ui/brand-icon.tsx");
+    expect(source).toContain("SVGProps<SVGSVGElement>");
+    expect(source).toMatch(/\{\.\.\.props\}/);
+  });
+
+  it("leaves role=img off decorative marks", () => {
+    for (const path of [
+      "src/components/ui/brand-icon.tsx",
+      "src/components/ui/skill-tag.tsx",
+    ]) {
+      const source = read(path);
+      expect(source, path).toContain('aria-hidden="true"');
+      expect(source, path).not.toContain('role="img"');
+    }
   });
 });

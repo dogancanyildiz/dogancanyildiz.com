@@ -16,29 +16,47 @@ async function readJson(relativePath, hint) {
 }
 
 function collectProjectLiveUrls(projects) {
+  // No locale filter: en and tr are the same project translated, so the
+  // same live URL appears under both, and the Map below already
+  // deduplicates it. Filtering to "en" only meant a live link that existed
+  // solely on the tr entry (a translation added without its en counterpart,
+  // or vice versa) was never audited.
   /** @type {Map<string, string[]>} */
   const urls = new Map();
   for (const project of projects) {
-    if (project.locale !== "en") continue;
     const live = project.links?.live;
     if (!live) continue;
     const sources = urls.get(live) ?? [];
-    sources.push(`projects/${project.slug}`);
+    sources.push(`${project.locale}/projects/${project.slug}`);
     urls.set(live, sources);
   }
   return urls;
 }
 
 async function collectCertificateVerifyUrls() {
-  const body = await readFile(join(root, "src/content/profile.ts"), "utf8");
-  const matches = [...body.matchAll(/verifyUrl:\s*"(https:\/\/[^"]+)"/g)];
   /** @type {Map<string, string[]>} */
   const urls = new Map();
+  let body;
+  try {
+    body = await readFile(join(root, "src/content/profile.ts"), "utf8");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(
+      `src/content/profile.ts not readable, skipping certificate URLs (${message}).`
+    );
+    return urls;
+  }
+  const matches = [...body.matchAll(/verifyUrl:\s*"(https:\/\/[^"]+)"/g)];
   for (const match of matches) {
     const url = match[1];
     const sources = urls.get(url) ?? [];
     sources.push("certificates");
     urls.set(url, sources);
+  }
+  if (matches.length === 0) {
+    console.log(
+      "No certificate verifyUrl found in src/content/profile.ts (none filled in yet)."
+    );
   }
   return urls;
 }

@@ -3,14 +3,20 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 
 /**
- * Boundary for notFound() thrown inside a locale, for example by
- * projects/[slug]/page.tsx. It lives under [lang] because the locale layout is
- * the root layout of this app: a not-found file placed higher up would render
- * without globals.css, without the header and footer and without an html lang
- * attribute.
+ * Inert while experimental.globalNotFound is on.
  *
- * Paths that do not resolve to a route at all never reach this file, they are
- * answered by src/app/global-not-found.tsx instead.
+ * That flag (next.config.ts) routes every 404 to src/app/global-not-found.tsx,
+ * including a notFound() thrown inside a locale by projects/[slug]/page.tsx or
+ * blog/[slug]/page.tsx. Verified against a production build: /tr/blog/<unknown>
+ * answers 404 with the global document, which carries neither the header nor
+ * the footer nor the .page-title h1 below. Nothing rendered here reaches a
+ * visitor today.
+ *
+ * It is kept because it is the non-experimental path: turn the flag off and
+ * this file is the boundary again. It lives under [lang] because the locale
+ * layout is the root layout of this app, so a not-found file placed higher up
+ * would render without globals.css, without the header and footer and without
+ * an html lang attribute.
  *
  * next-intl reads the active locale from the request, so this file cannot take
  * params and has to stay a synchronous component.
@@ -22,9 +28,7 @@ export default function LocaleNotFound() {
     <section className="section-space">
       <div className="page-shell flex flex-col items-start gap-6">
         <span className="eyebrow">{t("code")}</span>
-        <h1 className="max-w-3xl text-4xl leading-[1.05] sm:text-5xl">
-          {t("title")}
-        </h1>
+        <h1 className="max-w-3xl page-title">{t("title")}</h1>
         <p className="max-w-xl text-lg leading-8 text-muted-foreground">
           {t("description")}
         </p>

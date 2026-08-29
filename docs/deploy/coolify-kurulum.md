@@ -41,12 +41,15 @@ Coolify'da her değişkenin yanındaki "Build Variable?" kutusu, o değişkenin 
 - [ ] Doğrulama: deploy sonrası Coolify build logunda `re_` ile başlayan hiçbir string yok.
 - [ ] Doğrulama: canlı sayfanın HTML kaynağında `https://dogancanyildiz.com` geçiyor (`NEXT_PUBLIC_SITE_URL` gerçekten gömülmüş).
 - [ ] Doğrulama: `TRUST_CF_CONNECTING_IP` yalnızca Task 9 bittikten sonra `true` yapıldı; PR preview ortamlarında `false` kalıyor (preview'lar Cloudflare'ın arkasında değil).
+- [ ] Build değişkenleri `NEXT_PUBLIC_BUILD_SHA` (Coolify `SOURCE_COMMIT`) ve `NEXT_PUBLIC_BUILD_DATE` (deploy zamanı, ISO) set; boşsa Systems paneli "son yayın" alanını gizler ve footer yıl basmaz. Faz 5 değişkenleri (`GATUS_URL` Runtime, `UMAMI_SCRIPT_URL` ve `UMAMI_WEBSITE_ID` Build) `docs/runbooks/infrastructure.md`'de. `CSP_REPORT_ONLY=1` yalnızca tek bir ölçüm deploy'u için Build değişkeni olarak eklenir ve sonra kaldırılır.
+- [ ] Doğrulama: container açılış logunda `RESEND_API_KEY`, `CONTACT_EMAIL`, `FROM_EMAIL` için hata satırı yok ve `curl -s https://dogancanyildiz.com/api/health` gövdesinde `"status":"ok"` (eksik mail değişkeni `"degraded"` üretir, HTTP yine 200).
 
 ## 5. Auto deploy ve Preview Deployments
 
 - [ ] Advanced -> "Auto Deploy" açık. `main`'e push, GitHub App webhook'u üzerinden yeniden deploy tetikler.
 - [ ] Advanced -> "Preview Deployments" açık.
 - [ ] Preview URL şablonu: `http://{{pr_id}}.preview.dogancanyildiz.com`
+  - **Preview için ayrı `NEXT_PUBLIC_SITE_URL` (karar, 2026-08-28):** `/api/contact` `Origin` başlığını `NEXT_PUBLIC_SITE_URL` ile birebir karşılaştırır (F-042); production değerini taşıyan bir preview'da form 403 alır. Coolify'da preview deployment'lar için Build değişkeni preview host'una (`http://<pr>.preview.dogancanyildiz.com`) çevrilir; canonical/hreflang/sitemap/RSS de preview'a çözülür, bu beklenen davranıştır (faz-2 ve faz-4 checklist'lerindeki çelişki bu kararla kapandı).
   - Şema bilerek `http`. Cloudflare ücretsiz planı wildcard DNS kaydını proxy'leyemiyor, dolayısıyla `*.preview` kaydı gri bulut kalıyor; gri bulutta Let's Encrypt HTTP-01 doğrulaması origin'e doğrudan ulaşmak zorunda kalır ve origin yalnızca Cloudflare IP'lerine açık olduğu için başarısız olur. Preview'lar TLS'siz ve yalnızca allowlist'teki admin IP'sinden erişilebilir kalır, bkz. `docs/deploy/traefik-ve-origin.md`.
 - [ ] Doğrulama: test PR'ı açıldığında Coolify PR'a preview URL'i içeren bir yorum bırakıyor.
 
@@ -75,10 +78,10 @@ Beklenen:
 
 ```
 healthy
-200 {"status":"ok","uptime":<saniye>,"timestamp":"2026-..."}
+200 {"status":"ok","checks":{"content":true,"mail":true},"timestamp":"2026-..."}
 ```
 
-Sözleşme yalnızca HTTP `200` ve gövdedeki `status` alanının `ok` olmasıdır. `uptime` ve `timestamp` her çağrıda değişir (`src/app/api/health/route.ts`), gövdenin birebir eşleşmesi beklenmez; Coolify health check'i de yalnızca status koduna bakar.
+Sözleşme yalnızca HTTP `200` ve gövdedeki `status` alanının `ok` olmasıdır. `timestamp` her çağrıda değişir, `checks.mail` üç Resend değişkeni eksikse `false` olur ve `status` `degraded`e düşer (HTTP yine 200; `src/app/api/health/route.ts`, 2026-08-28), gövdenin birebir eşleşmesi beklenmez; Coolify health check'i yalnızca status koduna bakar, Gatus ise `[BODY].status == ok` koşuluyla `degraded` durumunu alarm olarak görür.
 
 `unhealthy` görülürse rolling update yeni deploy'ları geri alır. O durumda Coolify UI'da health check geçici olarak kapatılır, sorun `#7500` referansıyla not edilir ve production'a health check bağlı halde geçilmez.
 
@@ -99,4 +102,4 @@ Dördü birden sağlanmalı:
 
 ## 9. GitHub branch protection
 
-- [ ] GitHub -> Settings -> Branches -> `main` için "Require status checks to pass": `lint, typecheck, test, build` ve `hadolint and image build` işaretlenir. Bu iki check `.github/workflows/ci.yml` içindeki `checks` ve `docker` job'larının görünen adlarıdır.
+- [ ] GitHub -> Settings -> Branches -> `main` için "Require status checks to pass": `Quality checks`, `Docker image` ve `CodeQL analysis` işaretlenir (adlar 2026-08-28'de böyle; `.github/workflows/ci.yml` ve `codeql.yml` job adları). `enforce_admins` da açılmalı, aksi halde bir admin CI'ı bypass edip doğrudan push edebilir.

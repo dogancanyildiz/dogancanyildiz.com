@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { getPosts, type Locale } from "@/lib/content";
 import { absoluteUrl } from "@/lib/seo/alternates";
+import { escapeXml } from "@/lib/seo/xml";
 import { siteConfig } from "@/lib/site-config";
 
 export const dynamic = "force-static";
@@ -13,15 +14,6 @@ export const dynamicParams = false;
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
-}
-
-function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
 }
 
 export async function GET(
@@ -52,12 +44,20 @@ export async function GET(
     })
     .join("\n");
 
-  // Posts are already sorted newest first by getPosts, so the first entry
-  // (if any) carries the most recent publish date.
+  // lastBuildDate is the channel's freshness signal, so it has to move when a
+  // post is revised, not only when one is published. The sitemap and the
+  // BlogPosting JSON-LD already read `updated ?? date`; reading only `date`
+  // here made the three disagree about the same post. getPosts sorts by
+  // publish date, so the newest revision is a max over the whole list.
+  const newestChange = posts.reduce<number | null>((newest, post) => {
+    const changed = new Date(post.updated ?? post.date).getTime();
+    if (Number.isNaN(changed)) return newest;
+    return newest === null || changed > newest ? changed : newest;
+  }, null);
   const lastBuildDate =
-    posts.length > 0
-      ? `\n    <lastBuildDate>${new Date(posts[0].date).toUTCString()}</lastBuildDate>`
-      : "";
+    newestChange === null
+      ? ""
+      : `\n    <lastBuildDate>${new Date(newestChange).toUTCString()}</lastBuildDate>`;
 
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',

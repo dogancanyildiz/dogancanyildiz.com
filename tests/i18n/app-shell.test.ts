@@ -1,6 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+// Next's own compiler for the proxy `config.matcher` patterns. This is the
+// same module next-router-worker uses to turn a matcher string into a
+// RegExp, so testing against it (instead of a hand rolled regex) catches a
+// matcher change that Next itself would interpret differently than a naive
+// reader would.
+import { pathToRegexp } from "next/dist/compiled/path-to-regexp";
+import { isLocalizedRoutePath } from "@/lib/locale-from-pathname";
+import { config as proxyConfig } from "@/proxy";
 
 const repoPath = (relative: string) => join(process.cwd(), relative);
 const read = (relative: string) => readFileSync(repoPath(relative), "utf8");
@@ -32,29 +40,25 @@ const REMOVED_ROUTES = [
   "src/app/opengraph-image.tsx",
 ];
 
-// Parses every double quoted string literal inside the `matcher: [ ... ]`
-// array in src/proxy.ts, unescaping each one with JSON.parse (the file is
-// TypeScript source, so backslashes are still escaped there).
-function proxyMatcher(): string[] {
-  const source = read("src/proxy.ts");
-  const block = source.match(/matcher:\s*\[([\s\S]*?)\]/);
-  if (!block) throw new Error("proxy.ts does not declare an array matcher");
-  const literals = block[1].match(/"(?:[^"\\]|\\.)*"/g);
-  if (!literals) {
-    throw new Error("proxy.ts matcher array has no string literals");
-  }
-  return literals.map((literal) => JSON.parse(literal) as string);
+// The matcher array is either plain strings or { source, ... } objects (see
+// the Next proxy docs); this project only uses plain strings, so a matcher
+// entry that turned into an object is a change this test should surface
+// rather than silently skip.
+function matcherSources(): string[] {
+  return proxyConfig.matcher.map((entry) => {
+    if (typeof entry === "string") return entry;
+    throw new Error(
+      "expected every proxy config.matcher entry to be a plain string"
+    );
+  });
 }
 
-// Converts a matcher pattern to a JS regex and tests it against pathname.
-// :path* becomes .* (a bare locale path such as /tr still matches through
-// the generic catch-all pattern, so this simplification does not lose
-// coverage), and the whole pattern is anchored with ^ and $.
+// Compiles every matcher pattern with the exact path-to-regexp build Next
+// uses to interpret config.matcher, then tests pathname against each.
 function matchesAny(pathname: string): boolean {
-  return proxyMatcher().some((pattern) => {
-    const regexSource = pattern.replace(/:path\*/g, ".*");
-    return new RegExp(`^${regexSource}$`).test(pathname);
-  });
+  return matcherSources().some((pattern) =>
+    pathToRegexp(pattern).test(pathname)
+  );
 }
 
 describe("proxy", () => {
@@ -71,7 +75,26 @@ describe("proxy", () => {
     expect(source).toContain('requestHeaders.set("x-pathname"');
   });
 
-  it("matches page routes and skips api, framework and file paths", () => {
+  it("runs on every path so x-pathname is always written by the server", () => {
+    // The matcher no longer excludes anything: global-not-found reads
+    // x-pathname, and a path the proxy skipped was a path where the client
+    // could send that header itself. The i18n exclusions moved into
+    // isLocalizedRoutePath.
+    for (const pathname of [
+      "/",
+      "/tr",
+      "/about",
+      "/api/contact",
+      "/_next/static/chunk.js",
+      "/favicon.ico",
+      "/cv/dogancanyildiz-cv.pdf",
+      "/icon",
+    ]) {
+      expect(matchesAny(pathname), pathname).toBe(true);
+    }
+  });
+
+  it("hands page routes to next-intl and passes the rest through", () => {
     for (const pathname of [
       "/",
       "/tr",
@@ -83,7 +106,7 @@ describe("proxy", () => {
       "/icons",
       "/blog/x",
     ]) {
-      expect(matchesAny(pathname), pathname).toBe(true);
+      expect(isLocalizedRoutePath(pathname), pathname).toBe(true);
     }
 
     for (const pathname of [
@@ -97,18 +120,17 @@ describe("proxy", () => {
       "/cv/dogancanyildiz-cv.pdf",
       "/icon",
     ]) {
-      expect(matchesAny(pathname), pathname).toBe(false);
+      expect(isLocalizedRoutePath(pathname), pathname).toBe(false);
     }
   });
 
   it("skips exactly /icon and /apple-icon but not /icons", () => {
     // /icon and /apple-icon live outside app/[lang], so a rewrite to
-    // /en/icon or /tr/icon would 404. The icon$ / apple-icon$ anchors narrow
-    // the exclusion to those exact paths, so a future /icons route stays
-    // locale rewritten like any other path.
-    expect(matchesAny("/icon")).toBe(false);
-    expect(matchesAny("/apple-icon")).toBe(false);
-    expect(matchesAny("/icons")).toBe(true);
+    // /en/icon or /tr/icon would 404. The exclusion is anchored to those exact
+    // paths, so a future /icons route stays locale rewritten like any other.
+    expect(isLocalizedRoutePath("/icon")).toBe(false);
+    expect(isLocalizedRoutePath("/apple-icon")).toBe(false);
+    expect(isLocalizedRoutePath("/icons")).toBe(true);
   });
 
   it("redirects the legacy favicon path to the single icon source", () => {
@@ -148,7 +170,10 @@ describe("app/[lang] route tree", () => {
     for (const route of LANG_ROUTES.filter(
       (item) => !item.endsWith("opengraph-image.tsx")
     )) {
-      expect(read(route), route).toContain("setRequestLocale(lang)");
+      // The pages resolve the segment through resolveLocale(params), which
+      // returns a narrowed Locale named `locale`; the layout still destructures
+      // `lang` straight from params. Either name is the same call.
+      expect(read(route), route).toMatch(/setRequestLocale\((lang|locale)\)/);
     }
   });
 
@@ -263,11 +288,21 @@ describe("global-not-found font parity", () => {
     expect(source).not.toMatch(/<body\b[^>]*fontVariables/);
   });
 
-  it("has a localized boundary for notFound() thrown inside a locale", () => {
+  it("keeps a localized boundary ready for when globalNotFound is off", () => {
     const source = read("src/app/[lang]/not-found.tsx");
     expect(source).toContain('useTranslations("notFound")');
     expect(source).toContain('from "@/i18n/navigation"');
     expect(source).not.toContain('from "next/link"');
+  });
+
+  it("says out loud that the [lang] boundary is inert today", () => {
+    // globalNotFound routes a notFound() thrown inside a locale to the global
+    // document too, so this file renders for nobody. Its docstring used to
+    // promise the header and footer that the global 404 does not have.
+    const source = read("src/app/[lang]/not-found.tsx");
+    expect(source).toMatch(/Inert while experimental\.globalNotFound is on/);
+    expect(source).not.toContain("never reach this file");
+    expect(read("src/app/global-not-found.tsx")).toMatch(/only 404 in the app/);
   });
 
   it("carries the same notFound keys in both catalogs", () => {
@@ -309,8 +344,16 @@ describe("content components", () => {
     "reads messages through next-intl in %s",
     (component) => {
       const source = read(component);
-      expect(source, component).toContain('from "next-intl"');
-      expect(source, component).toContain("useTranslations(");
+      // Client sections read messages through the hook, server rendered ones
+      // through next-intl/server. Both must go through next-intl, never
+      // through a hand rolled locale context.
+      const viaHook =
+        source.includes('from "next-intl"') &&
+        source.includes("useTranslations(");
+      const viaServerApi =
+        source.includes('from "next-intl/server"') &&
+        source.includes("getTranslations(");
+      expect(viaHook || viaServerApi, component).toBe(true);
       expect(source, component).not.toContain(
         'from "@/components/locale-provider"'
       );

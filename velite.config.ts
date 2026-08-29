@@ -13,6 +13,24 @@ function localeFromPath(path: string): "en" | "tr" {
   return segment === "tr" ? "tr" : "en";
 }
 
+/**
+ * Outbound link in frontmatter.
+ *
+ * s.string().url() alone accepts any parsable URL, javascript: and data:
+ * included, and every one of these values is rendered straight into an href.
+ * The repo is public, so a content pull request is a real path for such a
+ * value to arrive; scripts/audit-live-links.mjs already assumes https, and the
+ * schema now carries the same contract instead of trusting the author.
+ */
+function httpsUrl() {
+  return s
+    .string()
+    .url()
+    .refine((value) => value.startsWith("https://"), {
+      message: "must be an https:// url",
+    });
+}
+
 const projects = defineCollection({
   name: "Project",
   pattern: "projects/**/*.mdx",
@@ -24,15 +42,24 @@ const projects = defineCollection({
       role: s.string().min(1).max(120),
       stack: s.array(s.string().min(1)).min(1),
       year: s.number().int().min(2015).max(2100),
+      // Last substantive edit. Feeds dateModified and the sitemap lastmod, so
+      // a redeploy alone never claims the entry changed.
+      updated: s.isodate().optional(),
       links: s
         .object({
-          live: s.string().url().optional(),
-          repo: s.string().url().optional(),
+          live: httpsUrl().optional(),
+          repo: httpsUrl().optional(),
         })
         .default({}),
       cover: s.image().optional(),
+      // Empty or absent means the cover carries no information the page text
+      // does not already state, and the image is rendered as decorative.
+      coverAlt: s.string().min(1).max(240).optional(),
       outcome: s.string().min(1).max(300),
       featured: s.boolean().default(false),
+      // Same contract as posts: a draft is visible in development and never
+      // reaches a production build, a sitemap entry or the rss feed.
+      draft: s.boolean().default(false),
       order: s.number().int().min(1).max(999).default(100),
       path: s.path(),
       code: s.mdx(),
@@ -48,9 +75,13 @@ const posts = defineCollection({
       title: s.string().min(1).max(140),
       slug: s.string().regex(SLUG_PATTERN),
       date: s.isodate(),
+      // Set only when a published post is revised. dateModified falls back to
+      // date, so an untouched post never advertises a fake revision.
+      updated: s.isodate().optional(),
       summary: s.string().min(1).max(300),
       tags: s.array(s.string().min(1)).default([]),
       cover: s.image().optional(),
+      coverAlt: s.string().min(1).max(240).optional(),
       draft: s.boolean().default(false),
       path: s.path(),
       code: s.mdx(),
@@ -59,10 +90,11 @@ const posts = defineCollection({
     .transform((data) => ({ ...data, locale: localeFromPath(data.path) })),
 });
 
-// Exported so a test fixture (tests/fixtures/velite.valid.config.ts) can
-// reuse the real collections and mdx pipeline without duplicating the
-// schema. That fixture writes to its own output directory, so the real
-// .velite output is never touched by a test run.
+// Exported so the test fixtures (tests/fixtures/velite.invalid.config.ts,
+// velite.invalid-links.config.ts, velite.schema-fields.config.ts) can reuse
+// the real collections and mdx pipeline without duplicating the schema. Each
+// fixture writes to its own output directory, so the real .velite output is
+// never touched by a test run.
 export const collections = { projects, posts };
 
 export const mdx: MdxOptions = {

@@ -83,4 +83,12 @@ describe("getClientIp", () => {
     const headers = headersOf({ "x-forwarded-for": "203.0.113.5, garbage" });
     expect(getClientIp(headers, { trustCloudflare: false })).toBe(UNKNOWN_IP);
   });
+
+  it("falls back to the unknown bucket, not a forged value, when both the cloudflare header and every x-forwarded-for hop are junk", () => {
+    const headers = headersOf({
+      "cf-connecting-ip": "not-an-ip",
+      "x-forwarded-for": "also-not-an-ip",
+    });
+    expect(getClientIp(headers, { trustCloudflare: true })).toBe(UNKNOWN_IP);
+  });
 });

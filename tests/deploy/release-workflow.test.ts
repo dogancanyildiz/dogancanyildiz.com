@@ -6,12 +6,28 @@ const workflow = () =>
   readFileSync(join(process.cwd(), ".github/workflows/release.yml"), "utf8");
 
 describe("release workflow", () => {
-  it("runs on pushes to main and on demand", () => {
+  it("waits for CI to succeed on main instead of reacting to the push directly", () => {
     const content = workflow();
-    expect(content).toMatch(/push:\s*\n\s*branches: \[main\]/);
+    expect(content).toMatch(/workflow_run:\s*\n\s*workflows: \[CI\]/);
+    expect(content).toContain("types: [completed]");
+    expect(content).toMatch(/branches: \[main\]/);
+    expect(content).not.toMatch(/^\s*push:/m);
     expect(content).toContain("workflow_dispatch:");
     expect(content).toMatch(/inputs:\s*\n\s*version:/);
-    expect(content).toContain("if: github.ref == 'refs/heads/main'");
+  });
+
+  it("only releases a workflow_dispatch from main or a green CI run on main", () => {
+    const content = workflow();
+    expect(content).toContain(
+      "(github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')"
+    );
+    expect(content).toContain(
+      "(github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')"
+    );
+  });
+
+  it("has a job level timeout", () => {
+    expect(workflow()).toMatch(/timeout-minutes: \d+/);
   });
 
   it("asks for exactly the write scopes it uses", () => {
@@ -20,12 +36,29 @@ describe("release workflow", () => {
     );
   });
 
+  it("resolves RELEASE_SHA to the commit CI verified, not the workflow's own ref", () => {
+    const content = workflow();
+    expect(content).toContain(
+      "RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}"
+    );
+    expect(content).toContain("ref: ${{ env.RELEASE_SHA }}");
+  });
+
   it("checks out the full history so the last tag is reachable", () => {
     const content = workflow();
-    expect(content).toContain("actions/checkout@v7");
+    expect(content).toMatch(/actions\/checkout@[0-9a-f]{40} # v\d/);
     expect(content).toContain("fetch-depth: 0");
-    expect(content).toContain("actions/setup-node@v7");
+    expect(content).toMatch(/actions\/setup-node@[0-9a-f]{40} # v\d/);
     expect(content).toContain('node-version-file: ".nvmrc"');
+  });
+
+  it("pins every action to a commit sha", () => {
+    const content = workflow();
+    const uses = [...content.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
+    expect(uses.length).toBeGreaterThan(0);
+    for (const use of uses) {
+      expect(use, use).toMatch(/@[0-9a-f]{40}$/);
+    }
   });
 
   it("derives the version from the release script", () => {
@@ -35,7 +68,7 @@ describe("release workflow", () => {
   it("tags the released commit as github-actions[bot] and publishes it", () => {
     const content = workflow();
     expect(content).toContain('git config user.name "github-actions[bot]"');
-    expect(content).toContain('git tag -a "$TAG" -m "$TAG" "$GITHUB_SHA"');
+    expect(content).toContain('git tag -a "$TAG" -m "$TAG" "$RELEASE_SHA"');
     expect(content).toContain('git push origin "refs/tags/$TAG"');
     expect(content).toContain('gh release create "$TAG"');
     expect(content).toContain("--notes-file");

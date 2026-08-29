@@ -2,50 +2,55 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/content";
 import { speaking } from "@/content/profile";
 import { testimonials } from "@/content/testimonials";
+import { AboutSubnavList } from "@/components/sections/about-subnav-list";
 
 interface AboutSubnavProps {
   locale: Locale;
 }
 
-const SECTIONS = [
-  { id: "about-skills", messageKey: "skillsTitle" as const },
-  { id: "about-experience", messageKey: "experienceTitle" as const },
-  { id: "about-community", messageKey: "communityTitle" as const },
-  { id: "about-speaking", messageKey: "speakingTitle" as const, optional: true },
-  { id: "about-certificates", messageKey: "certificatesTitle" as const },
-  { id: "about-education", messageKey: "educationTitle" as const },
-  { id: "about-languages", messageKey: "languagesTitle" as const },
-  { id: "about-testimonials", messageKey: "testimonialsTitle" as const, optional: true },
-] as const;
+type AboutMessageKey =
+  | "skillsTitle"
+  | "experienceTitle"
+  | "communityTitle"
+  | "speakingTitle"
+  | "certificatesTitle"
+  | "educationTitle"
+  | "languagesTitle"
+  | "testimonialsTitle";
+
+interface AboutSubnavSection {
+  id: string;
+  messageKey: AboutMessageKey;
+  isVisible?: () => boolean;
+}
 
 export async function AboutSubnav({ locale }: AboutSubnavProps) {
   const t = await getTranslations({ locale, namespace: "about" });
   const showTalks = speaking[locale].length > 0;
   const showTestimonials = testimonials[locale].length > 0;
 
-  const items = SECTIONS.filter((section) => {
-    if (section.id === "about-speaking") return showTalks;
-    if (section.id === "about-testimonials") return showTestimonials;
-    return true;
-  });
+  const sections: AboutSubnavSection[] = [
+    { id: "about-skills", messageKey: "skillsTitle" },
+    { id: "about-experience", messageKey: "experienceTitle" },
+    { id: "about-community", messageKey: "communityTitle" },
+    {
+      id: "about-speaking",
+      messageKey: "speakingTitle",
+      isVisible: () => showTalks,
+    },
+    { id: "about-certificates", messageKey: "certificatesTitle" },
+    { id: "about-education", messageKey: "educationTitle" },
+    { id: "about-languages", messageKey: "languagesTitle" },
+    {
+      id: "about-testimonials",
+      messageKey: "testimonialsTitle",
+      isVisible: () => showTestimonials,
+    },
+  ];
 
-  return (
-    <nav
-      aria-label={t("subnavLabel")}
-      className="sticky top-14 z-30 -mx-4 overflow-x-auto border-b border-border bg-background/85 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6"
-    >
-      <ul className="flex min-w-max gap-1">
-        {items.map((section) => (
-          <li key={section.id}>
-            <a
-              href={`#${section.id}`}
-              className="tap-target inline-flex items-center rounded-full px-3 py-1.5 text-sm text-muted-foreground no-underline transition-colors hover:bg-accent/40 hover:text-foreground"
-            >
-              {t(section.messageKey)}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
+  const items = sections
+    .filter((section) => section.isVisible?.() ?? true)
+    .map((section) => ({ id: section.id, label: t(section.messageKey) }));
+
+  return <AboutSubnavList items={items} ariaLabel={t("subnavLabel")} />;
 }

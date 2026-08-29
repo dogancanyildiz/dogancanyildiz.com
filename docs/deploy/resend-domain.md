@@ -18,13 +18,16 @@ Amaç: contact formunun gönderdiği postanın spam'e düşmemesi. Alıcı adres
 | TXT | `send` | `v=spf1 include:amazonses.com ~all` | - |
 | TXT | `resend._domainkey` | Resend'in verdiği `p=MIGfMA0GCSq...` DKIM değeri | - |
 
-DMARC kaydı Resend tarafından üretilmiyor, elle eklenir:
+DMARC kaydı Resend tarafından üretilmiyor. **Önce mevcut kaydı kontrol et** (2026-08-28 denetimi: `_dmarc.dogancanyildiz.com` zaten `p=none` ile var ve apex SPF yalnızca mevcut posta sağlayıcısını yetkilendiriyor; ikinci bir `_dmarc` TXT eklemek çakışma yaratır ve alıcılar kaydı geçersiz sayar):
 
-| Tip | Ad | İçerik |
-|---|---|---|
-| TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:me@dogancanyildiz.com; adkim=r; aspf=r` |
+```bash
+dig +short TXT _dmarc.dogancanyildiz.com
+dig +short TXT dogancanyildiz.com
+```
 
-- [ ] `p=none` bilinçli bir başlangıç: rapor topla, hiçbir postayı reddetme. Birkaç hafta rapor izlendikten sonra `p=quarantine`'a çıkılabilir.
+- [ ] Kayıt varsa **yeni satır ekleme**, mevcut `_dmarc` değerini düzenle: `rua=` adresi `me@dogancanyildiz.com`, `adkim=r; aspf=r`.
+- [ ] Resend'in SPF'i `send` alt alanında durduğu için apex SPF'e dokunma; gönderim zaten `send.dogancanyildiz.com` üzerinden yetkilendirilir (E-02 önerisi ile uyumlu: gönderim alt alanı, apex SPF bozulmaz).
+- [ ] DKIM `Verified` olduktan sonra DMARC'ı kademeli sertleştir: önce `p=quarantine; pct=10`, raporlar birkaç hafta temizse `p=reject`. `p=none` yalnızca rapor toplar, alan adına sahteciliği engellemez.
 
 ## 3. Doğrulama
 
@@ -47,10 +50,12 @@ Coolify'da `RESEND_API_KEY`, `CONTACT_EMAIL` ve `FROM_EMAIL` Runtime değişkeni
 ```bash
 curl -s -X POST https://dogancanyildiz.com/api/contact \
   -H 'content-type: application/json' \
-  -d '{"name":"Deploy check","email":"me@dogancanyildiz.com","subject":"faz 1 smoke test","message":"Deploy pipeline verification message."}'
+  -H 'origin: https://dogancanyildiz.com' \
+  -H 'x-locale: en' \
+  -d '{"name":"Deploy check","email":"me@dogancanyildiz.com","message":"Deploy pipeline verification message.","extra_field":""}'
 ```
 
-Beklenen: `{"ok":true}` ve `me@dogancanyildiz.com` kutusuna postanın ulaşması.
+Beklenen: `{"ok":true}`, yanıtta `x-request-id` başlığı ve `me@dogancanyildiz.com` kutusuna postanın ulaşması; postanın `Reply-To` başlığı gönderenin adresi. `origin` başlığı olmadan istek 403, `content-type` JSON değilse 415 alır (2026-08-28 sertleştirmesi); `subject` alanı artık kabul edilmez (400).
 
 - [ ] Gelen postanın kaynağında `dkim=pass` ve `spf=pass` görünüyor (Gmail'de "Show original").
 

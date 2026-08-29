@@ -1,7 +1,7 @@
 # Faz 5: Altyapı vitrini (Gatus status widget), Umami, bakım otomasyonu Implementation Plan
 
 
-> Durum: Başlamadı; Faz 4 devir notundaki uyarılar ve devredilen küçük işler bu plana girdi olarak okunmalı
+> Durum: Kod tarafı uygulandı (PR #31, 2026-08-28, v0.3.1); panel adımları `handoffs/faz-5-manual-checklist.md`'de. Düzeltme notu (2026-08-28): bu plan `.sh` ana domain varsayımıyla yazıldı ve `status.dogancanyildiz.sh` / `analytics.dogancanyildiz.sh` gibi hostname'ler kullanıyor; `.sh` alan adı kayıtlı değil, fiili uygulama `status.dogancanyildiz.com` ve `analytics.dogancanyildiz.com` ile yapıldı. Plan metni tarihsel kayıt olarak değiştirilmedi, hostname'ler için `infra/` ve `.env.example` geçerlidir (bkz. `docs/plans/README.md` ek notu).
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Yayına çıkmış siteye, kendi sunucusundaki Gatus'tan beslenen canlı bir "Systems" bölümü, self-host Umami analytics ve doğrulanmış bir bakım/otomatik-redeploy zinciri eklemek; topoloji bilgisi (hostname, port, IP, iç adres) hiçbir koşulda client'a sızmadan.

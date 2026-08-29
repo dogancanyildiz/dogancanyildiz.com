@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
 import { buildInfo, formatBuildSha } from "@/lib/build-info";
 import { getSiteStatus } from "@/lib/status";
@@ -10,7 +9,13 @@ import { cn } from "@/lib/utils";
  * Hard-coded on purpose. This line names technologies, never machines: no
  * hostname, no port, no internal service address, no IP.
  */
-const STACK = ["Next.js", "Docker", "Coolify", "Traefik", "Cloudflare"] as const;
+const STACK = [
+  "Next.js",
+  "Docker",
+  "Coolify",
+  "Traefik",
+  "Cloudflare",
+] as const;
 
 /**
  * Candidates for a later version, taken from docs/05-backend-icerik-ve-servisler.md
@@ -26,10 +31,19 @@ const STACK = ["Next.js", "Docker", "Coolify", "Traefik", "Cloudflare"] as const
  *   - GitHub commit activity through the public GitHub API
  */
 
+/**
+ * Both timestamps rendered below (deploy date, last check) are UTC instants
+ * from CI / Gatus. `timeZoneName: "short"` spells that out for every visitor
+ * instead of silently showing a time that looks local but is not.
+ */
 const DATE_FORMAT = {
-  dateStyle: "medium",
-  timeStyle: "short",
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
   timeZone: "UTC",
+  timeZoneName: "short",
 } as const;
 
 function SystemsNotice({ label }: { label: string }) {
@@ -49,7 +63,7 @@ function SystemsField({
 }) {
   return (
     <div className="space-y-2">
-      <dt className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground/70">
+      <dt className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
         {label}
       </dt>
       <dd className="text-sm font-medium text-foreground">{children}</dd>
@@ -64,7 +78,13 @@ async function SystemsPanel() {
     getSiteStatus(),
   ]);
   const buildSha = buildInfo.sha ? formatBuildSha(buildInfo.sha) : null;
-  const buildDate = buildInfo.date.trim() ? buildInfo.date : null;
+  const parsedBuildDate = buildInfo.date.trim()
+    ? new Date(buildInfo.date)
+    : null;
+  const buildDate =
+    parsedBuildDate && !Number.isNaN(parsedBuildDate.getTime())
+      ? parsedBuildDate
+      : null;
 
   if (!status) {
     return <SystemsNotice label={t("unavailable")} />;
@@ -79,7 +99,7 @@ async function SystemsPanel() {
               aria-hidden="true"
               className={cn(
                 "size-2 rounded-full",
-                status.up ? "bg-primary" : "bg-destructive",
+                status.up ? "bg-primary" : "bg-destructive"
               )}
             />
             {status.up ? t("up") : t("down")}
@@ -96,7 +116,7 @@ async function SystemsPanel() {
         </SystemsField>
 
         <SystemsField label={t("deployLabel")}>
-          {buildDate ?? t("noData")}
+          {buildDate ? format.dateTime(buildDate, DATE_FORMAT) : t("noData")}
         </SystemsField>
 
         <SystemsField label={t("commitLabel")}>
@@ -104,28 +124,38 @@ async function SystemsPanel() {
         </SystemsField>
 
         <div className="space-y-2 sm:col-span-2 lg:col-span-4">
-          <dt className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground/70">
+          <dt className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
             {t("stackLabel")}
           </dt>
-          <dd className="text-sm font-medium text-foreground">{STACK.join(" · ")}</dd>
+          <dd className="text-sm font-medium text-foreground">
+            {STACK.join(" · ")}
+          </dd>
         </div>
       </dl>
 
-      <p className="text-xs text-muted-foreground">
-        {t("lastCheck", {
-          time: format.dateTime(new Date(status.lastCheck), DATE_FORMAT),
-        })}
-      </p>
+      {status.lastCheck ? (
+        <p className="text-xs text-muted-foreground">
+          {t("lastCheck", {
+            time: format.dateTime(new Date(status.lastCheck), DATE_FORMAT),
+          })}
+        </p>
+      ) : null}
     </div>
   );
 }
 
+/**
+ * Renders a plain section, not a PageSection: the home page already wraps
+ * every section in one PageSection (src/app/[lang]/page.tsx), so opening a
+ * second one here would double the vertical rhythm and horizontal padding.
+ */
 export async function Systems() {
   const t = await getTranslations("systems");
 
   return (
-    <PageSection innerClassName="space-y-8">
+    <div className="space-y-8">
       <PageHeader
+        as="h2"
         eyebrow={t("eyebrow")}
         title={t("title")}
         description={t("description")}
@@ -133,6 +163,6 @@ export async function Systems() {
       <Suspense fallback={<SystemsNotice label={t("unavailable")} />}>
         <SystemsPanel />
       </Suspense>
-    </PageSection>
+    </div>
   );
 }

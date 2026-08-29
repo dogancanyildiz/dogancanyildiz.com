@@ -6,6 +6,9 @@ coverage
 package-lock.json
 next-env.d.ts
 public
+# docs/ and content/ (MDX prose, not code) stay out of prettier on purpose:
+# reflowing paragraph text on every save fights hand wrapped Turkish prose
+# and content/**/*.mdx frontmatter, for no behavioural gain.
 docs
 .local
 .nodeterm
@@ -13,5 +16,6 @@ docs
 src/app/favicon.ico
 .velite
 content
-tests/fixtures/.velite-valid
 tests/fixtures/.velite-invalid
+tests/fixtures/.velite-invalid-links
+tests/fixtures/.velite-schema-fields

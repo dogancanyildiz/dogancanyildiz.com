@@ -51,7 +51,7 @@ const FORBIDDEN_PATTERNS: Array<{ label: string; pattern: RegExp }> = [
 function shouldScanFile(file: string): boolean {
   if (!existsSync(file)) return false;
   if (BINARY_EXTENSIONS.some((ext) => file.endsWith(ext))) return false;
-  if (file.endsWith(".test.ts")) return false;
+  if (file.endsWith(".test.ts") || file.endsWith(".test.tsx")) return false;
   return true;
 }
 

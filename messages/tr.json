@@ -20,9 +20,9 @@
     "tagline": "Web uygulamaları geliştiriyorum, çalıştıkları altyapıyı da kendim işletiyorum.",
     "intro": "Konya'da yaşayan bir full-stack geliştiriciyim. Next.js ve Node.js ile web uygulamaları geliştiriyorum ve bunları kendim yayına alıyorum: Docker, GitHub Actions, Coolify ve Linux sunucular. Geliştirmenin yanında CAPT sertifikasına sahibim, Cisco CCNA hattını ve CyberOps Associate eğitimini tamamladım.",
     "availableForWork": "Seçili işler için uygunum",
-    "metricYearsLabel": "Yıllık teslim",
+    "metricYearsLabel": "Deneyim yılı",
     "metricYearsValue": "5",
-    "metricProjectsLabel": "Case study",
+    "metricProjectsLabel": "Vaka çalışması",
     "metricProjectsValue": "5",
     "metricFocusLabel": "Odak",
     "metricFocusValue": "Full-stack + DevOps",
@@ -53,7 +53,6 @@
     "linkedin": "LinkedIn",
     "rss": "RSS",
     "selfHosted": "Coolify üzerinde self-host.",
-    "healthLink": "API sağlık",
     "lastUpdated": "Son güncelleme {date}"
   },
   "about": {
@@ -78,7 +77,9 @@
     "languages": "Ana dilim Türkçe. Yazılı İngilizceyi her gün kullanıyorum: dokümantasyon, depolar ve bu sitedeki yazılar.",
     "downloadCv": "CV'yi indir",
     "testimonialsTitle": "Referanslar",
-    "subnavLabel": "Bu sayfada"
+    "subnavLabel": "Bu sayfada",
+    "profileImageAlt": "Doğan Can Yıldız, portre fotoğrafı",
+    "emptyList": "Burada henüz bir kayıt yok."
   },
   "projects": {
     "title": "Projeler",
@@ -89,7 +90,8 @@
     "outcome": "Sonuç",
     "viewLive": "Canlı site",
     "viewSource": "Kaynak kod",
-    "back": "Tüm projeler"
+    "back": "Tüm projeler",
+    "empty": "Henüz yayımlanmış proje yok."
   },
   "blog": {
     "title": "Yazılar",
@@ -100,7 +102,7 @@
   },
   "contact": {
     "title": "İletişim",
-    "description": "İlginç projelere ve sohbetlere açığım.",
+    "description": "Bir proje, bir pozisyon ya da kendi sunucusunda barındırma üzerine bir soru için yazın. Her mesajı okuyorum ve birkaç gün içinde yanıtlıyorum.",
     "intro": "İlginç projelere ve sohbetlere açığım. Bana en hızlı ulaşma yolu e-posta.",
     "ctaTitle": "Bir proje mi düşünüyorsunuz?",
     "ctaBody": "Ne geliştirmek istediğinizi yazın. Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
@@ -109,7 +111,7 @@
     "locationLabel": "Konum",
     "location": "Konya, Türkiye",
     "trustTitle": "Gizlilik",
-    "trustBody": "Form verileri yalnızca bana e-posta ile iletilir; üçüncü taraflarla satılmaz veya paylaşılmaz.",
+    "trustBody": "Form verileri, bu sitenin kullandığı posta sağlayıcısı Resend üzerinden bana e-posta olarak ulaşır; bunun dışında paylaşılmaz ya da satılmaz. Ziyaretler, kendi sunucumda çalışan çerezsiz Umami ile sayılır ve kişisel veri tutulmaz.",
     "responseExpectation": "Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
     "form": {
       "name": "Ad",
@@ -122,7 +124,16 @@
       "sending": "Gönderiliyor",
       "success": "Teşekkürler, mesajınız yola çıktı. Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
       "error": "Mesaj gönderilemedi. Lütfen doğrudan e-posta gönderin.",
-      "honeypotLabel": "Bu alanı boş bırakın"
+      "honeypotLabel": "Bu alanı boş bırakın",
+      "errorNameRequired": "Lütfen adınızı yazın.",
+      "errorNameInvalid": "Adınızı satır sonu içermeden yazın.",
+      "errorEmailRequired": "Lütfen e-posta adresinizi yazın.",
+      "errorEmailInvalid": "Lütfen geçerli bir e-posta adresi yazın.",
+      "errorMessageRequired": "Lütfen bir mesaj yazın.",
+      "errorMessageInvalid": "Mesajınızı düz metin olarak yazın.",
+      "errorFields": "Lütfen işaretlenen alanları kontrol edin.",
+      "errorTimeout": "İstek çok uzun sürdü. Mesajınız yine de bana ulaşmış olabilir, tekrar göndermeden önce biraz bekleyin.",
+      "retryAfter": "{seconds} sn sonra tekrar deneyin"
     }
   },
   "notFound": {
@@ -131,9 +142,17 @@
     "description": "Aradığınız sayfa yok ya da yeni bir adrese taşınmış.",
     "backHome": "Ana sayfaya dön"
   },
+  "errorPage": {
+    "title": "Bir şeyler ters gitti",
+    "description": "Bu sayfa yüklenemedi. Yeniden denemek çoğu zaman yeterli oluyor; olmazsa hata sunucuda kayda alındı.",
+    "retry": "Yeniden dene",
+    "backHome": "Ana sayfaya dön",
+    "digestLabel": "Hata referansı"
+  },
   "metadata": {
-    "defaultTitle": "Doğan Can Yıldız",
-    "defaultDescription": "Next.js ve Node.js ile ölçeklenebilir web uygulamaları geliştiren, bunları kendi Docker altyapısında yayına alan full-stack geliştirici. CAPT sertifikalı. Konya, Türkiye.",
+    "defaultTitle": "Doğan Can Yıldız | Full-Stack Web Geliştirici ve DevOps Mühendisi",
+    "siteName": "Doğan Can Yıldız",
+    "defaultDescription": "Next.js ve Node.js ile web uygulamaları geliştiren, kendi Docker altyapısında yayına alan full-stack geliştirici. CAPT sertifikalı, Konya.",
     "ogAlt": "Doğan Can Yıldız, Full-Stack Web Geliştirici ve DevOps Mühendisi"
   },
   "api": {
@@ -141,7 +160,10 @@
     "emailNotConfigured": "E-posta gönderimi sunucuda yapılandırılmamış.",
     "sendFailed": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.",
     "tooManyRequests": "Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin.",
-    "bodyTooLarge": "İstek gövdesi çok büyük."
+    "bodyTooLarge": "İstek gövdesi çok büyük.",
+    "unsupportedMediaType": "Desteklenmeyen içerik türü. İletişim formu JSON gönderir.",
+    "forbiddenOrigin": "Bu istek iletişim formundan gelmedi.",
+    "sendTimeout": "Posta servisi zamanında yanıt vermedi. Mesaj yine de gönderilmiş olabilir, tekrar göndermeden önce biraz bekleyin."
   },
   "systems": {
     "eyebrow": "Sistemler",

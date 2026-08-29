@@ -115,6 +115,7 @@ describe("sitemap", () => {
       matchedAny = true;
 
       const [, trPrefix, section, slug] = match;
+      if (!slug) throw new Error(`no slug captured from ${entry.url}`);
       const locale = trPrefix ? "tr" : "en";
 
       if (section === "blog") {
@@ -138,6 +139,99 @@ describe("sitemap", () => {
     const sitemap = (await import("@/app/sitemap")).default;
 
     expect(JSON.stringify(sitemap())).not.toContain("example.com");
+  });
+});
+
+describe("sitemap serialisation", () => {
+  it("carries a resolvable absolute url, changefreq and priority on every entry", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+
+    for (const entry of sitemap()) {
+      expect(() => new URL(entry.url)).not.toThrow();
+      // Compare the parsed origin, not a string prefix: a prefix check would
+      // also accept https://dogancanyildiz.com.evil.example.
+      expect(new URL(entry.url).origin).toBe("https://dogancanyildiz.com");
+      expect(entry.changeFrequency).toBeTruthy();
+      expect(typeof entry.priority).toBe("number");
+    }
+  });
+
+  it("gives every entry an x-default alternate", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+
+    for (const entry of sitemap()) {
+      const languages = entry.alternates?.languages;
+      expect(languages, entry.url).toBeDefined();
+      expect(languages?.["x-default"], entry.url).toBeTruthy();
+    }
+  });
+
+  it("leaves lastmod off the static pages instead of stamping the build time", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const entries = sitemap();
+    const staticUrls = [
+      "https://dogancanyildiz.com/",
+      "https://dogancanyildiz.com/tr",
+      "https://dogancanyildiz.com/about",
+      "https://dogancanyildiz.com/tr/contact",
+    ];
+
+    // A build timestamp told a crawler the whole site changed on every deploy.
+    for (const url of staticUrls) {
+      const entry = entries.find((item) => item.url === url);
+      expect(entry, url).toBeDefined();
+      expect(entry?.lastModified, url).toBeUndefined();
+    }
+  });
+
+  it("never dates a content entry in the future", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const now = Date.now();
+
+    for (const entry of sitemap()) {
+      if (!entry.lastModified) continue;
+      expect(new Date(entry.lastModified).getTime()).toBeLessThanOrEqual(now);
+    }
+  });
+});
+
+// F-072: the guard that keeps an untranslated page out of the hreflang set has
+// to hold for a slug that exists in one locale only. Every real content file
+// happens to be bilingual today, so a test built on the real collections
+// cannot observe the single locale branch at all.
+describe("hreflang alternates for partly translated content", () => {
+  it("does not advertise a locale the content was never translated into", async () => {
+    const { buildLanguageAlternates } = await import("@/lib/seo/alternates");
+    const languages = buildLanguageAlternates("/blog/only-in-turkish", ["tr"]);
+
+    expect(languages).toEqual({
+      tr: "https://dogancanyildiz.com/tr/blog/only-in-turkish",
+      "x-default": "https://dogancanyildiz.com/tr/blog/only-in-turkish",
+    });
+    expect(languages.en).toBeUndefined();
+  });
+
+  it("prefers english for x-default when both locales exist", async () => {
+    const { buildLanguageAlternates } = await import("@/lib/seo/alternates");
+    const languages = buildLanguageAlternates("/projects/both", ["en", "tr"]);
+
+    expect(languages["x-default"]).toBe(languages.en);
+  });
+
+  it("falls back to the only available locale for x-default", async () => {
+    const { buildLanguageAlternates } = await import("@/lib/seo/alternates");
+    const languages = buildLanguageAlternates("/projects/tr-only", ["tr"]);
+
+    expect(languages["x-default"]).toBe(languages.tr);
+  });
+
+  it("is the same helper the page head uses, so the two can never disagree", async () => {
+    const { buildAlternates, buildLanguageAlternates } =
+      await import("@/lib/seo/alternates");
+
+    expect(buildAlternates("tr", "/blog/x", ["tr"]).languages).toEqual(
+      buildLanguageAlternates("/blog/x", ["tr"], "tr")
+    );
   });
 });
 

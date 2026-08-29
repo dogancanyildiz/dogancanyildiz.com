@@ -1,5 +1,5 @@
 # Yönetici Özeti ve Ana Karar
-Durum: Kısmen uygulandı (Faz 0-3 main'de PR #2-#5, Faz 4 PR #6 açık), kalan: Faz 4 merge kararı ve teslimatlar, Faz 5 · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Kod tarafı uygulandı (Faz 0-5 main'de, PR #2-#6 ve #31, v0.3.1; 28 Ağustos denetiminin kod bulguları `feature/audit-closure` dalında kapatıldı), kalan: sahibinin panel/DNS adımları, içerik teslimatları, canlı doğrulamalar ve `.sh` alan adı kararı · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -39,8 +39,9 @@ Aşağıdaki kararlar kategori bazında gruplandı; her biri kendi detay doküma
 | 1. Deploy hattı | Her push'ta kendi sunucusunda otomatik yayın, PR preview, doğru domain yönlendirmesi. | Uygulandı (main, PR #3); panel/Coolify adımları sahibinin manuel checklist'inde ayrıca doğrulanacak |
 | 2. i18n yeniden mimarisi | İki dil ayrı URL'de, tüm içerik route'ları build'de prerender, hreflang/canonical doğru. | Uygulandı (main, PR #4) |
 | 3. Tasarım sistemi | Font gerçekten yüklensin, palet nötrlensin, mobil menü gelsin, hareket ve erişilebilirlik toparlansın. | Uygulandı (main, PR #5) |
-| 4. İçerik ve yayın | Şablon persona tamamen gitsin, gerçek case study'ler ve ilk blog yazıları iki dilde yayına çıksın; bu fazın sonu launch. | PR #6 açık, CI yeşil, merge kararı sahibinde; sahibinin teslim edeceği içerikler bekleniyor |
-| 5. Altyapı vitrini ve ölçüm | Gatus tabanlı status widget, Umami, Renovate/Dependabot otomasyonu; yayın sonrası. | Başlamadı |
+| 4. İçerik ve yayın | Şablon persona tamamen gitsin, gerçek case study'ler ve ilk blog yazıları iki dilde yayına çıksın; bu fazın sonu launch. | Uygulandı (main, PR #6, 2026-08-27); sahibinin teslim edeceği içerikler (kapaklar, sertifika linkleri, Konuşmalar) ve metin onayı bekleniyor, launch kapısının manuel maddeleri koşulmadı |
+| 5. Altyapı vitrini ve ölçüm | Gatus tabanlı status widget, Umami, Dependabot + CodeQL otomasyonu; yayın sonrası. | Kod tarafı uygulandı (main, PR #31, v0.3.1, 2026-08-28); Coolify/Cloudflare panel adımları `plans/handoffs/faz-5-manual-checklist.md`'de sahibinde |
+| Denetim kapanışı (2026-08-28) | 16 boyutlu denetimin 162 bulgusundan kod tarafında kapatılabilen her şey: contact API sertleştirme, erişilebilirlik, performans, güvenlik başlıkları, SEO/JSON-LD, CI/Docker, test altyapısı. | `feature/audit-closure` dalında tamamlandı, PR #34 (dev) 2026-08-30'da açıldı; ayrıntı `plans/handoffs/denetim-kapanisi-2026-08-28.md` |
 
 Detay: [10-yol-haritasi.md](./10-yol-haritasi.md).
 
@@ -55,7 +56,7 @@ Hızlı referans için ana bağımlılıkların hedef sürümleri:
 | tailwindcss | 4.x | 4.3.x | Uygulandı, package-lock'ta çözülen sürüm 4.3.3 |
 | next-intl | yok | 4.13.7 | Uygulandı, package.json'da 4.13.7 |
 | velite | yok | 0.4.0 (exact pin) | Uygulandı, package.json'da exact 0.4.0 |
-| motion (framer-motion) | ^12.34.3 | motion 13.1.1 | Uygulandı, package.json'da motion 13.1.1 |
+| motion (framer-motion) | ^12.34.3 | motion 13.1.1 | Uygulandı (Faz 0-3); **2026-08-28'de kaldırıldı**: JS animasyonu SSR görünürlüğünü hidrasyona bağlıyordu, sitede artık motion bağımlılığı yok (bkz. 03) |
 | node | pin yok | 24 (.nvmrc), engines.node >=24 | Uygulandı, .nvmrc 24 ve engines.node >=24 |
 
 typescript ve lucide-react major yükseltmeleri kasten bu listede yok; breaking değişiklik riski taşıdıkları için güvenlik yamasından ayrı, sonraki bir PR'a bırakıldı. Tam gerekçe ve yükseltme sırası: [02-stack-karari.md](./02-stack-karari.md).
@@ -106,10 +107,14 @@ Bu bölüm kontrol oturumu tarafından repodaki gerçek duruma bakılarak doğru
 | 1. Deploy hattı | feature/faz-1-deploy-hatti | #3 | Merged -> main |
 | 2. i18n yeniden mimarisi | feature/faz-2-i18n-app-lang | #4 | Merged -> main |
 | 3. Tasarım sistemi | feature/faz-3-tasarim-sistemi | #5 | Merged -> main |
-| 4. İçerik ve yayın | feature/faz-4-icerik-ve-yayin | #6 | Açık, CI yeşil, 21 commit, HEAD 8b4fe40, merge kararı sahibinde |
-| 5. Altyapı vitrini ve ölçüm | yok | yok | Başlamadı |
+| 4. İçerik ve yayın | feature/faz-4-icerik-ve-yayin | #6 | Merged -> main (2026-08-27) |
+| Ana domain `.com`, dallanma ve release akışı | feature/com-primary-and-release-flow | #7 (dev), #8 (main) | Merged, v0.2.0 |
+| Güven sinyalleri, editoryal UI, DCY marka işareti | feature/trust-ui-brand-refresh | #11 (dev), #12 (main) | Merged, v0.3.0 |
+| Repo public: Dependabot, CodeQL, güvenlik politikası, lisans | feature/public-repo-security | #14 | Merged -> dev |
+| 5. Altyapı vitrini ve ölçüm | dev | #31 (main) | Merged, v0.3.1 (2026-08-28) |
+| Denetim kapanışı | feature/audit-closure | #34 (dev) | Açık, 2026-08-30 |
 
-Bunların dışında, bir faz sayılmayan çapraz kesen bir altyapı değişikliği daha var: **ana domainin dogancanyildiz.com'a sabitlenmesi ve dallanma/sürüm otomasyonu** (dal `feature/com-primary-and-release-flow`, `dev`'den açıldı). Kapsamı: `NEXT_PUBLIC_SITE_URL`/sitemap/robots/testlerin `.com`'a geçirilmesi, `ci.yml`'in `dev` ve `main`'de zorunlu koşması, `main`'e her merge'de otomatik tag + GitHub Release + `CHANGELOG.md` üreten `release.yml`. Kod tarafı bu dalda tamamlandı ve kalite kapıları yeşil; bu değişiklik dev'e PR ile girer, PR numarası burada henüz belirtilmiyor, ana oturum PR açıldığında bu satırı günceller. Detay: [06-devops-ve-deploy.md](./06-devops-ve-deploy.md) "Dallanma ve sürüm akışı".
+Bunların dışında, bir faz sayılmayan çapraz kesen bir altyapı değişikliği daha var: **ana domainin dogancanyildiz.com'a sabitlenmesi ve dallanma/sürüm otomasyonu** (dal `feature/com-primary-and-release-flow`, PR #7 dev'e, PR #8 main'e, ilk otomatik sürüm v0.2.0). Kapsamı: `NEXT_PUBLIC_SITE_URL`/sitemap/robots/testlerin `.com`'a geçirilmesi, `ci.yml`'in `dev` ve `main`'de zorunlu koşması, `main`'e her merge'de otomatik tag + GitHub Release + `CHANGELOG.md` üreten `release.yml` (2026-08-28'den beri CI'ın başarılı bitmesini `workflow_run` ile bekliyor). Detay: [06-devops-ve-deploy.md](./06-devops-ve-deploy.md) "Dallanma ve sürüm akışı".
 
 ### Kapılar (Faz 4 HEAD, 8b4fe40)
 
@@ -127,6 +132,23 @@ Faz 0 ve Faz 1 workflow içi faz liderleriyle yürütüldü; Faz 1'de faz lideri
 - **Faz 5 hiç başlamadı:** Gatus container + status widget, Umami, Renovate GitHub App kurulumu, Next aylık güvenlik takibi, CSP nonce yolunun yeniden ele alınması, Faz 4'ten devredilen küçük test/sitemap x-default işleri.
 - **Cevaplandı, canlıya alınmadı:** iletişim domain'inin son hali. **Karar değişikliği (2026-08-27):** ana domain dogancanyildiz.com, dogancanyildiz.sh 301 ile yönlenir (tarihsel öneri "dogancanyildiz.sh ana domain, .com 301" idi); Cloudflare Redirect Rule'un canlıya alınması hâlâ bekliyor.
 
+## Uygulama durumu (2026-08-28)
+
+Bu bölüm 2026-08-27 tarihli bölümün üstünde geçerlidir; o bölüm tarihsel kayıt olarak duruyor.
+
+**Sürümler ve PR'lar.** Faz 4 PR #6 ile main'e girdi (2026-08-27). Aynı gün ana domain `.com` ve release akışı (PR #7/#8, v0.2.0), güven sinyalleri ve editoryal UI yenilemesi (PR #11/#12, v0.3.0). 2026-08-28'de repo public yapıldı (PR #14: Dependabot, CodeQL, secret scanning, SECURITY.md, `security.txt`, LICENSE: kod MIT, içerik telif saklı), dokuz bağımlılık PR'ı merge edildi (react, resend, lucide 1.34, shadcn 4.19, simple-icons 16, audit fix; PR #21-#30), Faz 5 PR #31 ile main'e girdi ve PR #32 sonrası v0.3.1 kesildi.
+
+**28 Ağustos denetimi.** 16 boyut, 254 ajan (sabah) + 66 ajan (akşam yeniden doğrulama), 162 bulgu, adversarial doğrulama; rapor sahibinin Claude artifact'ında ("dogancanyildiz.com denetimi"). Aynı gün akşam kod tarafında kapatılabilen bulguların tamamı `feature/audit-closure` dalında sekiz dosya-ayrık küme (contact, layout-a11y, perf-motion, css-tokens, security-config, pages-seo, tests-ci, status-infra), ardından çapraz kesen bir 2. tur (tsconfig strict bayrakları, ESLint tipli kurallar ve `--max-warnings=0`, jsdom + Testing Library render testleri) ve iki bağımsız doğrulama ile kapatıldı. Kapsam, kararlar ve sahibine kalanlar: [plans/handoffs/denetim-kapanisi-2026-08-28.md](./plans/handoffs/denetim-kapanisi-2026-08-28.md). Karar dokümanlarına yansıyan başlıca değişiklikler: contact API sözleşmesi ([05](./05-backend-icerik-ve-servisler.md)), güvenlik başlıkları ve CSP raporlama ([09](./09-guvenlik.md)), OG görseli ve JSON-LD kimlikleri ([07](./07-seo-ve-metadata.md)), CI/Docker/release sertleştirmesi ([06](./06-devops-ve-deploy.md)), token sözleşmesi ve hareket kararı ([03](./03-tasarim-ui-ux.md)), içerik alanları ([08](./08-icerik-stratejisi.md)).
+
+**Kalanlar (2026-08-28).**
+
+- **Canlı site kapalı:** her HTTPS yolu Cloudflare 526 (origin'de Traefik router yüklü değil, TLS handshake yok). Coolify panelinde uygulama ve Custom Labels doğrulanmalı; kalıcı çözüm Cloudflare Origin CA. Bu düzelmeden hiçbir canlı doğrulama (Lighthouse, hreflang, Search Console, contact uçtan uca, OG önizleme) yapılamaz.
+- **Panel adımları hiç uygulanmadı:** Coolify (env katmanları, `NEXT_PUBLIC_BUILD_SHA/DATE`, Gatus ve Umami kaynakları, `GATUS_ALERT_WEBHOOK_URL`), Cloudflare (Always Use HTTPS, Min TLS 1.2, CAA, managed robots.txt, Cache Rule, rate limiting, Bot Fight Mode), Traefik (trustedIPs, HSTS middleware, origin kilidi `DOCKER-USER`), Resend (SPF/DKIM/DMARC, mevcut DMARC `p=none` sertleştirme), `TRUST_CF_CONNECTING_IP` ancak origin kilidinden sonra.
+- **`.sh` alan adı kararı:** kayıtlı değil; ya kaydedilir ya kapsam dışı ilan edilir.
+- **Sahibinin teslimatları ve onayları:** proje kapakları (`cover` + `coverAlt`), sertifika `verifyUrl` değerleri (yalnızca `https://`), Konuşmalar verisi, profil fotoğrafı, blog/case study metin onayı (üç EN çeviri dahil), CV içeriği, Wikonya adı, ticket repo linki; görsel onaylar: ana sayfa giriş animasyonlarının kaldırılması, tema düğmesi ikon anlamı, pill'lerin normal yazımı, footer/CTA başlık ölçeği.
+- **Ölçüm penceresi:** `CSP_REPORT_ONLY=1` ile bir deploy, sıkı CSP'nin maliyeti loglardan okunur.
+- **Kalan teknik borç** (küçük): `localePath` önek koruması, `assert-static-routes` locale listesi, yetim `velite --watch`, typescript 7 / eslint 10 majorları, dev `npm audit` 2 high (velite -> sharp, build zamanı, kabul edildi). Tam liste yerel `audit/acik-kalanlar.md` defterinde.
+
 ## Uygulama notları
 
 Faz sırası bağımlılık taşıyor. Faz 0 ve Faz 1 yayından bağımsız, hemen başlanabilir ve içerik onayı beklenirken bile ilerler; ikisi arasında sıkı bir sıra yok, paralel yürütülebilir. Faz 2 (i18n restructure) Faz 1'deki deploy hattı üzerinden test edilebilmesi için Faz 1'den sonra planlandı ve tek PR'da bitirilecek büyük hamle olarak işaretlendi, kısmi commit'lerle yarım bırakılmayacak; doğrulama kriteri build çıktısında tüm içerik route'larının statik olması, yalnızca /api/* altındaki route'ların dynamic kalması. Faz 3 (tasarım sistemi) Faz 2'den bağımsız çalışabilir ama aynı dosyalara (layout, globals.css) dokunduğu için sıraya alındı, çakışma riski azaltıldı. Faz 4 sonu launch noktası: Lighthouse ölçümü, hreflang testi, Search Console doğrulaması ve contact formu uçtan uca testi burada zorunlu kılınıyor; bu dört kontrol geçmeden domain yönlendirmesi (dogancanyildiz.sh -> dogancanyildiz.com) canlıya alınmıyor.
@@ -142,14 +164,14 @@ Domain ve ortam ayrımı yayın öncesi kritik: dogancanyildiz.com ana domain (*
 | Stack | Next.js 16.3.3'te kal, migrate değil incremental-modernize | Yüksek (0.88) | 02-stack-karari.md | Uygulandı (Faz 0, PR #2) |
 | Tasarım / UI-UX | Terminal Editorial yönü, nötr palet + tek aksan, font vendoring | Yüksek | 03-tasarim-ui-ux.md | Uygulandı (Faz 3, PR #5) |
 | i18n | app/[lang] + next-intl 4.13.7, as-needed prefix | Orta-yüksek, tripwire'lı | 04-i18n.md | Uygulandı (Faz 2, PR #4) |
-| Backend / içerik altyapısı | Velite + MDX, Resend sertleştirme, Gatus status widget | Yüksek | 05-backend-icerik-ve-servisler.md | Kısmen uygulandı: Velite + Resend Faz 0/4'te (PR #2, #6); Gatus status widget Faz 5'te, başlamadı |
-| DevOps / deploy | Docker + Coolify git tabanlı build, Cloudflare proxied + Redirect Rules tek atlama 301 (Traefik 301 yedek yol) | Yüksek | 06-devops-ve-deploy.md | Kısmen uygulandı (Faz 1, PR #3): Dockerfile/CI/Coolify dokümantasyonu kodda, kalan: Coolify panel kurulumu ve Cloudflare 301'in canlıya alınması |
-| SEO / metadata | generateMetadata + hreflang + JSON-LD | Yüksek | 07-seo-ve-metadata.md | Uygulandı (Faz 2-4, PR #4, #6) |
-| İçerik stratejisi | Şablon persona kaldırılır, case study formatı | Orta, açık sorulara bağlı | 08-icerik-stratejisi.md | Kısmen uygulandı (Faz 4, PR #6 açık), kalan: sertifika linkleri, kapaklar, Konuşmalar verisi, sahibinin metin/CV onayı |
-| Güvenlik | Yükseltme + güvenlik başlıkları + Renovate otomasyonu zorunlu | Yüksek | 09-guvenlik.md | Kısmen uygulandı (Faz 0, PR #2): yükseltme ve başlıklar kodda, kalan: Renovate GitHub App kurulumu (Faz 5), npm audit ayrı PR |
-| Yol haritası | 6 fazlı plan (Faz 0-5) | Yüksek | 10-yol-haritasi.md | Kısmen uygulandı: Faz 0-3 main'de, Faz 4 PR #6 açık, Faz 5 başlamadı |
-| Ana domain | dogancanyildiz.com ana domain, dogancanyildiz.sh yalnızca 301 ile ona yönlenen ikincil domain (karar değişikliği; tarihsel öneri metni tam tersiydi, bkz. yukarıdaki not ve [11-acik-sorular.md](./11-acik-sorular.md) soru 5) | Kesin (sahibin kararı, 2026-08-27) | 07-seo-ve-metadata.md, 06-devops-ve-deploy.md | Kod tarafı uygulandı: `NEXT_PUBLIC_SITE_URL`, sitemap/robots/JSON-LD çıktısı, testler (dal `feature/com-primary-and-release-flow`, dev'e PR ile girer); kalan: Cloudflare Redirect Rule'un (`.sh -> .com` 301) canlıya alınması sahipte |
-| Dallanma ve sürüm | `feature/* -> dev -> main`, main'e her merge otomatik sürüm üretir (tag `vX.Y.Z` + GitHub Release + `CHANGELOG.md`); ilk otomatik sürüm 0.2.0, 1.0.0 launch'ta sahibinin `workflow_dispatch` ile elle kestiği sürüm | Yüksek | 06-devops-ve-deploy.md | Uygulandı: `release.yml`, `ci.yml`'in `dev`+`main`'de koşması, `scripts/release-version.mjs`, `CHANGELOG.md` taban girdisi (dal `feature/com-primary-and-release-flow`, dev'e PR ile girer) |
+| Backend / içerik altyapısı | Velite + MDX, Resend sertleştirme, Gatus status widget | Yüksek | 05-backend-icerik-ve-servisler.md | Uygulandı: Velite + Resend Faz 0/4 (PR #2, #6), Gatus status widget ve Umami Faz 5 (PR #31); contact API 2026-08-28 denetim kapanışında yeniden sertleştirildi (Origin/Content-Type, CRLF, zaman aşımı, Reply-To, alan bazlı hatalar, JSON log); kalan: Gatus/Umami container'larının Coolify'da açılması |
+| DevOps / deploy | Docker + Coolify git tabanlı build, Cloudflare proxied + Redirect Rules tek atlama 301 (Traefik 301 yedek yol) | Yüksek | 06-devops-ve-deploy.md | Kod tarafı uygulandı (Faz 1, PR #3; CI/Docker sertleştirmesi 2026-08-28: SHA pinli action'lar, dependency review, prod audit, imaj smoke testi, cache'li build, `workflow_run`'a bağlı release); kalan: Coolify panel kurulumu, Cloudflare ayarları, origin kilidi, canlı sitenin 526'dan çıkarılması, `.sh` kararı |
+| SEO / metadata | generateMetadata + hreflang + JSON-LD | Yüksek | 07-seo-ve-metadata.md | Uygulandı (Faz 2-4, PR #4, #6; 2026-08-28: OG görseli statik font instance'larıyla düzeltildi, WebSite/BreadcrumbList/@id'li Person, sitemap lastmod politikası, CV noindex) |
+| İçerik stratejisi | Şablon persona kaldırılır, case study formatı | Orta, açık sorulara bağlı | 08-icerik-stratejisi.md | Uygulandı (Faz 4, PR #6; Faz 5 ile iki EN çeviri daha), kalan: sertifika linkleri, kapaklar (`coverAlt` ile), Konuşmalar verisi, sahibinin metin/CV onayı |
+| Güvenlik | Yükseltme + güvenlik başlıkları + bakım otomasyonu zorunlu | Yüksek | 09-guvenlik.md | Uygulandı: yükseltme ve başlıklar (Faz 0), Dependabot + CodeQL + secret scanning (PR #14, Renovate yerine), 2026-08-28: HSTS (geçici olarak uygulamada), XFO/COOP/CORP, CSP raporlama, prod `npm audit` 0; kalan: origin'in Cloudflare'a kilitlenmesi, `TRUST_CF_CONNECTING_IP`, Cloudflare Min TLS/CAA/Always HTTPS |
+| Yol haritası | 6 fazlı plan (Faz 0-5) | Yüksek | 10-yol-haritasi.md | Kod tarafı uygulandı: Faz 0-5 main'de; panel adımları ve launch kapısının manuel maddeleri sahibinde |
+| Ana domain | dogancanyildiz.com ana domain, dogancanyildiz.sh yalnızca 301 ile ona yönlenen ikincil domain (karar değişikliği; tarihsel öneri metni tam tersiydi, bkz. yukarıdaki not ve [11-acik-sorular.md](./11-acik-sorular.md) soru 5) | Kesin (sahibin kararı, 2026-08-27) | 07-seo-ve-metadata.md, 06-devops-ve-deploy.md | Kod tarafı uygulandı (PR #7/#8): `NEXT_PUBLIC_SITE_URL`, sitemap/robots/JSON-LD çıktısı, testler; **2026-08-28 denetimi:** `dogancanyildiz.sh` hiç kayıtlı değil, 301 zinciri karşılıksız; sahibi ya alan adını kaydeder ya `.sh`'ı kapsam dışı ilan eder (bkz. `plans/README.md` ek notu) |
+| Dallanma ve sürüm | `feature/* -> dev -> main`, main'e her merge otomatik sürüm üretir (tag `vX.Y.Z` + GitHub Release + `CHANGELOG.md`); ilk otomatik sürüm 0.2.0, 1.0.0 launch'ta sahibinin `workflow_dispatch` ile elle kestiği sürüm | Yüksek | 06-devops-ve-deploy.md | Uygulandı (PR #7/#8): v0.2.0, v0.3.0, v0.3.1 kesildi; 2026-08-28: `release.yml` artık `main`'e push yerine CI'ın başarılı `workflow_run`'ını bekliyor, `release:check` dev'de de doğru tag'i buluyor |
 
 ### Şimdilik kapsam dışı (YAGNI)
 
