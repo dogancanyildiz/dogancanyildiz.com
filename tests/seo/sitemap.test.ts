@@ -148,7 +148,9 @@ describe("sitemap serialisation", () => {
 
     for (const entry of sitemap()) {
       expect(() => new URL(entry.url)).not.toThrow();
-      expect(entry.url.startsWith("https://dogancanyildiz.com")).toBe(true);
+      // Compare the parsed origin, not a string prefix: a prefix check would
+      // also accept https://dogancanyildiz.com.evil.example.
+      expect(new URL(entry.url).origin).toBe("https://dogancanyildiz.com");
       expect(entry.changeFrequency).toBeTruthy();
       expect(typeof entry.priority).toBe("number");
     }

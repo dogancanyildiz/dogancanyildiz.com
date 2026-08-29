@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -24,20 +24,20 @@ const VENDORED_OG_TTF = [
 
 describe("vendored fonts", () => {
   it.each(VENDORED_WOFF2)("%s exists and is a real woff2 file", (relative) => {
-    const file = join(root, relative);
-    expect(existsSync(file)).toBe(true);
-    expect(statSync(file).size).toBeGreaterThan(5000);
+    // Read once: a missing file throws here, so no exists/stat probe is
+    // needed before the read (and none should precede it, see CodeQL
+    // js/file-system-race).
+    const bytes = readFileSync(join(root, relative));
+    expect(bytes.length).toBeGreaterThan(5000);
     // woff2 magic number: "wOF2"
-    expect(readFileSync(file).subarray(0, 4).toString("latin1")).toBe("wOF2");
+    expect(bytes.subarray(0, 4).toString("latin1")).toBe("wOF2");
   });
 
   it.each(VENDORED_OG_TTF)(
     "%s exists and is a static TrueType file",
     (relative) => {
-      const file = join(root, relative);
-      expect(existsSync(file)).toBe(true);
-      expect(statSync(file).size).toBeGreaterThan(5000);
-      const bytes = readFileSync(file);
+      const bytes = readFileSync(join(root, relative));
+      expect(bytes.length).toBeGreaterThan(5000);
       // TrueType sfnt version 1.0
       expect(bytes.subarray(0, 4).toString("hex")).toBe("00010000");
       // No variation tables: satori cannot parse fvar/gvar outlines.

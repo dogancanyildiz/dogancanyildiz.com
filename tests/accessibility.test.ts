@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { isNavItemActive } from "@/lib/nav";
@@ -161,13 +161,13 @@ describe("theme-color viewport export", () => {
 // components next-intl's client provider actually has to serve.
 function listClientComponentFiles(dir: string): string[] {
   const files: string[] = [];
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
       files.push(...listClientComponentFiles(full));
       continue;
     }
-    if (!/\.(tsx?|jsx?)$/.test(entry)) continue;
+    if (!/\.(tsx?|jsx?)$/.test(entry.name)) continue;
     const source = readFileSync(full, "utf8");
     if (/^\s*["']use client["'];?/.test(source)) files.push(full);
   }
