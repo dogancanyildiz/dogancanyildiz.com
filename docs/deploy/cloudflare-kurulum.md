@@ -63,7 +63,7 @@ concat("https://dogancanyildiz.com", http.request.uri.path)
 
 - [ ] Status code: **301**
 - [ ] Preserve query string: **açık**
-- [ ] Hedef bilerek `https://dogancanyildiz.com` köküne gidiyor, `/en` değil. Zincirli yönlendirme (`.sh -> .com -> .com/en`) yasak, EN zaten kökte servis ediliyor.
+- [ ] Hedef bilerek `https://dogancanyildiz.com` köküne gidiyor. **Güncelleme (2026-08-30):** kökte artık Türkçe servis ediliyor (EN `/en` altında). Eski İngilizce yollar (`/about` vb.) origin'de 308 ile `/en/...`'e taşındığı için `.sh` üzerinden gelen eski bir link fiilen iki atlama yapar (.sh 301 .com, sonra 308); bu bilinçli kabul edilir, tek atlama şartı yalnızca `.sh` kuralının kendisi içindir.
 
 Ayrıca `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi için ikinci, ayrı bir Redirect Rule eklenir (rule name: `www to apex`, filter: `http.host eq "www.dogancanyildiz.com"`, hedef: `concat("https://dogancanyildiz.com", http.request.uri.path)`, 301, path korunur); Coolify'ın dahili www/non-www ayarı bunun için kullanılmaz, tek kaynak burasıdır.
 
@@ -71,7 +71,7 @@ Doğrulama:
 
 ```bash
 curl -sI https://dogancanyildiz.sh/projects | grep -i -E '^(HTTP|location)'
-curl -sI 'https://www.dogancanyildiz.sh/tr/about?utm_source=x' | grep -i -E '^(HTTP|location)'
+curl -sI 'https://www.dogancanyildiz.sh/hakkimda?utm_source=x' | grep -i -E '^(HTTP|location)'
 ```
 
 Beklenen:
@@ -80,7 +80,7 @@ Beklenen:
 HTTP/2 301
 location: https://dogancanyildiz.com/projects
 HTTP/2 301
-location: https://dogancanyildiz.com/tr/about?utm_source=x
+location: https://dogancanyildiz.com/hakkimda?utm_source=x
 ```
 
 Tek atlama şartı: ikinci bir `301` veya `location` satırı çıkmamalı.

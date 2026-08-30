@@ -86,7 +86,7 @@ Bu kararların kod tarafı Faz 3'te (dal `feature/faz-3-tasarim-sistemi`, PR #5,
 
 **OG image / icon.** `src/app/icon.tsx` "DCY" monogramını kararın dark zemin (#0a0c0f) + accent (#4fcc8d) paletiyle render ediyor; `src/app/[lang]/opengraph-image.tsx` gerçek isim, unvan ve lokasyonu Instrument Serif ile basıyor, şablon "Building clean, fast experiences for the web" metni gitti.
 
-**Faz 4 sapmaları (2026-08-27):** Hero metrik/available rozeti, header sr-only isim ve footer Contact CTA site sahibi onayıyla geri alındı (UI/UX yenileme). Contact formundaki konu alanı kaldırılmış halde kaldı (API opsiyonel `subject`'i kabul etmeye devam ediyor).
+**Faz 4 sapmaları (2026-08-27):** Hero metrik/available rozeti, header sr-only isim ve footer Contact CTA site sahibi onayıyla geri alındı (UI/UX yenileme). **Güncelleme (PR #35, 2026-08-30):** contact formunda artık zorunlu, kapalı kümeli bir hizmet başlığı var (`topic`: web/devops/security/other, NativeSelect); `subject` gövdede kabul edilmiyor, posta konusu topic etiketinden türetiliyor. Header görünür tam adı ve yanında GitHub/LinkedIn ikonlarını (SocialLinks, mobil menüde de) taşıyor; hero'daki sosyal ikonlar kalktı; footer etiketli metin bağlantılarına döndü (Privacy ve WhatsApp dahil). /privacy, /coming-soon, /updating ve 404 ortak StatusScreen ailesini kullanıyor; Umami script'i consent banner onayından sonra enjekte ediliyor.
 
 **Hâlâ açık olanlar:**
 - Tarayıcıda ekran görüntüsü turu yapılmadı (Faz 3 manuel checklist'in 14 maddelik listesi, `docs/plans/handoffs/faz-3-manual-checklist.md`, sahibini bekliyor).

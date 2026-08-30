@@ -177,7 +177,7 @@
     "analyticsTitle": "Ziyaret sayımı",
     "analyticsBody": "İzin verirseniz ziyaretler, kendi sunucumdaki Umami ile sayılır. Umami çerez koymaz. Betik yalnızca evet dedikten sonra yüklenir. Gerekli depolama (tema ve bu tercih) o eveti beklemez.",
     "formTitle": "İletişim formu",
-    "formBody": "Form adınızı, e-postanızı ve mesajınızı kendi posta sunucum üzerinden bana iletir. Yanıtlamak için kullanırım. Satmam, başkasına vermem.",
+    "formBody": "Form adınızı, e-postanızı ve mesajınızı kendi posta sunucum üzerinden bana iletir. Yanıtlamak için kullanırım. Satmam, başkasına vermem. Seçtiğiniz hizmet başlığı da mesajla birlikte gelir.",
     "contactTitle": "İletişim",
     "contactBody": "Bu bildirim veya iş için iletişim sayfasından yazın."
   },

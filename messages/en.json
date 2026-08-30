@@ -177,7 +177,7 @@
     "analyticsTitle": "Visit counts",
     "analyticsBody": "If you allow it, visits are counted by a self-hosted Umami instance on my own server. Umami does not set a cookie. The script loads only after you say yes. Necessary storage (theme and this choice) does not wait on that yes.",
     "formTitle": "Contact form",
-    "formBody": "The form sends your name, email and message to me through my own mail server. I use that to reply. I do not sell it or pass it to anyone else.",
+    "formBody": "The form sends your name, email and message to me through my own mail server. I use that to reply. I do not sell it or pass it to anyone else. It also carries the service topic you pick.",
     "contactTitle": "Contact",
     "contactBody": "To ask about this notice or to reach me about work, use the contact page."
   },

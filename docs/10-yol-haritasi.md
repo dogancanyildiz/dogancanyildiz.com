@@ -71,7 +71,7 @@ Büyüklük: L. Repo şu an Docker'a hiç hazır değil (Dockerfile, .dockerigno
 - [x] Person JSON-LD eklenir; language-switcher URL tabanlı çalışacak şekilde yeniden yazılır
 - [x] Contact route (bir Route Handler olduğu için `next/root-params` desteklemiyor) locale'i elle alır
 
-Bitti sayılma kriteri: `next build` çıktısında yalnızca `/api/*` route'ları dynamic işaretli, geri kalan tüm içerik route'ları statik (SSG); `/` ve `/tr` farklı içerik ve farklı `<html lang>` döndürüyor; bir hreflang test aracıyla (ör. technicalseo.com hreflang tag generator/tester) self-referencing ve karşılıklı hreflang hatasız çıkıyor.
+Bitti sayılma kriteri: `next build` çıktısında yalnızca `/api/*` route'ları dynamic işaretli, geri kalan tüm içerik route'ları statik (SSG); `/` (tr) ve `/en` farklı içerik ve farklı `<html lang>` döndürüyor (2026-08-30 TR-varsayılan şeması; `/tr/*` kalıcı 308 ile köke düşer); bir hreflang test aracıyla (ör. technicalseo.com hreflang tag generator/tester) self-referencing ve karşılıklı hreflang hatasız çıkıyor.
 
 Gerçek sonuç (PR #4, main'de merge): beş kapı (`typecheck`, `lint`, `test`, `build`, `verify:routes`) exit 0; 19 dosya / 207 test (düzeltme turuyla 20 dosya / 271 test); `verify:routes` "20 content routes prerendered (6 project pages per locale)"; `next build` çıktısında yalnızca `/api/contact` ve `/api/health` dynamic, prerender-manifest'te 26 route (20 içerik + 6 sistem). hreflang test aracı herkese açık bir URL istediği için bu oturumda koşulmadı, `docs/plans/handoffs/faz-2-manual-checklist.md`'de sahibini bekliyor.
 
