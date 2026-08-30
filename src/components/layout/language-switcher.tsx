@@ -1,10 +1,10 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
 import {
   fillPathname,
   pathnameForLocale,
+  useParams,
   usePathname,
 } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";

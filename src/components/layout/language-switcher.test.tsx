@@ -12,13 +12,9 @@ vi.mock("@/i18n/navigation", async (importOriginal) => {
   return {
     ...actual,
     usePathname: () => currentTemplate,
+    useParams: () => currentParams,
   };
 });
-
-vi.mock("next/navigation", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("next/navigation")>()),
-  useParams: () => currentParams,
-}));
 
 beforeEach(() => {
   currentTemplate = "/about";

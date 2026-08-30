@@ -4,6 +4,11 @@ import { routing } from "./routing";
 export const { Link, redirect, usePathname, useRouter, getPathname } =
   createNavigation(routing);
 
+// Route params are locale independent, but every layout component imports its
+// navigation hooks from this module only (tests/i18n/app-shell.test.ts locks
+// that), so the params hook goes through the same single door.
+export { useParams } from "next/navigation";
+
 export type AppHref = Parameters<typeof getPathname>[0]["href"];
 
 /**
