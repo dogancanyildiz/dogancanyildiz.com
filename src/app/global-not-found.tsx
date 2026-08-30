@@ -16,7 +16,12 @@ import "./globals.css";
 import { fontVariables } from "@/fonts";
 import { routing } from "@/i18n/routing";
 import { localeFromPathname } from "@/lib/locale-from-pathname";
+import { localePath } from "@/lib/seo/alternates";
 import { ThemeProvider } from "@/components/theme-provider";
+import {
+  StatusScreen,
+  statusLinksFor,
+} from "@/components/status/status-screen";
 
 /**
  * 404 document for every path the router cannot match.
@@ -47,30 +52,50 @@ type Locale = (typeof routing.locales)[number];
  * was the hardcoded "/" carrying the Turkish label: it sent the reader to the
  * English home page and offered no way across to the Turkish one.
  */
-function homeHref(locale: Locale): string {
-  return locale === routing.defaultLocale ? "/" : `/${locale}`;
-}
-
 async function documentLocale(): Promise<Locale> {
   const pathname = (await headers()).get("x-pathname") ?? "";
   return localeFromPathname(pathname);
 }
 
-async function messages(locale: string) {
-  return getTranslations({ locale, namespace: "notFound" });
+async function messages(locale: string, namespace: string) {
+  return getTranslations({ locale, namespace });
 }
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await documentLocale();
-  const t = await messages(locale);
+  const t = await getTranslations({ locale, namespace: "notFound" });
   return { title: t("title") };
 }
 
 export default async function GlobalNotFound() {
   const locale = await documentLocale();
-  const t = await messages(locale);
+  const t = await messages(locale, "notFound");
+  const tNav = await messages(locale, "nav");
+  const tBrand = await messages(locale, "brand");
   const secondaryLocale = routing.locales.find((other) => other !== locale);
-  const secondary = secondaryLocale ? await messages(secondaryLocale) : null;
+  const secondary = secondaryLocale
+    ? await messages(secondaryLocale, "notFound")
+    : null;
+
+  const links = [
+    ...statusLinksFor(locale, {
+      home: t("backHome"),
+      projects: tNav("projects"),
+      blog: tNav("blog"),
+      contact: tNav("contact"),
+    }),
+    ...(secondary && secondaryLocale
+      ? [
+          {
+            href: localePath(secondaryLocale, "/"),
+            label: secondary("backHome"),
+            hrefLang: secondaryLocale,
+            lang: secondaryLocale,
+            primary: true as const,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <html lang={locale} className={fontVariables} suppressHydrationWarning>
@@ -83,40 +108,24 @@ export default async function GlobalNotFound() {
         >
           <main className="flex min-h-screen items-center">
             <section className="section-space w-full">
-              <div className="page-shell flex flex-col items-start gap-6">
-                <span className="eyebrow">{t("code")}</span>
-                <h1 className="max-w-3xl text-4xl leading-[1.05] sm:text-5xl">
-                  {t("title")}
-                </h1>
-                <p className="max-w-xl text-lg leading-8 text-muted-foreground">
-                  {t("description")}
-                </p>
-                {secondary && secondaryLocale ? (
-                  <p
-                    lang={secondaryLocale}
-                    className="max-w-xl text-base leading-7 text-muted-foreground"
-                  >
-                    {secondary("title")}. {secondary("description")}
-                  </p>
-                ) : null}
-                <div className="flex flex-wrap gap-5">
-                  <a
-                    className="text-base font-semibold text-primary underline-offset-4 hover:underline"
-                    href={homeHref(locale)}
-                  >
-                    {t("backHome")}
-                  </a>
-                  {secondary && secondaryLocale ? (
-                    <a
-                      className="text-base font-semibold text-primary underline-offset-4 hover:underline"
-                      hrefLang={secondaryLocale}
-                      lang={secondaryLocale}
-                      href={homeHref(secondaryLocale)}
-                    >
-                      {secondary("backHome")}
-                    </a>
-                  ) : null}
-                </div>
+              <div className="page-shell">
+                <StatusScreen
+                  brandName={tBrand("name")}
+                  eyebrow={t("code")}
+                  title={t("title")}
+                  description={t("description")}
+                  extra={
+                    secondary && secondaryLocale ? (
+                      <p
+                        lang={secondaryLocale}
+                        className="max-w-xl text-base leading-7 text-muted-foreground"
+                      >
+                        {secondary("title")}. {secondary("description")}
+                      </p>
+                    ) : null
+                  }
+                  links={links}
+                />
               </div>
             </section>
           </main>

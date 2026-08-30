@@ -13,7 +13,9 @@ import { siteUrl } from "@/lib/env";
 import { getUntranslatedPaths, type Locale } from "@/lib/content";
 import { buildOpenGraph } from "@/lib/seo/alternates";
 import { ThemeProvider } from "@/components/theme-provider";
-import { UmamiScript } from "@/components/umami-script";
+import { layoutUmamiTag } from "@/components/umami-script";
+import { ConsentProvider } from "@/components/consent/consent-provider";
+import { ConsentBanner } from "@/components/consent/consent-banner";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -63,6 +65,7 @@ const CLIENT_MESSAGE_NAMESPACES = [
   "blog",
   "contact",
   "errorPage",
+  "consent",
   "a11y",
 ] as const;
 
@@ -118,6 +121,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   const t = await getTranslations({ locale: lang, namespace: "a11y" });
   const messages = await getMessages();
   const clientMessages = pickMessages(messages, CLIENT_MESSAGE_NAMESPACES);
+  const analyticsTag = layoutUmamiTag();
 
   // Computed for every locale, not just the current one: the language
   // switcher needs to know, for each target locale it links to, whether the
@@ -136,21 +140,23 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
           disableTransitionOnChange
         >
           <NextIntlClientProvider messages={clientMessages}>
-            <a href="#main" className="skip-link">
-              {t("skipToContent")}
-            </a>
-            <Header untranslated={untranslated} />
-            <main
-              id="main"
-              tabIndex={-1}
-              className="flex-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
-            >
-              {children}
-            </main>
-            <Footer />
+            <ConsentProvider tag={analyticsTag}>
+              <a href="#main" className="skip-link">
+                {t("skipToContent")}
+              </a>
+              <Header untranslated={untranslated} />
+              <main
+                id="main"
+                tabIndex={-1}
+                className="flex-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+              >
+                {children}
+              </main>
+              <Footer />
+              <ConsentBanner />
+            </ConsentProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
-        <UmamiScript />
       </body>
     </html>
   );

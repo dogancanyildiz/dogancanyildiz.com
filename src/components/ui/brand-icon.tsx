@@ -1,5 +1,5 @@
 import type { SVGProps } from "react";
-import { siGithub } from "simple-icons";
+import { siGithub, siWhatsapp } from "simple-icons";
 import { cn } from "@/lib/utils";
 
 /**
@@ -55,4 +55,8 @@ export function GithubIcon(props: BrandIconProps) {
 
 export function LinkedinIcon(props: BrandIconProps) {
   return <BrandIcon path={LINKEDIN_PATH} {...props} />;
+}
+
+export function WhatsAppIcon(props: BrandIconProps) {
+  return <BrandIcon path={siWhatsapp.path} {...props} />;
 }

@@ -75,9 +75,17 @@ describe("header", () => {
     expect(source).toContain("aria-current=");
   });
 
-  it("shows the DCY monogram instead of a hard coded Portfolio eyebrow", () => {
+  it("shows the full name instead of a hard coded Portfolio eyebrow", () => {
     expect(source).not.toContain(">Portfolio<");
-    expect(source).toContain('tBrand("monogram")');
+    expect(source).toContain('tBrand("name")');
+    expect(source).not.toContain('tBrand("monogram")');
+  });
+
+  it("renders GitHub and LinkedIn next to the name, from lib/site", () => {
+    expect(source).toContain('from "./social-links"');
+    expect(source).toContain("<SocialLinks");
+    expect(source).toContain('t("footer.github")');
+    expect(source).toContain('t("footer.linkedin")');
   });
 
   it("uses the shared route list on every page", () => {
@@ -113,6 +121,7 @@ describe("footer", () => {
     expect(source).toContain('from "@/lib/site"');
     expect(source).toContain("CONTACT_EMAIL_PUBLIC");
     expect(source).toContain("SOCIAL");
+    expect(source).toContain("whatsappHref");
     expect(source).not.toContain("github.com/");
   });
 

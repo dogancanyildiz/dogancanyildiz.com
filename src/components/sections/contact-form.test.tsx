@@ -30,6 +30,7 @@ function jsonResponse(
 async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Name"), "Ada Lovelace");
   await user.type(screen.getByLabelText("Email"), "ada@example.com");
+  await user.selectOptions(screen.getByLabelText("What do you need"), "web");
   await user.type(screen.getByLabelText("Message"), "Hello there");
 }
 
@@ -74,12 +75,35 @@ describe("ContactForm validation", () => {
       "aria-invalid",
       "true"
     );
+    expect(screen.getByLabelText("What do you need")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    );
     expect(screen.getByLabelText("Message")).toHaveAttribute(
       "aria-invalid",
       "true"
     );
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Please check the highlighted fields."
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("focuses the topic field when it is the first one left empty", async () => {
+    const user = userEvent.setup();
+    renderWithIntl(<ContactForm />);
+
+    await user.type(screen.getByLabelText("Name"), "Ada Lovelace");
+    await user.type(screen.getByLabelText("Email"), "ada@example.com");
+    await user.type(screen.getByLabelText("Message"), "Hello there");
+    await user.click(screen.getByRole("button", { name: "Send message" }));
+
+    const topic = screen.getByLabelText("What do you need");
+    expect(topic).toHaveAttribute("aria-invalid", "true");
+    expect(topic).toHaveFocus();
+    expect(screen.getByText("Please choose a heading.")).toHaveAttribute(
+      "id",
+      "contact-topic-error"
     );
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -112,6 +136,7 @@ describe("ContactForm submission", () => {
     expect(JSON.parse(init.body as string)).toEqual({
       name: "Ada Lovelace",
       email: "ada@example.com",
+      topic: "web",
       message: "Hello there",
       [HONEYPOT_FIELD]: "",
     });
@@ -162,6 +187,13 @@ describe("ContactForm submission", () => {
     expect(screen.getByLabelText("Name")).toHaveAttribute(
       "aria-disabled",
       "true"
+    );
+    expect(screen.getByLabelText("What do you need")).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+    expect(screen.getByLabelText("What do you need")).not.toHaveAttribute(
+      "disabled"
     );
     expect(screen.getByRole("status")).toHaveTextContent("Sending");
 
@@ -259,6 +291,9 @@ describe("ContactForm rate limiting", () => {
     });
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "ada@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("What do you need"), {
+      target: { value: "web" },
     });
     fireEvent.change(screen.getByLabelText("Message"), {
       target: { value: "Hello there" },

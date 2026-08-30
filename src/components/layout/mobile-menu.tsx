@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { SocialLinks } from "./social-links";
 import { isNavItemActive, navItems } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
@@ -76,6 +77,12 @@ export function MobileMenu() {
               );
             })}
           </ul>
+          <div className="mt-4 border-t border-border pt-3">
+            <SocialLinks
+              githubLabel={t("footer.github")}
+              linkedinLabel={t("footer.linkedin")}
+            />
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

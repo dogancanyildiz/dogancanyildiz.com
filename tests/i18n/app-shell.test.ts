@@ -23,6 +23,9 @@ const LANG_ROUTES = [
   "src/app/[lang]/blog/page.tsx",
   "src/app/[lang]/blog/[slug]/page.tsx",
   "src/app/[lang]/contact/page.tsx",
+  "src/app/[lang]/privacy/page.tsx",
+  "src/app/[lang]/coming-soon/page.tsx",
+  "src/app/[lang]/updating/page.tsx",
   "src/app/[lang]/opengraph-image.tsx",
 ];
 
@@ -291,7 +294,7 @@ describe("global-not-found font parity", () => {
   it("keeps a localized boundary ready for when globalNotFound is off", () => {
     const source = read("src/app/[lang]/not-found.tsx");
     expect(source).toContain('useTranslations("notFound")');
-    expect(source).toContain('from "@/i18n/navigation"');
+    expect(source).toContain("statusLinksFor");
     expect(source).not.toContain('from "next/link"');
   });
 

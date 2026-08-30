@@ -1,7 +1,7 @@
 # dogancanyildiz.com
 
-Personal portfolio of Doğan Can Yıldız, a full stack web developer and DevOps
-engineer. The site is a Next.js App Router application that is self hosted on a
+Personal portfolio of Doğan Can YILDIZ, a full-stack web developer and DevOps
+specialist. The site is a Next.js App Router application that is self hosted on a
 Coolify managed server behind Traefik and Cloudflare, without Vercel.
 
 ## Stack

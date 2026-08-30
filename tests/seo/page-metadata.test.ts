@@ -92,6 +92,21 @@ const PAGES: PageCase[] = [
     path: "/contact",
     load: () => import("@/app/[lang]/contact/page"),
   },
+  {
+    name: "privacy",
+    path: "/privacy",
+    load: () => import("@/app/[lang]/privacy/page"),
+  },
+  {
+    name: "coming-soon",
+    path: "/coming-soon",
+    load: () => import("@/app/[lang]/coming-soon/page"),
+  },
+  {
+    name: "updating",
+    path: "/updating",
+    load: () => import("@/app/[lang]/updating/page"),
+  },
   ...getProjectSlugs("en").map((slug) => ({
     name: `projects/${slug}`,
     path: `/projects/${slug}`,
@@ -355,4 +370,14 @@ describe("page openGraph metadata", () => {
       "x-default",
     ]);
   });
+
+  it.each(["coming-soon", "updating"] as const)(
+    "%s is not indexed",
+    async (name) => {
+      const page = PAGES.find((entry) => entry.name === name);
+      if (!page) throw new Error(`no ${name} page case found`);
+      const metadata = await metadataFor(page, "en");
+      expect(metadata.robots).toEqual({ index: false, follow: false });
+    }
+  );
 });

@@ -133,7 +133,7 @@ export const skills: Record<Locale, SkillGroup[]> = {
         "GitHub Actions",
         "Docker",
         "CI/CD pipelines",
-        "Linux server engineering",
+        "Linux server administration",
         "Traefik",
         "Coolify",
         "Go",

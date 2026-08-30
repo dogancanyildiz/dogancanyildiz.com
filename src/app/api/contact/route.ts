@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 
 import { getClientIp } from "@/lib/client-ip";
 import {
+  CONTACT_TOPIC_LABELS,
   MAX_BODY_BYTES,
   validateBody,
   type ContactPayload,
@@ -52,7 +53,9 @@ const SEND_TIMEOUT_MS = 10_000;
  */
 function idempotencyKey(payload: ContactPayload): string {
   const digest = createHash("sha256")
-    .update(`${payload.name}\n${payload.email}\n${payload.message}`)
+    .update(
+      `${payload.name}\n${payload.email}\n${payload.topic}\n${payload.message}`
+    )
     .digest("hex");
   return `contact-${digest.slice(0, 32)}`;
 }
@@ -371,9 +374,11 @@ export async function POST(request: Request) {
   // Plain labelled lines rather than a leading "From:", which reads like a
   // mail header in a client that renders the body as source. The values are
   // already free of CR and LF, so neither line can be split.
+  const topicLabel = CONTACT_TOPIC_LABELS[parsed.data.topic];
   const text = [
     `Name: ${parsed.data.name}`,
     `Email: ${parsed.data.email}`,
+    `Topic: ${topicLabel}`,
     "",
     parsed.data.message,
   ].join("\n");
@@ -384,7 +389,7 @@ export async function POST(request: Request) {
         {
           from,
           to,
-          subject: `Portfolio contact from ${parsed.data.name}`,
+          subject: `Portfolio contact from ${parsed.data.name} (${topicLabel})`,
           text,
           // Answering the visitor is a reply in the mail client, not a copy
           // and paste out of the body.

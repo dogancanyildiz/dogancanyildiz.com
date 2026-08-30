@@ -26,7 +26,7 @@ describe("LocaleError", () => {
     renderWithIntl(<LocaleError error={error} retry={vi.fn()} />);
 
     expect(
-      screen.getByRole("heading", { name: "Something went wrong" })
+      screen.getByRole("heading", { name: "This page failed to load" })
     ).toBeInTheDocument();
     expect(consoleError).toHaveBeenCalledWith(error);
   });
