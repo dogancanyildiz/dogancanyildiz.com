@@ -18,6 +18,7 @@ const STATIC_PAGES: Array<{
   { path: "/projects", priority: 0.9, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.9, changeFrequency: "weekly" },
   { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
+  { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
 ];
 
 // Same helper the page head uses, so the sitemap and the hreflang tags can

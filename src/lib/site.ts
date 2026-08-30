@@ -21,6 +21,17 @@ export const SOCIAL = {
 export const CONTACT_EMAIL_PUBLIC = "me@dogancanyildiz.com";
 
 /**
+ * International number with no plus or spaces, the form wa.me expects.
+ * Kept off Person JSON-LD on purpose: the chat link is a contact path, not a
+ * public identity URL, and the digits stay out of the structured data.
+ */
+export const WHATSAPP_NUMBER = "905543828000";
+
+export function whatsappHref(prefilledText: string): string {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(prefilledText)}`;
+}
+
+/**
  * Public path to the CV file. Lives here rather than in lib/cv.ts because
  * client components (e.g. the hero) need to read the path without pulling
  * node:fs into the browser bundle.

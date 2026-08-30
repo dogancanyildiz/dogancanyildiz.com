@@ -3,7 +3,8 @@ import { useTranslations } from "next-intl";
 import { ContactForm } from "@/components/sections/contact-form";
 import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
-import { CONTACT_EMAIL_PUBLIC } from "@/lib/site";
+import { WhatsAppIcon } from "@/components/ui/brand-icon";
+import { CONTACT_EMAIL_PUBLIC, whatsappHref } from "@/lib/site";
 
 export function ContactPageContent() {
   const t = useTranslations("contact");
@@ -26,6 +27,23 @@ export function ContactPageContent() {
                 className="break-all text-sm text-primary underline-offset-4 hover:underline"
               >
                 {CONTACT_EMAIL_PUBLIC}
+              </a>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <WhatsAppIcon
+              className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <p className="meta-label">{t("whatsappLabel")}</p>
+              <a
+                href={whatsappHref(t("whatsappPrefill"))}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary underline-offset-4 hover:underline"
+              >
+                {t("whatsappAction")}
               </a>
             </div>
           </div>

@@ -1,8 +1,8 @@
 {
   "brand": {
-    "name": "Doğan Can Yıldız",
+    "name": "Doğan Can YILDIZ",
     "monogram": "DCY",
-    "role": "Full-Stack Web Developer & DevOps Engineer"
+    "role": "Full-Stack Web Developer and DevOps Specialist"
   },
   "nav": {
     "home": "Home",
@@ -17,9 +17,9 @@
   },
   "hero": {
     "location": "Konya, Türkiye",
-    "tagline": "I build web applications and run the infrastructure they ship on.",
-    "intro": "I'm a full-stack developer based in Konya, Türkiye. I build web applications with Next.js and Node.js, and I deploy them myself: Docker, GitHub Actions, Coolify and Linux servers. Alongside development I hold the CAPT certification and have completed the full Cisco CCNA track along with CyberOps Associate.",
-    "availableForWork": "Available for select work",
+    "tagline": "I build web applications and run the servers they live on.",
+    "intro": "I'm a full-stack developer in Konya. I write apps with Next.js and Node.js, then put them on my own machines: Docker, GitHub Actions, Coolify and Linux. I also hold the CAPT certification and have finished the Cisco CCNA track and CyberOps Associate.",
+    "availableForWork": "Open to work",
     "metricYearsLabel": "Years shipping",
     "metricYearsValue": "5",
     "metricProjectsLabel": "Case studies",
@@ -34,16 +34,16 @@
     "featuredTitle": "Selected work",
     "featuredLink": "All projects",
     "experienceTitle": "Experience",
-    "experienceDescription": "The most recent role on my résumé. Full history on the About page.",
+    "experienceDescription": "The role I hold now. The rest is on the About page.",
     "experienceLink": "Full résumé",
     "latestPostsTitle": "Latest writing",
     "latestPostsLink": "All posts",
     "skillsTitle": "What I work with",
     "skillsEyebrow": "Capabilities",
-    "skillsSubtitle": "Full-stack development on a networking and security foundation, shipped on infrastructure I run myself."
+    "skillsSubtitle": "Full-stack work on a networking and security base, shipped on servers I run myself."
   },
   "footer": {
-    "tagline": "Full-stack development, self-hosted infrastructure, security-minded engineering.",
+    "tagline": "Full-stack development, self-hosted infrastructure, and a security habit.",
     "copyright": "Built and self-hosted by me.",
     "availability": "Open to work",
     "navTitle": "Pages",
@@ -51,17 +51,19 @@
     "elsewhereLabel": "Elsewhere",
     "github": "GitHub",
     "linkedin": "LinkedIn",
+    "whatsapp": "WhatsApp",
     "rss": "RSS",
     "selfHosted": "Self-hosted on Coolify.",
-    "lastUpdated": "Last updated {date}"
+    "lastUpdated": "Last updated {date}",
+    "privacy": "Privacy"
   },
   "about": {
     "title": "About",
-    "description": "Full-stack developer in Konya, Türkiye, building web applications and running the infrastructure they ship on.",
-    "lead": "Software engineer specializing in scalable, user-friendly web applications with Next.js, Node.js/Express and MongoDB.",
-    "body1": "I don't stop at writing the code. I build and ship on self-hosted infrastructure (Docker, GitHub Actions CI/CD, Coolify, Traefik and Linux servers) and work in Agile teams, using ClickUp for sprint planning and issue tracking.",
-    "body2": "What sets my work apart is a strong networking and security foundation underneath the application layer: I'm CAPT certified, and I've completed the full Cisco CCNA track along with CyberOps Associate. This means I think about how a system is deployed, exposed and hardened, not just how it's built.",
-    "body3": "Outside of work I spent two years as a GDG Konya organizer and served on the GDG Cloud Konya core team, organizing tech talks, study jams and hands-on workshops for the local developer community.",
+    "description": "Full-stack developer in Konya, Türkiye. I build web applications and run the infrastructure they ship on.",
+    "lead": "I build web applications with Next.js, Node.js/Express and MongoDB.",
+    "body1": "I also run what I ship: Docker, GitHub Actions, Coolify, Traefik and Linux on my own servers. In teams I work Agile, with sprint planning and tracking in ClickUp.",
+    "body2": "Networking and security sit under that application work. I'm CAPT certified, and I've finished the Cisco CCNA track plus CyberOps Associate. I care about how a system is deployed and what it exposes, not only how the code is written.",
+    "body3": "Outside of work I spent two years as a GDG Konya organizer and was on the GDG Cloud Konya core team. We ran talks, study jams and workshops for the local developer community.",
     "nowLabel": "Now",
     "now": "Full-Stack Developer at BerrSoft, studying Mathematics and Computer Science at Necmettin Erbakan University",
     "locationLabel": "Location",
@@ -78,7 +80,7 @@
     "downloadCv": "Download CV",
     "testimonialsTitle": "References",
     "subnavLabel": "On this page",
-    "profileImageAlt": "Doğan Can Yıldız, portrait photo",
+    "profileImageAlt": "Doğan Can YILDIZ, portrait photo",
     "emptyList": "Nothing listed here yet."
   },
   "projects": {
@@ -102,22 +104,31 @@
   },
   "contact": {
     "title": "Contact",
-    "description": "Send a message about a project, a role or a question on self-hosted infrastructure. I read every message and reply within a few days.",
-    "intro": "Open to interesting projects and conversations. The fastest way to reach me is email.",
+    "description": "Write about a project, a role, or a question on self-hosted infrastructure. I read every message and reply within a few days.",
+    "intro": "If you have a project or a question, email or WhatsApp both reach me.",
     "ctaTitle": "Have a project in mind?",
     "ctaBody": "Tell me what you are building. I usually reply within two to three business days.",
     "ctaButton": "Send a message",
     "emailLabel": "Email",
+    "whatsappLabel": "WhatsApp",
+    "whatsappAction": "Write on WhatsApp",
+    "whatsappPrefill": "Hello, I am writing from your site.",
     "locationLabel": "Location",
     "location": "Konya, Türkiye",
     "trustTitle": "Privacy",
-    "trustBody": "Form data reaches me by email through Resend, the mail provider this site uses, and is not shared or sold anywhere else. Visits are counted by a self-hosted, cookieless Umami instance that keeps no personal data.",
+    "trustBody": "Form data reaches me by email through Resend, the mail provider this site uses, and is not shared or sold. Visit counts come from a self-hosted Umami instance that does not use cookies, and only after you allow measurement.",
     "responseExpectation": "I usually reply within two to three business days.",
     "form": {
       "name": "Name",
       "namePlaceholder": "Your name",
       "email": "Email",
       "emailPlaceholder": "you@company.com",
+      "topic": "What do you need",
+      "topicPlaceholder": "Choose a heading",
+      "topicWeb": "Web development",
+      "topicDevops": "DevOps and infrastructure",
+      "topicSecurity": "Security",
+      "topicOther": "Something else",
       "message": "Message",
       "messagePlaceholder": "What would you like to build?",
       "submit": "Send message",
@@ -129,6 +140,7 @@
       "errorNameInvalid": "Please enter your name without line breaks.",
       "errorEmailRequired": "Please enter your email address.",
       "errorEmailInvalid": "Please enter a valid email address.",
+      "errorTopicRequired": "Please choose a heading.",
       "errorMessageRequired": "Please write a message.",
       "errorMessageInvalid": "Please write your message as plain text.",
       "errorFields": "Please check the highlighted fields.",
@@ -138,25 +150,59 @@
   },
   "notFound": {
     "code": "404",
-    "title": "Page not found",
-    "description": "The page you are looking for does not exist or has moved to a new address.",
+    "title": "This address is not on the site",
+    "description": "The page may have moved, or the link is wrong. Home, projects, writing and contact are below.",
     "backHome": "Back to home"
   },
+  "status": {
+    "construction": {
+      "code": "In progress",
+      "title": "This page is still being built",
+      "description": "The rest of the site is up. Home, projects, writing and contact are a click away."
+    },
+    "updating": {
+      "code": "Updating",
+      "title": "This page is being updated",
+      "description": "I am rewriting this section. It will be back here. Until then, the rest of the site is open."
+    }
+  },
+  "privacy": {
+    "title": "Privacy",
+    "description": "How this site handles visits, messages and the measurement choice stored in your browser.",
+    "lead": "This page is the short version of who I am, what the site stores, and how visit counts work.",
+    "whoTitle": "Who I am",
+    "whoBody": "I am Doğan Can YILDIZ. This site is my portfolio. For questions about this notice, use the contact form or email me at the address in the footer.",
+    "storageTitle": "What stays in your browser",
+    "storageBody": "Theme preference is stored by the browser (localStorage), not as a cookie. Your measurement choice is stored the same way, under the key dcy-consent. Neither is sent to me as a tracking cookie.",
+    "analyticsTitle": "Visit counts",
+    "analyticsBody": "If you allow it, visits are counted by a self-hosted Umami instance on my own server. Umami does not set a cookie. The script loads only after you say yes. Necessary storage (theme and this choice) does not wait on that yes.",
+    "formTitle": "Contact form",
+    "formBody": "The form sends your name, email and message to me through Resend. I use that to reply. I do not sell it or pass it to anyone else.",
+    "contactTitle": "Contact",
+    "contactBody": "To ask about this notice or to reach me about work, use the contact page."
+  },
+  "consent": {
+    "title": "Visit counts",
+    "body": "This site does not use measurement cookies. Theme stays in your browser. Visit counts (Umami, cookieless, on my server) load only if you allow them.",
+    "accept": "Allow visit counts",
+    "reject": "Not now",
+    "privacy": "Privacy"
+  },
   "errorPage": {
-    "title": "Something went wrong",
-    "description": "This page could not be loaded. Trying again often fixes it; if it does not, the error has been logged on the server.",
+    "title": "This page failed to load",
+    "description": "Trying again often fixes it. If it does not, the error has been logged on the server.",
     "retry": "Try again",
     "backHome": "Back to home",
     "digestLabel": "Error reference"
   },
   "metadata": {
-    "defaultTitle": "Doğan Can Yıldız | Full-Stack Web Developer and DevOps Engineer",
-    "siteName": "Doğan Can Yıldız",
-    "defaultDescription": "Full-stack developer building scalable web apps with Next.js and Node.js, shipping on self-hosted Docker infrastructure. CAPT certified. Konya, Türkiye.",
-    "ogAlt": "Doğan Can Yıldız, Full-Stack Web Developer and DevOps Engineer"
+    "defaultTitle": "Doğan Can YILDIZ | Full-Stack Web Developer and DevOps Specialist",
+    "siteName": "Doğan Can YILDIZ",
+    "defaultDescription": "Full-stack developer building web apps with Next.js and Node.js, shipping on self-hosted Docker infrastructure. CAPT certified. Konya, Türkiye.",
+    "ogAlt": "Doğan Can YILDIZ, Full-Stack Web Developer and DevOps Specialist"
   },
   "api": {
-    "invalidRequest": "Invalid request. Name, email, and message are required.",
+    "invalidRequest": "Invalid request. Name, email, topic and message are required.",
     "emailNotConfigured": "Email is not configured on the server.",
     "sendFailed": "The message could not be sent. Please try again later.",
     "tooManyRequests": "Too many requests. Please try again in a few minutes.",

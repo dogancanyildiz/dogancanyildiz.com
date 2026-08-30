@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CONTACT_TOPICS,
   HONEYPOT_FIELD,
   MAX_BODY_BYTES,
   MAX_EMAIL_LENGTH,
@@ -13,6 +14,7 @@ import {
 const validBody = {
   name: "Doğan Can",
   email: "visitor@mail.invalid",
+  topic: "web",
   message: "I would like to talk about a project.",
 };
 
@@ -21,6 +23,7 @@ describe("validateBody", () => {
     const result = validateBody({
       name: "  Doğan Can  ",
       email: "  visitor@mail.invalid ",
+      topic: " web ",
       message: "  I would like to talk about a project.  ",
     });
     expect(result).toEqual({
@@ -28,6 +31,7 @@ describe("validateBody", () => {
       data: {
         name: "Doğan Can",
         email: "visitor@mail.invalid",
+        topic: "web",
         message: "I would like to talk about a project.",
       },
     });
@@ -88,10 +92,29 @@ describe("validateBody", () => {
       reason: "invalid",
       field: "message",
     });
+    expect(validateBody({ ...validBody, topic: "" })).toEqual({
+      ok: false,
+      reason: "invalid",
+      field: "topic",
+    });
+    expect(validateBody({ ...validBody, topic: "consulting" })).toEqual({
+      ok: false,
+      reason: "invalid",
+      field: "topic",
+    });
+  });
+
+  it("accepts every published topic id", () => {
+    for (const topic of CONTACT_TOPICS) {
+      expect(validateBody({ ...validBody, topic })).toEqual({
+        ok: true,
+        data: { ...validBody, topic },
+      });
+    }
   });
 
   it("rejects missing required fields", () => {
-    expect(validateBody({ name: "a", email: "a@b.co" })).toEqual({
+    expect(validateBody({ name: "a", email: "a@b.co", topic: "web" })).toEqual({
       ok: false,
       reason: "invalid",
       field: "message",
@@ -209,6 +232,7 @@ describe("MAX_BODY_BYTES", () => {
     return JSON.stringify({
       name: fill(character, MAX_NAME_LENGTH),
       email: fill(character, MAX_EMAIL_LENGTH),
+      topic: "security",
       message: fill(character, MAX_MESSAGE_LENGTH),
       [HONEYPOT_FIELD]: "",
     });

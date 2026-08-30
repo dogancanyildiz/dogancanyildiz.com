@@ -13,7 +13,8 @@ const SITE_ORIGIN = "https://dogancanyildiz.com";
 
 const messages = {
   api: {
-    invalidRequest: "Invalid request. Name, email, and message are required.",
+    invalidRequest:
+      "Invalid request. Name, email, topic and message are required.",
     emailNotConfigured: "Email is not configured on the server.",
     sendFailed: "The message could not be sent. Please try again later.",
     tooManyRequests: "Too many requests. Please try again in a few minutes.",
@@ -86,6 +87,7 @@ vi.mock("@/lib/resend", async (importOriginal) => {
 const validPayload = {
   name: "Doğan Can",
   email: "visitor@mail.invalid",
+  topic: "web",
   message: "I would like to talk about a project.",
 };
 
@@ -162,10 +164,11 @@ describe("POST /api/contact success path", () => {
     const payload = sendCall()[0];
 
     expect(payload.text).toBe(
-      `Name: ${validPayload.name}\nEmail: ${validPayload.email}\n\n${validPayload.message}`
+      `Name: ${validPayload.name}\nEmail: ${validPayload.email}\nTopic: Web development\n\n${validPayload.message}`
     );
     expect(payload.text.startsWith("From:")).toBe(false);
     expect(payload.subject).toContain(validPayload.name);
+    expect(payload.subject).toContain("Web development");
   });
 
   it("carries a request id and the remaining budget", async () => {
@@ -310,6 +313,29 @@ describe("POST /api/contact rejections", () => {
 
     expect(response.status).toBe(400);
     expect(await response.json()).toMatchObject({ field: "name" });
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("answers 400 when the topic is missing or unknown", async () => {
+    const missing = await POST(
+      contactRequest({
+        body: JSON.stringify({
+          name: validPayload.name,
+          email: validPayload.email,
+          message: validPayload.message,
+        }),
+      })
+    );
+    expect(missing.status).toBe(400);
+    expect(await missing.json()).toMatchObject({ field: "topic" });
+
+    const unknown = await POST(
+      contactRequest({
+        body: JSON.stringify({ ...validPayload, topic: "consulting" }),
+      })
+    );
+    expect(unknown.status).toBe(400);
+    expect(await unknown.json()).toMatchObject({ field: "topic" });
     expect(send).not.toHaveBeenCalled();
   });
 });
@@ -578,6 +604,19 @@ describe("POST /api/contact idempotency", () => {
     const keys = send.mock.calls.map((call) => call[1]?.idempotencyKey);
     expect(keys[1]).toBe(keys[0]);
     expect(keys[2]).not.toBe(keys[0]);
+  });
+
+  it("treats a different topic as a different message", async () => {
+    await POST(contactRequest());
+    await POST(
+      contactRequest({
+        ip: "198.51.100.6",
+        body: JSON.stringify({ ...validPayload, topic: "devops" }),
+      })
+    );
+
+    const keys = send.mock.calls.map((call) => call[1]?.idempotencyKey);
+    expect(keys[1]).not.toBe(keys[0]);
   });
 });
 

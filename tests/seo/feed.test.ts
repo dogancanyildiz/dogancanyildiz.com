@@ -211,7 +211,7 @@ describe("escapeXml", () => {
   });
 
   it("leaves plain text, including non ascii, untouched", () => {
-    expect(escapeXml("Doğan Can Yıldız")).toBe("Doğan Can Yıldız");
+    expect(escapeXml("Doğan Can YILDIZ")).toBe("Doğan Can YILDIZ");
     expect(escapeXml("")).toBe("");
   });
 });

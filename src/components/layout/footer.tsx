@@ -1,17 +1,20 @@
 import { buildInfo, formatBuildSha } from "@/lib/build-info";
-import { Mail, Rss } from "lucide-react";
+import { Mail } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { navItems } from "@/lib/nav";
 import { routing } from "@/i18n/routing";
-import { CONTACT_EMAIL_PUBLIC, SOCIAL } from "@/lib/site";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icon";
+import { CONTACT_EMAIL_PUBLIC, SOCIAL, whatsappHref } from "@/lib/site";
+
+const footerTextLinkClass =
+  "inline-flex min-h-6 items-center text-sm text-muted-foreground no-underline transition-colors hover:text-foreground";
 
 export async function Footer() {
   const year = buildInfo.year;
-  const [t, tBrand, locale] = await Promise.all([
+  const [t, tBrand, tContact, locale] = await Promise.all([
     getTranslations(),
     getTranslations("brand"),
+    getTranslations("contact"),
     getLocale(),
   ]);
   const buildSha = formatBuildSha(buildInfo.sha);
@@ -25,6 +28,12 @@ export async function Footer() {
     <footer className="mt-auto border-t border-border">
       <div className="page-shell grid gap-10 py-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
         <div className="space-y-3">
+          <p
+            aria-hidden="true"
+            className="font-mono text-xs font-semibold tracking-[0.12em] text-muted-foreground"
+          >
+            {tBrand("monogram")}
+          </p>
           <p className="eyebrow">{t("footer.availability")}</p>
           <h2 className="section-heading">{tBrand("name")}</h2>
           <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
@@ -53,23 +62,25 @@ export async function Footer() {
         </div>
 
         <div className="grid min-w-0 gap-8 sm:grid-cols-2">
-          <nav aria-label={t("footer.navTitle")} className="min-w-0 space-y-3">
+          <nav aria-label={t("footer.navTitle")} className="min-w-0 space-y-2">
             <p className="meta-label">{t("footer.navTitle")}</p>
-            <ul className="flex flex-col gap-1">
+            <ul className="flex flex-col">
               {navItems.map(({ href, key }) => (
                 <li key={href}>
-                  <Link
-                    href={href}
-                    className="tap-target inline-flex items-center text-sm text-muted-foreground no-underline transition-colors hover:text-foreground"
-                  >
+                  <Link href={href} className={footerTextLinkClass}>
                     {t(key)}
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/privacy" className={footerTextLinkClass}>
+                  {t("footer.privacy")}
+                </Link>
+              </li>
             </ul>
           </nav>
 
-          <div className="min-w-0 space-y-3">
+          <div className="min-w-0 space-y-2">
             <p className="meta-label">{t("footer.emailLabel")}</p>
             <a
               href={`mailto:${CONTACT_EMAIL_PUBLIC}`}
@@ -79,33 +90,43 @@ export async function Footer() {
               <span className="min-w-0">{CONTACT_EMAIL_PUBLIC}</span>
             </a>
             <p className="meta-label pt-3">{t("footer.elsewhereLabel")}</p>
-            <div className="flex items-center gap-4">
-              <a
-                href={SOCIAL.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={t("footer.github")}
-                className="tap-target text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <GithubIcon className="size-4" />
-              </a>
-              <a
-                href={SOCIAL.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={t("footer.linkedin")}
-                className="tap-target text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <LinkedinIcon className="size-4" />
-              </a>
-              <a
-                href={feedHref}
-                aria-label={t("footer.rss")}
-                className="tap-target text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <Rss className="size-4" aria-hidden="true" />
-              </a>
-            </div>
+            <ul className="flex flex-col">
+              <li>
+                <a
+                  href={whatsappHref(tContact("whatsappPrefill"))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={footerTextLinkClass}
+                >
+                  {t("footer.whatsapp")}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={SOCIAL.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={footerTextLinkClass}
+                >
+                  {t("footer.github")}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={SOCIAL.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={footerTextLinkClass}
+                >
+                  {t("footer.linkedin")}
+                </a>
+              </li>
+              <li>
+                <a href={feedHref} className={footerTextLinkClass}>
+                  {t("footer.rss")}
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>

@@ -44,6 +44,12 @@ const required = [
   "/tr/blog",
   "/en/contact",
   "/tr/contact",
+  "/en/privacy",
+  "/tr/privacy",
+  "/en/coming-soon",
+  "/tr/coming-soon",
+  "/en/updating",
+  "/tr/updating",
   "/en/feed.xml",
   "/tr/feed.xml",
   // Root level metadata routes, outside the [lang] segment so they carry no

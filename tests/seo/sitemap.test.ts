@@ -19,6 +19,12 @@ describe("sitemap", () => {
     expect(urls).toContain("https://dogancanyildiz.com/tr/blog");
     expect(urls).toContain("https://dogancanyildiz.com/contact");
     expect(urls).toContain("https://dogancanyildiz.com/tr/contact");
+    expect(urls).toContain("https://dogancanyildiz.com/privacy");
+    expect(urls).toContain("https://dogancanyildiz.com/tr/privacy");
+    expect(urls).not.toContain("https://dogancanyildiz.com/coming-soon");
+    expect(urls).not.toContain("https://dogancanyildiz.com/tr/coming-soon");
+    expect(urls).not.toContain("https://dogancanyildiz.com/updating");
+    expect(urls).not.toContain("https://dogancanyildiz.com/tr/updating");
   });
 
   it("lists every project in both locales because all of them are translated", async () => {

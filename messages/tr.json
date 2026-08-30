@@ -1,8 +1,8 @@
 {
   "brand": {
-    "name": "Doğan Can Yıldız",
+    "name": "Doğan Can YILDIZ",
     "monogram": "DCY",
-    "role": "Full-Stack Web Geliştirici ve DevOps Mühendisi"
+    "role": "Full-Stack Web Geliştirici ve DevOps Uzmanı"
   },
   "nav": {
     "home": "Ana Sayfa",
@@ -17,9 +17,9 @@
   },
   "hero": {
     "location": "Konya, Türkiye",
-    "tagline": "Web uygulamaları geliştiriyorum, çalıştıkları altyapıyı da kendim işletiyorum.",
-    "intro": "Konya'da yaşayan bir full-stack geliştiriciyim. Next.js ve Node.js ile web uygulamaları geliştiriyorum ve bunları kendim yayına alıyorum: Docker, GitHub Actions, Coolify ve Linux sunucular. Geliştirmenin yanında CAPT sertifikasına sahibim, Cisco CCNA hattını ve CyberOps Associate eğitimini tamamladım.",
-    "availableForWork": "Seçili işler için uygunum",
+    "tagline": "Web uygulamaları yazıyorum, çalıştıkları sunucuları da ben işletiyorum.",
+    "intro": "Konya'da yaşayan bir full-stack geliştiriciyim. Next.js ve Node.js ile uygulama yazıyorum; Docker, GitHub Actions, Coolify ve Linux sunucularda kendim yayına alıyorum. CAPT sertifikam var, Cisco CCNA hattını ve CyberOps Associate eğitimini tamamladım.",
+    "availableForWork": "İş tekliflerine açığım",
     "metricYearsLabel": "Deneyim yılı",
     "metricYearsValue": "5",
     "metricProjectsLabel": "Vaka çalışması",
@@ -34,16 +34,16 @@
     "featuredTitle": "Seçili işler",
     "featuredLink": "Tüm projeler",
     "experienceTitle": "Deneyim",
-    "experienceDescription": "Özgeçmişimdeki en güncel rol. Tam geçmiş Hakkımda sayfasında.",
+    "experienceDescription": "Şu anki rolüm. Tam geçmiş Hakkımda sayfasında.",
     "experienceLink": "Tam özgeçmiş",
     "latestPostsTitle": "Son yazılar",
     "latestPostsLink": "Tüm yazılar",
     "skillsTitle": "Neyle çalışıyorum",
     "skillsEyebrow": "Yetkinlikler",
-    "skillsSubtitle": "Ağ ve güvenlik temeli üstünde full-stack geliştirme; altyapısını kendim işlettiğim sistemlerde yayına alıyorum."
+    "skillsSubtitle": "Ağ ve güvenlik temeli üstünde full-stack geliştirme; yayını kendi işlettiğim sunucularda yapıyorum."
   },
   "footer": {
-    "tagline": "Full-stack geliştirme, kendi sunucusunda barındırma, güvenlik odaklı mühendislik.",
+    "tagline": "Full-stack geliştirme, kendi sunucusunda barındırma, güvenlik alışkanlığı.",
     "copyright": "Kendim geliştirdim, kendi sunucumda barındırıyorum.",
     "availability": "İş tekliflerine açık",
     "navTitle": "Sayfalar",
@@ -51,17 +51,19 @@
     "elsewhereLabel": "Diğer kanallar",
     "github": "GitHub",
     "linkedin": "LinkedIn",
+    "whatsapp": "WhatsApp",
     "rss": "RSS",
     "selfHosted": "Coolify üzerinde self-host.",
-    "lastUpdated": "Son güncelleme {date}"
+    "lastUpdated": "Son güncelleme {date}",
+    "privacy": "Gizlilik"
   },
   "about": {
     "title": "Hakkımda",
-    "description": "Konya'da yaşayan, web uygulamaları geliştiren ve bu uygulamaların çalıştığı altyapıyı da kendisi işleten full-stack geliştirici.",
-    "lead": "Next.js, Node.js/Express ve MongoDB ile ölçeklenebilir, kullanıcı dostu web uygulamaları geliştiren bir yazılım mühendisiyim.",
-    "body1": "İşim kodu yazmakla bitmiyor. Uygulamaları kendi sunucumdaki altyapıda derleyip yayına alıyorum (Docker, GitHub Actions CI/CD, Coolify, Traefik ve Linux sunucular) ve Agile ekiplerde çalışıyorum; sprint planlama ile iş takibini ClickUp üzerinde yürütüyorum.",
-    "body2": "İşimi ayıran şey, uygulama katmanının altındaki güçlü ağ ve güvenlik temeli: CAPT sertifikalıyım, Cisco CCNA hattının tamamını ve CyberOps Associate eğitimini tamamladım. Bu, bir sistemin yalnızca nasıl kurulduğunu değil, nasıl yayına alındığını, dışarıya nasıl açıldığını ve nasıl sıkılaştırıldığını da düşünmek demek.",
-    "body3": "İşin dışında iki yıl GDG Konya organizatörlüğü yaptım ve GDG Cloud Konya çekirdek ekibinde yer aldım; yerel geliştirici topluluğu için teknik konuşmalar, study jam'ler ve uygulamalı atölyeler düzenledik.",
+    "description": "Konya'da yaşayan full-stack geliştirici. Web uygulamaları yazıyor, çalıştıkları altyapıyı da kendisi işletiyor.",
+    "lead": "Next.js, Node.js/Express ve MongoDB ile web uygulamaları geliştiriyorum.",
+    "body1": "Yazdığım şeyi de ben çalıştırıyorum: Docker, GitHub Actions, Coolify, Traefik ve Linux, kendi sunucularımda. Ekiplerde Agile çalışıyorum; sprint planlama ve iş takibi ClickUp'ta.",
+    "body2": "Ağ ve güvenlik bu işin altında duruyor. CAPT sertifikam var, Cisco CCNA hattını ve CyberOps Associate eğitimini tamamladım. Bir sistemin nasıl yayına alındığını ve dışarıya ne açtığını da düşünüyorum, yalnızca kodun nasıl yazıldığını değil.",
+    "body3": "İşin dışında iki yıl GDG Konya organizatörlüğü yaptım, GDG Cloud Konya çekirdek ekibindeydim. Yerel geliştirici topluluğu için konuşmalar, study jam'ler ve atölyeler düzenledik.",
     "nowLabel": "Şu anda",
     "now": "BerrSoft'ta Full-Stack Developer, Necmettin Erbakan Üniversitesi'nde Matematik ve Bilgisayar Bilimleri öğrencisi",
     "locationLabel": "Konum",
@@ -78,7 +80,7 @@
     "downloadCv": "CV'yi indir",
     "testimonialsTitle": "Referanslar",
     "subnavLabel": "Bu sayfada",
-    "profileImageAlt": "Doğan Can Yıldız, portre fotoğrafı",
+    "profileImageAlt": "Doğan Can YILDIZ, portre fotoğrafı",
     "emptyList": "Burada henüz bir kayıt yok."
   },
   "projects": {
@@ -102,22 +104,31 @@
   },
   "contact": {
     "title": "İletişim",
-    "description": "Bir proje, bir pozisyon ya da kendi sunucusunda barındırma üzerine bir soru için yazın. Her mesajı okuyorum ve birkaç gün içinde yanıtlıyorum.",
-    "intro": "İlginç projelere ve sohbetlere açığım. Bana en hızlı ulaşma yolu e-posta.",
+    "description": "Bir proje, bir pozisyon ya da kendi sunucusunda barındırma üzerine yazın. Her mesajı okuyorum ve birkaç gün içinde yanıtlıyorum.",
+    "intro": "Bir projeniz veya sorunuz varsa e-posta veya WhatsApp ile yazabilirsiniz.",
     "ctaTitle": "Bir proje mi düşünüyorsunuz?",
     "ctaBody": "Ne geliştirmek istediğinizi yazın. Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
     "ctaButton": "Mesaj gönder",
     "emailLabel": "E-posta",
+    "whatsappLabel": "WhatsApp",
+    "whatsappAction": "WhatsApp'tan yaz",
+    "whatsappPrefill": "Merhaba, sitenizden yazıyorum.",
     "locationLabel": "Konum",
     "location": "Konya, Türkiye",
     "trustTitle": "Gizlilik",
-    "trustBody": "Form verileri, bu sitenin kullandığı posta sağlayıcısı Resend üzerinden bana e-posta olarak ulaşır; bunun dışında paylaşılmaz ya da satılmaz. Ziyaretler, kendi sunucumda çalışan çerezsiz Umami ile sayılır ve kişisel veri tutulmaz.",
+    "trustBody": "Form verileri Resend üzerinden bana e-posta olarak gelir; başka yere gitmez, satılmaz. Ziyaret sayımı, kendi sunucumdaki çerezsiz Umami ile yapılır ve yalnızca siz ölçüme izin verdikten sonra.",
     "responseExpectation": "Genellikle iki ila üç iş günü içinde yanıtlıyorum.",
     "form": {
       "name": "Ad",
       "namePlaceholder": "Adınız",
       "email": "E-posta",
       "emailPlaceholder": "siz@sirket.com",
+      "topic": "Nasıl bir hizmet",
+      "topicPlaceholder": "Bir başlık seçin",
+      "topicWeb": "Web uygulaması",
+      "topicDevops": "DevOps ve altyapı",
+      "topicSecurity": "Güvenlik",
+      "topicOther": "Başka bir konu",
       "message": "Mesaj",
       "messagePlaceholder": "Ne geliştirmek istiyorsunuz?",
       "submit": "Mesajı gönder",
@@ -129,6 +140,7 @@
       "errorNameInvalid": "Adınızı satır sonu içermeden yazın.",
       "errorEmailRequired": "Lütfen e-posta adresinizi yazın.",
       "errorEmailInvalid": "Lütfen geçerli bir e-posta adresi yazın.",
+      "errorTopicRequired": "Lütfen bir başlık seçin.",
       "errorMessageRequired": "Lütfen bir mesaj yazın.",
       "errorMessageInvalid": "Mesajınızı düz metin olarak yazın.",
       "errorFields": "Lütfen işaretlenen alanları kontrol edin.",
@@ -138,25 +150,59 @@
   },
   "notFound": {
     "code": "404",
-    "title": "Sayfa bulunamadı",
-    "description": "Aradığınız sayfa yok ya da yeni bir adrese taşınmış.",
+    "title": "Bu adres sitede yok",
+    "description": "Sayfa taşınmış ya da bağlantı yanlış olabilir. Ana sayfa, projeler, yazılar ve iletişim aşağıda.",
     "backHome": "Ana sayfaya dön"
   },
+  "status": {
+    "construction": {
+      "code": "Yapım aşamasında",
+      "title": "Bu sayfa henüz hazır değil",
+      "description": "Sitenin geri kalanı açık. Ana sayfa, projeler, yazılar ve iletişim bir tık ötede."
+    },
+    "updating": {
+      "code": "Güncelleniyor",
+      "title": "Bu sayfa güncelleniyor",
+      "description": "Bu bölümü yeniden yazıyorum. Bitince yine burada olacak. O zamana kadar sitenin geri kalanı duruyor."
+    }
+  },
+  "privacy": {
+    "title": "Gizlilik",
+    "description": "Bu sitenin ziyaretleri, mesajları ve tarayıcınızda tutulan ölçüm tercihini nasıl işlediği.",
+    "lead": "Kim olduğum, sitede ne durduğu ve ziyaret sayımının nasıl çalıştığı. Kısa hali.",
+    "whoTitle": "Kimim",
+    "whoBody": "Ben Doğan Can YILDIZ. Bu site portfolyom. Bu bildirimle ilgili soru için iletişim formunu veya alt bilgideki e-postayı kullanın.",
+    "storageTitle": "Tarayıcınızda ne kalır",
+    "storageBody": "Tema tercihi çerez değil, tarayıcının localStorage'ında durur. Ölçüm tercihiniz de aynı yerde, dcy-consent anahtarıyla. İkisi de bana takip çerezi olarak gitmez.",
+    "analyticsTitle": "Ziyaret sayımı",
+    "analyticsBody": "İzin verirseniz ziyaretler, kendi sunucumdaki Umami ile sayılır. Umami çerez koymaz. Betik yalnızca evet dedikten sonra yüklenir. Gerekli depolama (tema ve bu tercih) o eveti beklemez.",
+    "formTitle": "İletişim formu",
+    "formBody": "Form adınızı, e-postanızı ve mesajınızı Resend üzerinden bana iletir. Yanıtlamak için kullanırım. Satmam, başkasına vermem.",
+    "contactTitle": "İletişim",
+    "contactBody": "Bu bildirim veya iş için iletişim sayfasından yazın."
+  },
+  "consent": {
+    "title": "Ziyaret sayımı",
+    "body": "Bu sitede ölçüm çerezi yok. Tema tarayıcınızda kalır. Ziyaret sayımı (Umami, çerezsiz, kendi sunucumda) yalnızca siz izin verirseniz yüklenir.",
+    "accept": "Sayıma izin ver",
+    "reject": "Şimdi değil",
+    "privacy": "Gizlilik"
+  },
   "errorPage": {
-    "title": "Bir şeyler ters gitti",
-    "description": "Bu sayfa yüklenemedi. Yeniden denemek çoğu zaman yeterli oluyor; olmazsa hata sunucuda kayda alındı.",
+    "title": "Bu sayfa yüklenemedi",
+    "description": "Yeniden denemek çoğu zaman yeterli oluyor. Olmazsa hata sunucuda kayda alındı.",
     "retry": "Yeniden dene",
     "backHome": "Ana sayfaya dön",
     "digestLabel": "Hata referansı"
   },
   "metadata": {
-    "defaultTitle": "Doğan Can Yıldız | Full-Stack Web Geliştirici ve DevOps Mühendisi",
-    "siteName": "Doğan Can Yıldız",
+    "defaultTitle": "Doğan Can YILDIZ | Full-Stack Web Geliştirici ve DevOps Uzmanı",
+    "siteName": "Doğan Can YILDIZ",
     "defaultDescription": "Next.js ve Node.js ile web uygulamaları geliştiren, kendi Docker altyapısında yayına alan full-stack geliştirici. CAPT sertifikalı, Konya.",
-    "ogAlt": "Doğan Can Yıldız, Full-Stack Web Geliştirici ve DevOps Mühendisi"
+    "ogAlt": "Doğan Can YILDIZ, Full-Stack Web Geliştirici ve DevOps Uzmanı"
   },
   "api": {
-    "invalidRequest": "Geçersiz istek. Ad, e-posta ve mesaj alanları zorunlu.",
+    "invalidRequest": "Geçersiz istek. Ad, e-posta, hizmet ve mesaj alanları zorunlu.",
     "emailNotConfigured": "E-posta gönderimi sunucuda yapılandırılmamış.",
     "sendFailed": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.",
     "tooManyRequests": "Çok fazla istek gönderildi. Lütfen birkaç dakika sonra tekrar deneyin.",

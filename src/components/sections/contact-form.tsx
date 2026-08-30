@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,7 +28,7 @@ type FocusTarget = ContactField | "status" | "alert" | null;
 const REQUEST_TIMEOUT_MS = 15_000;
 
 /** Field order, which is also the order the first error is focused in. */
-const FIELDS: ContactField[] = ["name", "email", "message"];
+const FIELDS: ContactField[] = ["name", "email", "topic", "message"];
 
 /**
  * The API answers a 400 with the field that failed and one generic sentence
@@ -39,6 +40,7 @@ const FIELDS: ContactField[] = ["name", "email", "message"];
 const SERVER_FIELD_ERROR: Record<ContactField, string> = {
   name: "errorNameInvalid",
   email: "errorEmailInvalid",
+  topic: "errorTopicRequired",
   message: "errorMessageInvalid",
 };
 
@@ -52,6 +54,7 @@ export function ContactForm() {
 
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  const topicRef = useRef<HTMLSelectElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
   const alertRef = useRef<HTMLDivElement>(null);
@@ -71,6 +74,7 @@ export function ContactForm() {
     const targets: Record<Exclude<FocusTarget, null>, HTMLElement | null> = {
       name: nameRef.current,
       email: emailRef.current,
+      topic: topicRef.current,
       message: messageRef.current,
       status: statusRef.current,
       alert: alertRef.current,
@@ -105,6 +109,9 @@ export function ContactForm() {
     } else if (!EMAIL_PATTERN.test(email)) {
       errors.email = t("errorEmailInvalid");
     }
+    if (!values.topic.trim()) {
+      errors.topic = t("errorTopicRequired");
+    }
     if (!values.message.trim()) {
       errors.message = t("errorMessageRequired");
     }
@@ -125,6 +132,7 @@ export function ContactForm() {
     const values: Record<ContactField, string> = {
       name: String(formData.get("name") ?? ""),
       email: String(formData.get("email") ?? ""),
+      topic: String(formData.get("topic") ?? ""),
       message: String(formData.get("message") ?? ""),
     };
 
@@ -268,6 +276,30 @@ export function ContactForm() {
         {fieldErrors.email && (
           <p id={errorId("email")} className="text-sm text-destructive">
             {fieldErrors.email}
+          </p>
+        )}
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="topic">{t("topic")}</Label>
+        <NativeSelect
+          id="topic"
+          name="topic"
+          ref={topicRef}
+          defaultValue=""
+          required
+          aria-invalid={fieldErrors.topic ? true : undefined}
+          aria-describedby={describedBy("topic")}
+          aria-disabled={busy || undefined}
+        >
+          <option value="">{t("topicPlaceholder")}</option>
+          <option value="web">{t("topicWeb")}</option>
+          <option value="devops">{t("topicDevops")}</option>
+          <option value="security">{t("topicSecurity")}</option>
+          <option value="other">{t("topicOther")}</option>
+        </NativeSelect>
+        {fieldErrors.topic && (
+          <p id={errorId("topic")} className="text-sm text-destructive">
+            {fieldErrors.topic}
           </p>
         )}
       </div>

@@ -5,6 +5,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
 import { MobileMenu } from "./mobile-menu";
+import { SocialLinks } from "./social-links";
 import { isNavItemActive, navItems } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
@@ -20,15 +21,22 @@ export function Header({ untranslated }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
       <div className="page-shell flex h-16 items-center justify-between gap-4">
-        <Link
-          href="/"
-          className="group flex min-w-0 items-center gap-2.5 no-underline"
-        >
-          <span className="font-mono text-xs font-semibold tracking-[0.12em] text-foreground">
-            {tBrand("monogram")}
-          </span>
-          <span className="sr-only">{tBrand("name")}</span>
-        </Link>
+        <div className="flex min-w-0 items-center gap-1">
+          <Link
+            href="/"
+            className="group flex min-w-0 items-center gap-2.5 no-underline"
+          >
+            <span className="text-sm font-medium tracking-tight text-foreground">
+              {tBrand("name")}
+            </span>
+          </Link>
+          <div className="hidden md:block">
+            <SocialLinks
+              githubLabel={t("footer.github")}
+              linkedinLabel={t("footer.linkedin")}
+            />
+          </div>
+        </div>
 
         <div className="flex min-w-0 items-center gap-3">
           <nav aria-label={t("nav.menu")} className="hidden md:block">

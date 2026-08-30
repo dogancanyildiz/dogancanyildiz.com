@@ -1,11 +1,10 @@
 import { ArrowRight, Download } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icon";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { DisplayHeading } from "@/components/ui/display-heading";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { CV_PATH, SOCIAL } from "@/lib/site";
+import { CV_PATH } from "@/lib/site";
 
 interface HeroProps {
   showCv: boolean;
@@ -17,7 +16,7 @@ interface HeroProps {
  * depend on hydration to become visible: an entrance animation here printed
  * `opacity: 0` into the prerendered HTML and kept the largest paint waiting for
  * the client bundle. Nothing in this section is interactive, so it also keeps
- * the brand marks and the translation lookups out of the client bundle.
+ * the translation lookups out of the client bundle.
  */
 export async function Hero({ showCv, profileImageSrc }: HeroProps) {
   const t = await getTranslations();
@@ -112,27 +111,6 @@ export async function Hero({ showCv, profileImageSrc }: HeroProps) {
                 </a>
               </Button>
             ) : null}
-          </div>
-
-          <div className="flex items-center gap-4">
-            <a
-              href={SOCIAL.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t("footer.github")}
-              className="tap-target text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <GithubIcon className="size-4" aria-hidden="true" />
-            </a>
-            <a
-              href={SOCIAL.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t("footer.linkedin")}
-              className="tap-target text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <LinkedinIcon className="size-4" aria-hidden="true" />
-            </a>
           </div>
         </div>
       </div>

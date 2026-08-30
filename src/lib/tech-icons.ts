@@ -54,7 +54,7 @@ const SKILL_ICONS: Record<string, TechIconData> = {
   Docker: siDocker,
   Traefik: siTraefikproxy,
   Coolify: siCoolify,
-  "Linux server engineering": siLinux,
+  "Linux server administration": siLinux,
   "Linux sunucu yönetimi": siLinux,
   "CI/CD hatları": siGithubactions,
   Linux: siLinux,

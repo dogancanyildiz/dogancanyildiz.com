@@ -16,6 +16,24 @@ export const MAX_EMAIL_LENGTH = 200;
 export const MAX_MESSAGE_LENGTH = 5000;
 
 /**
+ * Closed set of service headings the form offers. The posted value is one of
+ * these ids, never the translated label: the inbox maps the id to a stable
+ * English line, and an unknown string is refused the same way a missing field
+ * is.
+ */
+export const CONTACT_TOPICS = ["web", "devops", "security", "other"] as const;
+export type ContactTopic = (typeof CONTACT_TOPICS)[number];
+
+export const CONTACT_TOPIC_LABELS: Record<ContactTopic, string> = {
+  web: "Web development",
+  devops: "DevOps and infrastructure",
+  security: "Security",
+  other: "Other",
+};
+
+const CONTACT_TOPIC_SET: ReadonlySet<string> = new Set(CONTACT_TOPICS);
+
+/**
  * Worst case cost in body bytes of one UTF-16 code unit, which is the unit
  * maxLength and String.length count. Three bytes for a U+0800..U+FFFF
  * character, four for a surrogate pair (two units), two for the ASCII
@@ -25,6 +43,11 @@ const MAX_BYTES_PER_CODE_UNIT = 6;
 
 /** Key names, quotes, braces and the empty honeypot value. */
 const BODY_ENVELOPE_BYTES = 1024;
+
+/** Longest current topic id, counted in code units the same way as the rest. */
+const MAX_TOPIC_LENGTH = Math.max(
+  ...CONTACT_TOPICS.map((topic) => topic.length)
+);
 
 /**
  * Upper bound for the raw request body, checked through Content-Length and
@@ -36,7 +59,7 @@ const BODY_ENVELOPE_BYTES = 1024;
  * budget long before it fills the character budget.
  */
 export const MAX_BODY_BYTES =
-  (MAX_NAME_LENGTH + MAX_EMAIL_LENGTH + MAX_MESSAGE_LENGTH) *
+  (MAX_NAME_LENGTH + MAX_EMAIL_LENGTH + MAX_MESSAGE_LENGTH + MAX_TOPIC_LENGTH) *
     MAX_BYTES_PER_CODE_UNIT +
   BODY_ENVELOPE_BYTES;
 
@@ -68,15 +91,17 @@ const STRIPPED_CHARACTERS_PATTERN = /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g;
 const ALLOWED_FIELDS: ReadonlySet<string> = new Set([
   "name",
   "email",
+  "topic",
   "message",
   HONEYPOT_FIELD,
 ]);
 
-export type ContactField = "name" | "email" | "message";
+export type ContactField = "name" | "email" | "topic" | "message";
 
 export type ContactPayload = {
   name: string;
   email: string;
+  topic: ContactTopic;
   message: string;
 };
 
@@ -119,12 +144,16 @@ export function validateBody(body: unknown): ValidationResult {
   if (typeof raw.email !== "string") {
     return invalid("email");
   }
+  if (typeof raw.topic !== "string") {
+    return invalid("topic");
+  }
   if (typeof raw.message !== "string") {
     return invalid("message");
   }
 
   const name = raw.name.trim();
   const email = raw.email.trim();
+  const topic = raw.topic.trim();
   const message = stripControlCharacters(raw.message).trim();
 
   if (
@@ -142,9 +171,15 @@ export function validateBody(body: unknown): ValidationResult {
   ) {
     return invalid("email");
   }
+  if (!CONTACT_TOPIC_SET.has(topic)) {
+    return invalid("topic");
+  }
   if (!message || message.length > MAX_MESSAGE_LENGTH) {
     return invalid("message");
   }
 
-  return { ok: true, data: { name, email, message } };
+  return {
+    ok: true,
+    data: { name, email, topic: topic as ContactTopic, message },
+  };
 }

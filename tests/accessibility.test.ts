@@ -39,6 +39,7 @@ describe("focus ring survives on form controls", () => {
       "src/components/ui/button.tsx",
       "src/components/ui/input.tsx",
       "src/components/ui/textarea.tsx",
+      "src/components/ui/native-select.tsx",
     ];
     for (const file of files) {
       const source = read(file);
@@ -60,6 +61,7 @@ describe("target size", () => {
       "src/components/layout/footer.tsx",
       "src/components/layout/language-switcher.tsx",
       "src/components/layout/header.tsx",
+      "src/components/layout/social-links.tsx",
     ]) {
       expect(read(file), `${file} has no tap-target`).toContain("tap-target");
     }
@@ -255,6 +257,8 @@ describe("client message payload", () => {
       "metadata",
       "api",
       "systems",
+      "privacy",
+      "status",
     ]) {
       expect(namespaceList).not.toContain(`"${namespace}"`);
     }
@@ -269,12 +273,11 @@ describe("client message payload", () => {
 // screen reader user would notice it.
 
 describe("brand link", () => {
-  it("stops the aria-label from overriding the sr-only brand name", () => {
+  it("shows the brand name in the header instead of hiding it for assistive tech", () => {
     const source = read("src/components/layout/header.tsx");
     expect(source).not.toContain('aria-label={tBrand("name")}');
-    expect(source).toContain(
-      '<span className="sr-only">{tBrand("name")}</span>'
-    );
+    expect(source).toContain('{tBrand("name")}');
+    expect(source).not.toContain("sr-only");
   });
 });
 

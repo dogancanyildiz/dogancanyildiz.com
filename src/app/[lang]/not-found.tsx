@@ -1,6 +1,10 @@
-import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { useLocale, useTranslations } from "next-intl";
+import { PageSection } from "@/components/layout/page-section";
+import {
+  StatusScreen,
+  statusLinksFor,
+} from "@/components/status/status-screen";
+import type { Locale } from "@/lib/content";
 
 /**
  * Inert while experimental.globalNotFound is on.
@@ -22,20 +26,25 @@ import { Button } from "@/components/ui/button";
  * params and has to stay a synchronous component.
  */
 export default function LocaleNotFound() {
+  const locale = useLocale() as Locale;
   const t = useTranslations("notFound");
+  const tNav = useTranslations("nav");
+  const tBrand = useTranslations("brand");
 
   return (
-    <section className="section-space">
-      <div className="page-shell flex flex-col items-start gap-6">
-        <span className="eyebrow">{t("code")}</span>
-        <h1 className="max-w-3xl page-title">{t("title")}</h1>
-        <p className="max-w-xl text-lg leading-8 text-muted-foreground">
-          {t("description")}
-        </p>
-        <Button asChild size="lg">
-          <Link href="/">{t("backHome")}</Link>
-        </Button>
-      </div>
-    </section>
+    <PageSection>
+      <StatusScreen
+        brandName={tBrand("name")}
+        eyebrow={t("code")}
+        title={t("title")}
+        description={t("description")}
+        links={statusLinksFor(locale, {
+          home: t("backHome"),
+          projects: tNav("projects"),
+          blog: tNav("blog"),
+          contact: tNav("contact"),
+        })}
+      />
+    </PageSection>
   );
 }

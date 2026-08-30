@@ -24,7 +24,7 @@ export async function buildPageMetadata(
     /**
      * The title is already complete and must not be suffixed. Used by the
      * home page, whose title carries the name and the role and would read
-     * "Doğan Can Yıldız | ... | Doğan Can Yıldız" under the template.
+     * "Doğan Can YILDIZ | ... | Doğan Can YILDIZ" under the template.
      */
     absoluteTitle?: boolean;
   }

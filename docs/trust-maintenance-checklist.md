@@ -36,7 +36,7 @@ Code automates live demo URLs on a weekly schedule (`.github/workflows/links.yml
 
 | Source | Field | Expected |
 |--------|--------|----------|
-| `src/lib/site-config.ts` | `person.name` | Doğan Can Yıldız |
+| `src/lib/site-config.ts` | `person.name` | Doğan Can YILDIZ |
 | `messages/*.json` | `brand.name` | Same spelling |
 | GitHub profile | Display name | Same spelling |
 | LinkedIn | Name | Same spelling |

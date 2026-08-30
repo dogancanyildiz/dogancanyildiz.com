@@ -12,9 +12,9 @@ vi.mock("next/headers", () => ({
 // enough to tell the two link labels apart.
 vi.mock("next-intl/server", () => ({
   getTranslations:
-    async ({ locale }: { locale: string }) =>
+    async ({ locale, namespace }: { locale: string; namespace?: string }) =>
     (key: string) =>
-      `${locale}:${key}`,
+      `${locale}:${namespace ?? "none"}:${key}`,
 }));
 
 // next/font/local is a build time transform; outside next build the module is
@@ -42,6 +42,10 @@ function anchors(html: string): { href: string; tag: string; text: string }[] {
   }));
 }
 
+function homeLinks(html: string) {
+  return anchors(html).filter((link) => link.text.endsWith(":backHome"));
+}
+
 describe("global 404 home links", () => {
   beforeEach(() => {
     pathname.value = "/";
@@ -50,14 +54,14 @@ describe("global 404 home links", () => {
   it("sends the English 404 to the English home and offers Turkish", async () => {
     const html = await renderAt("/does-not-exist");
     expect(html).toContain('lang="en"');
-    const links = anchors(html);
-    expect(links).toHaveLength(2);
-    expect(links[0]?.href).toBe("/");
-    expect(links[0]?.text).toBe("en:backHome");
-    expect(links[0]?.tag).not.toContain("hrefLang");
-    expect(links[1]?.href).toBe("/tr");
-    expect(links[1]?.tag).toContain('hrefLang="tr"');
-    expect(links[1]?.text).toBe("tr:backHome");
+    const homes = homeLinks(html);
+    expect(homes).toHaveLength(2);
+    expect(homes[0]?.href).toBe("/");
+    expect(homes[0]?.text).toBe("en:notFound:backHome");
+    expect(homes[0]?.tag).not.toContain("hrefLang");
+    expect(homes[1]?.href).toBe("/tr");
+    expect(homes[1]?.tag).toContain('hrefLang="tr"');
+    expect(homes[1]?.text).toBe("tr:notFound:backHome");
   });
 
   it("sends the Turkish 404 to the Turkish home, not the English one", async () => {
@@ -67,18 +71,26 @@ describe("global 404 home links", () => {
     // hardcoded href="/" under the Turkish label.
     const html = await renderAt("/tr/olmayan");
     expect(html).toContain('lang="tr"');
-    const links = anchors(html);
-    expect(links).toHaveLength(2);
-    expect(links[0]?.href).toBe("/tr");
-    expect(links[0]?.text).toBe("tr:backHome");
-    expect(links[1]?.href).toBe("/");
-    expect(links[1]?.tag).toContain('hrefLang="en"');
-    expect(links[1]?.text).toBe("en:backHome");
+    const homes = homeLinks(html);
+    expect(homes).toHaveLength(2);
+    expect(homes[0]?.href).toBe("/tr");
+    expect(homes[0]?.text).toBe("tr:notFound:backHome");
+    expect(homes[1]?.href).toBe("/");
+    expect(homes[1]?.tag).toContain('hrefLang="en"');
+    expect(homes[1]?.text).toBe("en:notFound:backHome");
   });
 
   it("falls back to the default locale when the pathname header is missing", async () => {
     const html = await renderAt("");
     expect(html).toContain('lang="en"');
-    expect(anchors(html)[0]?.href).toBe("/");
+    expect(homeLinks(html)[0]?.href).toBe("/");
+  });
+
+  it("offers projects, writing and contact in the page locale", async () => {
+    const html = await renderAt("/does-not-exist");
+    const links = anchors(html);
+    expect(links.map((link) => link.href)).toEqual(
+      expect.arrayContaining(["/projects", "/blog", "/contact"])
+    );
   });
 });
