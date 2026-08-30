@@ -6,13 +6,13 @@ bir sunucuda Traefik ve Cloudflare arkasında self-host ediliyor.
 
 ## Yığın
 
-| Katman    | Seçim                                                               |
-| --------- | ------------------------------------------------------------------- |
-| Çatı      | Next.js 16.3.3, App Router, `output: 'standalone'`                   |
-| Arayüz    | React 19.2, Tailwind CSS 4, shadcn/ui, JS animasyon katmanı yok      |
-| E-posta   | Resend, `/api/contact` üzerinden                                     |
-| Çalışma   | Node 24, tek konteyner                                              |
-| Barındırma | Coolify'ın ürettiği Docker imajı, önde Traefik, Cloudflare proxy    |
+| Katman     | Seçim                                                            |
+| ---------- | ---------------------------------------------------------------- |
+| Çatı       | Next.js 16.3.3, App Router, `output: 'standalone'`               |
+| Arayüz     | React 19.2, Tailwind CSS 4, shadcn/ui, JS animasyon katmanı yok  |
+| E-posta    | Resend, `/api/contact` üzerinden                                 |
+| Çalışma    | Node 24, tek konteyner                                           |
+| Barındırma | Coolify'ın ürettiği Docker imajı, önde Traefik, Cloudflare proxy |
 
 ## Gereksinimler
 
@@ -37,23 +37,23 @@ sessiz bir yedek `robots.txt` ve `sitemap.xml`'e yanlış host yazardı.
 
 ## Betikler
 
-| Betik                   | Ne yapar                                                                                                                                                                                 |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`           | http://localhost:3000 geliştirme sunucusu, velite yanında izleme kipinde çalışır                                                                                                        |
-| `npm run build`         | Üretim derlemesi, `.next/standalone` yazar                                                                                                                                               |
-| `npm run build:content` | Velite'i sıkı kipte bir kez çalıştırır, her içerik dosyasını şemasına karşı doğrular                                                                                                     |
-| `npm run build:app`     | Yalnızca `next build`; velite çıktısı taze olan ağaç için (CI bunu `build:content`'ten sonra kullanır)                                                                                  |
-| `npm run start`         | Üretim derlemesini sunar                                                                                                                                                                 |
-| `npm run lint`          | Next.js yapılandırmasıyla ESLint, tip-duyarlı kurallar açık, uyarı sıfır                                                                                                                 |
-| `npm run typecheck`     | `tsc --noEmit`                                                                                                                                                                           |
+| Betik                   | Ne yapar                                                                                                                                                                                  |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`           | http://localhost:3000 geliştirme sunucusu, velite yanında izleme kipinde çalışır                                                                                                          |
+| `npm run build`         | Üretim derlemesi, `.next/standalone` yazar                                                                                                                                                |
+| `npm run build:content` | Velite'i sıkı kipte bir kez çalıştırır, her içerik dosyasını şemasına karşı doğrular                                                                                                      |
+| `npm run build:app`     | Yalnızca `next build`; velite çıktısı taze olan ağaç için (CI bunu `build:content`'ten sonra kullanır)                                                                                    |
+| `npm run start`         | Üretim derlemesini sunar                                                                                                                                                                  |
+| `npm run lint`          | Next.js yapılandırmasıyla ESLint, tip-duyarlı kurallar açık, uyarı sıfır                                                                                                                  |
+| `npm run typecheck`     | `tsc --noEmit`                                                                                                                                                                            |
 | `npm test`              | vitest: `*.test.ts` için node, `*.test.tsx` için jsdom + Testing Library; CI `--coverage` ekler                                                                                           |
-| `npm run format`        | Prettier kontrol kipi                                                                                                                                                                    |
-| `npm run format:write`  | Prettier yazma kipi                                                                                                                                                                     |
-| `npm run verify:routes` | Derlemeden sonra `.next/prerender-manifest.json`: her içerik rotası iki dilde prerender, `/api/*` dynamic                                                                                |
+| `npm run format`        | Prettier kontrol kipi                                                                                                                                                                     |
+| `npm run format:write`  | Prettier yazma kipi                                                                                                                                                                       |
+| `npm run verify:routes` | Derlemeden sonra `.next/prerender-manifest.json`: her içerik rotası iki dilde prerender, `/api/*` dynamic                                                                                 |
 | `npm run verify:links`  | Proje canlı demo URL'leri ve sertifika doğrulama linklerinin HEAD/GET denetimi (`npm run build:content` önce); merge kapısı değil, `.github/workflows/links.yml` haftalık ve isteğe bağlı |
-| `npm run verify:docs`   | `docs/` ve deploy checklist'leri üzerinde yapısal kontroller (`scripts/verify-docs.mjs`), CI'da çalışır                                                                                |
-| `npm run release:check` | `scripts/release-version.mjs` kuru koşu: `main`'e bir sonraki merge'in keseceği sürümü basar, hiçbir şey yazmaz                                                                        |
-| `npm run vendor:fonts`  | @fontsource paketlerindeki woff2 ve woff dosyalarını `src/fonts` ve `public/fonts/og`'ye kopyalar                                                                                       |
+| `npm run verify:docs`   | `docs/` ve deploy checklist'leri üzerinde yapısal kontroller (`scripts/verify-docs.mjs`), CI'da çalışır                                                                                   |
+| `npm run release:check` | `scripts/release-version.mjs` kuru koşu: `main`'e bir sonraki merge'in keseceği sürümü basar, hiçbir şey yazmaz                                                                           |
+| `npm run vendor:fonts`  | @fontsource paketlerindeki woff2 ve woff dosyalarını `src/fonts` ve `public/fonts/og`'ye kopyalar                                                                                         |
 
 ## Ortam değişkenleri
 
@@ -62,19 +62,19 @@ ayrımı kozmetik değil. Build değişkenini yalnızca runtime işaretlemek
 derlemeyi doğrudan düşürür; bir sırrı build değişkeni yapmak imaj
 katmanlarına ve derleme loglarına sızdırır.
 
-| Değişken                 | Coolify katmanı | Zorunlu           | Not                                                                                                                                                                                                                      |
-| ------------------------ | --------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_SITE_URL`   | Build           | Evet              | `next build` client bundle'a gömer. Dockerfile `ARG`'ının varsayılanı yok; bu argümansız derleme `/robots.txt` prerender'ında `resolveSiteUrl`'de düşer, tanımsız bir değer göndermez.                                  |
-| `RESEND_API_KEY`         | Runtime         | Üretimde evet     | Build değişkenleri imaj katmanına ve derleme loguna sızabilir.                                                                                                                                                           |
-| `CONTACT_EMAIL`          | Runtime         | Üretimde evet     | Form mesajlarının gittiği kutu.                                                                                                                                                                                         |
-| `FROM_EMAIL`             | Runtime         | Üretimde evet     | Resend'de doğrulanmış bir domain'de olmalı.                                                                                                                                                                             |
-| `TRUST_CF_CONNECTING_IP` | Runtime         | Hayır             | Yalnızca origin yalnızca Cloudflare'dan erişilebilir ve Traefik Cloudflare aralıklarına güvendikten sonra `true`. `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.                                               |
-| `NEXT_PUBLIC_BUILD_SHA`  | Build           | Hayır             | Systems panelindeki commit SHA; Coolify `SOURCE_COMMIT` veya CI `github.sha`. Boşsa alan gizlenir.                                                                                                                     |
-| `NEXT_PUBLIC_BUILD_DATE` | Build           | Hayır             | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa ikisi de gizlenir.                                                                                                                                          |
-| `GATUS_URL`              | Runtime         | Hayır             | Systems panelinin okuduğu Gatus taban URL'i. Yalnızca sunucu tarafı, client'a gitmez; boşsa nötr "durum alınamıyor" satırı görünür.                                                                                     |
-| `UMAMI_SCRIPT_URL`       | Build           | Hayır             | Self-host Umami origin'i. CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                                                                                               |
-| `UMAMI_WEBSITE_ID`       | Build           | Hayır             | Umami website UUID. İzleyici etiketi yalnızca iki Umami değeri de setken basılır.                                                                                                                                       |
-| `CSP_REPORT_ONLY`        | Build           | Hayır             | Tek bir ölçüm deploy'u için `1`: sıkı report-only CSP'yi yayınlar, `/api/csp-report` bütçesini yükseltir. Pencere bitince kaldır.                                                                                        |
+| Değişken                 | Coolify katmanı | Zorunlu       | Not                                                                                                                                                                                    |
+| ------------------------ | --------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`   | Build           | Evet          | `next build` client bundle'a gömer. Dockerfile `ARG`'ının varsayılanı yok; bu argümansız derleme `/robots.txt` prerender'ında `resolveSiteUrl`'de düşer, tanımsız bir değer göndermez. |
+| `RESEND_API_KEY`         | Runtime         | Üretimde evet | Build değişkenleri imaj katmanına ve derleme loguna sızabilir.                                                                                                                         |
+| `CONTACT_EMAIL`          | Runtime         | Üretimde evet | Form mesajlarının gittiği kutu.                                                                                                                                                        |
+| `FROM_EMAIL`             | Runtime         | Üretimde evet | Resend'de doğrulanmış bir domain'de olmalı.                                                                                                                                            |
+| `TRUST_CF_CONNECTING_IP` | Runtime         | Hayır         | Yalnızca origin yalnızca Cloudflare'dan erişilebilir ve Traefik Cloudflare aralıklarına güvendikten sonra `true`. `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.               |
+| `NEXT_PUBLIC_BUILD_SHA`  | Build           | Hayır         | Systems panelindeki commit SHA; Coolify `SOURCE_COMMIT` veya CI `github.sha`. Boşsa alan gizlenir.                                                                                     |
+| `NEXT_PUBLIC_BUILD_DATE` | Build           | Hayır         | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa ikisi de gizlenir.                                                                                                         |
+| `GATUS_URL`              | Runtime         | Hayır         | Systems panelinin okuduğu Gatus taban URL'i. Yalnızca sunucu tarafı, client'a gitmez; boşsa nötr "durum alınamıyor" satırı görünür.                                                    |
+| `UMAMI_SCRIPT_URL`       | Build           | Hayır         | Self-host Umami origin'i. CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                                                              |
+| `UMAMI_WEBSITE_ID`       | Build           | Hayır         | Umami website UUID. İzleyici etiketi yalnızca iki Umami değeri de setken basılır.                                                                                                      |
+| `CSP_REPORT_ONLY`        | Build           | Hayır         | Tek bir ölçüm deploy'u için `1`: sıkı report-only CSP'yi yayınlar, `/api/csp-report` bütçesini yükseltir. Pencere bitince kaldır.                                                      |
 
 ## Uluslararasılaştırma
 
@@ -227,12 +227,12 @@ feature/*  --PR-->  dev  --PR-->  main  --push-->  release workflow
 3. `package.json`, `package-lock.json` ve `CHANGELOG.md`'yi taşıyan
    `chore(release): sync version vX.Y.Z` pull request'ini `dev`'e açar.
 
-| Commit tipi                                           | Sürüm artışı |
-| ----------------------------------------------------- | ------------ |
-| `feat`                                                | minor        |
-| `fix`, `perf`, `refactor`                             | patch        |
-| konuda `!:` veya gövdede `BREAKING CHANGE:`            | major        |
-| `chore`, `docs`, `ci`, `test`, `style`, `build`       | yok          |
+| Commit tipi                                     | Sürüm artışı |
+| ----------------------------------------------- | ------------ |
+| `feat`                                          | minor        |
+| `fix`, `perf`, `refactor`                       | patch        |
+| konuda `!:` veya gövdede `BREAKING CHANGE:`     | major        |
+| `chore`, `docs`, `ci`, `test`, `style`, `build` | yok          |
 
 Yalnızca sürüm-nötr commit taşıyan bir batch etiketsiz biter.
 `npm run release:check` kararı yerelde basar, hiçbir şey yazmaz.

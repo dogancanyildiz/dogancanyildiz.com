@@ -56,6 +56,5 @@ yönetici parolası tohumlamayı desteklemez). İlk yayın bu yüzden kısa sür
 `https://analytics.dogancanyildiz.com`'da o varsayılan parolayla erişilir.
 İlk başarılı deploy'dan hemen sonra Settings altında değiştir; domain ile
 başka bir şey yapmadan (paylaşmak, bağlamak, ikinci kullanıcı eklemek)
-önce. `docs/plans/handoffs/faz-5-manual-checklist.md` şu an domain'i (adım
-4) parola değişiminden (adım 5) önce ayağa kaldırıyor; panel erişilir
+önce. `docs/plans/handoffs/faz-5-manual-checklist.md` şu an domain'i (adım 4) parola değişiminden (adım 5) önce ayağa kaldırıyor; panel erişilir
 olur olmaz ilk iş parola, website eklemeden ve linki paylaşmadan önce.
