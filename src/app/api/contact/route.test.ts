@@ -50,36 +50,27 @@ type SendPayload = {
   replyTo: string;
 };
 
-type SendResult = {
-  data: { id: string } | null;
-  error: { name: string; message: string } | null;
-};
+type SendResult = { messageId: string };
 
-type SendOptions = { idempotencyKey?: string };
-
-const send =
-  vi.fn<(payload: SendPayload, options?: SendOptions) => Promise<SendResult>>();
+const send = vi.fn<(payload: SendPayload) => Promise<SendResult>>();
 
 /** The nth recorded send, failing loudly instead of reading past the end. */
-function sendCall(index = 0): [SendPayload, (SendOptions | undefined)?] {
+function sendCall(index = 0): [SendPayload] {
   const call = send.mock.calls[index];
   if (!call) {
-    throw new Error(`resend send was not called ${index + 1} time(s)`);
+    throw new Error(`mailer sendMail was not called ${index + 1} time(s)`);
   }
   return call;
 }
 
-vi.mock("@/lib/resend", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/resend")>();
+vi.mock("@/lib/mailer", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/mailer")>();
   return {
     ...actual,
     // The factory is hoisted above the `send` binding, so the stub reaches it
     // through a closure that only runs when the route calls it.
-    resend: {
-      emails: {
-        send: (payload: SendPayload, options?: SendOptions) =>
-          send(payload, options),
-      },
+    mailer: {
+      sendMail: (payload: SendPayload) => send(payload),
     },
   };
 });
@@ -128,7 +119,7 @@ const originalEnv = { ...process.env };
 beforeEach(() => {
   process.env.CONTACT_EMAIL = "me@mail.invalid";
   process.env.FROM_EMAIL = "site@mail.invalid";
-  send.mockResolvedValue({ data: { id: "mail-id" }, error: null });
+  send.mockResolvedValue({ messageId: "mail-id" });
 });
 
 afterEach(() => {
@@ -405,12 +396,13 @@ describe("POST /api/contact mail failures", () => {
     });
   });
 
-  it("answers 500 when the provider rejects the message", async () => {
+  it("answers 500 when the SMTP server rejects the message", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
-    send.mockResolvedValue({
-      data: null,
-      error: { name: "validation_error", message: "visitor@mail.invalid" },
-    });
+    send.mockRejectedValue(
+      Object.assign(new Error("550 rejected: visitor@mail.invalid"), {
+        name: "SMTPEnvelopeError",
+      })
+    );
 
     const response = await POST(contactRequest());
 
@@ -418,12 +410,13 @@ describe("POST /api/contact mail failures", () => {
     expect(await response.json()).toEqual({ error: messages.api.sendFailed });
   });
 
-  it("never writes the provider message into the log line", async () => {
+  it("never writes the SMTP error message into the log line", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
-    send.mockResolvedValue({
-      data: null,
-      error: { name: "validation_error", message: "visitor@mail.invalid" },
-    });
+    send.mockRejectedValue(
+      Object.assign(new Error("550 rejected: visitor@mail.invalid"), {
+        name: "SMTPEnvelopeError",
+      })
+    );
 
     await POST(contactRequest());
 
@@ -433,7 +426,7 @@ describe("POST /api/contact mail failures", () => {
     }
     const line = String(logged[0]);
 
-    expect(line).toContain("validation_error");
+    expect(line).toContain("SMTPEnvelopeError");
     expect(line).not.toContain("visitor@mail.invalid");
     expect(line).not.toContain(validPayload.message);
   });
@@ -576,47 +569,17 @@ describe("POST /api/contact rate limit", () => {
   });
 });
 
-describe("POST /api/contact idempotency", () => {
-  // The send timeout only stops the handler waiting; the upstream request can
-  // still deliver, so the retry the visitor is invited to make has to collapse
-  // onto the same send at the provider.
-  it("derives the key from the payload", async () => {
-    await POST(contactRequest());
-
-    expect(sendCall()[1]).toMatchObject({
-      idempotencyKey: expect.stringMatching(/^contact-[0-9a-f]{32}$/),
-    });
-  });
-
-  it("reuses the key for the same message and not for another", async () => {
+describe("POST /api/contact send", () => {
+  // SMTP has no provider side idempotency window (the old Resend key is
+  // gone), so the contract this suite can hold is simpler: exactly one
+  // sendMail per accepted request, and a lost timeout race may deliver a
+  // late copy, which is accepted because the recipient is the owner.
+  it("performs exactly one send per accepted request", async () => {
     await POST(contactRequest());
     await POST(contactRequest({ ip: "198.51.100.4" }));
-    await POST(
-      contactRequest({
-        ip: "198.51.100.5",
-        body: JSON.stringify({
-          ...validPayload,
-          message: "A different message.",
-        }),
-      })
-    );
 
-    const keys = send.mock.calls.map((call) => call[1]?.idempotencyKey);
-    expect(keys[1]).toBe(keys[0]);
-    expect(keys[2]).not.toBe(keys[0]);
-  });
-
-  it("treats a different topic as a different message", async () => {
-    await POST(contactRequest());
-    await POST(
-      contactRequest({
-        ip: "198.51.100.6",
-        body: JSON.stringify({ ...validPayload, topic: "devops" }),
-      })
-    );
-
-    const keys = send.mock.calls.map((call) => call[1]?.idempotencyKey);
-    expect(keys[1]).not.toBe(keys[0]);
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(sendCall(0)[0].replyTo).toBe(validPayload.email);
   });
 });
 

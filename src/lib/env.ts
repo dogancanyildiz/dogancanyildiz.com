@@ -2,7 +2,7 @@
  * Environment access for the portfolio.
  *
  * NEXT_PUBLIC_SITE_URL is a build time variable, it is inlined into the client
- * bundle by next build. RESEND_API_KEY, CONTACT_EMAIL, FROM_EMAIL and
+ * bundle by next build. The SMTP_* variables, CONTACT_EMAIL, FROM_EMAIL and
  * TRUST_CF_CONNECTING_IP are runtime only, they must never be exposed to the
  * client bundle or to build logs.
  *
@@ -12,7 +12,7 @@
  * scope of a route, otherwise they run during next build.
  */
 
-export const DEV_FALLBACK_EMAIL = "onboarding@resend.dev";
+export const DEV_FALLBACK_EMAIL = "dev-fallback@dogancanyildiz.invalid";
 
 export function resolveSiteUrl(value: string | undefined): string {
   const trimmed = value?.trim() ?? "";
@@ -56,7 +56,7 @@ export function resolveRequiredEmail(
   }
   if (isProduction) {
     throw new Error(
-      `${name} is not set. It is required in production, the silent onboarding@resend.dev fallback is development only.`
+      `${name} is not set. It is required in production, the silent development fallback address is development only.`
     );
   }
   return DEV_FALLBACK_EMAIL;

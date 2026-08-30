@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { posts, projects } from "#site/content";
 
-import { missingMailEnv } from "@/lib/resend";
+import { missingMailEnv } from "@/lib/mailer";
 import { methodNotAllowed } from "@/lib/api-methods";
 
 // Never prerendered, never cached: a cached 200 would keep reporting healthy

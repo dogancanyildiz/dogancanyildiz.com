@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 
@@ -8,7 +6,6 @@ import {
   CONTACT_TOPIC_LABELS,
   MAX_BODY_BYTES,
   validateBody,
-  type ContactPayload,
 } from "@/lib/contact-validation";
 import {
   contactEmail,
@@ -26,7 +23,7 @@ import {
   parseJsonBody,
   readBodyWithLimit,
 } from "@/lib/request-body";
-import { resend } from "@/lib/resend";
+import { mailer } from "@/lib/mailer";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { localeFromPathname } from "@/lib/locale-from-pathname";
 import { methodNotAllowed } from "@/lib/api-methods";
@@ -34,8 +31,8 @@ import { methodNotAllowed } from "@/lib/api-methods";
 const ROUTE = "/api/contact";
 
 /**
- * Upper bound on the Resend call. The SDK exposes no AbortSignal on
- * emails.send (checked against node_modules/resend types), so the timeout is a
+ * Upper bound on the SMTP send. nodemailer keeps its own socket timeouts on
+ * sendMail (nodemailer keeps its own socket timeouts under this race), so the timeout is a
  * race: the visitor gets an answer, while the upstream request is left to
  * finish or fail on its own instead of holding the handler open for minutes.
  *
@@ -46,24 +43,9 @@ const ROUTE = "/api/contact";
  */
 const SEND_TIMEOUT_MS = 10_000;
 
-/**
- * Stable per message key for the provider's idempotency window. Derived from
- * the payload, so a retry of the same message reuses it while a different
- * message never does; a hash rather than the values themselves, because the
- * key travels in a header.
- */
-function idempotencyKey(payload: ContactPayload): string {
-  const digest = createHash("sha256")
-    .update(
-      `${payload.name}\n${payload.email}\n${payload.topic}\n${payload.message}`
-    )
-    .digest("hex");
-  return `contact-${digest.slice(0, 32)}`;
-}
-
 class SendTimeoutError extends Error {
   constructor() {
-    super(`Resend did not answer within ${SEND_TIMEOUT_MS}ms`);
+    super(`The SMTP server did not answer within ${SEND_TIMEOUT_MS}ms`);
     this.name = "SendTimeoutError";
   }
 }
@@ -343,7 +325,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!resend) {
+  if (!mailer) {
     log("error", "contact mail transport is not configured", {
       requestId,
       route: ROUTE,
@@ -384,39 +366,29 @@ export async function POST(request: Request) {
   ].join("\n");
 
   try {
-    const { error } = await withTimeout(
-      resend.emails.send(
-        {
-          from,
-          to,
-          subject: `Portfolio contact from ${parsed.data.name} (${topicLabel})`,
-          text,
-          // Answering the visitor is a reply in the mail client, not a copy
-          // and paste out of the body.
-          replyTo: parsed.data.email,
-        },
-        { idempotencyKey: idempotencyKey(parsed.data) }
-      ),
+    // nodemailer rejects on failure, there is no error tuple to unwrap. No
+    // idempotency key either: SMTP has no provider side dedupe window, so a
+    // retry after a lost 10s race can deliver a second copy. Accepted, the
+    // recipient is the owner's own inbox (decision 2026-08-31).
+    await withTimeout(
+      mailer.sendMail({
+        from,
+        to,
+        subject: `Portfolio contact from ${parsed.data.name} (${topicLabel})`,
+        text,
+        // Answering the visitor is a reply in the mail client, not a copy
+        // and paste out of the body.
+        replyTo: parsed.data.email,
+      }),
       SEND_TIMEOUT_MS
     );
-
-    if (error) {
-      log("error", "contact provider rejected the message", {
-        requestId,
-        route: ROUTE,
-        // The provider message can quote the payload, the error code cannot.
-        detail: error.name,
-      });
-      return jsonResponse(
-        { error: t("sendFailed") },
-        { status: 500, requestId, budget: spent }
-      );
-    }
   } catch (sendError) {
     const timedOut = sendError instanceof SendTimeoutError;
     log("error", timedOut ? "contact send timed out" : "contact send failed", {
       requestId,
       route: ROUTE,
+      // describeError keeps the code/name, never the message: an SMTP error
+      // string can quote the envelope, so it stays out of the logs.
       detail: describeError(sendError),
     });
     return jsonResponse(

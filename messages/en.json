@@ -116,7 +116,7 @@
     "locationLabel": "Location",
     "location": "Konya, Türkiye",
     "trustTitle": "Privacy",
-    "trustBody": "Form data reaches me by email through Resend, the mail provider this site uses, and is not shared or sold. Visit counts come from a self-hosted Umami instance that does not use cookies, and only after you allow measurement.",
+    "trustBody": "Form data reaches me by email through my own Mailcow mail server, with no third party provider in between, and is not shared or sold. Visit counts come from a self-hosted Umami instance that does not use cookies, and only after you allow measurement.",
     "responseExpectation": "I usually reply within two to three business days.",
     "form": {
       "name": "Name",
@@ -177,7 +177,7 @@
     "analyticsTitle": "Visit counts",
     "analyticsBody": "If you allow it, visits are counted by a self-hosted Umami instance on my own server. Umami does not set a cookie. The script loads only after you say yes. Necessary storage (theme and this choice) does not wait on that yes.",
     "formTitle": "Contact form",
-    "formBody": "The form sends your name, email and message to me through Resend. I use that to reply. I do not sell it or pass it to anyone else.",
+    "formBody": "The form sends your name, email and message to me through my own mail server. I use that to reply. I do not sell it or pass it to anyone else.",
     "contactTitle": "Contact",
     "contactBody": "To ask about this notice or to reach me about work, use the contact page."
   },

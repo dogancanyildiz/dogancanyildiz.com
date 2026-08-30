@@ -138,7 +138,7 @@ Bu workflow image push etmiyor ve Coolify'a deploy tetiklemiyor; tek işi lint +
 | Değişken | Build/Runtime | Gerekçe |
 |---|---|---|
 | NEXT_PUBLIC_SITE_URL | Build | `next build` sırasında client bundle'a gömülüyor; yalnızca Runtime işaretlenirse üretimde sessizce undefined kalır |
-| RESEND_API_KEY | Runtime | Sır; Build işaretlenirse image katmanlarına veya build loglarına sızma riski taşır |
+| SMTP_HOST / SMTP_USER / SMTP_PASSWORD (2026-08-31: Resend yerine Mailcow) | Runtime | Sır; Build işaretlenirse image katmanlarına veya build loglarına sızma riski taşır |
 | CONTACT_EMAIL | Runtime | Yalnızca server route'ta (contact API) okunuyor, client'a hiç gitmiyor |
 | FROM_EMAIL | Runtime | Aynı gerekçe |
 | TRUST_CF_CONNECTING_IP | Runtime | `false` (varsayılan, `.env.example`'da uygulandı); origin Cloudflare'a kilitlenip (yukarıdaki DOCKER-USER adımı) doğrulanana kadar `CF-Connecting-IP` okunmuyor, rate limit `X-Forwarded-For`'un son hop'una düşüyor |
@@ -236,7 +236,7 @@ Kanıt: `.github/workflows/ci.yml`, `release.yml`, `links.yml`, `dependabot.yml`
 
 - **next.config.ts'de output: "standalone" eksikse**: Dockerfile .next/standalone klasörünü bulamaz, build başarısız olur ya da yanlış (şişkin) çıktı kopyalanır. Faz 0'da bu değişiklik Dockerfile'dan önce yapılmalı.
 - **coollabsio/coolify#7500**: Dockerfile HEALTHCHECK + Node.js container'larında connection refused üreten, hâlâ açık bir bug. Staging'de curl/wget ile doğrulanmadan production health check'e güvenilmemeli; aksi halde rolling update sürekli unhealthy görüp yeni deploy'ları geri alabilir veya downtime yaratabilir.
-- **RESEND_API_KEY yanlışlıkla Build variable işaretlenirse**: image katmanlarına veya build loglarına sızabilir.
+- **SMTP_PASSWORD yanlışlıkla Build variable işaretlenirse**: image katmanlarına veya build loglarına sızabilir (2026-08-31 öncesi bu satır RESEND_API_KEY içindi).
 - **NEXT_PUBLIC_* değişkenleri yalnızca Runtime işaretlenirse**: `next build` sırasında client bundle'a hiç gömülmez, üretimde sessizce undefined dolaşır.
 - **Turbopack + standalone regresyonu (vercel/next.js#88844)**: serverExternalPackages trace edilmiyor. Dockerfile'a harici bir native paket eklenirse .next/standalone/node_modules'te eksik çıkabilir; `next build --webpack` fallback'i akılda tutulmalı.
 - **Docker build cache eviction (~48 saat)**: sık deploy edilmezse cache sıfırlanıp build süresi uzayabilir; bu bir hata değil ama beklenen bir yavaşlama.

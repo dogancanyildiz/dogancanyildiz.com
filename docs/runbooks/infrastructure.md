@@ -28,13 +28,13 @@ o adresi gösterir; Systems paneli yalnızca link verir, Kuma'nın API'sinden ve
 | `NEXT_PUBLIC_STATUS_URL` | Build | Kuma public status sayfasının tam adresi; boşsa Systems'taki link satırı gizlenir, yalnızca https kabul edilir |
 | `UMAMI_SCRIPT_URL` | Build | `https://umami.dravcore.com` (`src/lib/analytics.ts` `UMAMI_ORIGIN` ile aynı olmak zorunda, aksi halde production build durur) |
 | `UMAMI_WEBSITE_ID` | Build | Merkezi Umami panelindeki bu siteye ait website UUID'si |
-| `RESEND_API_KEY` | Runtime | Resend API anahtarı |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | Runtime | Mailcow submission (587); uygulama parolası, `docs/deploy/mailcow-smtp.md` |
 | `CONTACT_EMAIL` | Runtime | `me@dogancanyildiz.com` |
 | `FROM_EMAIL` | Runtime | doğrulanmış gönderici adresi |
 | `TRUST_CF_CONNECTING_IP` | Runtime | `false`; origin Cloudflare'a kilitlenince `true` |
 | `CSP_REPORT_ONLY` | Build, geçici | `1` yalnızca tek bir ölçüm deploy'u için; sıkı report-only CSP'yi yayınlar, sonra kaldırılır |
 
-Üç mail değişkeninden biri eksikse container açılışta JSON hata satırı basar ve
+Posta değişkenlerinden biri eksikse container açılışta JSON hata satırı basar ve
 `/api/health` `"status":"degraded"` döner (HTTP 200). Tracker script'i consent
 onayından sonra enjekte edilir ve `data-domains="dogancanyildiz.com"` taşır:
 aynı merkezi Umami'ye ekli diğer siteler veya preview kopyaları bu website

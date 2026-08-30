@@ -86,15 +86,15 @@ Düzeltme turu (opus, 10 commit, `1e5501a..c9c85b0`): `.display-hero` geri geldi
 Tam liste yerel `audit/acik-kalanlar.md` defterinde (P-, O-, M- maddeleri). Öncelik sırasıyla:
 
 1. **Canlı siteyi ayağa kaldır** (F-002/F-003, kritik): her HTTPS yolu Cloudflare 526; origin'de Traefik router yüklü değil. Coolify'da uygulama ve Custom Labels, sunucuda `docker inspect` + coolify-proxy logları; kalıcı çözüm Cloudflare Origin CA.
-2. **Coolify env'leri doğrula:** `RESEND_API_KEY`, `CONTACT_EMAIL`, `FROM_EMAIL` (eksikse health `degraded`, Gatus alarm verir), `NEXT_PUBLIC_BUILD_SHA/DATE` (`SOURCE_COMMIT`), Faz 5 değişkenleri.
+2. **Coolify env'leri doğrula:** `SMTP_HOST/PORT/USER/PASSWORD` (2026-08-31: Resend yerine Mailcow), `CONTACT_EMAIL`, `FROM_EMAIL` (eksikse health `degraded`, izleyici alarm verir), `NEXT_PUBLIC_BUILD_SHA/DATE` (`SOURCE_COMMIT`), Faz 5 değişkenleri.
 3. **Cloudflare:** Always Use HTTPS, Minimum TLS 1.2, CAA, managed robots.txt kapalı, Cache Rule, rate limiting, Bot Fight Mode (`docs/deploy/cloudflare-kurulum.md`).
 4. **Traefik / origin:** trustedIPs, HSTS middleware (sonra uygulamadaki satır kaldırılır), `DOCKER-USER` origin kilidi; ardından `TRUST_CF_CONNECTING_IP=true`.
-5. **Resend:** domain doğrulama kayıtları, mevcut DMARC'ı düzenle (yeni kayıt ekleme), kademeli `p=quarantine` -> `p=reject`.
+5. **Mailcow (2026-08-31 kararı):** `contact@` kutusuna uygulama parolası, `SMTP_*` env'leri, canlı bir form gönderimiyle Origin'in kırpılmadığını ve DKIM/SPF pass olduğunu doğrula; DMARC sertleştirmesi öneri olarak duruyor (`docs/deploy/mailcow-smtp.md`). Resend DNS doğrulaması gereksizleşti.
 6. **Gatus ve Umami:** Coolify kaynakları, `GATUS_ALERT_WEBHOOK_URL`, Umami parolası domain bağlanmadan önce; harici ikinci prob.
 7. **`.sh` alan adı kararı:** kaydet veya kapsam dışı ilan et.
 8. **GitHub:** `main` için `enforce_admins`; merge edilmiş `release/sync-v0.3.0` ve `feature/public-repo-security` uzak dallarını sil; preview wildcard DNS kararı.
 9. **Görsel onaylar:** giriş animasyonlarının yokluğu, tema düğmesi ikon anlamı, pill'lerin normal yazımı, footer/CTA başlık ölçeği; tarayıcı turu (Faz 3 listesi + bu kapanış).
-10. **Canlı doğrulamalar (site açılınca):** Lighthouse (CLS/LCP dahil), hreflang aracı, Search Console, Rich Results, OG önizleme, contact formu gerçek gönderim (Origin kırpılmıyor), `CSP_REPORT_ONLY=1` ölçüm penceresi, Resend idempotency penceresi.
+10. **Canlı doğrulamalar (site açılınca):** Lighthouse (CLS/LCP dahil), hreflang aracı, Search Console, Rich Results, OG önizleme, contact formu gerçek gönderim (Origin kırpılmıyor), `CSP_REPORT_ONLY=1` ölçüm penceresi.
 11. **İçerik teslimatları:** kapaklar (`cover` + `coverAlt`), sertifika `verifyUrl`, Konuşmalar, profil fotoğrafı, metin ve CV onayı, Wikonya adı, ticket repo linki.
 
 ## Kalan teknik borç (küçük, sıralı PR'lara uygun)

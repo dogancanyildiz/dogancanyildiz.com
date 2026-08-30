@@ -17,7 +17,7 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 | A | `*.preview` | `ORIGIN_IPV4` | **DNS only (gri bulut)** |
 
 - [ ] `*.preview` bilerek gri bulut: ücretsiz planda wildcard DNS kayıtları proxy'lenemez. Preview'lar bu yüzden TLS'siz `http` üzerinden ve yalnızca origin firewall'unda allowlist'e alınmış admin IP'sinden erişilebilir, bkz. `docs/deploy/traefik-ve-origin.md`.
-- [ ] Resend'in ekleyeceği MX ve TXT kayıtları (`send`, `resend._domainkey`, `_dmarc`) proxy'lenemez ve proxy'lenmemeli, bkz. `docs/deploy/resend-domain.md`. `FROM_EMAIL` artık bu domain üzerinde (`contact@dogancanyildiz.com`), Resend doğrulaması da bu zone'a eklenir.
+- [ ] Posta DNS kayıtları (MX, DKIM, SPF, DMARC) Mailcow kurulumuna aittir ve proxy'lenmez (gri bulut); 2026-08-31 kararıyla Resend kaldırıldı, gönderim `contact@dogancanyildiz.com` üzerinden Mailcow SMTP ile yapılır, bkz. `docs/deploy/mailcow-smtp.md`.
 - [ ] **Uyarı:** `me@dogancanyildiz.com` alıcı adresini taşıyan MX kayıtlarına dokunulmaz; A/CNAME kayıtlarının eklenmesi mevcut postayı etkilemez.
 - [ ] `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi bu zone'daki bir Redirect Rule ile yapılır (bölüm 3), Coolify'ın dahili www ayarı kullanılmaz.
 

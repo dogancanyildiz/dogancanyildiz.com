@@ -88,7 +88,7 @@ Cloudflare 526 verdiği için bölüm 3-5'in canlı URL isteyen maddelerinin hi�
       `https://dogancanyildiz.com/tr/about` adresine 301 dönüyor (site sahibinin
       2026-08-27 kararıyla domain yönü tersine döndü, bkz. `docs/11-acik-sorular.md` soru 5)
 - [ ] Coolify sağlık kontrolü yeşil, `/api/health` 200 ve gövdede `"status":"ok"`
-      (`degraded` ise Coolify'da `RESEND_API_KEY`, `CONTACT_EMAIL` veya `FROM_EMAIL` eksik;
+      (`degraded` ise Coolify'da `SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD`, `CONTACT_EMAIL` veya `FROM_EMAIL` eksik;
       container açılış logunda aynı hata satırı görünür)
 - [ ] Yanıt başlıklarında `strict-transport-security`, `x-frame-options: DENY`,
       `cross-origin-opener-policy` ve `content-security-policy` (`report-uri /api/csp-report`

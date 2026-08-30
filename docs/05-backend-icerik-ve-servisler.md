@@ -44,6 +44,8 @@ Velite'ın 0.x sürüm olması API kırılma riski taşıyor; bu risk caret değ
 
 ### 2. Contact formu: Resend + katmanlı sunucu tarafı savunma, Turnstile ertelendi
 
+**Karar değişikliği (2026-08-31):** Resend kaldırıldı; gönderim sahibinin kendi Mailcow sunucusundan SMTP ile yapılır (`src/lib/mailer.ts`, nodemailer, 587 STARTTLS zorunlu). Gerekçe: form yalnızca sahibinin kutusuna teslim eder, transactional sağlayıcının teslimat itibarı burada değer üretmez; son üçüncü taraf runtime bağımlılığı da kalkar ve hiç yapılmamış Resend DNS doğrulaması gereksizleşir. DKIM/SPF Mailcow'da. Katmanlı savunmanın tamamı (honeypot, rate limit, uzunluk, Origin/Content-Type, CRLF, 10 sn zaman aşımı, JSON log) aynen taşındı; tek kayıp sağlayıcı idempotency penceresi (504 sonrası tekrar çift posta üretebilir, alıcı sahibin kendisi olduğu için kabul). Kurulum: `docs/deploy/mailcow-smtp.md`. Bu bölümün kalanı tarihsel kayıt.
+
 Mevcut `src/app/api/contact/route.ts` ve `src/lib/resend.ts` korunur, Resend değiştirilmez. Üzerine üç koruma katmanı (honeypot, rate limit, uzunluk sınırı) ve bir hata sızıntısı düzeltmesi eklenir:
 
 1. **Sunucu tarafı honeypot**: `website` alanı şu an yalnızca `contact-form.tsx`'in client kodunda kontrol ediliyor, `route.ts` bu alanı hiç okumuyor. Doğrudan `curl` ile atılan istekte honeypot devre dışı kalıyor; alan artık route handler'da da kontrol edilir.
@@ -105,7 +107,7 @@ Umami, self-hosted, çerezsiz ve gizlilik dostu bir web analytics aracı; Coolif
 
 | Değişken | Kapsam | Zorunlu | Not |
 |---|---|---|---|
-| `RESEND_API_KEY` | Runtime | Prod'da evet | .env.example:1-9'da mevcut |
+| `RESEND_API_KEY` | Runtime | Prod'da evet | Tarihsel satır; 2026-08-31'de yerini `SMTP_HOST/PORT/USER/PASSWORD` aldı |
 | `CONTACT_EMAIL` | Runtime | Prod'da evet | Fallback yalnızca development |
 | `FROM_EMAIL` | Runtime | Prod'da evet | `dogancanyildiz.com` doğrulanmış domain |
 | `GATUS_URL` | Runtime | Status widget için evet | Client'a sızmaz, yalnızca sunucu tarafı çeker |

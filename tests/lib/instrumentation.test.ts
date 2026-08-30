@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { register } from "@/instrumentation";
-import { MAIL_ENV_KEYS, missingMailEnv } from "@/lib/resend";
+import { MAIL_ENV_KEYS, missingMailEnv } from "@/lib/mailer";
 
 const originalEnv = { ...process.env };
 
@@ -24,16 +24,20 @@ describe("missingMailEnv", () => {
   it("names every variable that is absent or blank", () => {
     expect(
       missingMailEnv({
-        RESEND_API_KEY: "re_key",
+        SMTP_HOST: "mail.example.invalid",
+        SMTP_USER: "contact@example.invalid",
+        SMTP_PASSWORD: "app-password",
         CONTACT_EMAIL: "   ",
       })
     ).toEqual(["CONTACT_EMAIL", "FROM_EMAIL"]);
   });
 
-  it("is empty when all three are set", () => {
+  it("is empty when every variable is set", () => {
     expect(
       missingMailEnv({
-        RESEND_API_KEY: "re_key",
+        SMTP_HOST: "mail.example.invalid",
+        SMTP_USER: "contact@example.invalid",
+        SMTP_PASSWORD: "app-password",
         CONTACT_EMAIL: "me@example.invalid",
         FROM_EMAIL: "site@example.invalid",
       })
@@ -42,7 +46,9 @@ describe("missingMailEnv", () => {
 
   it("covers exactly the variables the contact route needs", () => {
     expect([...MAIL_ENV_KEYS]).toEqual([
-      "RESEND_API_KEY",
+      "SMTP_HOST",
+      "SMTP_USER",
+      "SMTP_PASSWORD",
       "CONTACT_EMAIL",
       "FROM_EMAIL",
     ]);
@@ -55,7 +61,9 @@ describe("register", () => {
     withEnv({
       NEXT_RUNTIME: "nodejs",
       NODE_ENV: "production",
-      RESEND_API_KEY: "re_key",
+      SMTP_HOST: "mail.example.invalid",
+      SMTP_USER: "contact@example.invalid",
+      SMTP_PASSWORD: "app-password",
       CONTACT_EMAIL: undefined,
       FROM_EMAIL: undefined,
     });
@@ -77,7 +85,9 @@ describe("register", () => {
     withEnv({
       NEXT_RUNTIME: "nodejs",
       NODE_ENV: "production",
-      RESEND_API_KEY: "re_key",
+      SMTP_HOST: "mail.example.invalid",
+      SMTP_USER: "contact@example.invalid",
+      SMTP_PASSWORD: "app-password",
       CONTACT_EMAIL: "me@example.invalid",
       FROM_EMAIL: "site@example.invalid",
     });
@@ -94,7 +104,9 @@ describe("register", () => {
     withEnv({
       NEXT_RUNTIME: "edge",
       NODE_ENV: "production",
-      RESEND_API_KEY: undefined,
+      SMTP_HOST: undefined,
+      SMTP_USER: undefined,
+      SMTP_PASSWORD: undefined,
       CONTACT_EMAIL: undefined,
       FROM_EMAIL: undefined,
     });
@@ -110,7 +122,9 @@ describe("register", () => {
     withEnv({
       NEXT_RUNTIME: "nodejs",
       NODE_ENV: "development",
-      RESEND_API_KEY: undefined,
+      SMTP_HOST: undefined,
+      SMTP_USER: undefined,
+      SMTP_PASSWORD: undefined,
       CONTACT_EMAIL: undefined,
       FROM_EMAIL: undefined,
     });
