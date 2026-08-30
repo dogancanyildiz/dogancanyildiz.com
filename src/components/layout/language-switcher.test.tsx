@@ -1,15 +1,28 @@
 // @vitest-environment jsdom
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
 import { renderWithIntl } from "../../../tests/helpers/render";
 import { LanguageSwitcher } from "./language-switcher";
+
+let currentTemplate = "/about";
+let currentParams: Record<string, string> = {};
 
 vi.mock("@/i18n/navigation", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/i18n/navigation")>();
   return {
     ...actual,
-    usePathname: () => "/about",
+    usePathname: () => currentTemplate,
   };
+});
+
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useParams: () => currentParams,
+}));
+
+beforeEach(() => {
+  currentTemplate = "/about";
+  currentParams = {};
 });
 
 describe("LanguageSwitcher", () => {
@@ -56,5 +69,36 @@ describe("LanguageSwitcher", () => {
     const tr = screen.getByRole("link", { name: /TR/ });
     expect(en).toHaveAttribute("href", "/en/about");
     expect(tr).toHaveAttribute("href", "/hakkimda");
+  });
+
+  it("fills dynamic params instead of linking the template on detail pages", () => {
+    // With a pathnames map, usePathname() returns "/blog/[slug]"; before the
+    // 2026-08-31 fix the switcher rendered that template into both hrefs.
+    currentTemplate = "/blog/[slug]";
+    currentParams = { slug: "self-hosting-with-coolify" };
+
+    renderWithIntl(<LanguageSwitcher untranslated={{ en: [], tr: [] }} />);
+
+    const en = screen.getByRole("link", { name: /EN/ });
+    const tr = screen.getByRole("link", { name: /TR/ });
+    expect(en).toHaveAttribute("href", "/en/blog/self-hosting-with-coolify");
+    expect(tr).toHaveAttribute("href", "/blog/self-hosting-with-coolify");
+    expect(en.getAttribute("href")).not.toContain("[slug]");
+  });
+
+  it("falls back to the section root for an untranslated detail page", () => {
+    currentTemplate = "/blog/[slug]";
+    currentParams = { slug: "capt-sinavina-hazirlik" };
+
+    renderWithIntl(
+      <LanguageSwitcher
+        untranslated={{ en: ["/blog/capt-sinavina-hazirlik"], tr: [] }}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: /EN/ })).toHaveAttribute(
+      "href",
+      "/en/blog"
+    );
   });
 });

@@ -17,3 +17,22 @@ export function pathnameForLocale(locale: string, href: string): string {
     href: href as AppHref,
   });
 }
+
+/**
+ * With a `pathnames` map, next-intl's usePathname() returns the matched
+ * template (`/blog/[slug]`), not the concrete path the visitor is on. Any
+ * consumer that compares against content paths or builds a link from the
+ * current location has to fill the template with the route params first,
+ * otherwise the literal `[slug]` leaks into an href (the 2026-08-31 review
+ * caught exactly that on every detail page's language switcher).
+ */
+export function fillPathname(
+  template: string,
+  params: Record<string, string | string[] | undefined>
+): string {
+  return template.replace(/\[(?:\.\.\.)?([^\]]+)\]/g, (match, name) => {
+    const value = params[name];
+    if (value === undefined) return match;
+    return Array.isArray(value) ? value.join("/") : value;
+  });
+}
