@@ -71,8 +71,8 @@ katmanlarına ve derleme loglarına sızdırır.
 | `TRUST_CF_CONNECTING_IP` | Runtime         | Hayır         | Yalnızca origin yalnızca Cloudflare'dan erişilebilir ve Traefik Cloudflare aralıklarına güvendikten sonra `true`. `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.               |
 | `NEXT_PUBLIC_BUILD_SHA`  | Build           | Hayır         | Systems panelindeki commit SHA; Coolify `SOURCE_COMMIT` veya CI `github.sha`. Boşsa alan gizlenir.                                                                                     |
 | `NEXT_PUBLIC_BUILD_DATE` | Build           | Hayır         | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa ikisi de gizlenir.                                                                                                         |
-| `GATUS_URL`              | Runtime         | Hayır         | Systems panelinin okuduğu Gatus taban URL'i. Yalnızca sunucu tarafı, client'a gitmez; boşsa nötr "durum alınamıyor" satırı görünür.                                                    |
-| `UMAMI_SCRIPT_URL`       | Build           | Hayır         | Self-host Umami origin'i. CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                                                              |
+| `NEXT_PUBLIC_STATUS_URL` | Build           | Hayır         | Systems panelinin link verdiği public status sayfası (Uptime Kuma). Yalnızca https kabul edilir; boşsa satır gizlenir.                                                                 |
+| `UMAMI_SCRIPT_URL`       | Build           | Hayır         | Merkezi self-host Umami origin'i (`https://umami.dravcore.com`). CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                       |
 | `UMAMI_WEBSITE_ID`       | Build           | Hayır         | Umami website UUID. İzleyici etiketi yalnızca iki Umami değeri de setken basılır.                                                                                                      |
 | `CSP_REPORT_ONLY`        | Build           | Hayır         | Tek bir ölçüm deploy'u için `1`: sıkı report-only CSP'yi yayınlar, `/api/csp-report` bütçesini yükseltir. Pencere bitince kaldır.                                                      |
 
@@ -188,7 +188,7 @@ Kontrol panelinde, bu depoda olmayan adımlar adım adım checklist:
 - `docs/deploy/cloudflare-kurulum.md` — DNS, TLS, yönlendirme, cache, rate limiting
 - `docs/deploy/traefik-ve-origin.md` — güvenilir proxy başlıkları, HSTS, origin kilidi
 - `docs/deploy/resend-domain.md` — gönderici domain için SPF, DKIM, DMARC
-- `docs/runbooks/infrastructure.md` — Gatus, Umami ve arkalarındaki ortam değişkenleri
+- `docs/runbooks/infrastructure.md` — Uptime Kuma, merkezi Umami ve ortam değişkenleri
 
 ## Depo düzeni
 

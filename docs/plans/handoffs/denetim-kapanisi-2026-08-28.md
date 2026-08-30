@@ -106,6 +106,10 @@ Tam liste yerel `audit/acik-kalanlar.md` defterinde (P-, O-, M- maddeleri). Önc
 - typescript 7 ve eslint 10 majorları (`eslint-config-next` desteği bekleniyor).
 - Preview deployment'lar için ayrı `NEXT_PUBLIC_SITE_URL` (`docs/deploy/coolify-kurulum.md`'ye yazıldı, Coolify'da uygulanmalı).
 
+## Ek karar (2026-08-30): gözlemlenebilirlik panele taşındı
+
+Sahibi Gatus ve repodaki Umami stack'ini kaldırdı: gerçek izleme Coolify servis kataloğundan kurulan Uptime Kuma'da (bildirim kanalları Kuma'nın kendi sağlayıcılarıyla), ölçüm sahibinin merkezi Umami kurulumunda (`umami.dravcore.com`, bu site orada bir website). `infra/` klasörü, `src/lib/status.ts`, `GATUS_URL` ve ana sayfanın 60 sn revalidate'i silindi; Systems paneli incelip build bilgisi + `NEXT_PUBLIC_STATUS_URL` linkine döndü (Kuma'nın dokümante olmayan API'sine bilinçli olarak bağlanılmadı; docs/05'teki ret gerekçesi korunuyor). Umami origin'i `src/lib/analytics.ts`'te güncellendi, `data-domains` çapraz site karışmasını engelliyor. Kapanış turunun N-01..N-24 status/infra kalemlerinden compose ve alerting'e bağlı olanlar bu kararla geçersizleşti; parola-domain sırası artık Kuma/merkezi Umami akışında geçerli değil (merkezi Umami zaten kurulu).
+
 ## Öğrenilenler (orkestrasyon)
 
 - Dosya-ayrık kümeler + worktree izolasyonu bu boyutta işe yaradı: 8 paralel uygulayıcı, yalnızca 3 küçük çakışma. Çakışmalar hep "paylaşılan test dosyası" ve "iki kümenin aynı bileşende farklı sınıf yazması" biçimindeydi; sahiplik listeleri brief'te net olduğunda ajanlar sınırı korudu, sınırı aşmak zorunda kaldıklarında `crossEdits` ile bildirdiler.

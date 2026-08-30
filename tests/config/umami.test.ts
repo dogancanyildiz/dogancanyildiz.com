@@ -79,7 +79,7 @@ describe("umami tag", () => {
     expect(() =>
       resolveUmamiTag({
         ...base,
-        scriptUrl: "https://analytics.dogancanyildiz.com.evil.test",
+        scriptUrl: "https://umami.dravcore.com.evil.test",
       })
     ).toThrow(UmamiOriginMismatchError);
   });
@@ -88,7 +88,7 @@ describe("umami tag", () => {
     expect(() =>
       resolveUmamiTag({
         ...base,
-        scriptUrl: "http://analytics.dogancanyildiz.com",
+        scriptUrl: "http://umami.dravcore.com",
       })
     ).toThrow(UmamiOriginMismatchError);
   });

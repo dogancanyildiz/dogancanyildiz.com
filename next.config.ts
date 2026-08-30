@@ -114,7 +114,7 @@ function buildContentSecurityPolicy({
  * for a submission that cannot be undone quickly.
  *
  * includeSubDomains has a blast radius beyond the apex: once a browser has seen
- * this header it refuses plain http to dev., preview., status., analytics. and
+ * this header it refuses plain http to every subdomain (dev., preview., send. and
  * send.dogancanyildiz.com for a year, and shortening the max-age only helps the
  * clients that come back afterwards. Every one of those hosts has to terminate
  * TLS with a valid certificate before this ships.
@@ -151,7 +151,7 @@ function staticSecurityHeaders(isProduction: boolean) {
     { key: "X-Frame-Options", value: "DENY" },
     { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
     // Only governs how other origins may embed resources we serve. It does not
-    // touch the Umami script, which is loaded from analytics.dogancanyildiz.com
+    // touch the Umami script, which is loaded from umami.dravcore.com
     // and carries that origin's own CORP. /feed.xml and /api/health stay
     // readable for server side clients (feed readers, uptime probes): CORP is
     // enforced by browsers on subresource loads, cross origin fetch is governed

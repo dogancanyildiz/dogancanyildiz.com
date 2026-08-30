@@ -63,12 +63,7 @@ describe("Dockerfile", () => {
 
   it("never bakes a runtime secret into an image layer", () => {
     const content = dockerfile();
-    for (const secret of [
-      "RESEND_API_KEY",
-      "CONTACT_EMAIL",
-      "FROM_EMAIL",
-      "GATUS_URL",
-    ]) {
+    for (const secret of ["RESEND_API_KEY", "CONTACT_EMAIL", "FROM_EMAIL"]) {
       expect(content).not.toContain(secret);
     }
   });

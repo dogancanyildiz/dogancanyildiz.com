@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { layoutUmamiTag } from "./umami-script";
 
-const REAL_ORIGIN = "https://analytics.dogancanyildiz.com";
+const REAL_ORIGIN = "https://umami.dravcore.com";
 
 describe("layoutUmamiTag", () => {
   afterEach(() => {

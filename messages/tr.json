@@ -214,17 +214,13 @@
   "systems": {
     "eyebrow": "Sistemler",
     "title": "Canlı altyapı",
-    "description": "Bu site kendi baktığım bir sunucuda çalışıyor. Aşağıdaki veriler kendi izleme sistemimden geliyor ve 60 saniyede bir yenileniyor.",
-    "siteLabel": "Site",
-    "up": "Çalışıyor",
-    "down": "Kapalı",
-    "uptimeLabel": "Son 24 saat çalışma oranı",
+    "description": "Bu site kendi baktığım bir sunucuda çalışıyor. Aşağıdaki yayın bilgileri doğrudan build'den geliyor; canlı izleme kendi Uptime Kuma kurulumumda koşuyor.",
     "deployLabel": "Son yayın",
     "commitLabel": "Commit",
+    "statusLabel": "Canlı durum",
+    "statusPage": "Durum sayfasını aç",
     "stackLabel": "Üzerinde çalıştığı yapı",
-    "noData": "Veri yok",
-    "unavailable": "Durum bilgisi şu an alınamıyor",
-    "lastCheck": "Son kontrol {time}"
+    "noData": "Veri yok"
   },
   "a11y": {
     "skipToContent": "İçeriğe geç",

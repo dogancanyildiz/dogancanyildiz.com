@@ -214,17 +214,13 @@
   "systems": {
     "eyebrow": "Systems",
     "title": "Live infrastructure",
-    "description": "This site runs on a server I maintain myself. The numbers below come from my own monitoring and refresh every 60 seconds.",
-    "siteLabel": "Site",
-    "up": "Operational",
-    "down": "Down",
-    "uptimeLabel": "Uptime, last 24 hours",
+    "description": "This site runs on a server I maintain myself. The deploy details below come straight from the build; live monitoring runs on my own Uptime Kuma instance.",
     "deployLabel": "Last deploy",
     "commitLabel": "Commit",
+    "statusLabel": "Live status",
+    "statusPage": "Open the status page",
     "stackLabel": "Runs on",
-    "noData": "No data",
-    "unavailable": "Status unavailable",
-    "lastCheck": "Last checked {time}"
+    "noData": "No data"
   },
   "a11y": {
     "skipToContent": "Skip to content",

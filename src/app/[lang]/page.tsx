@@ -26,11 +26,6 @@ import {
   toProjectCardData,
 } from "@/lib/content";
 
-// GATUS_URL is a runtime variable, so the Gatus fetch does not run during the
-// Docker build. Without this the route would be frozen as fully static and the
-// systems panel would never leave its "status unavailable" state.
-export const revalidate = 60;
-
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
 }

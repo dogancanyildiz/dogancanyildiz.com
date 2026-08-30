@@ -142,7 +142,7 @@ Bu workflow image push etmiyor ve Coolify'a deploy tetiklemiyor; tek işi lint +
 | CONTACT_EMAIL | Runtime | Yalnızca server route'ta (contact API) okunuyor, client'a hiç gitmiyor |
 | FROM_EMAIL | Runtime | Aynı gerekçe |
 | TRUST_CF_CONNECTING_IP | Runtime | `false` (varsayılan, `.env.example`'da uygulandı); origin Cloudflare'a kilitlenip (yukarıdaki DOCKER-USER adımı) doğrulanana kadar `CF-Connecting-IP` okunmuyor, rate limit `X-Forwarded-For`'un son hop'una düşüyor |
-| GATUS_URL | Runtime | Status widget verisi sunucu tarafında çekiliyor, client'a URL sızmıyor; `.env.example`'da tanımlı ama boş, Gatus Faz 5'te kuruluyor |
+| GATUS_URL | Runtime | Tarihsel satır: 2026-08-30'da Gatus ile birlikte kaldırıldı; yerine Build katmanında `NEXT_PUBLIC_STATUS_URL` (public status sayfası linki, sır değil) var |
 
 ### 7. Traefik: redirect (yedek yol), HSTS/compress, buffering
 
@@ -229,8 +229,8 @@ Kanıt: `.github/workflows/ci.yml`, `release.yml`, `links.yml`, `dependabot.yml`
 - **CI `Docker image` job'u:** hadolint (digest pinli imaj), `docker/build-push-action` ile gha cache'li build (push yok, `load: true`), sonra imaj `3131:3000` ile çalıştırılır, `Healthcheck` config'inin boş olmadığı assert edilir, `docker inspect` ile `healthy` beklenir ve `/api/health` dışarıdan curl'lenir, container temizlenir. Job'larda `timeout-minutes` var. Tüm action'lar commit SHA'sına pinli (`# vX.Y.Z` yorumuyla).
 - **Dockerfile:** `node:24-alpine` digest'e pinli, `RUN --mount=type=cache,target=/root/.npm`, build tek `npm run build` (velite artık iki kez koşmuyor), `NEXT_PUBLIC_BUILD_SHA`/`NEXT_PUBLIC_BUILD_DATE` ARG'ları varsayılansız. `docker-compose.yml` bu iki arg'ı geçiyor, imaj adı faz numarasından bağımsız. `.dockerignore` `audit` ve `.cursor` dizinlerini de dışlıyor.
 - **Release:** `release.yml` `workflow_run` + `conclusion == success`; `scripts/release-version.mjs` son tag'i `git tag --sort=-v:refname` ile semver'e göre seçiyor (dev dalında da doğru), dev'de çalışınca uyarı basıyor. `package.json` `predev` ile velite yarışı kapandı.
-- **Dependabot:** docker ekosistemi `/`, `/infra/gatus`, `/infra/umami`; npm haftalık gruplu; majorlar (`next`, `eslint`, `typescript`) ignore'da.
-- **Panel tarafı hâlâ uygulanmadı ve canlı site kapalı (526):** Coolify env katmanları (`NEXT_PUBLIC_BUILD_SHA/DATE` için `SOURCE_COMMIT`), Gatus/Umami kaynakları, Cloudflare (Always Use HTTPS, Min TLS 1.2, CAA, managed robots.txt, Cache Rule, rate limiting), Traefik (trustedIPs, HSTS middleware, origin kilidi), preview wildcard DNS kararı, merge edilmiş `release/sync-v0.3.0` ve `feature/public-repo-security` uzak dallarının silinmesi, `main` için `enforce_admins`. Preview deployment'lar kendi `NEXT_PUBLIC_SITE_URL` değerini almalı (contact API `Origin`'i bu değerle karşılaştırıyor).
+- **Dependabot:** docker ekosistemi yalnızca kök Dockerfile (gözlemlenebilirlik 2026-08-30 kararıyla Coolify servis kataloğunda: Uptime Kuma + merkezi Umami, repoda compose yok); npm haftalık gruplu; majorlar (`next`, `eslint`, `typescript`) ignore'da.
+- **Panel tarafı hâlâ uygulanmadı ve canlı site kapalı (526):** Coolify env katmanları (`NEXT_PUBLIC_BUILD_SHA/DATE` için `SOURCE_COMMIT`, `NEXT_PUBLIC_STATUS_URL`), Uptime Kuma servisi ve merkezi Umami'ye site kaydı, Cloudflare (Always Use HTTPS, Min TLS 1.2, CAA, managed robots.txt, Cache Rule, rate limiting), Traefik (trustedIPs, HSTS middleware, origin kilidi), preview wildcard DNS kararı, merge edilmiş `release/sync-v0.3.0` ve `feature/public-repo-security` uzak dallarının silinmesi, `main` için `enforce_admins`. Preview deployment'lar kendi `NEXT_PUBLIC_SITE_URL` değerini almalı (contact API `Origin`'i bu değerle karşılaştırıyor).
 
 ## Riskler ve tripwire'lar
 

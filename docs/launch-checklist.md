@@ -93,5 +93,8 @@ Cloudflare 526 verdiği için bölüm 3-5'in canlı URL isteyen maddelerinin hi�
 - [ ] Yanıt başlıklarında `strict-transport-security`, `x-frame-options: DENY`,
       `cross-origin-opener-policy` ve `content-security-policy` (`report-uri /api/csp-report`
       ile) görünüyor; `http://` istek 301 ile `https://`'e dönüyor (Cloudflare Always Use HTTPS)
-- [ ] Gatus `status.dogancanyildiz.com`'da yayında, `public_site` yeşil ve
-      `GATUS_ALERT_WEBHOOK_URL` ile bir test uyarısı gerçekten ulaştı
+- [ ] Uptime Kuma Coolify'da yayında, `https://dogancanyildiz.com/api/health` monitörü yeşil,
+      bir bildirim kanalı bağlı ve bir test uyarısı gerçekten ulaştı; public status sayfası
+      açık ve `NEXT_PUBLIC_STATUS_URL` o sayfayı gösteriyor (Systems panelindeki link çalışıyor)
+- [ ] Site `umami.dravcore.com`'daki merkezi Umami'ye website olarak eklendi, onay sonrası
+      ziyaretler panelde görünüyor, sayfada CSP ihlali yok

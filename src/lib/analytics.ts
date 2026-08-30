@@ -1,5 +1,8 @@
 /**
- * Single source of truth for the self-hosted Umami tracker.
+ * Single source of truth for the Umami tracker. Since 2026-08-30 the
+ * instance is the central self-hosted one on umami.dravcore.com (the owner's
+ * infra domain); this site is added there as a website, nothing Umami related
+ * runs in this repo or on this domain.
  *
  * The origin is a constant rather than an environment variable because the CSP
  * in next.config.ts has to name it literally: the policy is baked into the
@@ -8,7 +11,7 @@
  * the configured script URL against it, so a mismatch fails the build instead
  * of shipping a tag the browser blocks.
  */
-export const UMAMI_ORIGIN = "https://analytics.dogancanyildiz.com";
+export const UMAMI_ORIGIN = "https://umami.dravcore.com";
 
 export class UmamiOriginMismatchError extends Error {
   constructor(scriptUrl: string) {

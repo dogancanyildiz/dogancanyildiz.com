@@ -30,7 +30,9 @@ her zaman `docs/` altındaki numaralı karar dokümanlarına bakın.
 **Ek not (2026-08-28):** 28 Ağustos denetimi `dogancanyildiz.sh` alan adının
 hiç kayıtlı olmadığını gösterdi (DNS'te zone yok). Faz 5 planı 90 yerde `.sh`
 hostname'i kullanıyor (`status.dogancanyildiz.sh`, `analytics.dogancanyildiz.sh`);
-uygulama `.com` ile yapıldı (`infra/gatus`, `infra/umami`, `.env.example`).
+uygulama `.com` ile yapıldı; 2026-08-30'da gözlemlenebilirlik Coolify servis
+kataloğuna taşındı ve `infra/` klasörü tamamen kaldırıldı (izleme Uptime Kuma,
+ölçüm merkezi Umami `umami.dravcore.com`).
 `.sh` için karar sahibinde: ya alan adı kaydedilip Cloudflare'a eklenir ve
 `docs/deploy/cloudflare-kurulum.md` bölüm "Zone: dogancanyildiz.sh" uygulanır,
 ya da `.sh` kapsam dışı ilan edilir ve README, launch-checklist, cloudflare-kurulum,

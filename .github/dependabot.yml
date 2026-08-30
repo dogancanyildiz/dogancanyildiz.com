@@ -57,15 +57,12 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: docker
-    # The root Dockerfile plus the Faz 5 side service stacks: infra/gatus and
-    # infra/umami each carry their own docker-compose.yml with a floating
-    # image tag (twinproduction/gatus, ghcr.io/umami-software/umami). Without
-    # these two, Dependabot only ever saw the root Dockerfile and neither
-    # compose file's image got a version bump PR.
+    # Root Dockerfile only. Observability (Uptime Kuma, the central Umami on
+    # dravcore.com) is installed from Coolify's service catalog and managed in
+    # the panel (2026-08-30 decision), so there is no compose file here for
+    # Dependabot to watch; image versions are bumped in the panel.
     directories:
       - /
-      - /infra/gatus
-      - /infra/umami
     schedule:
       interval: weekly
       day: monday
