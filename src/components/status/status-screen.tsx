@@ -27,8 +27,9 @@ const SECONDARY_PATHS = [
 ] as const;
 
 /**
- * Locale-prefixed hrefs for a status page. Uses localePath so a Turkish
- * 404 never sends the reader to the English home by accident.
+ * Locale-aware hrefs for a status page. Uses localePath so a Turkish 404
+ * never sends the reader to the English home by accident, and so a
+ * localized slug (`/iletisim`) cannot drift from the routing config.
  */
 export function statusLinksFor(
   locale: Locale,

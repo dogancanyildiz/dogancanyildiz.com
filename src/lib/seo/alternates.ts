@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pathnameForLocale } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import type { Locale } from "@/lib/content";
@@ -14,14 +15,15 @@ import {
 export { siteUrl };
 
 /**
- * Locale prefixed pathname. The default locale (en) stays on the root because
- * routing uses localePrefix "as-needed".
+ * Public pathname for one locale. Goes through next-intl getPathname so a
+ * localized slug (`/hakkimda`) and a locale prefix (`/en/about`) cannot
+ * drift from the routing config. Unknown paths (OG images, a concrete
+ * `/blog/slug`) still get the as-needed prefix.
  */
-export function localePath(locale: Locale, path: string): string {
+export function localePath(locale: string, path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  const trimmed = normalized === "/" ? "" : normalized.replace(/\/+$/, "");
-  const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
-  return `${prefix}${trimmed}` || "/";
+  const trimmed = normalized === "/" ? "/" : normalized.replace(/\/+$/, "");
+  return pathnameForLocale(locale, trimmed);
 }
 
 export function absoluteUrl(locale: Locale, path: string): string {
@@ -104,8 +106,8 @@ export function buildOpenGraph(
  *
  * Locales without a translation are left out completely, which is the part
  * that matters: advertising a hreflang link to a page that 404s is worse than
- * advertising none. x-default prefers english, then falls back to whichever
- * locale is available.
+ * advertising none. x-default prefers the default locale (Turkish), then
+ * falls back to whichever locale is available.
  *
  * Shared with src/app/sitemap.ts, which has to publish the same set: the
  * sitemap and the page head disagreeing about which languages exist is a
@@ -120,8 +122,10 @@ export function buildLanguageAlternates(
   for (const locale of availableLocales) {
     languages[locale] = absoluteUrl(locale, path);
   }
-  const fallbackLocale: Locale = availableLocales.includes("en")
-    ? "en"
+  const fallbackLocale: Locale = availableLocales.includes(
+    routing.defaultLocale
+  )
+    ? routing.defaultLocale
     : (availableLocales[0] ?? currentLocale ?? routing.defaultLocale);
   languages["x-default"] = absoluteUrl(fallbackLocale, path);
   return languages;
@@ -131,8 +135,8 @@ export function buildLanguageAlternates(
  * canonical + hreflang set for one page. Every locale points at itself as well
  * (self referencing tag), otherwise Google discards the whole cluster.
  * Locales without translated content are left out completely. x-default
- * prefers english, then falls back to whichever locale is available, then to
- * the current locale.
+ * prefers the default locale, then falls back to whichever locale is
+ * available, then to the current locale.
  */
 export function buildAlternates(
   currentLocale: Locale,

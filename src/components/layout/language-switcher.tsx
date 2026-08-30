@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { getPathname, usePathname } from "@/i18n/navigation";
+import { pathnameForLocale, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { switchTargetPath } from "@/i18n/switch-target";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ export function LanguageSwitcher({ untranslated }: LanguageSwitcherProps) {
       {routing.locales.map((locale) => {
         const isActive = locale === activeLocale;
         const target = switchTargetPath(pathname, untranslated[locale] ?? []);
-        const href = getPathname({ locale, href: target });
+        const href = pathnameForLocale(locale, target);
         return (
           <a
             key={locale}

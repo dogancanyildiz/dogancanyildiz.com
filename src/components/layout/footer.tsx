@@ -1,13 +1,18 @@
 import { buildInfo, formatBuildSha } from "@/lib/build-info";
-import { Mail } from "lucide-react";
+import { Mail, Rss } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { navItems } from "@/lib/nav";
-import { routing } from "@/i18n/routing";
+import { localePath } from "@/lib/seo/alternates";
+import {
+  GithubIcon,
+  LinkedinIcon,
+  WhatsAppIcon,
+} from "@/components/ui/brand-icon";
 import { CONTACT_EMAIL_PUBLIC, SOCIAL, whatsappHref } from "@/lib/site";
 
 const footerTextLinkClass =
-  "inline-flex min-h-6 items-center text-sm text-muted-foreground no-underline transition-colors hover:text-foreground";
+  "inline-flex min-h-6 items-center gap-2 text-sm text-muted-foreground no-underline transition-colors hover:text-foreground";
 
 export async function Footer() {
   const year = buildInfo.year;
@@ -19,10 +24,9 @@ export async function Footer() {
   ]);
   const buildSha = formatBuildSha(buildInfo.sha);
   const buildDate = buildInfo.date;
-  // feed.xml is a route handler, not an i18n page route, so it is linked
-  // directly rather than through the next-intl Link helper.
-  const feedHref =
-    locale === routing.defaultLocale ? "/feed.xml" : `/${locale}/feed.xml`;
+  // feed.xml is a route handler, so it is not a next-intl Link target;
+  // localePath still applies the as-needed prefix from the routing config.
+  const feedHref = localePath(locale, "/feed.xml");
 
   return (
     <footer className="mt-auto border-t border-border">
@@ -98,6 +102,7 @@ export async function Footer() {
                   rel="noopener noreferrer"
                   className={footerTextLinkClass}
                 >
+                  <WhatsAppIcon className="size-4 shrink-0" />
                   {t("footer.whatsapp")}
                 </a>
               </li>
@@ -108,6 +113,7 @@ export async function Footer() {
                   rel="noopener noreferrer"
                   className={footerTextLinkClass}
                 >
+                  <GithubIcon className="size-4 shrink-0" />
                   {t("footer.github")}
                 </a>
               </li>
@@ -118,11 +124,13 @@ export async function Footer() {
                   rel="noopener noreferrer"
                   className={footerTextLinkClass}
                 >
+                  <LinkedinIcon className="size-4 shrink-0" />
                   {t("footer.linkedin")}
                 </a>
               </li>
               <li>
                 <a href={feedHref} className={footerTextLinkClass}>
+                  <Rss className="size-4 shrink-0" aria-hidden="true" />
                   {t("footer.rss")}
                 </a>
               </li>

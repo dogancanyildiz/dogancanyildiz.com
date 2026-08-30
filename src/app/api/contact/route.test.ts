@@ -38,7 +38,7 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async ({ namespace, locale }) => {
     requestedLocales.push(locale);
     return (key: string) =>
-      `${locale}:${messageLookup[namespace]?.[key] ?? key}`.replace(/^en:/, "");
+      `${locale}:${messageLookup[namespace]?.[key] ?? key}`.replace(/^tr:/, "");
   }),
 }));
 
@@ -626,24 +626,24 @@ describe("POST /api/contact locale", () => {
     expect(requestedLocales).toEqual(["tr"]);
   });
 
-  it("falls back to the /tr prefix of the referring page", async () => {
+  it("falls back to the /en prefix of the referring page", async () => {
     await POST(
       contactRequest({
-        headers: { referer: `${SITE_ORIGIN}/tr/contact` },
-        body: "{}",
-      })
-    );
-    expect(requestedLocales).toEqual(["tr"]);
-  });
-
-  it("ignores an English referer", async () => {
-    await POST(
-      contactRequest({
-        headers: { referer: `${SITE_ORIGIN}/contact` },
+        headers: { referer: `${SITE_ORIGIN}/en/contact` },
         body: "{}",
       })
     );
     expect(requestedLocales).toEqual(["en"]);
+  });
+
+  it("treats an unprefixed referer as Turkish", async () => {
+    await POST(
+      contactRequest({
+        headers: { referer: `${SITE_ORIGIN}/iletisim` },
+        body: "{}",
+      })
+    );
+    expect(requestedLocales).toEqual(["tr"]);
   });
 
   it("reads Accept-Language by quality value, not by substring", async () => {
@@ -667,27 +667,27 @@ describe("POST /api/contact locale", () => {
   });
 
   it("uses the same locale on every early rejection", async () => {
-    const turkish = { "x-locale": "tr" };
+    const english = { "x-locale": "en" };
 
     const unsupported = await POST(
       contactRequest({
-        headers: { ...turkish, "content-type": "text/plain" },
+        headers: { ...english, "content-type": "text/plain" },
       })
     );
     const forbidden = await POST(
       contactRequest({
-        headers: { ...turkish, origin: "https://evil.invalid" },
+        headers: { ...english, origin: "https://evil.invalid" },
       })
     );
     const tooLarge = await POST(
       contactRequest({
-        headers: { ...turkish, "content-length": String(MAX_BODY_BYTES + 1) },
+        headers: { ...english, "content-length": String(MAX_BODY_BYTES + 1) },
       })
     );
 
     for (const response of [unsupported, forbidden, tooLarge]) {
       const body = await response.json();
-      expect(body.error.startsWith("tr:")).toBe(true);
+      expect(body.error.startsWith("en:")).toBe(true);
     }
   });
 
@@ -696,10 +696,10 @@ describe("POST /api/contact locale", () => {
       await POST(probe());
     }
     const limited = await POST(
-      contactRequest({ headers: { "x-locale": "tr" }, body: "{}" })
+      contactRequest({ headers: { "x-locale": "en" }, body: "{}" })
     );
 
     expect(limited.status).toBe(429);
-    expect((await limited.json()).error.startsWith("tr:")).toBe(true);
+    expect((await limited.json()).error.startsWith("en:")).toBe(true);
   });
 });

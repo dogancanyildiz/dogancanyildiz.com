@@ -59,7 +59,10 @@ export async function ProjectList({
             <div className="flex items-start gap-3">
               <Heading className="min-w-0 flex-1 text-lg font-semibold leading-snug tracking-tight sm:text-xl">
                 <Link
-                  href={project.href}
+                  href={{
+                    pathname: "/projects/[slug]",
+                    params: { slug: project.slug },
+                  }}
                   prefetch={false}
                   className="after:absolute after:inset-0 text-foreground no-underline transition-colors group-hover:text-primary"
                 >

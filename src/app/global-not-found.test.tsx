@@ -52,14 +52,14 @@ describe("global 404 home links", () => {
   });
 
   it("sends the English 404 to the English home and offers Turkish", async () => {
-    const html = await renderAt("/does-not-exist");
+    const html = await renderAt("/en/does-not-exist");
     expect(html).toContain('lang="en"');
     const homes = homeLinks(html);
     expect(homes).toHaveLength(2);
-    expect(homes[0]?.href).toBe("/");
+    expect(homes[0]?.href).toBe("/en");
     expect(homes[0]?.text).toBe("en:notFound:backHome");
     expect(homes[0]?.tag).not.toContain("hrefLang");
-    expect(homes[1]?.href).toBe("/tr");
+    expect(homes[1]?.href).toBe("/");
     expect(homes[1]?.tag).toContain('hrefLang="tr"');
     expect(homes[1]?.text).toBe("tr:notFound:backHome");
   });
@@ -69,28 +69,28 @@ describe("global 404 home links", () => {
     // module scope, so it was "tr" on a Turkish 404 too: the whole secondary
     // block was skipped as a duplicate and the one remaining link was a
     // hardcoded href="/" under the Turkish label.
-    const html = await renderAt("/tr/olmayan");
+    const html = await renderAt("/olmayan");
     expect(html).toContain('lang="tr"');
     const homes = homeLinks(html);
     expect(homes).toHaveLength(2);
-    expect(homes[0]?.href).toBe("/tr");
+    expect(homes[0]?.href).toBe("/");
     expect(homes[0]?.text).toBe("tr:notFound:backHome");
-    expect(homes[1]?.href).toBe("/");
+    expect(homes[1]?.href).toBe("/en");
     expect(homes[1]?.tag).toContain('hrefLang="en"');
     expect(homes[1]?.text).toBe("en:notFound:backHome");
   });
 
   it("falls back to the default locale when the pathname header is missing", async () => {
     const html = await renderAt("");
-    expect(html).toContain('lang="en"');
+    expect(html).toContain('lang="tr"');
     expect(homeLinks(html)[0]?.href).toBe("/");
   });
 
   it("offers projects, writing and contact in the page locale", async () => {
-    const html = await renderAt("/does-not-exist");
+    const html = await renderAt("/olmayan");
     const links = anchors(html);
     expect(links.map((link) => link.href)).toEqual(
-      expect.arrayContaining(["/projects", "/blog", "/contact"])
+      expect.arrayContaining(["/projeler", "/blog", "/iletisim"])
     );
   });
 });

@@ -117,12 +117,12 @@ describe("footer", () => {
     expect(source).not.toContain("twitter.com");
   });
 
-  it("sources contact details and social links from lib/site, not hard coded strings", () => {
-    expect(source).toContain('from "@/lib/site"');
-    expect(source).toContain("CONTACT_EMAIL_PUBLIC");
-    expect(source).toContain("SOCIAL");
-    expect(source).toContain("whatsappHref");
-    expect(source).not.toContain("github.com/");
+  it("pairs the elsewhere labels with the same icon treatment as email", () => {
+    expect(source).toContain("GithubIcon");
+    expect(source).toContain("LinkedinIcon");
+    expect(source).toContain("WhatsAppIcon");
+    expect(source).toContain("<Rss");
+    expect(source).toContain("gap-2");
   });
 
   it("is a server component: no client directive, no siteUrl in the bundle", () => {
@@ -132,11 +132,9 @@ describe("footer", () => {
     expect(source).toContain('from "next-intl/server"');
   });
 
-  it("links feed.xml directly instead of through the next-intl Link helper", () => {
+  it("links feed.xml through localePath instead of a hardcoded prefix", () => {
     expect(source).not.toContain('href="/feed.xml"');
-    expect(source).toContain(
-      'locale === routing.defaultLocale ? "/feed.xml" : `/${locale}/feed.xml`'
-    );
+    expect(source).toContain('localePath(locale, "/feed.xml")');
   });
 });
 

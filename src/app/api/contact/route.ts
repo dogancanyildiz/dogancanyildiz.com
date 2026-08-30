@@ -28,6 +28,7 @@ import {
 } from "@/lib/request-body";
 import { resend } from "@/lib/resend";
 import { routing, type AppLocale } from "@/i18n/routing";
+import { localeFromPathname } from "@/lib/locale-from-pathname";
 import { methodNotAllowed } from "@/lib/api-methods";
 
 const ROUTE = "/api/contact";
@@ -92,7 +93,7 @@ function localeFromHeader(value: string | null): AppLocale | null {
   return candidate && isAppLocale(candidate) ? candidate : null;
 }
 
-/** The page the form was submitted from, e.g. https://host/tr/contact. */
+/** The page the form was submitted from, e.g. https://host/en/contact. */
 function localeFromReferer(value: string | null): AppLocale | null {
   if (!value) {
     return null;
@@ -103,8 +104,7 @@ function localeFromReferer(value: string | null): AppLocale | null {
   } catch {
     return null;
   }
-  const first = pathname.split("/").filter(Boolean)[0]?.toLowerCase() ?? "";
-  return first && isAppLocale(first) ? first : null;
+  return localeFromPathname(pathname);
 }
 
 /**

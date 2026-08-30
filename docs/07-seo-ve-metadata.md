@@ -8,7 +8,7 @@ Mevcut kurulumda `generateMetadata` cookie okuyor, `alternates` (canonical/langu
 ## Karar(lar)
 
 1. **`generateMetadata` yalnızca `lang` route param'ından üretilir**, `cookies()` çağrısı kalkar. `metadataBase` kök layout'ta `new URL(process.env.NEXT_PUBLIC_SITE_URL)` olarak tanımlanır; `NEXT_PUBLIC_SITE_URL` eksikse build patlar (aşağıdaki tablo).
-2. **`alternates.canonical` + `alternates.languages` + `x-default`** her sayfada set edilir, EN kökü işaret eder.
+2. **`alternates.canonical` + `alternates.languages` + `x-default`** her sayfada set edilir. **Karar değişikliği (2026-08-30):** `x-default` Türkçe (varsayılan dil) kökünü işaret eder.
 3. **`sitemap.ts` iki locale için de girdi üretir**, yalnızca gerçekten var olan çeviriler eklenir; çevirisi olmayan slug o dilin sitemap'ine hiç girmez.
 4. **`robots.ts` gerçek domain'i kullanır** (`https://dogancanyildiz.com`), `example.com` fallback'i kaldırılır.
 5. **JSON-LD üç tip için eklenir**: ana sayfada `Person`, blog yazılarında `BlogPosting`, proje detayında `CreativeWork`.
@@ -23,13 +23,13 @@ Mevcut kurulumda `generateMetadata` cookie okuyor, `alternates` (canonical/langu
 
 **`alternates` ve hreflang.** hreflang uyuşmazlıklarının çoğu eksik self-referencing tag'den kaynaklanıyor; hreflang kurulumlarının yaklaşık %75'inde hata bulunduğu raporlanıyor (dchost.com). URL şeması [04-i18n.md](./04-i18n.md)'de karara bağlandı: `localePrefix: 'as-needed'`, EN kökte prefix'siz, TR `/tr` altında. Örnek URL tablosu:
 
-| Sayfa | EN (kanonik) | TR | x-default |
+| Sayfa | TR (kanonik, varsayılan) | EN | x-default |
 |---|---|---|---|
-| Ana sayfa | `https://dogancanyildiz.com/` | `https://dogancanyildiz.com/tr` | `https://dogancanyildiz.com/` |
-| About | `https://dogancanyildiz.com/about` | `https://dogancanyildiz.com/tr/about` | `https://dogancanyildiz.com/about` |
-| Projects | `https://dogancanyildiz.com/projects` | `https://dogancanyildiz.com/tr/projects` | `https://dogancanyildiz.com/projects` |
-| Blog yazısı (iki dilde) | `https://dogancanyildiz.com/blog/<slug>` | `https://dogancanyildiz.com/tr/blog/<slug>` | `https://dogancanyildiz.com/blog/<slug>` |
-| Blog yazısı (yalnız TR) | girmez | `https://dogancanyildiz.com/tr/blog/<slug>` | girmez |
+| Ana sayfa | `https://dogancanyildiz.com/` | `https://dogancanyildiz.com/en` | `https://dogancanyildiz.com/` |
+| Hakkımda | `https://dogancanyildiz.com/hakkimda` | `https://dogancanyildiz.com/en/about` | `https://dogancanyildiz.com/hakkimda` |
+| Projeler | `https://dogancanyildiz.com/projeler` | `https://dogancanyildiz.com/en/projects` | `https://dogancanyildiz.com/projeler` |
+| Blog yazısı (iki dilde) | `https://dogancanyildiz.com/blog/<slug>` | `https://dogancanyildiz.com/en/blog/<slug>` | `https://dogancanyildiz.com/blog/<slug>` |
+| Blog yazısı (yalnız TR) | `https://dogancanyildiz.com/blog/<slug>` | girmez | `https://dogancanyildiz.com/blog/<slug>` |
 
 Her sayfa kendi dilini de `alternates.languages` içine yazar (self-referencing), aksi halde Google eksik cluster'ı yok sayabiliyor.
 

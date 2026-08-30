@@ -242,8 +242,8 @@ describe("page openGraph metadata", () => {
       if (!ogImage) throw new Error(`${page.name} published no og image`);
       expect(ogImage.url).toBe(
         locale === "en"
-          ? "https://dogancanyildiz.com/opengraph-image/default"
-          : "https://dogancanyildiz.com/tr/opengraph-image/default"
+          ? "https://dogancanyildiz.com/en/opengraph-image/default"
+          : "https://dogancanyildiz.com/opengraph-image/default"
       );
       expect(ogImage.width).toBe(1200);
       expect(ogImage.alt).toBeTruthy();
@@ -274,7 +274,7 @@ describe("page openGraph metadata", () => {
     });
 
     expect((metadata.openGraph as { url: string }).url).toBe(
-      "https://dogancanyildiz.com/tr"
+      "https://dogancanyildiz.com/"
     );
   });
 
@@ -291,8 +291,8 @@ describe("page openGraph metadata", () => {
     );
 
     expect(new Set(urls).size).toBe(routing.locales.length);
-    expect(urls).toContain("https://dogancanyildiz.com/about");
-    expect(urls).toContain("https://dogancanyildiz.com/tr/about");
+    expect(urls).toContain("https://dogancanyildiz.com/en/about");
+    expect(urls).toContain("https://dogancanyildiz.com/hakkimda");
   });
 
   it("marks the project detail page openGraph type as article", async () => {
@@ -315,8 +315,8 @@ describe("page openGraph metadata", () => {
       expect(feedLinks, `${page.name} has no rss feed alternate`).toBeTruthy();
       expect(String(feedLinks?.[0]?.url)).toBe(
         locale === "en"
-          ? "https://dogancanyildiz.com/feed.xml"
-          : "https://dogancanyildiz.com/tr/feed.xml"
+          ? "https://dogancanyildiz.com/en/feed.xml"
+          : "https://dogancanyildiz.com/feed.xml"
       );
     }
   );

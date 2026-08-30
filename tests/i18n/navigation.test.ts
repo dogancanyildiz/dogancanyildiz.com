@@ -3,14 +3,31 @@ import { getPathname } from "@/i18n/navigation";
 import { switchTargetPath } from "@/i18n/switch-target";
 
 describe("locale aware navigation", () => {
-  it("keeps the default locale on the root and prefixes the other one", () => {
-    expect(getPathname({ locale: "en", href: "/" })).toBe("/");
-    expect(getPathname({ locale: "tr", href: "/" })).toBe("/tr");
-    expect(getPathname({ locale: "en", href: "/about" })).toBe("/about");
-    expect(getPathname({ locale: "tr", href: "/about" })).toBe("/tr/about");
-    expect(getPathname({ locale: "tr", href: "/projects/design-system" })).toBe(
-      "/tr/projects/design-system"
-    );
+  it("keeps Turkish on the root, prefixes English, and localizes nav slugs", () => {
+    expect(getPathname({ locale: "tr", href: "/" })).toBe("/");
+    expect(getPathname({ locale: "en", href: "/" })).toBe("/en");
+    expect(getPathname({ locale: "tr", href: "/about" })).toBe("/hakkimda");
+    expect(getPathname({ locale: "en", href: "/about" })).toBe("/en/about");
+    expect(getPathname({ locale: "tr", href: "/contact" })).toBe("/iletisim");
+    expect(getPathname({ locale: "en", href: "/contact" })).toBe("/en/contact");
+    expect(
+      getPathname({
+        locale: "tr",
+        href: {
+          pathname: "/projects/[slug]",
+          params: { slug: "design-system" },
+        },
+      })
+    ).toBe("/projects/design-system");
+    expect(
+      getPathname({
+        locale: "en",
+        href: {
+          pathname: "/projects/[slug]",
+          params: { slug: "design-system" },
+        },
+      })
+    ).toBe("/en/projects/design-system");
   });
 });
 

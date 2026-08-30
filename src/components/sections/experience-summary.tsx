@@ -27,7 +27,7 @@ export async function ExperienceSummary({ locale }: ExperienceSummaryProps) {
         description={t("experienceDescription")}
         action={
           <Link
-            href="/about#about-experience"
+            href={{ pathname: "/about", hash: "about-experience" }}
             className="text-sm text-primary underline-offset-4 hover:underline"
           >
             {t("experienceLink")}

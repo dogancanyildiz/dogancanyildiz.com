@@ -48,7 +48,10 @@ export async function PostList({ posts, headingLevel = "h2" }: PostListProps) {
             <div className="flex items-start gap-3">
               <Heading className="min-w-0 flex-1 text-lg font-semibold leading-snug tracking-tight sm:text-xl">
                 <Link
-                  href={post.href}
+                  href={{
+                    pathname: "/blog/[slug]",
+                    params: { slug: post.slug },
+                  }}
                   prefetch={false}
                   className="after:absolute after:inset-0 text-foreground no-underline transition-colors group-hover:text-primary"
                 >
