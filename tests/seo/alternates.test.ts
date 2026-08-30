@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   absoluteUrl,
   buildAlternates,
@@ -7,18 +7,25 @@ import {
   siteUrl,
 } from "@/lib/seo/alternates";
 
+beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://dogancanyildiz.com");
+});
+
 describe("localePath", () => {
-  it("keeps english at the root", () => {
-    expect(localePath("en", "/")).toBe("/");
-    expect(localePath("en", "/projects/cargo-pilot")).toBe(
+  it("keeps turkish at the root and localizes nav slugs", () => {
+    expect(localePath("tr", "/")).toBe("/");
+    expect(localePath("tr", "/about")).toBe("/hakkimda");
+    expect(localePath("tr", "/contact")).toBe("/iletisim");
+    expect(localePath("tr", "/projects/cargo-pilot")).toBe(
       "/projects/cargo-pilot"
     );
   });
 
-  it("prefixes turkish with /tr", () => {
-    expect(localePath("tr", "/")).toBe("/tr");
-    expect(localePath("tr", "/projects/cargo-pilot")).toBe(
-      "/tr/projects/cargo-pilot"
+  it("prefixes english with /en", () => {
+    expect(localePath("en", "/")).toBe("/en");
+    expect(localePath("en", "/about")).toBe("/en/about");
+    expect(localePath("en", "/projects/cargo-pilot")).toBe(
+      "/en/projects/cargo-pilot"
     );
   });
 });
@@ -26,10 +33,8 @@ describe("localePath", () => {
 describe("absoluteUrl", () => {
   it("joins the site url with the locale path", () => {
     expect(siteUrl()).toBe("https://dogancanyildiz.com");
-    expect(absoluteUrl("tr", "/blog")).toBe(
-      "https://dogancanyildiz.com/tr/blog"
-    );
-    expect(absoluteUrl("en", "/")).toBe("https://dogancanyildiz.com/");
+    expect(absoluteUrl("tr", "/blog")).toBe("https://dogancanyildiz.com/blog");
+    expect(absoluteUrl("en", "/")).toBe("https://dogancanyildiz.com/en");
   });
 });
 
@@ -40,15 +45,15 @@ describe("buildAlternates", () => {
       "tr",
     ]);
     expect(result.canonical).toBe(
-      "https://dogancanyildiz.com/tr/blog/self-hosting-with-coolify"
+      "https://dogancanyildiz.com/blog/self-hosting-with-coolify"
     );
     expect(result.languages).toEqual({
-      en: "https://dogancanyildiz.com/blog/self-hosting-with-coolify",
-      tr: "https://dogancanyildiz.com/tr/blog/self-hosting-with-coolify",
+      en: "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify",
+      tr: "https://dogancanyildiz.com/blog/self-hosting-with-coolify",
       "x-default": "https://dogancanyildiz.com/blog/self-hosting-with-coolify",
     });
     expect(result.types["application/rss+xml"][0]?.url).toBe(
-      "https://dogancanyildiz.com/tr/feed.xml"
+      "https://dogancanyildiz.com/feed.xml"
     );
   });
 
@@ -57,15 +62,15 @@ describe("buildAlternates", () => {
       "tr",
     ]);
     expect(result.canonical).toBe(
-      "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik"
+      "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
     );
     expect(result.languages).toEqual({
-      tr: "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik",
-      "x-default": "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik",
+      tr: "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik",
+      "x-default": "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik",
     });
     expect(result.languages.en).toBeUndefined();
     expect(result.types["application/rss+xml"][0]?.url).toBe(
-      "https://dogancanyildiz.com/tr/feed.xml"
+      "https://dogancanyildiz.com/feed.xml"
     );
   });
 });
@@ -84,12 +89,12 @@ describe("buildOpenGraph", () => {
       siteName: "Portfolyo",
       title: "Tasarim sistemi",
       description: "Aciklama",
-      url: "https://dogancanyildiz.com/tr/projects/design-system",
+      url: "https://dogancanyildiz.com/projects/design-system",
       locale: "tr_TR",
       alternateLocale: ["en_US"],
       images: [
         {
-          url: "https://dogancanyildiz.com/tr/opengraph-image/default",
+          url: "https://dogancanyildiz.com/opengraph-image/default",
           type: "image/png",
           width: 1200,
           height: 630,

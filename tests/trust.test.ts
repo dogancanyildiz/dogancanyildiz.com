@@ -70,6 +70,6 @@ describe("trust maintenance docs", () => {
     );
     expect(doc).toContain("verify:links");
     expect(doc).toContain("Search Console");
-    expect(doc).toContain("three months");
+    expect(doc).toContain("üç ay");
   });
 });

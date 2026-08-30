@@ -155,12 +155,12 @@ export function renderNotes({ commits, tag, previousTag, repoUrl }) {
     blocks.push(`### ${title}\n\n${list.map(formatCommitLine).join("\n")}`);
   }
   if (blocks.length === 0) {
-    blocks.push("No commits since the previous release.");
+    blocks.push("Önceki sürümden bu yana commit yok.");
   }
   const url = compareUrl({ repoUrl, previousTag, tag });
   if (url) {
     const label = previousTag ? `${previousTag}...${tag}` : tag;
-    blocks.push(`**Full changelog**: [${label}](${url})`);
+    blocks.push(`**Tam değişiklik listesi**: [${label}](${url})`);
   }
   return `${blocks.join("\n\n")}\n`;
 }

@@ -5,24 +5,25 @@ import {
 } from "@/lib/locale-from-pathname";
 
 describe("localeFromPathname", () => {
-  it("maps /tr paths to tr", () => {
-    expect(localeFromPathname("/tr")).toBe("tr");
-    expect(localeFromPathname("/tr/about")).toBe("tr");
-    expect(localeFromPathname("/tr/blog/nope")).toBe("tr");
+  it("maps /en paths to en", () => {
+    expect(localeFromPathname("/en")).toBe("en");
+    expect(localeFromPathname("/en/about")).toBe("en");
+    expect(localeFromPathname("/en/blog/nope")).toBe("en");
   });
 
-  it("maps everything else to en", () => {
-    expect(localeFromPathname("/")).toBe("en");
-    expect(localeFromPathname("/about")).toBe("en");
-    expect(localeFromPathname("/blog/nope")).toBe("en");
-    expect(localeFromPathname("")).toBe("en");
+  it("maps everything else to the default locale (Turkish)", () => {
+    expect(localeFromPathname("/")).toBe("tr");
+    expect(localeFromPathname("/hakkimda")).toBe("tr");
+    expect(localeFromPathname("/blog/nope")).toBe("tr");
+    expect(localeFromPathname("/tr/olmayan")).toBe("tr");
+    expect(localeFromPathname("")).toBe("tr");
   });
 });
 
 describe("isLocalizedRoutePath", () => {
   it("claims the root and every page path", () => {
     expect(isLocalizedRoutePath("/")).toBe(true);
-    expect(isLocalizedRoutePath("/about")).toBe(true);
+    expect(isLocalizedRoutePath("/hakkimda")).toBe(true);
     expect(isLocalizedRoutePath("/blog/nope")).toBe(true);
   });
 

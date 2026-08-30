@@ -4,16 +4,13 @@ import { screen } from "@testing-library/react";
 import { renderWithIntl } from "../../../tests/helpers/render";
 import { LanguageSwitcher } from "./language-switcher";
 
-// The component reads its current path and builds each locale's href through
-// @/i18n/navigation, next-intl's wrapper around next/navigation. Mocking the
-// wrapper directly (rather than next/navigation underneath it) sidesteps the
-// App Router context that real next/navigation hooks require and that jsdom
-// has no way to provide.
-vi.mock("@/i18n/navigation", () => ({
-  usePathname: () => "/about",
-  getPathname: ({ locale, href }: { locale: string; href: string }) =>
-    locale === "en" ? href : `/${locale}${href === "/" ? "" : href}`,
-}));
+vi.mock("@/i18n/navigation", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/i18n/navigation")>();
+  return {
+    ...actual,
+    usePathname: () => "/about",
+  };
+});
 
 describe("LanguageSwitcher", () => {
   it("shows the TR/EN labels with an sr-only language name for each", () => {
@@ -50,12 +47,14 @@ describe("LanguageSwitcher", () => {
       <LanguageSwitcher untranslated={{ en: [], tr: ["/about"] }} />
     );
     const tr = screen.getByRole("link", { name: /TR/ });
-    expect(tr).toHaveAttribute("href", "/tr");
+    expect(tr).toHaveAttribute("href", "/");
   });
 
   it("keeps the translated path when one exists", () => {
     renderWithIntl(<LanguageSwitcher untranslated={{ en: [], tr: [] }} />);
+    const en = screen.getByRole("link", { name: /EN/ });
     const tr = screen.getByRole("link", { name: /TR/ });
-    expect(tr).toHaveAttribute("href", "/tr/about");
+    expect(en).toHaveAttribute("href", "/en/about");
+    expect(tr).toHaveAttribute("href", "/hakkimda");
   });
 });

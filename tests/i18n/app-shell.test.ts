@@ -225,10 +225,10 @@ describe("application shell", () => {
 
   it("switches language by URL, never by cookie", () => {
     const source = read("src/components/layout/language-switcher.tsx");
-    // getPathname honours localePrefix "as-needed", so the English link is
-    // /about and not /en/about, which the proxy answers with a 307. Link with
-    // an explicit locale prop always forces the prefix.
-    expect(source).toContain("getPathname({ locale, href: target })");
+    // getPathname honours localePrefix "as-needed", so the Turkish link is
+    // /hakkimda and not /tr/about. Link with an explicit locale prop always
+    // forces the prefix and would 308 a default-locale URL.
+    expect(source).toContain("pathnameForLocale(locale, target)");
     expect(source).not.toContain("locale={locale}");
     expect(source).not.toContain("setLocale");
     expect(source).not.toContain("document.cookie");

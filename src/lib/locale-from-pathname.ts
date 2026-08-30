@@ -1,9 +1,9 @@
 import { routing, type AppLocale } from "@/i18n/routing";
 
-/** Derives the document locale from a pathname (/tr/... -> tr, else default). */
+/** Derives the document locale from a pathname (/en/... -> en, else default). */
 export function localeFromPathname(pathname: string): AppLocale {
-  if (pathname === "/tr" || pathname.startsWith("/tr/")) {
-    return "tr";
+  if (pathname === "/en" || pathname.startsWith("/en/")) {
+    return "en";
   }
   return routing.defaultLocale;
 }

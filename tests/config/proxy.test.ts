@@ -54,16 +54,59 @@ describe("proxy x-pathname", () => {
 
   it("keeps the server value on the localized branch as well", () => {
     const response = proxy(
-      new NextRequest("https://dogancanyildiz.com/tr/hakkimda", {
+      new NextRequest("https://dogancanyildiz.com/hakkimda", {
         headers: { "x-pathname": "/hack" },
       })
     );
 
     // next-intl builds its response from the patched request, so the override
     // survives the i18n branch and arrives next to the locale it negotiated.
-    expect(overriddenPathname(response)).toBe("/tr/hakkimda");
+    expect(overriddenPathname(response)).toBe("/hakkimda");
     expect(
       response.headers.get("x-middleware-request-x-next-intl-locale")
     ).toBe("tr");
+  });
+
+  it("sends the old unprefixed English nav URLs to the prefixed English pages", () => {
+    for (const [from, to] of [
+      ["/about", "/en/about"],
+      ["/projects", "/en/projects"],
+      ["/contact", "/en/contact"],
+      ["/privacy", "/en/privacy"],
+    ] as const) {
+      const response = proxy(
+        new NextRequest(`https://dogancanyildiz.com${from}?utm=1`)
+      );
+      expect(response.status, from).toBe(308);
+      expect(response.headers.get("location")).toBe(
+        `https://dogancanyildiz.com${to}?utm=1`
+      );
+    }
+  });
+
+  it("does not redirect a project detail off the Turkish canonical", () => {
+    const response = proxy(
+      new NextRequest("https://dogancanyildiz.com/projects/hubit")
+    );
+    expect(response.status).not.toBe(308);
+  });
+
+  it("sends leftover /tr prefixes to the unprefixed Turkish canonical", () => {
+    for (const [from, to] of [
+      ["/tr", "/"],
+      ["/tr/about", "/hakkimda"],
+      ["/tr/contact", "/iletisim"],
+      ["/tr/projects", "/projeler"],
+      ["/tr/privacy", "/gizlilik"],
+      ["/tr/blog/capt-sinavina-hazirlik", "/blog/capt-sinavina-hazirlik"],
+    ] as const) {
+      const response = proxy(
+        new NextRequest(`https://dogancanyildiz.com${from}`)
+      );
+      expect(response.status, from).toBe(308);
+      expect(response.headers.get("location")).toBe(
+        `https://dogancanyildiz.com${to}`
+      );
+    }
   });
 });

@@ -9,21 +9,21 @@ describe("statusLinksFor", () => {
     contact: "Contact",
   };
 
-  it("keeps English hrefs unprefixed", () => {
+  it("prefixes English hrefs", () => {
     expect(statusLinksFor("en", labels)).toEqual([
-      { href: "/", label: "Home", primary: true },
-      { href: "/projects", label: "Projects" },
-      { href: "/blog", label: "Blog" },
-      { href: "/contact", label: "Contact" },
+      { href: "/en", label: "Home", primary: true },
+      { href: "/en/projects", label: "Projects" },
+      { href: "/en/blog", label: "Blog" },
+      { href: "/en/contact", label: "Contact" },
     ]);
   });
 
-  it("prefixes Turkish hrefs so a TR status page never lands on English", () => {
+  it("keeps Turkish hrefs unprefixed and localized", () => {
     expect(statusLinksFor("tr", labels)).toEqual([
-      { href: "/tr", label: "Home", primary: true },
-      { href: "/tr/projects", label: "Projects" },
-      { href: "/tr/blog", label: "Blog" },
-      { href: "/tr/contact", label: "Contact" },
+      { href: "/", label: "Home", primary: true },
+      { href: "/projeler", label: "Projects" },
+      { href: "/blog", label: "Blog" },
+      { href: "/iletisim", label: "Contact" },
     ]);
   });
 });

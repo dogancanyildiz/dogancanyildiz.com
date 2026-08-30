@@ -121,7 +121,8 @@ describe("rss feed route", () => {
 
     expect(links.length).toBeGreaterThan(1);
     for (const link of links) {
-      expect(link.startsWith("https://dogancanyildiz.com/tr/")).toBe(true);
+      expect(link.startsWith("https://dogancanyildiz.com/")).toBe(true);
+      expect(link.startsWith("https://dogancanyildiz.com/en/")).toBe(false);
     }
     expect(textInside(body, "language")).toEqual(["tr"]);
   });

@@ -69,7 +69,7 @@ describe("buildBreadcrumbList", () => {
         "@type": "ListItem",
         position: 1,
         name: "Yazılar",
-        item: "https://dogancanyildiz.com/tr/blog",
+        item: "https://dogancanyildiz.com/blog",
       },
       {
         "@type": "ListItem",
@@ -97,8 +97,8 @@ describe("blog posting schema", () => {
         expect(data.publisher).toEqual(data.author);
         expect(data.image).toBe(
           locale === "en"
-            ? "https://dogancanyildiz.com/opengraph-image/default"
-            : "https://dogancanyildiz.com/tr/opengraph-image/default"
+            ? "https://dogancanyildiz.com/en/opengraph-image/default"
+            : "https://dogancanyildiz.com/opengraph-image/default"
         );
         expect(data.inLanguage).toBe(locale);
         expect(data.datePublished).toBe(post.date);
@@ -133,7 +133,7 @@ describe("project schema", () => {
       expect(data["@type"]).toBe("CreativeWork");
       expect((data.creator as Record<string, unknown>)["@id"]).toBe(personId());
       expect(data.url).toBe(
-        `https://dogancanyildiz.com/projects/${project.slug}`
+        `https://dogancanyildiz.com/en/projects/${project.slug}`
       );
       // No updated field means no dateModified at all, rather than a repeat
       // of the creation year.

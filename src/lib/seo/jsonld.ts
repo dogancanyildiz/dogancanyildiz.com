@@ -1,3 +1,4 @@
+import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import type { Locale, Post, Project } from "@/lib/content";
 import { absoluteUrl } from "@/lib/seo/alternates";
@@ -26,14 +27,14 @@ export function websiteId(): string {
 /**
  * Canonical url of the person and of the site as a whole.
  *
- * Deliberately pinned to the english root rather than the current locale
- * (F-104). `absoluteUrl(locale, "/")` would make the same entity claim a
- * different url per locale, which reintroduces the split identity that the
- * shared `@id` exists to prevent. Per page urls stay locale aware; this one
- * value is the single home of the entity.
+ * Deliberately pinned to the site root (the default locale) rather than the
+ * current locale (F-104). `absoluteUrl(locale, "/")` would make the same
+ * entity claim a different url per locale, which reintroduces the split
+ * identity that the shared `@id` exists to prevent. Per page urls stay
+ * locale aware; this one value is the single home of the entity.
  */
 export function identityUrl(): string {
-  return absoluteUrl("en", "/");
+  return absoluteUrl(routing.defaultLocale, "/");
 }
 
 /**

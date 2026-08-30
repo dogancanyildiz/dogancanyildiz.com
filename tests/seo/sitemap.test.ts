@@ -10,21 +10,21 @@ describe("sitemap", () => {
     const urls = sitemap().map((entry) => entry.url);
 
     expect(urls).toContain("https://dogancanyildiz.com/");
-    expect(urls).toContain("https://dogancanyildiz.com/tr");
-    expect(urls).toContain("https://dogancanyildiz.com/about");
-    expect(urls).toContain("https://dogancanyildiz.com/tr/about");
-    expect(urls).toContain("https://dogancanyildiz.com/projects");
-    expect(urls).toContain("https://dogancanyildiz.com/tr/projects");
+    expect(urls).toContain("https://dogancanyildiz.com/en");
+    expect(urls).toContain("https://dogancanyildiz.com/hakkimda");
+    expect(urls).toContain("https://dogancanyildiz.com/en/about");
+    expect(urls).toContain("https://dogancanyildiz.com/projeler");
+    expect(urls).toContain("https://dogancanyildiz.com/en/projects");
     expect(urls).toContain("https://dogancanyildiz.com/blog");
-    expect(urls).toContain("https://dogancanyildiz.com/tr/blog");
-    expect(urls).toContain("https://dogancanyildiz.com/contact");
-    expect(urls).toContain("https://dogancanyildiz.com/tr/contact");
-    expect(urls).toContain("https://dogancanyildiz.com/privacy");
-    expect(urls).toContain("https://dogancanyildiz.com/tr/privacy");
+    expect(urls).toContain("https://dogancanyildiz.com/en/blog");
+    expect(urls).toContain("https://dogancanyildiz.com/iletisim");
+    expect(urls).toContain("https://dogancanyildiz.com/en/contact");
+    expect(urls).toContain("https://dogancanyildiz.com/gizlilik");
+    expect(urls).toContain("https://dogancanyildiz.com/en/privacy");
     expect(urls).not.toContain("https://dogancanyildiz.com/coming-soon");
-    expect(urls).not.toContain("https://dogancanyildiz.com/tr/coming-soon");
+    expect(urls).not.toContain("https://dogancanyildiz.com/en/coming-soon");
     expect(urls).not.toContain("https://dogancanyildiz.com/updating");
-    expect(urls).not.toContain("https://dogancanyildiz.com/tr/updating");
+    expect(urls).not.toContain("https://dogancanyildiz.com/en/updating");
   });
 
   it("lists every project in both locales because all of them are translated", async () => {
@@ -37,7 +37,7 @@ describe("sitemap", () => {
         `https://dogancanyildiz.com/projects/${project.slug}`
       );
       expect(urls).toContain(
-        `https://dogancanyildiz.com/tr/projects/${project.slug}`
+        `https://dogancanyildiz.com/en/projects/${project.slug}`
       );
     }
   });
@@ -45,8 +45,8 @@ describe("sitemap", () => {
   it("lists every bilingual post at both locale urls", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const urls = sitemap().map((entry) => entry.url);
-    const enUrl = "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik";
-    const trUrl = "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik";
+    const enUrl = "https://dogancanyildiz.com/en/blog/capt-sinavina-hazirlik";
+    const trUrl = "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik";
 
     expect(urls).toContain(enUrl);
     expect(urls).toContain(trUrl);
@@ -57,15 +57,15 @@ describe("sitemap", () => {
     const entries = sitemap();
     const entry = entries.find(
       (item) =>
-        item.url === "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik"
+        item.url === "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
     );
 
     expect(entry).toBeDefined();
     expect(entry?.alternates?.languages?.en).toBe(
-      "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
+      "https://dogancanyildiz.com/en/blog/capt-sinavina-hazirlik"
     );
     expect(entry?.alternates?.languages?.tr).toBe(
-      "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik"
+      "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
     );
     expect(entry?.alternates?.languages?.["x-default"]).toBe(
       "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
@@ -76,9 +76,9 @@ describe("sitemap", () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const entries = sitemap();
     const urls = entries.map((entry) => entry.url);
-    const enUrl = "https://dogancanyildiz.com/blog/self-hosting-with-coolify";
-    const trUrl =
-      "https://dogancanyildiz.com/tr/blog/self-hosting-with-coolify";
+    const enUrl =
+      "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify";
+    const trUrl = "https://dogancanyildiz.com/blog/self-hosting-with-coolify";
 
     expect(urls).toContain(enUrl);
     expect(urls).toContain(trUrl);
@@ -98,7 +98,7 @@ describe("sitemap", () => {
     const entries = sitemap();
     const entry = entries.find(
       (item) =>
-        item.url === "https://dogancanyildiz.com/tr/blog/capt-sinavina-hazirlik"
+        item.url === "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
     );
     const post = getPost("tr", "capt-sinavina-hazirlik");
 
@@ -112,7 +112,7 @@ describe("sitemap", () => {
     const entries = sitemap();
 
     const pattern =
-      /^https:\/\/dogancanyildiz\.com(\/tr)?\/(blog|projects)\/([a-z0-9-]+)$/;
+      /^https:\/\/dogancanyildiz\.com(\/en)?\/(blog|projects)\/([a-z0-9-]+)$/;
 
     let matchedAny = false;
     for (const entry of entries) {
@@ -120,9 +120,9 @@ describe("sitemap", () => {
       if (!match) continue;
       matchedAny = true;
 
-      const [, trPrefix, section, slug] = match;
+      const [, enPrefix, section, slug] = match;
       if (!slug) throw new Error(`no slug captured from ${entry.url}`);
-      const locale = trPrefix ? "tr" : "en";
+      const locale = enPrefix ? "en" : "tr";
 
       if (section === "blog") {
         expect(getPost(locale, slug), entry.url).toBeDefined();
@@ -177,9 +177,9 @@ describe("sitemap serialisation", () => {
     const entries = sitemap();
     const staticUrls = [
       "https://dogancanyildiz.com/",
-      "https://dogancanyildiz.com/tr",
-      "https://dogancanyildiz.com/about",
-      "https://dogancanyildiz.com/tr/contact",
+      "https://dogancanyildiz.com/en",
+      "https://dogancanyildiz.com/hakkimda",
+      "https://dogancanyildiz.com/en/contact",
     ];
 
     // A build timestamp told a crawler the whole site changed on every deploy.
@@ -211,17 +211,17 @@ describe("hreflang alternates for partly translated content", () => {
     const languages = buildLanguageAlternates("/blog/only-in-turkish", ["tr"]);
 
     expect(languages).toEqual({
-      tr: "https://dogancanyildiz.com/tr/blog/only-in-turkish",
-      "x-default": "https://dogancanyildiz.com/tr/blog/only-in-turkish",
+      tr: "https://dogancanyildiz.com/blog/only-in-turkish",
+      "x-default": "https://dogancanyildiz.com/blog/only-in-turkish",
     });
     expect(languages.en).toBeUndefined();
   });
 
-  it("prefers english for x-default when both locales exist", async () => {
+  it("prefers the default locale for x-default when both locales exist", async () => {
     const { buildLanguageAlternates } = await import("@/lib/seo/alternates");
     const languages = buildLanguageAlternates("/projects/both", ["en", "tr"]);
 
-    expect(languages["x-default"]).toBe(languages.en);
+    expect(languages["x-default"]).toBe(languages.tr);
   });
 
   it("falls back to the only available locale for x-default", async () => {

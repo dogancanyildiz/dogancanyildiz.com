@@ -26,7 +26,7 @@ Aşağıdaki kararlar kategori bazında gruplandı; her biri kendi detay doküma
 **Ana yön, alan bazında:**
 
 - Tasarım/UI: Terminal Editorial yönü, nötr zemin üstünde emerald tek bir aksan/status rengine indiriliyor, tek sütun editoryal layout, mobil menü eksikliği kapatılıyor. Detay: [03-tasarim-ui-ux.md](./03-tasarim-ui-ux.md).
-- i18n: app/[lang] + next-intl 4.13.7, localePrefix 'as-needed' (EN kökte, TR /tr altında), otomatik Accept-Language yönlendirmesi kapalı. Detay: [04-i18n.md](./04-i18n.md).
+- i18n: app/[lang] + next-intl 4.13.7, localePrefix 'as-needed' (TR kökte, EN /en altında), otomatik Accept-Language yönlendirmesi kapalı. Detay: [04-i18n.md](./04-i18n.md).
 - İçerik altyapısı ve servisler: Velite ile MDX (proje + blog, iki dilde, çevrilmemiş içerik için fallback sayfa yok), Resend contact formu üç katmanla sertleştiriliyor, Gatus'un JSON API'sinden beslenen canlı status widget'ı ekleniyor. Detay: [05-backend-icerik-ve-servisler.md](./05-backend-icerik-ve-servisler.md).
 - Deploy: çok aşamalı Dockerfile + Coolify GitHub App ile git tabanlı build, PR başına preview açık, GitHub Actions yalnızca lint/typecheck/build kapısı olarak çalışıyor, image push etmiyor. Detay: [06-devops-ve-deploy.md](./06-devops-ve-deploy.md).
 - İçerik: tüm şablon persona siliniyor, .local/content/portfolio-content.md'den gerçek içerik (Doğan Can Yıldız, 4-5 gerçek proje case study'si, gerçek sosyal linkler) yazılıyor. Detay: [08-icerik-stratejisi.md](./08-icerik-stratejisi.md).
