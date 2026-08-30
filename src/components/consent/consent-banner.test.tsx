@@ -9,7 +9,7 @@ import { ConsentBanner } from "./consent-banner";
 import type { UmamiTag } from "@/lib/analytics";
 
 const tag: UmamiTag = {
-  src: "https://analytics.dogancanyildiz.com/script.js",
+  src: "https://umami.dravcore.com/script.js",
   websiteId: "site-123",
   domains: "dogancanyildiz.com",
 };

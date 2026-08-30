@@ -71,7 +71,7 @@ Büyüklük: L. Repo şu an Docker'a hiç hazır değil (Dockerfile, .dockerigno
 - [x] Person JSON-LD eklenir; language-switcher URL tabanlı çalışacak şekilde yeniden yazılır
 - [x] Contact route (bir Route Handler olduğu için `next/root-params` desteklemiyor) locale'i elle alır
 
-Bitti sayılma kriteri: `next build` çıktısında yalnızca `/api/*` route'ları dynamic işaretli, geri kalan tüm içerik route'ları statik (SSG); `/` ve `/tr` farklı içerik ve farklı `<html lang>` döndürüyor; bir hreflang test aracıyla (ör. technicalseo.com hreflang tag generator/tester) self-referencing ve karşılıklı hreflang hatasız çıkıyor.
+Bitti sayılma kriteri: `next build` çıktısında yalnızca `/api/*` route'ları dynamic işaretli, geri kalan tüm içerik route'ları statik (SSG); `/` (tr) ve `/en` farklı içerik ve farklı `<html lang>` döndürüyor (2026-08-30 TR-varsayılan şeması; `/tr/*` kalıcı 308 ile köke düşer); bir hreflang test aracıyla (ör. technicalseo.com hreflang tag generator/tester) self-referencing ve karşılıklı hreflang hatasız çıkıyor.
 
 Gerçek sonuç (PR #4, main'de merge): beş kapı (`typecheck`, `lint`, `test`, `build`, `verify:routes`) exit 0; 19 dosya / 207 test (düzeltme turuyla 20 dosya / 271 test); `verify:routes` "20 content routes prerendered (6 project pages per locale)"; `next build` çıktısında yalnızca `/api/contact` ve `/api/health` dynamic, prerender-manifest'te 26 route (20 içerik + 6 sistem). hreflang test aracı herkese açık bir URL istediği için bu oturumda koşulmadı, `docs/plans/handoffs/faz-2-manual-checklist.md`'de sahibini bekliyor.
 
@@ -116,12 +116,12 @@ Büyüklük: L. En çok elle yazılan içerik burada, iki dilde.
 
 ### Faz 5: Altyapı vitrini ve ölçüm (yayın sonrası)
 
-- [x] Gatus compose + config repoda (`infra/gatus/`, `public_site` + `public_umami`, alerting yok, 2026-08-28).
-- [x] Ana sayfaya systems bölümü: `src/lib/status.ts` + `src/components/sections/systems.tsx`, 60s revalidate (2026-08-28).
+- [x] Gatus compose + config repoda (2026-08-28). **Karar değişikliği (2026-08-30):** Gatus tamamen kaldırıldı; gerçek izleme Coolify servis kataloğundan kurulan Uptime Kuma'da, `infra/` silindi.
+- [x] Ana sayfaya systems bölümü (2026-08-28). **2026-08-30:** panel inceldi: üçüncü taraf verisi çekmez, build bilgisi + `NEXT_PUBLIC_STATUS_URL` linki gösterir; `status.ts` ve 60 sn revalidate kaldırıldı, ana sayfa tamamen statik.
 - [x] Build-time commit SHA ve deploy zamanı widget'ta (`NEXT_PUBLIC_BUILD_SHA/DATE` + `build-info.ts`, 2026-08-28).
-- [x] Umami compose repoda (`infra/umami/`) + CSP + `UmamiScript` layout entegrasyonu (2026-08-28).
+- [x] Umami: CSP + consent + layout entegrasyonu (2026-08-28). **2026-08-30:** merkezi kuruluma geçildi (`umami.dravcore.com`), repodaki compose silindi; site oraya website olarak eklenir.
 - [x] Dependabot + CodeQL repoda; Renovate kaldırıldı (`security-automation.test.ts`, 2026-08-28).
-- [ ] Coolify'da gatus, umami ve portfolio env redeploy (manuel: `docs/plans/handoffs/faz-5-manual-checklist.md`; Umami parolası domain bağlanmadan önce değişir, Gatus'a `GATUS_ALERT_WEBHOOK_URL` verilmezse kesinti bildirilmez).
+- [ ] Coolify'da Uptime Kuma kurulumu, merkezi Umami'ye site kaydı ve portfolio env redeploy (manuel: `docs/plans/handoffs/faz-5-manual-checklist.md`).
 - [x] Release akışı çalıştı: v0.2.0 (PR #8), v0.3.0 (PR #12), v0.3.1 (Faz 5 PR #31 + PR #32, 2026-08-28).
 - [ ] Blog için aylık 1 yazı ritmi; ilk 3 ayın sonunda Astro'ya geçiş sorusunun yeniden değerlendirilmesi
 - [x] Sitemap `x-default` üretimi (`src/app/sitemap.ts` `languagesFor`, 2026-08-28 UI/UX kapanış).
@@ -134,7 +134,7 @@ Büyüklük: L. En çok elle yazılan içerik burada, iki dilde.
 
 (`/favicon.ico` sorunu Faz 4'te çözüldü: `next.config.ts` `redirects()` ile 308 -> `/icon`; burada ayrıca madde değil.)
 
-Bitti sayılma kriteri: status widget canlı Gatus verisiyle çalışıyor ve Network sekmesinde hostname/port/IP hiç görünmüyor (yalnızca takma ad + yüzde + zaman damgası); Dependabot en az bir dependency PR açmış veya merged (2026-08-28: dokuz Dependabot PR'ı merge edildi, kriter sağlandı); Umami kuruluysa sayfa yüklemesi CSP ihlali vermiyor. Runbook: `docs/runbooks/infrastructure.md`. Gerçek durum (2026-08-28): kod tarafı main'de (PR #31), Gatus ve Umami container'ları henüz Coolify'da açılmadı, widget canlıda doğrulanmadı; site zaten 526 veriyor.
+Bitti sayılma kriteri (2026-08-30 kararıyla güncellendi): Uptime Kuma `/api/health` monitörüyle yayında ve bir bildirim kanalı test edildi; Systems paneli build bilgisini ve `NEXT_PUBLIC_STATUS_URL` linkini gösteriyor, sayfada hostname/port/IP yok; Dependabot en az bir dependency PR açmış veya merged (2026-08-28: dokuz PR merge edildi, kriter sağlandı); site merkezi Umami'ye (`umami.dravcore.com`) ekli ve sayfa yüklemesi CSP ihlali vermiyor. Runbook: `docs/runbooks/infrastructure.md`. Gerçek durum: Kuma kurulmadı, site kaydı yapılmadı, site 526.
 
 ### Denetim kapanışı (2026-08-28, dal `feature/audit-closure`)
 

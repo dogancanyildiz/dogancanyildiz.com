@@ -2,7 +2,7 @@
 
 Bu adımlar kodla yapılamaz, site sahibi veya kontrol oturumu uygular. Kod tarafı (infra compose dosyaları, `status.ts`, Systems bölümü, Umami script, CSP) repoda hazır; burada kalan iş Cloudflare, Coolify ve Umami panel adımlarıdır.
 
-Durum (2026-08-28): Faz 5 kodu `dev` üzerinden `main`'e PR #31 ile merge edildi ve v0.3.1 olarak yayınlandı; bölüm 1 ve 9 bu yüzden kapandı. Bölüm 2-8 hâlâ sahibinin panel adımları. Sıra önemli: Umami paneli varsayılan `admin` / `umami` kimlik bilgisiyle açıldığı için bölüm 4'te deploy ile bölüm 5'teki parola değişikliği arasında panel herkese açık kalmamalı; bölüm 4'ün son adımı olan domain bağlamayı, parola değiştirilene kadar erteleyin.
+Durum (2026-08-30): Faz 5 kodu PR #31 ile main'de (v0.3.1). Gözlemlenebilirlik 2026-08-30 kararıyla panele taşındı (bölüm 2); bölüm 3-7 güncel akış, bölüm 8 aynen geçerli.
 
 ## 1. PR ve CI
 
@@ -10,50 +10,31 @@ Durum (2026-08-28): Faz 5 kodu `dev` üzerinden `main`'e PR #31 ile merge edildi
 - [x] Zorunlu check'ler yeşil geçti. Güncel adlar: `Quality checks`, `Docker image` (`ci.yml`) ve `CodeQL analysis` (`codeql.yml`); eski `lint`, `typecheck`, `test`, `build`, `hadolint and image build` job adları artık yok.
 - [x] Vitest özetinde `tests/lib/status.test.ts` ve `tests/config/csp.test.ts` geçiyor.
 
-## 2. Cloudflare DNS
+## 2. Karar değişikliği (2026-08-30): gözlemlenebilirlik panele taşındı
 
-Zone: `dogancanyildiz.com`
+Bölüm 2-7'nin repodaki compose dosyalarına dayanan eski adımları geçersiz:
+`infra/` silindi. İzleme Coolify servis kataloğundan kurulan **Uptime Kuma**,
+ziyaret ölçümü sahibinin **merkezi Umami** kurulumu (`umami.dravcore.com`).
+Aşağıdaki adımlar güncel akıştır; runbook: `docs/runbooks/infrastructure.md`.
 
-- [ ] Type `A` veya `CNAME`, Name `status`, origin sunucu adresi, **Proxied** (turuncu bulut).
-- [ ] Type `A` veya `CNAME`, Name `analytics`, origin sunucu adresi, **Proxied**.
-- [ ] SSL/TLS modu zone seviyesinde Full (strict).
+## 3. Coolify: Uptime Kuma
 
-## 3. Coolify: Gatus kaynağı
+- [ ] + New Resource > Service > Uptime Kuma (katalogdan); imaj sürümünü şablonda sabitle.
+- [ ] İlk açılışta yönetici hesabını oluştur (Kuma ilk kullanıcıyı kurulumda ister, varsayılan parola yoktur), domain'i ondan sonra bağla.
+- [ ] Monitör: `https://dogancanyildiz.com/api/health`, keyword `"status":"ok"` (health gövdesi `degraded` olursa alarm).
+- [ ] En az bir bildirim kanalı bağla (Discord/Telegram/e-posta) ve bir test bildirimi gönder; kanal yoksa kesinti kimseye görünmez.
+- [ ] Public status sayfası oluştur, yalnızca genel URL'lere giden monitörleri yayınla (iç hostname/port asla) ve sayfanın adresini not et.
+- [ ] Kuma aynı sunucuda: harici ikinci prob (ör. UptimeRobot, `/api/health`) sunucu tümden düştüğünde haber verir; kur.
 
-- [ ] + New Resource > Docker Compose.
-- [ ] Source: GitHub repo, branch `main` (merge sonrası).
-- [ ] Base Directory: `/infra/gatus`
-- [ ] Docker Compose Location: `/docker-compose.yml`
-- [ ] Domain: `gatus` servisi için `https://status.dogancanyildiz.com`
-- [ ] Deploy ve doğrula:
+## 4. Merkezi Umami'ye site kaydı
 
-```bash
-curl -s https://status.dogancanyildiz.com/api/v1/endpoints/statuses | jq -r '.results[].key' | sort
-```
-
-Beklenen: `public_site`, `public_umami`
-
-## 4. Coolify: Umami kaynağı
-
-- [ ] + New Resource > Docker Compose.
-- [ ] Base Directory: `/infra/umami`
-- [ ] İlk deploy'u domain BAĞLAMADAN yap (Coolify'ın verdiği geçici adres veya yalnızca iç ağ); `SERVICE_PASSWORD_*` magic değişkenlerinin üretildiğini doğrula.
-- [ ] Bölüm 5'teki parola değişikliğini tamamla, ancak ondan sonra `umami` servisine `https://analytics.dogancanyildiz.com` domain'ini bağla ve redeploy et. Varsayılan `admin` / `umami` çifti public domain'de bir saniye bile açık kalmamalı.
-- [ ] Doğrula:
-
-```bash
-curl -s -o /dev/null -w '%{http_code}\n' https://analytics.dogancanyildiz.com/api/heartbeat
-curl -s -o /dev/null -w '%{http_code}\n' https://analytics.dogancanyildiz.com/script.js
-```
-
-Beklenen: iki satır `200`
-
-## 5. Umami paneli
-
-- [ ] Panele geçici adresten (domain bağlanmadan önce, bkz. bölüm 4) gir.
-- [ ] Varsayılan `admin` / `umami` ile giriş, parolayı hemen değiştir; sonra bölüm 4'e dönüp domain'i bağla.
-- [ ] Settings > Websites > Add website: Name `dogancanyildiz.com`, Domain `dogancanyildiz.com`
+- [ ] `umami.dravcore.com` paneline gir, Settings > Websites > Add website: Name `dogancanyildiz.com`, Domain `dogancanyildiz.com`.
 - [ ] Website UUID'yi not al.
+- [ ] Bu sitenin tracker'ı consent onayından sonra enjekte edilir ve `data-domains="dogancanyildiz.com"` taşır; merkezi kurulumdaki diğer siteler bu kayda veri yazamaz.
+
+## 5. (Kaldırıldı)
+
+Repo tarafında Gatus/Umami kurulumu kalmadı; bu bölüm tarihsel olarak boş.
 
 ## 6. Coolify: portfolio ortam değişkenleri
 
@@ -61,9 +42,9 @@ Portfolio uygulamasında:
 
 | Key | Value | Build Variable |
 |---|---|---|
-| `GATUS_URL` | `https://status.dogancanyildiz.com` | **kapalı** (Runtime only) |
-| `UMAMI_SCRIPT_URL` | `https://analytics.dogancanyildiz.com` | **açık** |
-| `UMAMI_WEBSITE_ID` | Umami'den alınan UUID | **açık** |
+| `NEXT_PUBLIC_STATUS_URL` | Kuma public status sayfasının adresi | **açık** |
+| `UMAMI_SCRIPT_URL` | `https://umami.dravcore.com` | **açık** |
+| `UMAMI_WEBSITE_ID` | merkezi Umami'den alınan UUID | **açık** |
 
 `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_BUILD_SHA`, `NEXT_PUBLIC_BUILD_DATE` zaten Build Variable olarak set edilmiş olmalı (Faz 1).
 
@@ -72,14 +53,12 @@ Portfolio uygulamasında:
 ## 7. Canlı doğrulama
 
 ```bash
-curl -s https://dogancanyildiz.com/ | grep -Eic 'status\.dogancanyildiz|:8080|public_site'
-curl -sI https://dogancanyildiz.com/ | tr -d '\r' | grep -i '^content-security-policy:'
-curl -s https://dogancanyildiz.com/ | grep -o 'data-website-id="[0-9a-f-]\{36\}"'
+curl -s https://dogancanyildiz.com/ | grep -o 'href="https://[^"]*"' | grep -i status
+curl -sI https://dogancanyildiz.com/ | tr -d '\r' | grep -i '^content-security-policy:' | grep -c 'umami.dravcore.com'
+curl -s https://dogancanyildiz.com/ | grep -Eic ':8080|:3001|127\.0\.0\.1'
 ```
 
-Beklenen: ilk komut `0`; CSP satırında Umami origin; üçüncü komut tek `data-website-id="..."` satırı.
-
-Ana sayfada Systems bölümü: up/down, 24s uptime yüzdesi, son deploy tarihi ve commit SHA görünür (Gatus ve build env ayarlı olduğunda).
+Beklenen: ilk komut Systems panelindeki status linkini basar; CSP sayacı `1`; topoloji grep'i `0`. Tarayıcıda consent onayı sonrası `umami.dravcore.com/script.js` yüklenir, `data-website-id` UUID'yi ve `data-domains="dogancanyildiz.com"`ı taşır.
 
 ## 8. Dependabot ve CodeQL (GitHub Settings)
 
@@ -96,6 +75,5 @@ Ana sayfada Systems bölümü: up/down, 24s uptime yüzdesi, son deploy tarihi v
 ## Açık / opsiyonel
 
 - Umami 2FA isteniyor mu?
-- Gatus, Umami ve Postgres imajlarının sürüm pinleri ve Dependabot'un `infra/` dizinlerini taraması 2026-08-28 denetim kapanışında ele alındı; bkz. `docs/plans/handoffs/denetim-kapanisi-2026-08-28.md`.
-- Gatus uyarı kanalı: `infra/gatus` compose'unda `GATUS_ALERT_WEBHOOK_URL` boşsa uyarı gönderilmez; Coolify'da bu değişkeni doldurmadan kesinti kimseye bildirilmez.
+- İmaj sürümleri (Uptime Kuma, merkezi Umami) 2026-08-30 kararıyla panelde elle sabitlenir; repo ve Dependabot izlemez (tarihsel not: 2026-08-28 kapanışındaki `infra/` pinleri ve `GATUS_ALERT_WEBHOOK_URL` bu kararla geçersizleşti, bkz. `denetim-kapanisi-2026-08-28.md` "Ek karar" bölümleri).
 - Runtime `GIT_SHA` entrypoint migration bilinçli olarak yapılmadı; footer ve Systems `NEXT_PUBLIC_BUILD_SHA/DATE` kullanıyor.

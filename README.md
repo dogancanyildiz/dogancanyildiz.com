@@ -10,7 +10,7 @@ bir sunucuda Traefik ve Cloudflare arkasında self-host ediliyor.
 | ---------- | ---------------------------------------------------------------- |
 | Çatı       | Next.js 16.3.3, App Router, `output: 'standalone'`               |
 | Arayüz     | React 19.2, Tailwind CSS 4, shadcn/ui, JS animasyon katmanı yok  |
-| E-posta    | Resend, `/api/contact` üzerinden                                 |
+| E-posta    | Kendi Mailcow sunucum, SMTP ile `/api/contact` üzerinden         |
 | Çalışma    | Node 24, tek konteyner                                           |
 | Barındırma | Coolify'ın ürettiği Docker imajı, önde Traefik, Cloudflare proxy |
 
@@ -62,19 +62,19 @@ ayrımı kozmetik değil. Build değişkenini yalnızca runtime işaretlemek
 derlemeyi doğrudan düşürür; bir sırrı build değişkeni yapmak imaj
 katmanlarına ve derleme loglarına sızdırır.
 
-| Değişken                 | Coolify katmanı | Zorunlu       | Not                                                                                                                                                                                    |
-| ------------------------ | --------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`   | Build           | Evet          | `next build` client bundle'a gömer. Dockerfile `ARG`'ının varsayılanı yok; bu argümansız derleme `/robots.txt` prerender'ında `resolveSiteUrl`'de düşer, tanımsız bir değer göndermez. |
-| `RESEND_API_KEY`         | Runtime         | Üretimde evet | Build değişkenleri imaj katmanına ve derleme loguna sızabilir.                                                                                                                         |
-| `CONTACT_EMAIL`          | Runtime         | Üretimde evet | Form mesajlarının gittiği kutu.                                                                                                                                                        |
-| `FROM_EMAIL`             | Runtime         | Üretimde evet | Resend'de doğrulanmış bir domain'de olmalı.                                                                                                                                            |
-| `TRUST_CF_CONNECTING_IP` | Runtime         | Hayır         | Yalnızca origin yalnızca Cloudflare'dan erişilebilir ve Traefik Cloudflare aralıklarına güvendikten sonra `true`. `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.               |
-| `NEXT_PUBLIC_BUILD_SHA`  | Build           | Hayır         | Systems panelindeki commit SHA; Coolify `SOURCE_COMMIT` veya CI `github.sha`. Boşsa alan gizlenir.                                                                                     |
-| `NEXT_PUBLIC_BUILD_DATE` | Build           | Hayır         | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa ikisi de gizlenir.                                                                                                         |
-| `GATUS_URL`              | Runtime         | Hayır         | Systems panelinin okuduğu Gatus taban URL'i. Yalnızca sunucu tarafı, client'a gitmez; boşsa nötr "durum alınamıyor" satırı görünür.                                                    |
-| `UMAMI_SCRIPT_URL`       | Build           | Hayır         | Self-host Umami origin'i. CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                                                              |
-| `UMAMI_WEBSITE_ID`       | Build           | Hayır         | Umami website UUID. İzleyici etiketi yalnızca iki Umami değeri de setken basılır.                                                                                                      |
-| `CSP_REPORT_ONLY`        | Build           | Hayır         | Tek bir ölçüm deploy'u için `1`: sıkı report-only CSP'yi yayınlar, `/api/csp-report` bütçesini yükseltir. Pencere bitince kaldır.                                                      |
+| Değişken                                    | Coolify katmanı | Zorunlu       | Not                                                                                                                                                                                                    |
+| ------------------------------------------- | --------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_SITE_URL`                      | Build           | Evet          | `next build` client bundle'a gömer. Dockerfile `ARG`'ının varsayılanı yok; bu argümansız derleme `/robots.txt` prerender'ında `resolveSiteUrl`'de düşer, tanımsız bir değer göndermez.                 |
+| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` | Runtime         | Üretimde evet | Mailcow submission (587, STARTTLS zorunlu; 465 implicit TLS). Uygulama parolası kullanılır; Build işaretlenirse imaj katmanına sızar. `SMTP_PORT` opsiyonel, varsayılan 587.                           |
+| `CONTACT_EMAIL`                             | Runtime         | Üretimde evet | Form mesajlarının gittiği kutu.                                                                                                                                                                        |
+| `FROM_EMAIL`                                | Runtime         | Üretimde evet | Mailcow'da tanımlı, DKIM imzalı gönderici adres.                                                                                                                                                       |
+| `TRUST_CF_CONNECTING_IP`                    | Runtime         | Hayır         | Yalnızca origin yalnızca Cloudflare'dan erişilebilir ve Traefik Cloudflare aralıklarına güvendikten sonra `true`. `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.                               |
+| `NEXT_PUBLIC_BUILD_SHA`                     | Build           | Hayır         | Systems panelindeki commit SHA; Coolify `SOURCE_COMMIT` veya CI `github.sha`. Boşsa alan gizlenir.                                                                                                     |
+| `NEXT_PUBLIC_BUILD_DATE`                    | Build           | Hayır         | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa ikisi de gizlenir.                                                                                                                         |
+| `NEXT_PUBLIC_STATUS_URL`                    | Build           | Hayır         | Systems panelinin link verdiği public status sayfası (Uptime Kuma). Yalnızca https kabul edilir; boşsa satır gizlenir.                                                                                 |
+| `UMAMI_SCRIPT_URL`                          | Build           | Hayır         | Merkezi self-host Umami origin'i (`https://umami.dravcore.com`). CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                                       |
+| `UMAMI_WEBSITE_ID`                          | Build           | Hayır         | Umami website UUID. Tag yalnızca iki Umami değeri de setken üretilir ve script'i ConsentProvider ancak ziyaretçi onay verdikten sonra enjekte eder (PR #35); onay yoksa hiçbir şey yüklenmez. Basılır. |
+| `CSP_REPORT_ONLY`                           | Build           | Hayır         | Tek bir ölçüm deploy'u için `1`: sıkı report-only CSP'yi yayınlar, `/api/csp-report` bütçesini yükseltir. Pencere bitince kaldır.                                                                      |
 
 ## Uluslararasılaştırma
 
@@ -123,7 +123,7 @@ katmanlarına ve derleme loglarına sızdırır.
   stream sırasında sınırlar (413), honeypot ve ad/e-postadaki CR/LF dahil her
   alanı sunucu tarafında doğrular; `X-Request-Id`, `X-RateLimit-Limit`,
   `X-RateLimit-Remaining` ve 429'da `Retry-After` döner. Hatalar çevrilir;
-  400 gövdesi bozulan alanı adlandırır. Resend çağrısı 10 saniye zaman aşımı
+  400 gövdesi bozulan alanı adlandırır. SMTP gönderimi 10 saniye zaman aşımı
   (504), `Reply-To` ve idempotency anahtarı taşır. Loglar satır başına bir JSON
   nesnesi, mesaj gövdesi ve ziyaretçi adresi asla içlerinde yok.
 - `/api/health` `{ status: "ok" | "degraded", checks: { content, mail }, timestamp }`
@@ -171,7 +171,7 @@ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3000/   # 200
 docker compose down
 ```
 
-Üç Resend değişkeni yoksa `mail` yerelde `false`; compose dosyası yalnızca
+SMTP ve posta değişkenleri yoksa `mail` yerelde `false`; compose dosyası yalnızca
 `NEXT_PUBLIC_SITE_URL` ister.
 
 Dockerfile'ı CI ile aynı şekilde lint et:
@@ -184,11 +184,11 @@ docker run --rm -i hadolint/hadolint:v2.15.1-alpine hadolint --failure-threshold
 
 Kontrol panelinde, bu depoda olmayan adımlar adım adım checklist:
 
-- `docs/deploy/coolify-kurulum.md` — GitHub App, build pack, env katmanları, sağlık kontrolü
-- `docs/deploy/cloudflare-kurulum.md` — DNS, TLS, yönlendirme, cache, rate limiting
-- `docs/deploy/traefik-ve-origin.md` — güvenilir proxy başlıkları, HSTS, origin kilidi
-- `docs/deploy/resend-domain.md` — gönderici domain için SPF, DKIM, DMARC
-- `docs/runbooks/infrastructure.md` — Gatus, Umami ve arkalarındaki ortam değişkenleri
+- `docs/deploy/coolify-kurulum.md`: GitHub App, build pack, env katmanları, sağlık kontrolü
+- `docs/deploy/cloudflare-kurulum.md`: DNS, TLS, yönlendirme, cache, rate limiting
+- `docs/deploy/traefik-ve-origin.md`: güvenilir proxy başlıkları, HSTS, origin kilidi
+- `docs/deploy/mailcow-smtp.md`: Mailcow SMTP kutusu, uygulama parolası, env ve uçtan uca test
+- `docs/runbooks/infrastructure.md`: Uptime Kuma, merkezi Umami ve ortam değişkenleri
 
 ## Depo düzeni
 

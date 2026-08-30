@@ -1,7 +1,12 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { pathnameForLocale, usePathname } from "@/i18n/navigation";
+import {
+  fillPathname,
+  pathnameForLocale,
+  useParams,
+  usePathname,
+} from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { switchTargetPath } from "@/i18n/switch-target";
 import { cn } from "@/lib/utils";
@@ -25,7 +30,11 @@ interface LanguageSwitcherProps {
 
 export function LanguageSwitcher({ untranslated }: LanguageSwitcherProps) {
   const activeLocale = useLocale();
-  const pathname = usePathname();
+  // usePathname returns the matched template on dynamic routes
+  // (/blog/[slug]); fill it with the params so the comparison against the
+  // untranslated list and the generated href both use the concrete path.
+  const params = useParams();
+  const pathname = fillPathname(usePathname(), params);
   const t = useTranslations("nav");
 
   return (

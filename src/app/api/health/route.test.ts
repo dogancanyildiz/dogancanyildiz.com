@@ -5,7 +5,13 @@ import { GET } from "./route";
 const originalEnv = { ...process.env };
 
 function setMailEnv(present: boolean): void {
-  for (const key of ["RESEND_API_KEY", "CONTACT_EMAIL", "FROM_EMAIL"]) {
+  for (const key of [
+    "SMTP_HOST",
+    "SMTP_USER",
+    "SMTP_PASSWORD",
+    "CONTACT_EMAIL",
+    "FROM_EMAIL",
+  ]) {
     if (present) {
       process.env[key] = "set";
     } else {
@@ -34,7 +40,7 @@ describe("GET /api/health", () => {
     const response = await GET();
     const body = await response.json();
 
-    // Gatus watches "[BODY].status == ok", so the aggregate has to move even
+    // The uptime monitor watches the body's status field, so it has to move even
     // though the HTTP status deliberately stays 200 for the container probe.
     expect(response.status).toBe(200);
     expect(body.status).toBe("degraded");

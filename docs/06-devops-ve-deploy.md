@@ -138,11 +138,11 @@ Bu workflow image push etmiyor ve Coolify'a deploy tetiklemiyor; tek işi lint +
 | Değişken | Build/Runtime | Gerekçe |
 |---|---|---|
 | NEXT_PUBLIC_SITE_URL | Build | `next build` sırasında client bundle'a gömülüyor; yalnızca Runtime işaretlenirse üretimde sessizce undefined kalır |
-| RESEND_API_KEY | Runtime | Sır; Build işaretlenirse image katmanlarına veya build loglarına sızma riski taşır |
+| SMTP_HOST / SMTP_USER / SMTP_PASSWORD (2026-08-31: Resend yerine Mailcow) | Runtime | Sır; Build işaretlenirse image katmanlarına veya build loglarına sızma riski taşır |
 | CONTACT_EMAIL | Runtime | Yalnızca server route'ta (contact API) okunuyor, client'a hiç gitmiyor |
 | FROM_EMAIL | Runtime | Aynı gerekçe |
 | TRUST_CF_CONNECTING_IP | Runtime | `false` (varsayılan, `.env.example`'da uygulandı); origin Cloudflare'a kilitlenip (yukarıdaki DOCKER-USER adımı) doğrulanana kadar `CF-Connecting-IP` okunmuyor, rate limit `X-Forwarded-For`'un son hop'una düşüyor |
-| GATUS_URL | Runtime | Status widget verisi sunucu tarafında çekiliyor, client'a URL sızmıyor; `.env.example`'da tanımlı ama boş, Gatus Faz 5'te kuruluyor |
+| GATUS_URL | Runtime | Tarihsel satır: 2026-08-30'da Gatus ile birlikte kaldırıldı; yerine Build katmanında `NEXT_PUBLIC_STATUS_URL` (public status sayfası linki, sır değil) var |
 
 ### 7. Traefik: redirect (yedek yol), HSTS/compress, buffering
 
@@ -229,14 +229,14 @@ Kanıt: `.github/workflows/ci.yml`, `release.yml`, `links.yml`, `dependabot.yml`
 - **CI `Docker image` job'u:** hadolint (digest pinli imaj), `docker/build-push-action` ile gha cache'li build (push yok, `load: true`), sonra imaj `3131:3000` ile çalıştırılır, `Healthcheck` config'inin boş olmadığı assert edilir, `docker inspect` ile `healthy` beklenir ve `/api/health` dışarıdan curl'lenir, container temizlenir. Job'larda `timeout-minutes` var. Tüm action'lar commit SHA'sına pinli (`# vX.Y.Z` yorumuyla).
 - **Dockerfile:** `node:24-alpine` digest'e pinli, `RUN --mount=type=cache,target=/root/.npm`, build tek `npm run build` (velite artık iki kez koşmuyor), `NEXT_PUBLIC_BUILD_SHA`/`NEXT_PUBLIC_BUILD_DATE` ARG'ları varsayılansız. `docker-compose.yml` bu iki arg'ı geçiyor, imaj adı faz numarasından bağımsız. `.dockerignore` `audit` ve `.cursor` dizinlerini de dışlıyor.
 - **Release:** `release.yml` `workflow_run` + `conclusion == success`; `scripts/release-version.mjs` son tag'i `git tag --sort=-v:refname` ile semver'e göre seçiyor (dev dalında da doğru), dev'de çalışınca uyarı basıyor. `package.json` `predev` ile velite yarışı kapandı.
-- **Dependabot:** docker ekosistemi `/`, `/infra/gatus`, `/infra/umami`; npm haftalık gruplu; majorlar (`next`, `eslint`, `typescript`) ignore'da.
-- **Panel tarafı hâlâ uygulanmadı ve canlı site kapalı (526):** Coolify env katmanları (`NEXT_PUBLIC_BUILD_SHA/DATE` için `SOURCE_COMMIT`), Gatus/Umami kaynakları, Cloudflare (Always Use HTTPS, Min TLS 1.2, CAA, managed robots.txt, Cache Rule, rate limiting), Traefik (trustedIPs, HSTS middleware, origin kilidi), preview wildcard DNS kararı, merge edilmiş `release/sync-v0.3.0` ve `feature/public-repo-security` uzak dallarının silinmesi, `main` için `enforce_admins`. Preview deployment'lar kendi `NEXT_PUBLIC_SITE_URL` değerini almalı (contact API `Origin`'i bu değerle karşılaştırıyor).
+- **Dependabot:** docker ekosistemi yalnızca kök Dockerfile (gözlemlenebilirlik 2026-08-30 kararıyla Coolify servis kataloğunda: Uptime Kuma + merkezi Umami, repoda compose yok); npm haftalık gruplu; majorlar (`next`, `eslint`, `typescript`) ignore'da.
+- **Panel tarafı hâlâ uygulanmadı ve canlı site kapalı (526):** Coolify env katmanları (`NEXT_PUBLIC_BUILD_SHA/DATE` için `SOURCE_COMMIT`, `NEXT_PUBLIC_STATUS_URL`), Uptime Kuma servisi ve merkezi Umami'ye site kaydı, Cloudflare (Always Use HTTPS, Min TLS 1.2, CAA, managed robots.txt, Cache Rule, rate limiting), Traefik (trustedIPs, HSTS middleware, origin kilidi), preview wildcard DNS kararı, merge edilmiş `release/sync-v0.3.0` ve `feature/public-repo-security` uzak dallarının silinmesi, `main` için `enforce_admins`. Preview deployment'lar kendi `NEXT_PUBLIC_SITE_URL` değerini almalı (contact API `Origin`'i bu değerle karşılaştırıyor).
 
 ## Riskler ve tripwire'lar
 
 - **next.config.ts'de output: "standalone" eksikse**: Dockerfile .next/standalone klasörünü bulamaz, build başarısız olur ya da yanlış (şişkin) çıktı kopyalanır. Faz 0'da bu değişiklik Dockerfile'dan önce yapılmalı.
 - **coollabsio/coolify#7500**: Dockerfile HEALTHCHECK + Node.js container'larında connection refused üreten, hâlâ açık bir bug. Staging'de curl/wget ile doğrulanmadan production health check'e güvenilmemeli; aksi halde rolling update sürekli unhealthy görüp yeni deploy'ları geri alabilir veya downtime yaratabilir.
-- **RESEND_API_KEY yanlışlıkla Build variable işaretlenirse**: image katmanlarına veya build loglarına sızabilir.
+- **SMTP_PASSWORD yanlışlıkla Build variable işaretlenirse**: image katmanlarına veya build loglarına sızabilir (2026-08-31 öncesi bu satır RESEND_API_KEY içindi).
 - **NEXT_PUBLIC_* değişkenleri yalnızca Runtime işaretlenirse**: `next build` sırasında client bundle'a hiç gömülmez, üretimde sessizce undefined dolaşır.
 - **Turbopack + standalone regresyonu (vercel/next.js#88844)**: serverExternalPackages trace edilmiyor. Dockerfile'a harici bir native paket eklenirse .next/standalone/node_modules'te eksik çıkabilir; `next build --webpack` fallback'i akılda tutulmalı.
 - **Docker build cache eviction (~48 saat)**: sık deploy edilmezse cache sıfırlanıp build süresi uzayabilir; bu bir hata değil ama beklenen bir yavaşlama.

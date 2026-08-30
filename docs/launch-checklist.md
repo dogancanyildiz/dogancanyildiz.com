@@ -48,16 +48,17 @@ Cloudflare 526 verdiği için bölüm 3-5'in canlı URL isteyen maddelerinin hi�
 ## 3. SEO ve i18n
 
 - [ ] `https://dogancanyildiz.com/sitemap.xml` Search Console'a gönderildi ve hatasız işlendi
-- [ ] Search Console'da hem `/` hem `/tr` kapsamı doğrulandı
+- [ ] Search Console'da hem `/` (Türkçe) hem `/en` kapsamı doğrulandı (2026-08-30: TR kökte, EN /en altında)
 - [ ] Search Console URL inceleme aracıyla yalnız Türkçe olan bir blog yazısının
-      `/tr/blog/<slug>` adresi tek tek incelendi, dizinlenebilir çıktı
-- [ ] Bir hreflang test aracıyla (technicalseo.com hreflang tester) ana sayfa, `/about`,
-      `/projects`, bir proje detayı ve iki dilli blog yazısı tek tek tarandı, self-referencing
-      ve karşılıklı hreflang hatası yok
-- [ ] Yalnız TR olan blog yazısının EN adresi 404 dönüyor ve EN sitemap'inde geçmiyor
+      `/blog/<slug>` adresi (TR kökte; yalnız EN olan varsa `/en/blog/<slug>`) tek tek incelendi, dizinlenebilir çıktı
+- [ ] Bir hreflang test aracıyla (technicalseo.com hreflang tester) ana sayfa, `/hakkimda`,
+      `/projeler`, `/en/about`, `/en/projects`, bir proje detayı ve iki dilli blog yazısı tek tek
+      tarandı, self-referencing ve karşılıklı hreflang hatası yok
+- [ ] Yalnız TR olan blog yazısının `/en/blog/<slug>` adresi 404 dönüyor ve EN sitemap'inde geçmiyor
+- [ ] 308 tablosu doğrulandı: `/about` -> `/en/about`, `/projects` -> `/en/projects`, `/contact` -> `/en/contact`, `/tr/hakkimda` benzeri fazla önekler ve `/tr/about` prefix'siz TR karşılığına tek 308 ile düşüyor; hiçbir zincirde döngü yok
 - [ ] `robots.txt` doğru domain'i ve `Disallow: /api/` satırını içeriyor
-- [ ] `/feed.xml` ve `/tr/feed.xml` 200 ve `application/rss+xml` dönüyor
-- [ ] `/opengraph-image`, `/tr/opengraph-image` ve bir blog/proje OG rotası 200 ve PNG dönüyor
+- [ ] `/feed.xml` (TR) ve `/en/feed.xml` 200 ve `application/rss+xml` dönüyor; `/tr/feed.xml` 308 ile köke düşüyor
+- [ ] `/opengraph-image` (TR kökü) ve `/en/opengraph-image` ile bir blog/proje OG rotası 200 ve PNG dönüyor
       (2026-08-28 denetiminde 500 veriyordu, statik font instance'larıyla düzeltildi); bir
       paylaşım önizlemesi (LinkedIn/Slack) doğru görseli gösteriyor
 - [ ] Rich Results Test: `/` (Person + WebSite), bir blog yazısı (BlogPosting + BreadcrumbList)
@@ -88,10 +89,13 @@ Cloudflare 526 verdiği için bölüm 3-5'in canlı URL isteyen maddelerinin hi�
       `https://dogancanyildiz.com/tr/about` adresine 301 dönüyor (site sahibinin
       2026-08-27 kararıyla domain yönü tersine döndü, bkz. `docs/11-acik-sorular.md` soru 5)
 - [ ] Coolify sağlık kontrolü yeşil, `/api/health` 200 ve gövdede `"status":"ok"`
-      (`degraded` ise Coolify'da `RESEND_API_KEY`, `CONTACT_EMAIL` veya `FROM_EMAIL` eksik;
+      (`degraded` ise Coolify'da `SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD`, `CONTACT_EMAIL` veya `FROM_EMAIL` eksik;
       container açılış logunda aynı hata satırı görünür)
 - [ ] Yanıt başlıklarında `strict-transport-security`, `x-frame-options: DENY`,
       `cross-origin-opener-policy` ve `content-security-policy` (`report-uri /api/csp-report`
       ile) görünüyor; `http://` istek 301 ile `https://`'e dönüyor (Cloudflare Always Use HTTPS)
-- [ ] Gatus `status.dogancanyildiz.com`'da yayında, `public_site` yeşil ve
-      `GATUS_ALERT_WEBHOOK_URL` ile bir test uyarısı gerçekten ulaştı
+- [ ] Uptime Kuma Coolify'da yayında, `https://dogancanyildiz.com/api/health` monitörü yeşil,
+      bir bildirim kanalı bağlı ve bir test uyarısı gerçekten ulaştı; public status sayfası
+      açık ve `NEXT_PUBLIC_STATUS_URL` o sayfayı gösteriyor (Systems panelindeki link çalışıyor)
+- [ ] Site `umami.dravcore.com`'daki merkezi Umami'ye website olarak eklendi, onay sonrası
+      ziyaretler panelde görünüyor, sayfada CSP ihlali yok

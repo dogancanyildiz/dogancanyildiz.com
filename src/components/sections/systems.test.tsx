@@ -1,14 +1,7 @@
 // @vitest-environment jsdom
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { resolveServerTree } from "../../../tests/helpers/render";
-import type { SiteStatus } from "@/lib/status";
-
-const getSiteStatus = vi.fn<() => Promise<SiteStatus | null>>();
-
-vi.mock("@/lib/status", () => ({
-  getSiteStatus: () => getSiteStatus(),
-}));
 
 // Real next-intl resolves the locale from the request scope Next's
 // middleware sets up (see src/i18n/request.ts), which this render never
@@ -42,8 +35,8 @@ vi.mock("next-intl/server", () => ({
     };
   },
   // Backed by the platform's own Intl constructors, the same primitives
-  // next-intl's real formatter wraps, so format.number/format.dateTime
-  // behave like production for the options systems.tsx actually passes.
+  // next-intl's real formatter wraps, so format.dateTime behaves like
+  // production for the options systems.tsx actually passes.
   getFormatter: async () => ({
     number: (value: number, options?: Intl.NumberFormatOptions) =>
       new Intl.NumberFormat(activeLocale, options).format(value),
@@ -52,84 +45,84 @@ vi.mock("next-intl/server", () => ({
   }),
 }));
 
+// buildInfo is read at module scope in src/lib/build-info.ts, so stubbing
+// process.env after import cannot reach it; the module is mocked with a
+// mutable holder instead.
+const build = { sha: "", date: "" };
+vi.mock("@/lib/build-info", () => ({
+  buildInfo: {
+    get sha() {
+      return build.sha;
+    },
+    get date() {
+      return build.date;
+    },
+  },
+  formatBuildSha: (sha: string) => sha.slice(0, 7),
+}));
+
 const { Systems } = await import("./systems");
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 describe("Systems", () => {
-  it("renders every field once status data is available", async () => {
+  it("renders build data and the stack line from build-time values", async () => {
     activeLocale = "en";
-    getSiteStatus.mockResolvedValue({
-      name: "site",
-      up: true,
-      uptime24h: 99.95,
-      lastCheck: "2026-08-20T10:15:00.000Z",
-    });
+    build.sha = "0123abcd456";
+    build.date = "2026-08-28T09:12:33+00:00";
+    vi.stubEnv("NEXT_PUBLIC_STATUS_URL", "https://status.example.org/status");
 
     render(await resolveServerTree(<Systems />));
 
-    expect(screen.getByText("Operational")).toBeInTheDocument();
-    expect(screen.getByText("99.95%")).toBeInTheDocument();
+    // The deploy date is formatted, never the raw ISO string (N-12).
+    expect(screen.queryByText("2026-08-28T09:12:33+00:00")).toBeNull();
+    expect(screen.getByText(/UTC/)).toBeInTheDocument();
+    expect(screen.getByText("0123abc")).toBeInTheDocument();
     expect(
       screen.getByText("Next.js · Docker · Coolify · Traefik · Cloudflare")
     ).toBeInTheDocument();
+
+    const statusLink = screen.getByRole("link", { name: /status/i });
+    expect(statusLink).toHaveAttribute(
+      "href",
+      "https://status.example.org/status"
+    );
+    expect(statusLink).toHaveAttribute(
+      "rel",
+      expect.stringContaining("noopener")
+    );
   });
 
-  it("shows a neutral row instead of a number when a field has no data", async () => {
+  it("shows the neutral row when a build value or the status url is missing", async () => {
     activeLocale = "en";
-    getSiteStatus.mockResolvedValue({
-      name: "site",
-      up: false,
-      uptime24h: null,
-      lastCheck: null,
-    });
+    build.sha = "";
+    build.date = "";
+    vi.stubEnv("NEXT_PUBLIC_STATUS_URL", "");
 
     render(await resolveServerTree(<Systems />));
 
-    expect(screen.getByText("Down")).toBeInTheDocument();
-    // Uptime, deploy date and commit (no NEXT_PUBLIC_BUILD_DATE or
-    // NEXT_PUBLIC_BUILD_SHA in this test run) all fall back to the same
-    // neutral label.
-    expect(screen.getAllByText("No data")).toHaveLength(3);
-    expect(screen.queryByText(/Last checked/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getAllByText("No data").length).toBeGreaterThanOrEqual(3);
   });
 
-  it("shows the status unavailable notice instead of throwing when there is no status at all", async () => {
+  it("drops a status link that is not https instead of rendering it", async () => {
     activeLocale = "en";
-    getSiteStatus.mockResolvedValue(null);
+    vi.stubEnv("NEXT_PUBLIC_STATUS_URL", "http://status.example.org");
 
     render(await resolveServerTree(<Systems />));
 
-    expect(screen.getByText("Status unavailable")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).toBeNull();
   });
 
-  it("formats the last checked timestamp in UTC, spelled out with a timezone label", async () => {
-    activeLocale = "en";
-    getSiteStatus.mockResolvedValue({
-      name: "site",
-      up: true,
-      uptime24h: 100,
-      lastCheck: "2026-08-20T10:15:00.000Z",
-    });
-
-    render(await resolveServerTree(<Systems />));
-
-    expect(
-      screen.getByText("Last checked Aug 20, 2026, 10:15 AM UTC")
-    ).toBeInTheDocument();
-  });
-
-  it("formats the same instant with the tr locale's month names, still in UTC", async () => {
+  it("renders the Turkish copy for the tr locale", async () => {
     activeLocale = "tr";
-    getSiteStatus.mockResolvedValue({
-      name: "site",
-      up: true,
-      uptime24h: 100,
-      lastCheck: "2026-08-20T10:15:00.000Z",
-    });
+    vi.stubEnv("NEXT_PUBLIC_STATUS_URL", "https://status.example.org");
 
     render(await resolveServerTree(<Systems />));
 
-    expect(
-      screen.getByText("Son kontrol 20 Ağu 2026 10:15 UTC")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Sistemler")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /durum/i })).toBeInTheDocument();
   });
 });

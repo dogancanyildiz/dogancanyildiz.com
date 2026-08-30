@@ -1,5 +1,7 @@
 # Faz 4 manuel kontrol listesi
 
+> Güncel adres notu (2026-08-31): 2026-08-30 TR-varsayılan geçişinden sonra bu listedeki yollar eski şemayla yazılı. Doğrulamada güncel karşılıkları kullan: `/` (TR), `/en`, `/hakkimda`, `/en/about`, `/projeler`, `/en/projects`, `/blog`, `/en/blog`, `/iletisim`, `/en/contact`, `/feed.xml`, `/en/feed.xml`; eski `/about`, `/projects`, `/contact` 308 ile `/en/...`'e, fazla `/tr/...` önekleri prefix'siz TR karşılığına 308 ile gider.
+
 Bu adımlar kodla yapılamaz, site sahibi veya kontrol oturumu uygular. Bu oturumda: dal push edildi ve PR açıldı, PR merge edilmedi; hiçbir panele dokunulmadı; bu oturuma bağlı bir tarayıcı olmadığı için Lighthouse, hreflang test aracı, Search Console ve contact formunun uçtan uca testi koşulmadı. Faz 4'ün kod tarafı yerelde tamam (`docs/plans/handoffs/faz-4.md`, "Doğrulananlar"); burada kalan iş yayın kararları, panel adımları ve sahibinin teslim etmesi gereken içerik.
 
 Dal: `feature/faz-4-icerik-ve-yayin`, `main` (`ad56a51`) üzerine. Faz 0-3 PR'ları (#2-#5) merge edilmiş olduğu için bu dal yığın taşımıyor; tek PR, tek merge.

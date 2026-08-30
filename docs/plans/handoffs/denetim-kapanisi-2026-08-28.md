@@ -86,15 +86,15 @@ Düzeltme turu (opus, 10 commit, `1e5501a..c9c85b0`): `.display-hero` geri geldi
 Tam liste yerel `audit/acik-kalanlar.md` defterinde (P-, O-, M- maddeleri). Öncelik sırasıyla:
 
 1. **Canlı siteyi ayağa kaldır** (F-002/F-003, kritik): her HTTPS yolu Cloudflare 526; origin'de Traefik router yüklü değil. Coolify'da uygulama ve Custom Labels, sunucuda `docker inspect` + coolify-proxy logları; kalıcı çözüm Cloudflare Origin CA.
-2. **Coolify env'leri doğrula:** `RESEND_API_KEY`, `CONTACT_EMAIL`, `FROM_EMAIL` (eksikse health `degraded`, Gatus alarm verir), `NEXT_PUBLIC_BUILD_SHA/DATE` (`SOURCE_COMMIT`), Faz 5 değişkenleri.
+2. **Coolify env'leri doğrula:** `SMTP_HOST/PORT/USER/PASSWORD` (2026-08-31: Resend yerine Mailcow), `CONTACT_EMAIL`, `FROM_EMAIL` (eksikse health `degraded`, izleyici alarm verir), `NEXT_PUBLIC_BUILD_SHA/DATE` (`SOURCE_COMMIT`), Faz 5 değişkenleri.
 3. **Cloudflare:** Always Use HTTPS, Minimum TLS 1.2, CAA, managed robots.txt kapalı, Cache Rule, rate limiting, Bot Fight Mode (`docs/deploy/cloudflare-kurulum.md`).
 4. **Traefik / origin:** trustedIPs, HSTS middleware (sonra uygulamadaki satır kaldırılır), `DOCKER-USER` origin kilidi; ardından `TRUST_CF_CONNECTING_IP=true`.
-5. **Resend:** domain doğrulama kayıtları, mevcut DMARC'ı düzenle (yeni kayıt ekleme), kademeli `p=quarantine` -> `p=reject`.
+5. **Mailcow (2026-08-31 kararı):** `contact@` kutusuna uygulama parolası, `SMTP_*` env'leri, canlı bir form gönderimiyle Origin'in kırpılmadığını ve DKIM/SPF pass olduğunu doğrula; DMARC sertleştirmesi öneri olarak duruyor (`docs/deploy/mailcow-smtp.md`). Resend DNS doğrulaması gereksizleşti.
 6. **Gatus ve Umami:** Coolify kaynakları, `GATUS_ALERT_WEBHOOK_URL`, Umami parolası domain bağlanmadan önce; harici ikinci prob.
 7. **`.sh` alan adı kararı:** kaydet veya kapsam dışı ilan et.
 8. **GitHub:** `main` için `enforce_admins`; merge edilmiş `release/sync-v0.3.0` ve `feature/public-repo-security` uzak dallarını sil; preview wildcard DNS kararı.
 9. **Görsel onaylar:** giriş animasyonlarının yokluğu, tema düğmesi ikon anlamı, pill'lerin normal yazımı, footer/CTA başlık ölçeği; tarayıcı turu (Faz 3 listesi + bu kapanış).
-10. **Canlı doğrulamalar (site açılınca):** Lighthouse (CLS/LCP dahil), hreflang aracı, Search Console, Rich Results, OG önizleme, contact formu gerçek gönderim (Origin kırpılmıyor), `CSP_REPORT_ONLY=1` ölçüm penceresi, Resend idempotency penceresi.
+10. **Canlı doğrulamalar (site açılınca):** Lighthouse (CLS/LCP dahil), hreflang aracı, Search Console, Rich Results, OG önizleme, contact formu gerçek gönderim (Origin kırpılmıyor), `CSP_REPORT_ONLY=1` ölçüm penceresi.
 11. **İçerik teslimatları:** kapaklar (`cover` + `coverAlt`), sertifika `verifyUrl`, Konuşmalar, profil fotoğrafı, metin ve CV onayı, Wikonya adı, ticket repo linki.
 
 ## Kalan teknik borç (küçük, sıralı PR'lara uygun)
@@ -105,6 +105,14 @@ Tam liste yerel `audit/acik-kalanlar.md` defterinde (P-, O-, M- maddeleri). Önc
 - `--status-down` token'ı tüketicisiz (Systems `bg-status-down`'a geçerse kullanılır).
 - typescript 7 ve eslint 10 majorları (`eslint-config-next` desteği bekleniyor).
 - Preview deployment'lar için ayrı `NEXT_PUBLIC_SITE_URL` (`docs/deploy/coolify-kurulum.md`'ye yazıldı, Coolify'da uygulanmalı).
+
+## Ek karar (2026-08-30): gözlemlenebilirlik panele taşındı
+
+Sahibi Gatus ve repodaki Umami stack'ini kaldırdı: gerçek izleme Coolify servis kataloğundan kurulan Uptime Kuma'da (bildirim kanalları Kuma'nın kendi sağlayıcılarıyla), ölçüm sahibinin merkezi Umami kurulumunda (`umami.dravcore.com`, bu site orada bir website). `infra/` klasörü, `src/lib/status.ts`, `GATUS_URL` ve ana sayfanın 60 sn revalidate'i silindi; Systems paneli incelip build bilgisi + `NEXT_PUBLIC_STATUS_URL` linkine döndü (Kuma'nın dokümante olmayan API'sine bilinçli olarak bağlanılmadı; docs/05'teki ret gerekçesi korunuyor). Umami origin'i `src/lib/analytics.ts`'te güncellendi, `data-domains` çapraz site karışmasını engelliyor. Kapanış turunun N-01..N-24 status/infra kalemlerinden compose ve alerting'e bağlı olanlar bu kararla geçersizleşti; parola-domain sırası artık Kuma/merkezi Umami akışında geçerli değil (merkezi Umami zaten kurulu).
+
+## Ek not (2026-08-31): PR #35 ve #36 incelemesi
+
+Kapanıştan sonra başka oturumlarda iki büyük PR merge edildi ve bu notun bazı satırlarını tarihsel kıldı: **PR #35** contact'a zorunlu `topic` alanı (web/devops/security/other), consent banner (Umami onay sonrası), /privacy + /coming-soon + /updating (StatusScreen), WhatsApp kanalı ve kimlik/metin yenilemesi getirdi; **PR #36** Türkçeyi varsayılan yaptı (TR kökte yerelleştirilmiş URL'ler: /hakkimda, /projeler, /iletisim; EN /en altında; eski yollar 308) ve dokümanları Türkçeleştirdi. Üç bağımsız denetçi bu aralığı inceledi (26 bulgu): 1 blocker (dil değiştirici detay sayfalarında `/en/blog/[slug]` şablonunu basıyordu, `pathnames` sonrası `usePathname` sözleşme değişikliği; bu dalda `fillPathname` + `useParams` ile düzeltildi ve render testiyle kilitlendi), kalan major/minor bulgular sahibinin kararına sunuldu ve `audit/acik-kalanlar.md` "31 Ağustos incelemesi" bölümünde. Bu notun 'contact sözleşmesi' satırları 28 Ağustos anının kaydıdır; güncel sözleşme docs/05'te.
 
 ## Öğrenilenler (orkestrasyon)
 

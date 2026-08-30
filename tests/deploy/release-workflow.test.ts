@@ -92,12 +92,7 @@ describe("release workflow", () => {
 
   it("does not reference any runtime secret", () => {
     const content = workflow();
-    for (const secret of [
-      "RESEND_API_KEY",
-      "CONTACT_EMAIL",
-      "FROM_EMAIL",
-      "GATUS_URL",
-    ]) {
+    for (const secret of ["RESEND_API_KEY", "CONTACT_EMAIL", "FROM_EMAIL"]) {
       expect(content).not.toContain(secret);
     }
   });
