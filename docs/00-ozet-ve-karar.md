@@ -19,7 +19,7 @@ Denetim üç kritik sorun ortaya çıkardı. Birincisi, site içeriği yüzde y�
 
 Aşağıdaki kararlar kategori bazında gruplandı; her biri kendi detay dokümanında tam gerekçe, reddedilen alternatif ve uygulama adımlarıyla açıklanıyor. Bu bölüm yalnızca yönü veriyor.
 
-**Stack:** Next.js 16.3.3 (App Router, app/[lang], output: 'standalone') + React 19.2 + Tailwind 4.3.x + shadcn/ui + next-intl 4.13.7 + Velite 0.4.0 (MDX) + motion 13.1.1, Docker + Coolify üzerinde self-host. Detay: [02-stack-karari.md](./02-stack-karari.md).
+**Stack:** Next.js 16.3.3 (App Router, app/[lang], output: 'standalone') + React 19.2 + Tailwind 4.3.x + shadcn/ui + next-intl 4.14.1 + Velite 0.4.0 (MDX), Docker + Coolify üzerinde self-host (motion 2026-08-28'de kaldırıldı, bkz. sürüm tablosu). Detay: [02-stack-karari.md](./02-stack-karari.md).
 
 **Migrate vs modernize:** incremental-modernize. Aynı repo, aynı stack, fazlı dallar halinde ilerlenecek. Silinen şey mimari değil içerik ve i18n plumbing'i: src/lib/i18n/translations.ts, src/components/locale-provider.tsx, dört layout'taki cookies() çağrıları ve tüm Alex Chen metinleri gidiyor. Gerçek emek barındıran katman (shadcn bileşenleri, Button cva matrisi, ThemeToggle'ın hydration-safe kurulumu, opengraph-image route'u, çalışan Resend entegrasyonu) yerinde kalıyor. Repo şu an tsc --noEmit ve eslint'ten temiz geçiyor; bu güvenlik ağı fazlı ilerleyerek korunacak.
 
@@ -27,7 +27,7 @@ Aşağıdaki kararlar kategori bazında gruplandı; her biri kendi detay doküma
 
 - Tasarım/UI: Terminal Editorial yönü, nötr zemin üstünde emerald tek bir aksan/status rengine indiriliyor, tek sütun editoryal layout, mobil menü eksikliği kapatılıyor. Detay: [03-tasarim-ui-ux.md](./03-tasarim-ui-ux.md).
 - i18n: app/[lang] + next-intl 4.13.7, localePrefix 'as-needed' (TR kökte, EN /en altında), otomatik Accept-Language yönlendirmesi kapalı. Detay: [04-i18n.md](./04-i18n.md).
-- İçerik altyapısı ve servisler: Velite ile MDX (proje + blog, iki dilde, çevrilmemiş içerik için fallback sayfa yok), Resend contact formu üç katmanla sertleştiriliyor, Gatus'un JSON API'sinden beslenen canlı status widget'ı ekleniyor. Detay: [05-backend-icerik-ve-servisler.md](./05-backend-icerik-ve-servisler.md).
+- İçerik altyapısı ve servisler: Velite ile MDX (proje + blog, iki dilde, çevrilmemiş içerik için fallback sayfa yok), contact formu üç katmanla sertleştiriliyor (gönderim 2026-08-31'den beri Resend yerine Mailcow SMTP ile), canlı status widget'ın yerini 2026-08-30 kararıyla Uptime Kuma'ya link veren ince Systems paneli aldı. Detay: [05-backend-icerik-ve-servisler.md](./05-backend-icerik-ve-servisler.md).
 - Deploy: çok aşamalı Dockerfile + Coolify GitHub App ile git tabanlı build, PR başına preview açık, GitHub Actions yalnızca lint/typecheck/build kapısı olarak çalışıyor, image push etmiyor. Detay: [06-devops-ve-deploy.md](./06-devops-ve-deploy.md).
 - İçerik: tüm şablon persona siliniyor, .local/content/portfolio-content.md'den gerçek içerik (Doğan Can Yıldız, 4-5 gerçek proje case study'si, gerçek sosyal linkler) yazılıyor. Detay: [08-icerik-stratejisi.md](./08-icerik-stratejisi.md).
 
@@ -40,8 +40,9 @@ Aşağıdaki kararlar kategori bazında gruplandı; her biri kendi detay doküma
 | 2. i18n yeniden mimarisi | İki dil ayrı URL'de, tüm içerik route'ları build'de prerender, hreflang/canonical doğru. | Uygulandı (main, PR #4) |
 | 3. Tasarım sistemi | Font gerçekten yüklensin, palet nötrlensin, mobil menü gelsin, hareket ve erişilebilirlik toparlansın. | Uygulandı (main, PR #5) |
 | 4. İçerik ve yayın | Şablon persona tamamen gitsin, gerçek case study'ler ve ilk blog yazıları iki dilde yayına çıksın; bu fazın sonu launch. | Uygulandı (main, PR #6, 2026-08-27); sahibinin teslim edeceği içerikler (kapaklar, sertifika linkleri, Konuşmalar) ve metin onayı bekleniyor, launch kapısının manuel maddeleri koşulmadı |
-| 5. Altyapı vitrini ve ölçüm | Gatus tabanlı status widget, Umami, Dependabot + CodeQL otomasyonu; yayın sonrası. | Kod tarafı uygulandı (main, PR #31, v0.3.1, 2026-08-28); Coolify/Cloudflare panel adımları `plans/handoffs/faz-5-manual-checklist.md`'de sahibinde |
-| Denetim kapanışı (2026-08-28) | 16 boyutlu denetimin 162 bulgusundan kod tarafında kapatılabilen her şey: contact API sertleştirme, erişilebilirlik, performans, güvenlik başlıkları, SEO/JSON-LD, CI/Docker, test altyapısı. | `feature/audit-closure` dalında tamamlandı, PR #34 (dev) 2026-08-30'da açıldı; ayrıntı `plans/handoffs/denetim-kapanisi-2026-08-28.md` |
+| 5. Altyapı vitrini ve ölçüm | Gatus tabanlı status widget, Umami, Dependabot + CodeQL otomasyonu; yayın sonrası. | Kod tarafı uygulandı (main, PR #31, v0.3.1, 2026-08-28); 2026-08-30 kararıyla Gatus ve repo Umami'si kaldırıldı, izleme Uptime Kuma + merkezi Umami (PR #37); panel adımları `plans/handoffs/faz-5-manual-checklist.md`'de sahibinde |
+| Denetim kapanışı (2026-08-28) | 16 boyutlu denetimin 162 bulgusundan kod tarafında kapatılabilen her şey: contact API sertleştirme, erişilebilirlik, performans, güvenlik başlıkları, SEO/JSON-LD, CI/Docker, test altyapısı. | `feature/audit-closure` dalı PR #34 ile dev'e merge edildi (2026-08-29); ayrıntı `plans/handoffs/denetim-kapanisi-2026-08-28.md` |
+| Kapanış sonrası (2026-08-29..09-02) | Kimlik/consent/topic/WhatsApp (PR #35) ve TR varsayılan locale (PR #36, başka oturumlar); gözlemlenebilirlik panele + Mailcow SMTP + dil değiştirici blocker düzeltmesi (PR #37); ultrareview 6 bulgusunun kapanışı (PR #39); bağımlılık grubu (PR #40). | Tamamı dev'de; ayrıntı `plans/handoffs/denetim-kapanisi-2026-08-28.md` ek notları |
 
 Detay: [10-yol-haritasi.md](./10-yol-haritasi.md).
 
@@ -54,7 +55,7 @@ Hızlı referans için ana bağımlılıkların hedef sürümleri:
 | next | 16.1.6 | 16.3.3 | Uygulandı, package.json'da 16.3.3 |
 | react | 19.x | 19.2 | Uygulandı, package.json'da 19.2.3 |
 | tailwindcss | 4.x | 4.3.x | Uygulandı, package-lock'ta çözülen sürüm 4.3.3 |
-| next-intl | yok | 4.13.7 | Uygulandı, package.json'da 4.13.7 |
+| next-intl | yok | 4.13.7 | Uygulandı; Dependabot PR #40 ile 4.14.1'e çıktı (2026-09-02, yerelde tsc + 979 test + build doğrulandı) |
 | velite | yok | 0.4.0 (exact pin) | Uygulandı, package.json'da exact 0.4.0 |
 | motion (framer-motion) | ^12.34.3 | motion 13.1.1 | Uygulandı (Faz 0-3); **2026-08-28'de kaldırıldı**: JS animasyonu SSR görünürlüğünü hidrasyona bağlıyordu, sitede artık motion bağımlılığı yok (bkz. 03) |
 | node | pin yok | 24 (.nvmrc), engines.node >=24 | Uygulandı, .nvmrc 24 ve engines.node >=24 |
@@ -149,11 +150,19 @@ Bu bölüm 2026-08-27 tarihli bölümün üstünde geçerlidir; o bölüm tarihs
 - **Ölçüm penceresi:** `CSP_REPORT_ONLY=1` ile bir deploy, sıkı CSP'nin maliyeti loglardan okunur.
 - **Kalan teknik borç** (küçük): `localePath` önek koruması, `assert-static-routes` locale listesi, yetim `velite --watch`, typescript 7 / eslint 10 majorları, dev `npm audit` 2 high (velite -> sharp, build zamanı, kabul edildi). Tam liste yerel `audit/acik-kalanlar.md` defterinde.
 
+## Uygulama durumu (2026-09-02)
+
+Bu bölüm 2026-08-28 tarihli bölümün üstünde geçerlidir; o bölüm tarihsel kayıt olarak duruyor.
+
+**PR'lar.** Denetim kapanışı PR #34 ile dev'e girdi (2026-08-29). Başka oturumlarda PR #35 (zorunlu `topic` alanı, consent banner, /privacy, WhatsApp kanalı, kimlik metinleri) ve PR #36 (Türkçe varsayılan locale: TR kökte yerelleştirilmiş URL'ler, EN /en altında, eski yollar 308) merge edildi. PR #37 (2026-08-30) gözlemlenebilirliği panele taşıdı (Uptime Kuma + merkezi Umami, `infra/` silindi), postayı Mailcow SMTP'ye geçirdi ve dil değiştirici blocker'ını düzeltti. Merge sonrası bulut incelemesi (ultrareview) 6 bulgu verdi; tamamı PR #39 ile kapandı (2026-09-01): asıl hata Dockerfile builder aşamasında `NEXT_PUBLIC_STATUS_URL` ARG'ının olmamasıydı (status linki production'da hiç görünemezdi), kalanlar bayat Resend/Gatus referanslarıydı ve sızıntı bekçisi testler `SMTP_*`'a çevrildi. PR #40 bağımlılık grubu (lucide-react 1.37.0, next-intl 4.14.1, simple-icons 16.29.0, zod 4.5.4) yerel doğrulama (tsc, 979 test, production build) sonrası merge edildi (2026-09-02).
+
+**Kalanlar (2026-09-02).** Öz olarak 2026-08-28 listesinin devamı: canlı site hâlâ Cloudflare 526; panel adımları (Uptime Kuma kurulumu + `/api/health` monitörü, merkezi Umami'ye site kaydı ve `UMAMI_WEBSITE_ID`, `SMTP_*` env'leri ve `contact@` uygulama parolası, `NEXT_PUBLIC_STATUS_URL`); 31 Ağustos incelemesinin sahibine sunulan bulguları (consent geri alma kontrolü başta, V-2..V-18, yerel `audit/acik-kalanlar.md` bölüm 9); `.sh` kararı; içerik teslimatları.
+
 ## Uygulama notları
 
 Faz sırası bağımlılık taşıyor. Faz 0 ve Faz 1 yayından bağımsız, hemen başlanabilir ve içerik onayı beklenirken bile ilerler; ikisi arasında sıkı bir sıra yok, paralel yürütülebilir. Faz 2 (i18n restructure) Faz 1'deki deploy hattı üzerinden test edilebilmesi için Faz 1'den sonra planlandı ve tek PR'da bitirilecek büyük hamle olarak işaretlendi, kısmi commit'lerle yarım bırakılmayacak; doğrulama kriteri build çıktısında tüm içerik route'larının statik olması, yalnızca /api/* altındaki route'ların dynamic kalması. Faz 3 (tasarım sistemi) Faz 2'den bağımsız çalışabilir ama aynı dosyalara (layout, globals.css) dokunduğu için sıraya alındı, çakışma riski azaltıldı. Faz 4 sonu launch noktası: Lighthouse ölçümü, hreflang testi, Search Console doğrulaması ve contact formu uçtan uca testi burada zorunlu kılınıyor; bu dört kontrol geçmeden domain yönlendirmesi (dogancanyildiz.sh -> dogancanyildiz.com) canlıya alınmıyor.
 
-Domain ve ortam ayrımı yayın öncesi kritik: dogancanyildiz.com ana domain (**Karar değişikliği (2026-08-27):** sahibinin son kararı, tarihsel öneri metni tersiydi, bkz. açık soru 5), dogancanyildiz.sh Cloudflare Redirect Rules'ta tek atlamalı 301 ile dogancanyildiz.com'a yönlenecek (Traefik'teki karşılığı yalnızca yedek yol), dil prefix'ine dokunulmayacak. Coolify'da env değişkenleri Build/Runtime olarak bilinçli ayrılacak; bu ayrım Faz 1'de kurulmazsa NEXT_PUBLIC_SITE_URL client bundle'a hiç gömülmeyebilir veya RESEND_API_KEY yanlışlıkla build loglarına sızabilir, bkz. Riskler bölümü.
+Domain ve ortam ayrımı yayın öncesi kritik: dogancanyildiz.com ana domain (**Karar değişikliği (2026-08-27):** sahibinin son kararı, tarihsel öneri metni tersiydi, bkz. açık soru 5), dogancanyildiz.sh Cloudflare Redirect Rules'ta tek atlamalı 301 ile dogancanyildiz.com'a yönlenecek (Traefik'teki karşılığı yalnızca yedek yol), dil prefix'ine dokunulmayacak. Coolify'da env değişkenleri Build/Runtime olarak bilinçli ayrılacak; bu ayrım Faz 1'de kurulmazsa NEXT_PUBLIC_SITE_URL client bundle'a hiç gömülmeyebilir veya SMTP_PASSWORD (2026-08-31 öncesi RESEND_API_KEY) yanlışlıkla build loglarına sızabilir, bkz. Riskler bölümü.
 
 ### Ana kararlar
 
