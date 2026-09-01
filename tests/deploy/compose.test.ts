@@ -36,9 +36,7 @@ describe("docker-compose.yml", () => {
       "SMTP_USER",
       "SMTP_PASSWORD",
     ]) {
-      expect(content).toMatch(
-        new RegExp(`${name}:\\s*"\\$\\{${name}:-\\}"`)
-      );
+      expect(content).toMatch(new RegExp(`${name}:\\s*"\\$\\{${name}:-\\}"`));
     }
   });
 });
