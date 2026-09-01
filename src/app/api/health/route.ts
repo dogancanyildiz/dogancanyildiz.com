@@ -29,8 +29,9 @@ export const dynamic = "force-dynamic";
  *
  * The HTTP status stays 200 even when a check fails. The Docker healthcheck
  * looks at res.ok and would restart a container that is serving every page
- * correctly but happens to be missing a mail variable; Gatus reads
- * "[BODY].status == ok" and is the one that should raise that alarm.
+ * correctly but happens to be missing a mail variable; the Uptime Kuma
+ * keyword monitor watches the body for "status":"ok" and is the one that
+ * should raise that alarm.
  */
 export async function GET() {
   const checks = {

@@ -63,8 +63,31 @@ describe("Dockerfile", () => {
 
   it("never bakes a runtime secret into an image layer", () => {
     const content = dockerfile();
-    for (const secret of ["RESEND_API_KEY", "CONTACT_EMAIL", "FROM_EMAIL"]) {
+    for (const secret of [
+      "SMTP_HOST",
+      "SMTP_USER",
+      "SMTP_PASSWORD",
+      "CONTACT_EMAIL",
+      "FROM_EMAIL",
+    ]) {
       expect(content).not.toContain(secret);
+    }
+  });
+
+  it("carries every optional public build variable through the builder stage", () => {
+    const content = dockerfile();
+    for (const name of [
+      "NEXT_PUBLIC_BUILD_SHA",
+      "NEXT_PUBLIC_BUILD_DATE",
+      "NEXT_PUBLIC_STATUS_URL",
+      "UMAMI_SCRIPT_URL",
+      "UMAMI_WEBSITE_ID",
+    ]) {
+      // Without the ARG line Docker discards the --build-arg Coolify passes,
+      // and without the matching ENV line next build never sees the value:
+      // the feature it feeds then stays silently disabled in production.
+      expect(content).toMatch(new RegExp(`^ARG ${name}`, "m"));
+      expect(content).toMatch(new RegExp(`^ENV ${name}=\\$${name}$`, "m"));
     }
   });
 

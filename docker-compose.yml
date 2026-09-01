@@ -24,6 +24,7 @@ services:
         #     docker compose up --build -d
         NEXT_PUBLIC_BUILD_SHA: "${NEXT_PUBLIC_BUILD_SHA:-}"
         NEXT_PUBLIC_BUILD_DATE: "${NEXT_PUBLIC_BUILD_DATE:-}"
+        NEXT_PUBLIC_STATUS_URL: "${NEXT_PUBLIC_STATUS_URL:-}"
     # Not faz-numbered: the phases that named earlier builds are closed, and
     # "local" describes what this image is for regardless of which phase
     # touches it next.
@@ -36,7 +37,10 @@ services:
       # Runtime only values. Left empty on purpose so a local run never
       # sends real mail. Provide them through a shell export when the
       # contact endpoint is being tested.
-      RESEND_API_KEY: "${RESEND_API_KEY:-}"
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
       CONTACT_EMAIL: "${CONTACT_EMAIL:-}"
       FROM_EMAIL: "${FROM_EMAIL:-}"
     restart: "no"

@@ -51,8 +51,8 @@ Büyüklük: M. Çok sayıda küçük ve mekanik değişiklik, ama hiçbiri mima
 - [ ] Origin'i yalnızca Cloudflare IP'lerinden erişilebilir kılmak (DOCKER-USER iptables kuralları; ufw tek başına Docker'ın yayınladığı portları filtrelemiyor), önerilir (sahibi: manuel checklist, `docs/deploy/traefik-ve-origin.md`)
 - [ ] Cloudflare cache kuralı `_next/static/*` ve `public/` görselleri için, `/api/contact` için Cloudflare Rate Limiting kuralı (free planda 3 istek/10sn), Bot Fight Mode açık (sahibi: manuel checklist)
 - [ ] Traefik'te HSTS ve compress middleware'i, streaming için buffering kapatma (sahibi: manuel checklist)
-- [ ] Coolify env değişkenleri Build/Runtime olarak ayrılır (`NEXT_PUBLIC_SITE_URL` Build; `RESEND_API_KEY`, `CONTACT_EMAIL`, `FROM_EMAIL` Runtime) (sahibi: manuel checklist)
-- [ ] Resend'de dogancanyildiz.com domain doğrulaması (SPF/DKIM/DMARC) (sahibi: manuel checklist, `docs/deploy/resend-domain.md`; FROM_EMAIL contact@dogancanyildiz.com, alıcı me@dogancanyildiz.com)
+- [ ] Coolify env değişkenleri Build/Runtime olarak ayrılır (`NEXT_PUBLIC_SITE_URL` Build; `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`, `CONTACT_EMAIL`, `FROM_EMAIL` Runtime; madde metni 2026-08-31 öncesi `RESEND_API_KEY` idi) (sahibi: manuel checklist)
+- [ ] **Karar değişikliği (2026-08-31):** posta Resend yerine sahibinin Mailcow sunucusundan çıkar; Mailcow'da dogancanyildiz.com için SPF/DKIM/DMARC yayında ve `contact@` posta kutusu uygulama parolasıyla hazır (sahibi: manuel checklist, `docs/deploy/mailcow-smtp.md`; FROM_EMAIL contact@dogancanyildiz.com, alıcı me@dogancanyildiz.com; tarihsel madde metni Resend domain doğrulamasıydı)
 
 Bitti sayılma kriteri: main'e merge edilen bir commit Coolify'da otomatik deploy tetikliyor ve site canlıda ayakta; test PR'ı açıldığında preview URL üretiliyor; `curl -I https://dogancanyildiz.sh/herhangi-bir-yol` tek atlamada `https://dogancanyildiz.com/herhangi-bir-yol`'a 301 dönüyor; Coolify sağlık kontrolü yeşil.
 

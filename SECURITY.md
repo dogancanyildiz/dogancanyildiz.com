@@ -22,8 +22,8 @@ kapatmayı hedefliyorum. Ödül yok; istersen changelog'da kredi verilir.
   test: hizmet reddi yok, iletişim uç noktasında bir avuçtan fazla otomatik
   tarama yok).
 
-Kapsam dışı: sitenin dayandığı üçüncü taraf servisler (Cloudflare, Resend,
-GitHub); onları tedarikçiye bildir.
+Kapsam dışı: sitenin dayandığı harici servisler (Cloudflare, GitHub, posta
+sunucusu); onları ilgili tedarikçiye veya sahibine bildir.
 
 ## Desteklenen sürümler
 

@@ -124,11 +124,13 @@ katmanlarına ve derleme loglarına sızdırır.
   alanı sunucu tarafında doğrular; `X-Request-Id`, `X-RateLimit-Limit`,
   `X-RateLimit-Remaining` ve 429'da `Retry-After` döner. Hatalar çevrilir;
   400 gövdesi bozulan alanı adlandırır. SMTP gönderimi 10 saniye zaman aşımı
-  (504), `Reply-To` ve idempotency anahtarı taşır. Loglar satır başına bir JSON
+  (504) ve `Reply-To` taşır; SMTP tarafında tekilleştirme penceresi olmadığından
+  kaybedilen yarış sonrası tekrar deneme ikinci kopya üretebilir (alıcı sahibin
+  kendi kutusu, kabul edildi). Loglar satır başına bir JSON
   nesnesi, mesaj gövdesi ve ziyaretçi adresi asla içlerinde yok.
 - `/api/health` `{ status: "ok" | "degraded", checks: { content, mail }, timestamp }`
   döner, HTTP her iki durumda da 200; bir mail değişkeni eksikse `status`
-  `degraded` olur, Gatus koşulu buna alarm verir. `src/instrumentation.ts`
+  `degraded` olur, Uptime Kuma keyword monitörü buna alarm verir. `src/instrumentation.ts`
   o durumda açılışta yüksek sesli bir hata satırı da basar.
 - Bağımlılık ve kod taraması: Dependabot (`.github/dependabot.yml`, haftalık
   gruplu PR'lar `dev`'e, güvenlik güncellemeleri isteğe bağlı) ve CodeQL
