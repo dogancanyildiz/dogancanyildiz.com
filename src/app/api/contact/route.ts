@@ -31,15 +31,15 @@ import { methodNotAllowed } from "@/lib/api-methods";
 const ROUTE = "/api/contact";
 
 /**
- * Upper bound on the SMTP send. nodemailer keeps its own socket timeouts on
- * sendMail (nodemailer keeps its own socket timeouts under this race), so the timeout is a
- * race: the visitor gets an answer, while the upstream request is left to
+ * Upper bound on the SMTP send. nodemailer keeps its own socket timeouts
+ * (src/lib/mailer.ts) under this race, so the timeout is a ceiling on top of
+ * them: the visitor gets an answer, while the upstream request is left to
  * finish or fail on its own instead of holding the handler open for minutes.
  *
- * A send that lands after the race is lost is still delivered, so the visitor
- * who has been told to try again would otherwise produce a second copy of the
- * same mail. The retry carries the idempotency key below, which is what makes
- * the provider collapse the two attempts into one delivery.
+ * A send that lands after the race is lost is still delivered, so a visitor
+ * who was told to try again can produce a second copy of the same mail; what
+ * that duplicate risk means and why it is accepted is documented at the
+ * sendMail call below.
  */
 const SEND_TIMEOUT_MS = 10_000;
 

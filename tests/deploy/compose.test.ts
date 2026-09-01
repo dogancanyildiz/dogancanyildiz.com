@@ -30,7 +30,14 @@ describe("docker-compose.yml", () => {
 
   it("keeps the runtime env vars unset by default so a local run never sends real mail", () => {
     const content = compose();
-    expect(content).toMatch(/RESEND_API_KEY:\s*"\$\{RESEND_API_KEY:-\}"/);
+    for (const name of [
+      "SMTP_HOST",
+      "SMTP_PORT",
+      "SMTP_USER",
+      "SMTP_PASSWORD",
+    ]) {
+      expect(content).toMatch(new RegExp(`${name}:\\s*"\\$\\{${name}:-\\}"`));
+    }
   });
 });
 

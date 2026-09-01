@@ -36,11 +36,17 @@ WORKDIR /app
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_BUILD_SHA
 ARG NEXT_PUBLIC_BUILD_DATE
+# Optional like the build metadata above: an empty value hides the Systems
+# panel's status link instead of failing the build. Without this ARG the value
+# Coolify passes with --build-arg would be silently discarded and the link
+# could never appear in production.
+ARG NEXT_PUBLIC_STATUS_URL=""
 ARG UMAMI_SCRIPT_URL=""
 ARG UMAMI_WEBSITE_ID=""
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_BUILD_SHA=$NEXT_PUBLIC_BUILD_SHA
 ENV NEXT_PUBLIC_BUILD_DATE=$NEXT_PUBLIC_BUILD_DATE
+ENV NEXT_PUBLIC_STATUS_URL=$NEXT_PUBLIC_STATUS_URL
 ENV UMAMI_SCRIPT_URL=$UMAMI_SCRIPT_URL
 ENV UMAMI_WEBSITE_ID=$UMAMI_WEBSITE_ID
 ENV NEXT_TELEMETRY_DISABLED=1

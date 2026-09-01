@@ -2,7 +2,7 @@
  * Structured server logging.
  *
  * The site runs as a single Node process in a Coolify container, so stdout and
- * stderr are the log pipeline and Gatus is the external probe. A third party
+ * stderr are the log pipeline and Uptime Kuma is the external probe. A third party
  * error tracker is deliberately not part of the stack (decision E-03), which
  * makes the shape of these lines the whole observability contract: one JSON
  * object per line, greppable in the Coolify log view and parseable later

@@ -66,7 +66,7 @@ describe("resolveRequiredEmail", () => {
     );
   });
 
-  it("falls back to the resend sandbox address outside production", () => {
+  it("falls back to the local dev address outside production", () => {
     expect(resolveRequiredEmail("CONTACT_EMAIL", undefined, false)).toBe(
       DEV_FALLBACK_EMAIL
     );
