@@ -16,7 +16,7 @@ Tek gerçek kaynak bu klasördür. Site içeriği (biyografi, projeler, sertifik
 | [04-i18n.md](04-i18n.md) | Cookie i18n'den app/[lang] + next-intl'e geçiş, URL şeması, çeviri politikası | 4 |
 | [06-devops-ve-deploy.md](06-devops-ve-deploy.md) | Dockerfile, Coolify, GitHub Actions, Traefik yönlendirme, env ayrımı | 5 |
 | [03-tasarim-ui-ux.md](03-tasarim-ui-ux.md) | Terminal Editorial yönü, tipografi, nötr palet, layout, hareket, erişilebilirlik | 6 |
-| [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md) | Velite içerik pipeline'ı, contact sertleştirme (Turnstile ertelendi), Gatus status widget, Umami | 7 |
+| [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md) | Velite içerik pipeline'ı, contact sertleştirme (Turnstile ertelendi; posta 2026-08-31'den beri Mailcow SMTP), izleme/ölçüm kararları (2026-08-30'dan beri Uptime Kuma + merkezi Umami; Gatus bölümleri tarihsel) | 7 |
 | [07-seo-ve-metadata.md](07-seo-ve-metadata.md) | generateMetadata, canonical/hreflang, sitemap, robots, JSON-LD, OG image | 8 |
 | [08-icerik-stratejisi.md](08-icerik-stratejisi.md) | Sektör araştırması, case study formatı, içerik kararları, içerik dosyasının siteye haritası | 9 |
 | [09-guvenlik.md](09-guvenlik.md) | CVE'ler ve 16.3.3 zorunluluğu, yayın öncesi güvenlik listesi, bakım otomasyonu | 10 |
@@ -25,7 +25,7 @@ Tek gerçek kaynak bu klasördür. Site içeriği (biyografi, projeler, sertifik
 | [12-kaynaklar.md](12-kaynaklar.md) | Dayanılan tüm URL'ler, kategoriye göre | referans |
 | [launch-checklist.md](launch-checklist.md) | Yayın kapısı: otomatik kapılar, içerik, SEO/i18n, performans/erişilebilirlik, contact/altyapı; dogancanyildiz.sh -> dogancanyildiz.com 301 için önce alan adı kararı gerekiyor (.sh -> .com 301, .sh kayıtlı değil) | uygulama, launch öncesi |
 | [trust-maintenance-checklist.md](trust-maintenance-checklist.md) | Güven sinyallerinin bakım ritmi (linkler, JSON-LD, Search Console, sahibinin içerik teslimatları) | bakım |
-| [deploy/](deploy/) ve [runbooks/](runbooks/) | Panel checklist'leri (Coolify, Cloudflare, Traefik, Resend) ve altyapı runbook'u (Gatus, Umami, env değişkenleri) | uygulama |
+| [deploy/](deploy/) ve [runbooks/](runbooks/) | Panel checklist'leri (Coolify, Cloudflare, Traefik, Mailcow SMTP) ve altyapı runbook'u (Uptime Kuma, merkezi Umami, env değişkenleri) | uygulama |
 | [plans/](plans/) | Faz başına uygulama planı (writing-plans formatı), 2026-08-27-faz-0..5 dosyaları; kararlar dokümanlarından türetildi, faz yürütülürken izlendi; `.sh` domain varsayımıyla yazıldığı için `plans/README.md`'deki not | uygulama kaydı |
 | [plans/handoffs/](plans/handoffs/) | Faz başına devir notu (faz-N.md), sahibinin manuel checklist'i (faz-N-manual-checklist.md), ek notlar (faz-3-notlar.md, faz-4-brief.md) ve 28 Ağustos denetim kapanışının devir notu (denetim-kapanisi-2026-08-28.md); bir fazın gerçekte ne yaptığının, nelerin sahibi beklediğinin kanıtı | uygulama kaydı |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | Keep a Changelog biçiminde sürüm geçmişi; `release.yml` her `main` merge'inde günceller | referans |
