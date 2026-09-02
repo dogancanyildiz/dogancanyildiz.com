@@ -41,6 +41,8 @@ export async function generateMetadata({
   const project = getProject(locale, slug);
   if (!project) notFound();
 
+  const tMeta = await getTranslations({ locale, namespace: "metadata" });
+
   return buildPageMetadata(locale, `/projects/${slug}`, {
     title: project.title,
     description: project.summary,
@@ -52,6 +54,9 @@ export async function generateMetadata({
     // This page has an opengraph-image.tsx of its own; without naming it the
     // openGraph object here would keep pointing at the identity card.
     imagePath: ogImagePathFor(`/projects/${slug}`),
+    // Same reason as the blog card: the alt has to name the title the image
+    // actually shows.
+    imageAlt: tMeta("ogAltPage", { title: project.title }),
   });
 }
 

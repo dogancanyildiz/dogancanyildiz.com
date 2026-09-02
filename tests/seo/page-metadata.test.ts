@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { getPostSlugs, getProjectSlugs } from "@/lib/content";
+import {
+  getPost,
+  getPostSlugs,
+  getProject,
+  getProjectSlugs,
+} from "@/lib/content";
 
 // next/font/local is a build time only export: outside the Next compiler
 // (webpack or SWC) it resolves to an empty module, so calling it throws
@@ -26,7 +31,7 @@ vi.mock("next-intl/server", () => ({
     namespace?: string;
   }) => {
     const messages = (await import(`../../messages/${locale}.json`)).default;
-    return (key: string) => {
+    return (key: string, values?: Record<string, string>) => {
       const path = namespace ? `${namespace}.${key}` : key;
       const value = path
         .split(".")
@@ -37,7 +42,13 @@ vi.mock("next-intl/server", () => ({
       if (typeof value !== "string") {
         throw new Error(`missing message key: ${locale}.${path}`);
       }
-      return value;
+      // Plain ICU placeholders only, which is all the metadata namespace
+      // uses. Without this the og image alt would come back with a literal
+      // "{title}" in it and an assertion on the real title could not tell the
+      // difference.
+      return value.replace(/\{\s*(\w+)\s*\}/g, (match, name: string) =>
+        values && name in values ? String(values[name]) : match
+      );
     };
   },
   // Not exercised by any assertion in this file yet, but future blog pages
@@ -287,15 +298,33 @@ describe("page openGraph metadata", () => {
         `/${section}/some-slug/opengraph-image/default`
       );
 
+      const slug =
+        section === "blog" ? getPostSlugs("tr")[0] : getProjectSlugs("tr")[0];
+      if (!slug) throw new Error(`the tr ${section} collection is empty`);
+      const title =
+        section === "blog"
+          ? getPost("tr", slug)?.title
+          : getProject("tr", slug)?.title;
+
       const [image] = await route.generateImageMetadata({
-        params: Promise.resolve({
-          lang: "tr",
-          slug: [...expected][0]?.split("/")[1] ?? "",
-        }),
+        params: Promise.resolve({ lang: "tr", slug }),
       });
       if (!image) throw new Error(`${section} card published no image id`);
       expect(image.id).toBe("default");
-      expect(image.alt).toBeTruthy();
+      // The card leads with the page title, so the alt has to name it rather
+      // than repeat the identity line that belongs to the [lang] image.
+      expect(image.alt).toContain(title);
+
+      // The enumeration call arrives without a slug and still has to answer
+      // with something, which is where the identity alt is the right text.
+      const [fallback] = await route.generateImageMetadata({
+        params: Promise.resolve({
+          lang: "__metadata_id__",
+          slug: "__metadata_id__",
+        }),
+      });
+      expect(fallback?.alt).toBeTruthy();
+      expect(fallback?.alt).not.toContain(title);
     }
   );
 

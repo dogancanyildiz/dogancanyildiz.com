@@ -31,6 +31,12 @@ export async function buildPageMetadata(
      */
     imagePath?: string;
     /**
+     * Alt text for that card. Omitted, the page advertises the identity alt,
+     * which only describes the identity image; a page whose own card leads
+     * with its title has to say so here or the alt describes another picture.
+     */
+    imageAlt?: string;
+    /**
      * The title is already complete and must not be suffixed. Used by the
      * home page, whose title carries the name and the role and would read
      * "Doğan Can YILDIZ | ... | Doğan Can YILDIZ" under the template.
@@ -40,7 +46,7 @@ export async function buildPageMetadata(
 ): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "metadata" });
   const siteName = t("siteName");
-  const imageAlt = t("ogAlt");
+  const imageAlt = options.imageAlt ?? t("ogAlt");
 
   // The feed link every page advertises is the one of its own locale, and a
   // reader offers it by title, so the title has to be localized too.

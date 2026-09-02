@@ -43,6 +43,8 @@ export async function generateMetadata({
   const post = getPost(locale, slug);
   if (!post) notFound();
 
+  const tMeta = await getTranslations({ locale, namespace: "metadata" });
+
   return buildPageMetadata(locale, `/blog/${slug}`, {
     title: post.title,
     description: post.summary,
@@ -55,6 +57,9 @@ export async function generateMetadata({
     // This page has an opengraph-image.tsx of its own; without naming it the
     // openGraph object here would keep pointing at the identity card.
     imagePath: ogImagePathFor(`/blog/${slug}`),
+    // That card leads with the post title, so the identity alt would be
+    // describing an image nobody is served here.
+    imageAlt: tMeta("ogAltPage", { title: post.title }),
   });
 }
 

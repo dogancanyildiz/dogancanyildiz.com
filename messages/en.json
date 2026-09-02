@@ -208,7 +208,8 @@
     "defaultTitle": "Doğan Can YILDIZ | Full-Stack Web Developer and DevOps Specialist",
     "siteName": "Doğan Can YILDIZ",
     "defaultDescription": "Five production applications at BerrSoft, taken from architecture to maintenance. I write the application and run the Linux server it ships on. Konya, Türkiye.",
-    "ogAlt": "Doğan Can YILDIZ, Full-Stack Web Developer and DevOps Specialist"
+    "ogAlt": "Doğan Can YILDIZ, Full-Stack Web Developer and DevOps Specialist",
+    "ogAltPage": "{title}. Doğan Can YILDIZ, Full-Stack Web Developer and DevOps Specialist"
   },
   "api": {
     "invalidRequest": "Invalid request. Name, email, topic and message are required.",

@@ -208,7 +208,8 @@
     "defaultTitle": "Doğan Can YILDIZ | Full-Stack Web Geliştirici ve DevOps Uzmanı",
     "siteName": "Doğan Can YILDIZ",
     "defaultDescription": "BerrSoft'ta beş üretim uygulamasını mimariden bakıma kadar teslim ettim. Uygulamayı yazan da çalıştığı Linux sunucuyu işleten de aynı kişi: ben. Konya, Türkiye.",
-    "ogAlt": "Doğan Can YILDIZ, Full-Stack Web Geliştirici ve DevOps Uzmanı"
+    "ogAlt": "Doğan Can YILDIZ, Full-Stack Web Geliştirici ve DevOps Uzmanı",
+    "ogAltPage": "{title}. Doğan Can YILDIZ, Full-Stack Web Geliştirici ve DevOps Uzmanı"
   },
   "api": {
     "invalidRequest": "Geçersiz istek. Ad, e-posta, konu ve mesaj alanları zorunlu.",
