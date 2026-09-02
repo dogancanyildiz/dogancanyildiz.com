@@ -243,10 +243,12 @@ describe("new message keys", () => {
     }
   });
 
-  it("turns brand into an object with name, monogram, role and tagline in both catalogs", () => {
+  it("turns brand into an object with name, role and tagline in both catalogs", () => {
+    // monogram left with the text "DCY": the mark is an SVG now
+    // (src/components/brand/brand-mark.tsx), so the string had no reader.
     for (const locale of ["en", "tr"]) {
       const keys = messageKeys(locale, "brand");
-      expect(keys, locale).toEqual(["monogram", "name", "role", "tagline"]);
+      expect(keys, locale).toEqual(["name", "role", "tagline"]);
     }
   });
 

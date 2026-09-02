@@ -1,7 +1,6 @@
 {
   "brand": {
     "name": "Doğan Can YILDIZ",
-    "monogram": "DCY",
     "tagline": "Full Stack · DevOps",
     "role": "Full-Stack Web Geliştirici ve DevOps Uzmanı"
   },
@@ -45,7 +44,7 @@
   "footer": {
     "tagline": "Teslim ettiğim işlerin ve yazdığım yazıların kaydı.",
     "copyright": "Tasarımı da kodu da bana ait.",
-    "availability": "En hızlı yol e-posta",
+    "availability": "Yeni projelere açığım, yazın yeter.",
     "navTitle": "Sayfalar",
     "emailLabel": "E-posta",
     "elsewhereLabel": "Diğer kanallar",

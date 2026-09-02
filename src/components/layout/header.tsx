@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { BrandMark } from "@/components/brand/brand-mark";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { Link, usePathname } from "@/i18n/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
@@ -27,38 +27,17 @@ export function Header({ untranslated }: HeaderProps) {
               brand link is a standalone control like every other one here. */}
           <Link
             href="/"
-            className="tap-target group flex min-w-0 items-center gap-2.5 no-underline"
+            className="tap-target group flex min-w-0 items-center no-underline"
           >
-            {/* The owner's lockup: mark, hairline, the name over a mono
-                tagline. Mark and tagline are decorative, so the link's
-                accessible name is the name alone. Below 480px the row cannot
-                hold the lockup next to the 44px controls (measured with device
-                emulation), so only the mark shows there and the first span
-                keeps the name for assistive tech; from 480px up the second
-                block is the visible one. */}
-            <BrandMark
-              height={24}
+            {/* The lockup handles the phone rule itself; the link keeps the
+                name as its accessible name because mark and tagline are
+                aria-hidden inside it. */}
+            <BrandLockup
+              name={tBrand("name")}
+              tagline={tBrand("tagline")}
               cursor="blink"
-              className="shrink-0 text-foreground"
+              responsive
             />
-            <span className="sr-only min-[480px]:hidden">{tBrand("name")}</span>
-            <span className="hidden min-w-0 items-center gap-2.5 min-[480px]:flex">
-              <span
-                aria-hidden="true"
-                className="h-7 w-px shrink-0 bg-border-strong"
-              />
-              <span className="flex min-w-0 flex-col gap-1">
-                <span className="truncate text-[15px] leading-none font-medium tracking-tight text-foreground">
-                  {tBrand("name")}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="truncate font-mono text-[11px] leading-none tracking-wide text-primary"
-                >
-                  {tBrand("tagline")}
-                </span>
-              </span>
-            </span>
           </Link>
           {/* lg, not md: on an iPad in portrait (768 to 834px) the nav, the
               controls and these two icons together left the lockup no room

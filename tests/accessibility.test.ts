@@ -472,45 +472,51 @@ describe("client message payload", () => {
 // screen reader user would notice it.
 
 describe("brand link", () => {
+  const header = read("src/components/layout/header.tsx");
+  const lockup = read("src/components/brand/brand-lockup.tsx");
+
   it("shows the brand name in the header instead of hiding it for assistive tech", () => {
-    const source = read("src/components/layout/header.tsx");
-    expect(source).not.toContain('aria-label={tBrand("name")}');
-    expect(source).toContain('{tBrand("name")}');
+    expect(header).not.toContain('aria-label={tBrand("name")}');
+    expect(header).toContain('name={tBrand("name")}');
     // One sr-only copy of the name exists for phones only, paired with
-    // min-[480px]:hidden; the visible lockup takes over from 480px up. A second
-    // sr-only, or one without the breakpoint pair, would hide the name
-    // everywhere.
-    expect(source.match(/sr-only/g)).toHaveLength(1);
-    expect(source).toContain('className="sr-only min-[480px]:hidden"');
-    expect(source).toContain("min-[480px]:flex");
-    // The tagline is decorative brand copy, not part of the link's name.
-    const taglineAt = source.indexOf('{tBrand("tagline")}');
-    expect(taglineAt).toBeGreaterThan(-1);
-    expect(source.slice(taglineAt - 200, taglineAt)).toContain(
+    // min-[480px]:hidden; the visible lockup takes over from 480px up. A
+    // second sr-only, or one without the breakpoint pair, would hide the
+    // name everywhere.
+    expect(lockup.match(/sr-only/g)).toHaveLength(1);
+    expect(lockup).toContain('className="sr-only min-[480px]:hidden"');
+    expect(lockup).toContain("min-[480px]:flex");
+    expect(header).not.toContain("sr-only");
+  });
+
+  it("puts the logo mark inside the same link without labelling it", () => {
+    // The link wraps the whole lockup; inside it the mark reads first and is
+    // aria-hidden (src/components/brand/brand-mark.tsx), and so is the
+    // tagline, so the link's accessible name is the name text alone.
+    expect(header).toContain("<BrandLockup");
+    const markAt = lockup.indexOf("<BrandMark");
+    const nameAt = lockup.indexOf("{name}");
+    expect(markAt).toBeGreaterThan(-1);
+    expect(markAt).toBeLessThan(nameAt);
+    const taglineAt = lockup.indexOf("{tagline}");
+    expect(lockup.slice(taglineAt - 220, taglineAt)).toContain(
       'aria-hidden="true"'
     );
   });
 
-  it("puts the logo mark inside the same link without labelling it", () => {
-    const source = read("src/components/layout/header.tsx");
-    // Order matters: the mark reads first visually, and the link's accessible
-    // name has to stay the name text alone, which is what the aria-hidden on
-    // BrandMark (src/components/brand/brand-mark.tsx) buys.
-    const markAt = source.indexOf("<BrandMark");
-    const nameAt = source.indexOf('{tBrand("name")}');
-    expect(markAt).toBeGreaterThan(-1);
-    expect(markAt).toBeLessThan(nameAt);
-    expect(source).not.toContain('aria-label={tBrand("name")}');
+  it("lets the name ellipsize rather than wrap when the row runs out", () => {
+    // truncate needs a min-w-0 ancestor chain to do anything: the link, the
+    // lockup root and the text column all carry it.
+    expect(header).toContain("flex min-w-0 items-center no-underline");
+    expect(lockup).toContain("flex min-w-0 items-center gap-2.5");
+    expect(lockup).toContain("flex min-w-0 flex-col");
+    expect(lockup).toMatch(/className="truncate text-\[15px\][^"]*"/);
   });
 
-  it("lets the name ellipsize rather than wrap when the row runs out", () => {
-    // The mark added ~53px to a block that was the name alone, and the row is
-    // a fixed h-16. truncate needs a min-w-0 ancestor to do anything, which is
-    // what the link and its wrapper carry.
-    const source = read("src/components/layout/header.tsx");
-    expect(source).toMatch(/className="truncate text-\[15px\][^"]*"/);
-    expect(source).toContain("flex min-w-0 items-center gap-2.5");
-    expect(source).toContain("flex min-w-0 flex-col");
+  it("reuses the lockup in the footer with a steady cursor", () => {
+    const footer = read("src/components/layout/footer.tsx");
+    expect(footer).toContain("<BrandLockup");
+    expect(footer).not.toContain('cursor="blink"');
+    expect(footer).not.toContain('tBrand("monogram")');
   });
 });
 

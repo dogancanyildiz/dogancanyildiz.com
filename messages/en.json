@@ -1,7 +1,6 @@
 {
   "brand": {
     "name": "Doğan Can YILDIZ",
-    "monogram": "DCY",
     "tagline": "Full Stack · DevOps",
     "role": "Full-Stack Web Developer and DevOps Specialist"
   },
@@ -45,7 +44,7 @@
   "footer": {
     "tagline": "A record of the work I ship and the posts I write.",
     "copyright": "The design and the code are mine.",
-    "availability": "Email is the fastest way",
+    "availability": "Open to new projects, a message is enough.",
     "navTitle": "Pages",
     "emailLabel": "Email",
     "elsewhereLabel": "Elsewhere",
