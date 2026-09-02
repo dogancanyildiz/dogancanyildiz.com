@@ -1,6 +1,7 @@
 # Devir notu: yerelleştirilmiş yollar ve çeviri başına slug (2026-09-02)
 
-Durum: Uygulandı, dal `feature/brand-assets` · Taban: `d5cb0b5` · Son kod commit'i: `ec197c9`
+Durum: Uygulandı, dal `feature/brand-assets` · Taban: `d5cb0b5` · Son kod commit'i: `2b9b568`
+(düzeltme turu 2026-09-02, aşağıdaki "Düzeltme turu" bölümü)
 Plan: [../2026-09-02-yerel-yollar-ve-ceviri-slug.md](../2026-09-02-yerel-yollar-ve-ceviri-slug.md)
 (sahibinin kararları ve sapmalar plan dosyasının başındaki iki bölümde)
 Push yok, PR yok. Ana ağaçta tek yazar çalıştı.
@@ -216,6 +217,72 @@ hiç yayınlanmamış adres (Türkçe bölümler 2026-09-02'ye kadar `/blog` ve
 altında yeni bölüm + eski slug 404 verir. Tutarsızlık tek satırla kapatıldı
 ve `tests/i18n/legacy-paths.test.ts`'e ikisini birlikte kilitleyen bir case
 eklendi.
+
+## Düzeltme turu (2026-09-02)
+
+Bağımsız inceleme iki bloklayan bulgu bıraktı, ikisi de kapatıldı.
+
+### 1. OG kart adresleri kırıktı (`2b9b568`)
+
+Beş yayınlanmış kart adresi 404 veriyordu: `/blog/self-hosting-with-coolify`,
+`/projects/gpa-calculator`, `/projects/ticket-purchasing-system` kartları ile
+iki yazının `/en/blog/<tr-slug>` kartı. Bu adresler gerçekten yayındaydı;
+her detay sayfası kendi kartını `og:image` içinde adıyla ilan ediyor ve iki
+feed de aynı adresi `media:content` içinde yayınlıyordu. Sayfaları taşınınca
+next-intl kartları 307 ile artık var olmayan bir yola atıyordu.
+
+`docs/04-i18n.md`'deki "next-intl bunları zaten 307 ile yeni yola taşıyor"
+notu yanlış bir örnekleme üzerine kuruluydu: ölçüm slug'ı değişmemiş tek
+kartla (`/blog/ccna-dan-web-guvenligine/opengraph-image/default`) yapılmıştı,
+o kart zaten çalışıyordu. Kıran tek şey slug ya da bölüm değişikliğiydi.
+
+Çözüm dördüncü bir tablo değil, `legacyRedirectTarget` içindeki sonek
+kuralı: yolun sonundaki `/opengraph-image/<id>` kırpılır, gövde aynı üç
+tabloda aranır, bulunursa sonek hedefe geri eklenir. Kart, sayfasıyla aynı
+tek atlamayı harcar. İki sınır durumu koda ve `docs/04-i18n.md`'ye yazıldı:
+bölüm sayfalarının kendi kart route'u olmadığı için kural onlara
+uygulanmaz (`/blog/opengraph-image/default` 404 kalır), ve kural düz
+aramadan önce denenir, yoksa `/tr` önekli kart ikinci bir atlama harcardı.
+
+`tests/i18n/legacy-paths.test.ts`'e beş yeni case eklendi: beş kırık adresin
+hedefi, her detay anahtarının kartının sayfasıyla aynı yere gitmesi, `/tr`
+önekli kartın tek atlaması, kimlik ve kanonik kartların dokunulmazlığı,
+bölüm sayfası kartının uydurulmaması.
+
+Ayrıca `docs/07-seo-ve-metadata.md`'deki "eski öneksiz kart 307 ile Türkçe
+karşılığına gidiyor" cümlesi bu kurala göre düzeltildi.
+
+**Canlı ölçüm (`next start`, PORT=3165, 2026-09-02).** Üç tablodaki her
+anahtar, her detay anahtarının kart varyantı ve kimlik kartları, toplam 66
+adres tarandı: hepsi tek atlamada (kanonikler sıfır atlamada) 200. Kart
+satırlarının içerik tipi `image/png`. Örnek:
+
+```
+/blog/self-hosting-with-coolify/opengraph-image/default
+  308 -> /en/blog/self-hosting-with-coolify/opengraph-image/default   200 image/png
+/en/blog/ccna-dan-web-guvenligine/opengraph-image/default
+  308 -> /en/blog/from-ccna-to-web-security/opengraph-image/default   200 image/png
+/tr/projects/gpa-calculator/opengraph-image/default
+  308 -> /projeler/not-ortalamasi-hesaplayici/opengraph-image/default 200 image/png
+/blog/opengraph-image/default                                         404 (bilinçli)
+/yazilar/coolify-ile-kendi-sunucumda/opengraph-image/default          200 image/png
+```
+
+### 2. "308 tablosu (tam liste)" eksikti (`5711c51`)
+
+`docs/04-i18n.md`'nin kendini tam liste ilan eden bölümü `LEGACY_UNPREFIXED`'i
+iki tabloya bölüp 17 satırın 16'sını yazıyordu. Eksik satır
+`/yazilar/self-hosting-with-coolify`; kod doğruydu, satır entegrasyon
+commit'i `ec197c9` ile eklenmişti, doküman ondan önce yazılmıştı. B tablosuna
+eklendi, A ve B toplamının 17 olduğu ve son üç satırın neden orada olduğu
+tabloya not düşüldü.
+
+### Kapılar (düzeltme turu sonrası)
+
+`build:content`, `typecheck` (temiz `tsconfig.tsbuildinfo` ile), `lint`,
+`test` (81 dosya, 1238 test), `format`, `build`, `verify:routes`
+(41 içerik route, dil başına 6 proje + 3 yazı), `verify:docs` (21 dosya):
+hepsi geçti.
 
 ## Kalanlar
 
