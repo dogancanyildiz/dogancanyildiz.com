@@ -187,6 +187,9 @@
     .brand-cursor {
       animation: none;
     }
+    .status-pulse {
+      animation: none;
+    }
     *,
     *::before,
     *::after {
@@ -328,6 +331,13 @@
      threshold, and the reduced-motion block above keeps it steady. */
   .brand-cursor {
     animation: brand-cursor 1.06s step-end infinite;
+  }
+
+  /* The availability dot in the hero breathes rather than blinks: a status
+     light, not a cursor. One slow cycle every 1.6s, opacity only, and the
+     reduced-motion block keeps it steady. */
+  .status-pulse {
+    animation: status-pulse 1.6s ease-in-out infinite;
   }
 
   .skip-link {
@@ -478,5 +488,15 @@
   50%,
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
   }
 }

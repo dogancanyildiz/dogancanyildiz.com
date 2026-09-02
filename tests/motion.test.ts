@@ -130,3 +130,28 @@ describe("brand cursor blink", () => {
     expect(usages).toEqual(["components/layout/header.tsx"]);
   });
 });
+
+describe("availability pulse", () => {
+  const css = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8");
+
+  it("is a slow opacity keyframe on the hero status dot", () => {
+    expect(css).toMatch(
+      /\.status-pulse\s*\{[^}]*animation:\s*status-pulse 1\.6s ease-in-out infinite/
+    );
+    expect(css).toContain("@keyframes status-pulse");
+    const hero = readFileSync(
+      join(process.cwd(), "src/components/sections/hero.tsx"),
+      "utf8"
+    );
+    expect(hero).toContain(
+      'className="status-pulse size-1.5 rounded-full bg-status-up"'
+    );
+  });
+
+  it("stays steady under prefers-reduced-motion", () => {
+    const reduced = css.slice(
+      css.indexOf("@media (prefers-reduced-motion: reduce)")
+    );
+    expect(reduced).toMatch(/\.status-pulse\s*\{\s*animation:\s*none;\s*\}/);
+  });
+});
