@@ -609,6 +609,61 @@ describe("POST /api/contact locale", () => {
     expect(requestedLocales).toEqual(["tr"]);
   });
 
+  it("ignores a Referer from another site and falls through to Accept-Language", async () => {
+    await POST(
+      contactRequest({
+        headers: {
+          referer: "https://evil.invalid/en/contact",
+          "accept-language": "tr",
+        },
+        body: "{}",
+      })
+    );
+
+    // The /en prefix belongs to a page this site never served, so it must not
+    // decide the language of the answer.
+    expect(requestedLocales).toEqual(["tr"]);
+  });
+
+  it("ignores a foreign Referer even when there is no Accept-Language", async () => {
+    await POST(
+      contactRequest({
+        headers: { referer: "https://evil.invalid/en/contact" },
+        body: "{}",
+      })
+    );
+
+    expect(requestedLocales).toEqual(["tr"]);
+  });
+
+  it("still reads the /en prefix of a Referer from the site's own origin", async () => {
+    await POST(
+      contactRequest({
+        headers: {
+          referer: `${SITE_ORIGIN}/en/contact`,
+          "accept-language": "tr",
+        },
+        body: "{}",
+      })
+    );
+
+    expect(requestedLocales).toEqual(["en"]);
+  });
+
+  it("ignores a Referer whose host merely starts with the site host", async () => {
+    await POST(
+      contactRequest({
+        headers: {
+          referer: "https://dogancanyildiz.com.evil.invalid/en/contact",
+          "accept-language": "tr",
+        },
+        body: "{}",
+      })
+    );
+
+    expect(requestedLocales).toEqual(["tr"]);
+  });
+
   it("reads Accept-Language by quality value, not by substring", async () => {
     await POST(
       contactRequest({
