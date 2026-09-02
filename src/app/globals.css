@@ -334,7 +334,11 @@
      promises the browser. */
   .credential-dialog {
     @apply m-auto overflow-auto rounded-md border border-border bg-card p-0 text-foreground;
-    max-width: min(90vw, 632px);
+    /* An explicit width, not a max-width. A dialog is width: fit-content by
+       default, and shrink-to-fit ignores the percentage width of the image
+       inside it, so the box collapsed onto the max-content of the credential
+       name underneath: 164px of panel around a 130px badge. */
+    width: min(90vw, 632px);
     max-height: 85vh;
   }
 
