@@ -31,6 +31,14 @@ COPY package.json package-lock.json ./
 # and calls into libvips at runtime, and `npm run build` completes end to end,
 # with or without the rebuild step, so it is kept here as a deliberate safety
 # net rather than a step this setup has been observed to need.
+# One detail worth knowing when this list is revisited: the sharp that
+# actually carries a script is velite's nested copy
+# (node_modules/velite/node_modules/sharp), not the root sharp@0.35, which
+# has no install script at all. "npm rebuild sharp" therefore reruns the
+# nested "node install/check.js || npm run build", whose fallback is a
+# from-source libvips build. package-lock.json pins
+# @img/sharp-linuxmusl-x64 and @img/sharp-libvips-linuxmusl-x64 for both
+# copies, so the prebuilt path is the one taken here.
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --ignore-scripts && \
     npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher
 
