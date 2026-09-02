@@ -78,13 +78,18 @@ katmanlarına ve derleme loglarına sızdırır.
 
 ## Uluslararasılaştırma
 
-- Türkçe kökte (`/`, `/hakkimda`, `/iletisim`), İngilizce `/en` altında
-  (`/en`, `/en/about`, `/en/contact`).
+- Türkçe kökte ve Türkçe (`/`, `/hakkimda`, `/iletisim`, `/projeler`,
+  `/projeler/<slug>`, `/yazilar`, `/yazilar/<slug>`), İngilizce `/en` altında
+  (`/en`, `/en/about`, `/en/contact`, `/en/projects/<slug>`, `/en/blog/<slug>`).
+  Bölüm ve detay yolları `src/i18n/routing.ts`'teki `pathnames` haritasında
+  dil başına ayrı şablon: her çeviri kendi dilindeki slug'ı taşır
+  (`translationKey` eşler, `slug` değil).
 - Dil yönlendirmesi `src/i18n/routing.ts`; `src/proxy.ts` uygular. Accept-Language
   otomatik yönlendirmesi ve locale cookie kapalı: tek sinyal URL.
 - Eski prefix'siz İngilizce sayfalar (`/about`, `/projects`, `/contact`,
-  `/privacy`) `/en/...`'e 308. Fazla `/tr/...` adresleri prefix'siz Türkçe
-  slug'a gider.
+  `/privacy`, `/blog` dahil) ve eski slug'lar (`/blog/<eski-slug>`,
+  `/projects/<eski-slug>`) `/en/...`'e 308. Fazla `/tr/...` adresleri
+  prefix'siz Türkçe kanoniğe gider. Tam tablo: `src/i18n/legacy-paths.ts`.
 - Mesajlar `messages/en.json` ve `messages/tr.json`. İki dosya aynı anahtar
   kümesini taşımak zorunda.
 - `src/app/[lang]/` altındaki her sayfa ve layout `setRequestLocale(lang)`
@@ -251,24 +256,35 @@ Projeler ve blog yazıları `content/` altında MDX; Velite derleme ve
 geliştirme zamanında `velite.config.ts` şemalarına karşı derler.
 
 - Proje: `content/projects/<locale>/<slug>.mdx`. Zorunlu ön madde:
-  `title`, `slug`, `summary`, `role`, `stack` (boş olmayan liste), `year`,
-  `outcome`. `links.live`, `links.repo` (ikisi de `https://`), `cover`,
-  `coverAlt`, `featured`, `order`, `updated` ve `draft` isteğe bağlı;
-  `updated` sitemap `lastmod`'unu besler, ana sayfa `featured` projeleri
-  gösterir yoksa ilk üçüne düşer. `stack`'i web yığınındaysa öğrenme
-  sırasıyla (HTML, CSS, JavaScript, TypeScript, çatı) veya DevOps'ta boru
-  hattı sırasıyla (Git, CI, konteyner, OS, yönlendirme) yaz.
+  `title`, `slug`, `translationKey`, `summary`, `role`, `stack` (boş olmayan
+  liste), `year`, `outcome`. `links.live`, `links.repo` (ikisi de `https://`),
+  `cover`, `coverAlt`, `featured`, `order`, `updated`, `draft` ve
+  `legacySlugs` isteğe bağlı; `updated` sitemap `lastmod`'unu besler, ana
+  sayfa `featured` projeleri gösterir yoksa ilk üçüne düşer. `stack`'i web
+  yığınındaysa öğrenme sırasıyla (HTML, CSS, JavaScript, TypeScript, çatı)
+  veya DevOps'ta boru hattı sırasıyla (Git, CI, konteyner, OS, yönlendirme)
+  yaz.
 - Blog yazısı: `content/blog/<locale>/<slug>.mdx`. Zorunlu ön madde:
-  `title`, `slug`, `date`, `summary`. `tags`, `cover`, `coverAlt`, `updated`
-  ve `draft` isteğe bağlı; `updated` BlogPosting şemasında `dateModified` ve
-  sitemap `lastmod` olur.
+  `title`, `slug`, `translationKey`, `date`, `summary`. `tags`, `cover`,
+  `coverAlt`, `updated`, `draft` ve `legacySlugs` isteğe bağlı; `updated`
+  BlogPosting şemasında `dateModified` ve sitemap `lastmod` olur.
 - `<locale>` klasör adından türetilir, yalnızca `en` veya `tr`; elde
   `locale` alanı yok.
-- Aynı içeriğin iki dil klasöründe AYNI `slug` değeri olmalı; İngilizce ve
-  Türkçe sayfa arasındaki hreflang çifti bu eşleşmeden kurulur. Çeviri yoksa
-  diğer dil için yer tutucu dosya açma: çevrilmemiş slug o dilin
-  rotalarına, sitemap'ine veya hreflang alternatiflerine hiç girmez,
-  yedek sayfa yok.
+- İki dil dosyası AYNI `translationKey` değerini taşımalı; dil değiştirici,
+  sitemap, hreflang, feed ve JSON-LD çeviri eşlemesini bundan kurar, `slug`
+  değil. `slug` her dilde **farklı olabilir ve olmalıdır** (marka adı taşıyan
+  projeler istisna: iki dilde aynı slug kalır, çünkü isim zaten değişmez).
+  Çeviri yoksa diğer dil için yer tutucu dosya açma: çevrilmemiş
+  `translationKey` o dilin rotalarına, sitemap'ine veya hreflang
+  alternatiflerine hiç girmez, yedek sayfa yok.
+- `slug` ve `translationKey` deseni ASCII: `^[a-z0-9]+(?:-[a-z0-9]+)*$`
+  (`velite.config.ts`, `SLUG_PATTERN`). Türkçe'ye özgü `ı`, `ş`, `ğ`, `ç`,
+  `ö`, `ü` reddedilir; ASCII karşılığını yaz (`"yayında"` değil
+  `"yayinda"`), aksi halde `npm run build:content` düşer.
+- Bir dosyanın bu dilde daha önce başka bir slug'la yayınlandığı biliniyorsa
+  o eski slug'ı `legacySlugs` dizisine ekle ve `src/i18n/legacy-paths.ts`'e
+  eski adresten yeni kanoniğe 308 satırı yaz; `tests/i18n/legacy-paths.test.ts`
+  ikisinin tutarlılığını kilitler.
 - Kapak görseli isteğe bağlı. `content/images/` altına koy, ön maddeden
   göreli yol ver, örneğin `cover: ../../images/<slug>-cover.png`. `cover`
   alanı olmayan içerik kapaksız yayınlanır; CSS gradyanı veya stok görsele

@@ -19,12 +19,12 @@ Cloudflare 526 verdiği için bölüm 3-5'in canlı URL isteyen maddelerinin hi�
 - [x] `npm run format` hatasız
 - [x] `NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.com npm run build` başarılı ve build
       çıktısında dynamic (ƒ) yalnızca `/api/*` altında (`/api/contact`, `/api/csp-report`,
-      `/api/health`); `npm run verify:routes` 32 içerik route'unu ve statik meta
-      route'larını doğruluyor; `npm run verify:docs` geçiyor
+      `/api/health`); `npm run verify:routes` 41 içerik route'unu (6 proje x 2 locale, 3 yazı
+      x 2 locale) ve statik meta route'larını doğruluyor; `npm run verify:docs` geçiyor
 
 ## 2. İçerik
 
-- [x] En az 4 proje ve 3 blog yazısı yayında (5 proje x 2 locale, 6 yazı: 3 EN, 3 TR)
+- [x] En az 4 proje ve 3 blog yazısı yayında (6 proje x 2 locale, 6 yazı: 3 EN, 3 TR)
 - [x] Kapaksız yayınlanan projelerde CSS gradyan veya stok görsel yok (`content/images/`
       boş, `covers=0`)
 - [x] Sertifika satırları listede, `verifyUrl` gelmeyenlerde link yok ama satır duruyor
@@ -49,13 +49,13 @@ Cloudflare 526 verdiği için bölüm 3-5'in canlı URL isteyen maddelerinin hi�
 
 - [ ] `https://dogancanyildiz.com/sitemap.xml` Search Console'a gönderildi ve hatasız işlendi
 - [ ] Search Console'da hem `/` (Türkçe) hem `/en` kapsamı doğrulandı (2026-08-30: TR kökte, EN /en altında)
-- [ ] Search Console URL inceleme aracıyla yalnız Türkçe olan bir blog yazısının
-      `/blog/<slug>` adresi (TR kökte; yalnız EN olan varsa `/en/blog/<slug>`) tek tek incelendi, dizinlenebilir çıktı
+- [ ] Search Console URL inceleme aracıyla bir blog yazısının `/yazilar/<tr-slug>` adresi
+      (yalnız EN olan varsa `/en/blog/<en-slug>`) tek tek incelendi, dizinlenebilir çıktı
 - [ ] Bir hreflang test aracıyla (technicalseo.com hreflang tester) ana sayfa, `/hakkimda`,
       `/projeler`, `/en/about`, `/en/projects`, bir proje detayı ve iki dilli blog yazısı tek tek
       tarandı, self-referencing ve karşılıklı hreflang hatası yok
 - [ ] Yalnız TR olan blog yazısının `/en/blog/<slug>` adresi 404 dönüyor ve EN sitemap'inde geçmiyor
-- [ ] 308 tablosu doğrulandı: `/about` -> `/en/about`, `/projects` -> `/en/projects`, `/contact` -> `/en/contact`, `/tr/hakkimda` benzeri fazla önekler ve `/tr/about` prefix'siz TR karşılığına tek 308 ile düşüyor; hiçbir zincirde döngü yok
+- [ ] 308 tablosu doğrulandı: `/about` -> `/en/about`, `/projects` -> `/en/projects`, `/contact` -> `/en/contact`, `/blog` -> `/en/blog`, `/blog/<eski-slug>` -> `/en/blog/<en-slug>`, `/tr/hakkimda` benzeri fazla önekler ve `/tr/about` prefix'siz TR karşılığına tek 308 ile düşüyor; hiçbir zincirde döngü yok
 - [ ] `robots.txt` doğru domain'i ve `Disallow: /api/` satırını içeriyor
 - [ ] `/feed.xml` (TR) ve `/en/feed.xml` 200 ve `application/rss+xml` dönüyor; `/tr/feed.xml` 308 ile köke düşüyor
 - [ ] `/opengraph-image` (TR kökü) ve `/en/opengraph-image` ile bir blog/proje OG rotası 200 ve PNG dönüyor
