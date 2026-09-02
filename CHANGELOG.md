@@ -20,7 +20,7 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 - `e393dee` Faz 5: altyapı vitrini, UI kapanışı ve dev hattı güncellemeleri (#31)
 
-**Tam değişiklik listesi**: [v0.3.0...v0.3.1](https://github.com/dogancanyildiz/portfolio/compare/v0.3.0...v0.3.1)
+**Tam değişiklik listesi**: [v0.3.0...v0.3.1](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.0...v0.3.1)
 
 ## [0.3.0] - 2026-08-27
 
@@ -38,7 +38,7 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 - `4195d8f` record the repository settings behind the release flow
 - `0351a76` **release**: sync version v0.2.0
 
-**Tam değişiklik listesi**: [v0.2.0...v0.3.0](https://github.com/dogancanyildiz/portfolio/compare/v0.2.0...v0.3.0)
+**Tam değişiklik listesi**: [v0.2.0...v0.3.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.2.0...v0.3.0)
 
 ## [0.2.0] - 2026-08-27
 
@@ -59,7 +59,7 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 - `068dad1` run the quality gate on dev and main
 - `62eb3bf` **domain**: record the primary domain change
 
-**Tam değişiklik listesi**: [v0.1.0...v0.2.0](https://github.com/dogancanyildiz/portfolio/compare/v0.1.0...v0.2.0)
+**Tam değişiklik listesi**: [v0.1.0...v0.2.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.1.0...v0.2.0)
 
 ## [0.1.0] - 2026-08-27
 
@@ -92,13 +92,13 @@ faz başına bir pull request ile merge edildi.
   `docs/plans/` altında yürütülebilir faz planları, onlara eşlik eden devir
   notları ve elle checklist'ler.
 
-[#2]: https://github.com/dogancanyildiz/portfolio/pull/2
-[#3]: https://github.com/dogancanyildiz/portfolio/pull/3
-[#4]: https://github.com/dogancanyildiz/portfolio/pull/4
-[#5]: https://github.com/dogancanyildiz/portfolio/pull/5
-[#6]: https://github.com/dogancanyildiz/portfolio/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/portfolio/compare/v0.3.1...HEAD
-[0.3.1]: https://github.com/dogancanyildiz/portfolio/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/dogancanyildiz/portfolio/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/dogancanyildiz/portfolio/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/dogancanyildiz/portfolio/commits/main
+[#2]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/2
+[#3]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/3
+[#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
+[#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
+[#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/commits/main

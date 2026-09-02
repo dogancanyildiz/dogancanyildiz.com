@@ -19,7 +19,7 @@ const commit = (sha: string, subject: string, body = "") => ({
   body,
 });
 
-const repoUrl = "https://github.com/dogancanyildiz/portfolio";
+const repoUrl = "https://github.com/dogancanyildiz/dogancanyildiz.com";
 
 describe("parseCommitSubject", () => {
   it("splits type, scope and description", () => {
