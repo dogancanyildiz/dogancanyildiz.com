@@ -1,6 +1,6 @@
 # Denetim takip devir notu (2 Eylül 2026, 3. tur)
 
-Durum: Kod tarafı tamamlandı, dal `feature/audit-followups` (taban `8570f6a`) · Tarih: 2026-09-02 · Kaynak: 31 Ağustos incelemesinin V-2..V-18 maddeleri (`audit/acik-kalanlar.md` bölüm 9) ve o incelemenin ötesinde bulunan ek bulgular · Kapsam: 5 dosya-ayrık kümenin kod tarafı ve docs kümesinin doküman/defter tazelemesi; panel/DNS adımları ve sahibinin kararları "Sahibine kalanlar" bölümünde.
+Durum: Kod tarafı tamamlandı ve düzeltme turuyla birlikte bütün kapılar yeşil, dal `feature/audit-followups` (taban `8570f6a`) · Tarih: 2026-09-02 · Kaynak: 31 Ağustos incelemesinin V-2..V-18 maddeleri (`audit/acik-kalanlar.md` bölüm 9) ve o incelemenin ötesinde bulunan ek bulgular · Kapsam: 5 dosya-ayrık kümenin kod tarafı ve docs kümesinin doküman/defter tazelemesi; panel/DNS adımları ve sahibinin kararları "Sahibine kalanlar" bölümünde.
 
 Bu not bir faz devir notu değil; 28 Ağustos denetim kapanışı ve 31 Ağustos incelemesinin ardından üçüncü çapraz kesen takip turunun kaydıdır. Aynı biçimde okunur: yürütme modeli, küme sonuçları, yeni bulgular, kapılar, sahibine kalanlar.
 
@@ -37,7 +37,7 @@ Bu not bir faz devir notu değil; 28 Ağustos denetim kapanışı ve 31 Ağustos
 
 | Şiddet | Bulgu | Durum |
 |---|---|---|
-| **Yüksek (yeni, açık)** | `npm run typecheck` (tsbuildinfo temizlenmiş) `src/i18n/navigation.ts:21`'de `TS2322: Type 'string' is not assignable to type '"en" \| "tr"'` ile kırılıyor. `a34faf4`'ün next-intl `AppConfig` augmentation'ı `Locale` tipini daraltıyor; `pathnameForLocale(locale: string, ...)` artık `getPathname`'in beklediği `Locale` tipini karşılamıyor. `tsconfig.tsbuildinfo` incremental önbelleği bunu gizliyor (temizlenmeden koşulursa yeşil görünür), bu yüzden kontrol oturumunun "typecheck 0 hata" ölçümü yanıltıcı olabilir. Docs kümesi src/ dışında olduğu için düzeltmedi; ledger'da **T-56**. Önerilen düzeltme: `pathnameForLocale`'in `locale` parametresini `string` yerine `Locale` (`(typeof routing.locales)[number]`, `src/lib/content.ts`'teki `Locale` tipiyle aynı) yap; çağıranlar (`language-switcher.tsx`, `alternates.ts`) zaten doğru tipte değer veriyor. |
+| **Yüksek (yeni, düzeltme turunda kapandı: `1e0e115`)** | `npm run typecheck` (tsbuildinfo temizlenmiş) `src/i18n/navigation.ts:21`'de `TS2322: Type 'string' is not assignable to type '"en" \| "tr"'` ile kırılıyordu. `a34faf4`'ün next-intl `AppConfig` augmentation'ı `Locale` tipini daraltıyor; `pathnameForLocale(locale: string, ...)` artık `getPathname`'in beklediği `Locale` tipini karşılamıyordu. `tsconfig.tsbuildinfo` incremental önbelleği bunu gizliyor (temizlenmeden koşulursa yeşil görünür), bu yüzden kontrol oturumunun "typecheck 0 hata" ölçümü yanıltıcıydı. Bu kapı CI'da gerçekten koşuyor (`.github/workflows/ci.yml:50`), `next build` ise tip kontrolü adımını hiç çalıştırmadığı için yakalamıyor. Docs kümesi src/ dışında olduğu için düzeltmedi; ledger'da **T-56**. Düzeltme turunun bulduğu düzeltme, bu satırın ilk halinde yazan tarifin aksine iki fonksiyonu kapsıyor; ayrıntı "Düzeltme turu" bölümünde. |
 | Orta (ui-a11y, noted) | `tests/messages.test.ts`'in dizgi taraması yorum içindeki tek bir kesme işaretini string sınırlayıcı sanıyordu; iki kesme işaretli yorum aralarındaki her anahtarı yutuyordu. `4e583ed` ile kalıcı düzeltildi (bkz. yukarı). | kapandı |
 | Düşük (frontend-perf, noted) | Marka SVG path verisi ana sayfa HTML'inin ~%25'i (52784 bayt, 17306'sı tekrar); F-063 kabul kararı hâlâ geçerli ama tazelenmiş rakamlarla (önceki tahminden büyük). Kabul kararı sahibinde yeniden değerlendirilebilir. | bilgi, T-34'e not düşüldü |
 | Bilgi (çeşitli, noted, aksiyon istenmedi) | `links.yml` artık `--ignore-scripts` kullanıyor (test-quality-deps zaten kapattı); consent banner cevaplanmadan önce odaklı bir footer linkini gizleyebilir (SC 2.4.11, düşük risk); dış linklerde yeni sekme işareti yok (WCAG 3.2.5, AAA); `optimizePackageImports`'un simple-icons/radix-ui'a eklenmesi denendi, ölçülebilir kazanç yok, geri alındı; rate limiter'ın geri giden saat karşısında davranışı bilinçli olarak "fail closed". | bilgi, aksiyon istenmedi |
@@ -46,7 +46,7 @@ Bu not bir faz devir notu değil; 28 Ağustos denetim kapanışı ve 31 Ağustos
 
 | Kapı | Sonuç |
 |---|---|
-| `npm run typecheck` (tsbuildinfo temiz) | **kırık**: `src/i18n/navigation.ts:21` `TS2322` (T-56, yukarıda) |
+| `npm run typecheck` (tsbuildinfo temiz) | **kırık**: `src/i18n/navigation.ts:21` `TS2322` (T-56, yukarıda). Düzeltme turunda kapandı, güncel ölçüm "Düzeltme turu" bölümünde |
 | `npm run lint` | temiz, `--max-warnings=0` |
 | `npm test` | 75 dosya / 1080 test yeşil |
 | `npm run format` | temiz |
@@ -64,12 +64,32 @@ Not: docs kümesinin kendi görev tanımı yalnızca `verify:docs`, `format` ve 
 
 - **Panel/DNS (değişmedi):** Uptime Kuma kurulumu + `/api/health` monitörü, merkezi Umami'ye site kaydı ve `UMAMI_WEBSITE_ID`, `SMTP_*` env'leri ve `contact@` uygulama parolası, `NEXT_PUBLIC_STATUS_URL`, origin'in Cloudflare'a kilitlenmesi, `TRUST_CF_CONNECTING_IP=true` (yalnızca kilitten SONRA), `.sh` alan adı kararı.
 - **P-5 (backend kümesinin notu):** rate limit IP anahtarı artık canonical, ama Cloudflare'ın arkasındaki tek edge adresi hâlâ paylaşılıyor; gerçek düzeltme origin kilidi + `TRUST_CF_CONNECTING_IP=true`.
-- **T-56 (yeni, bu turda bulundu):** typecheck regresyonu, yukarıda. Kod değişikliği gerektiriyor, docs kümesinin kapsamı dışında bırakıldı.
 - **F-063 / T-34 (kabul, sahipte yeniden değerlendirme seçeneği):** marka SVG'lerinin `<symbol>`/`<use>` ile tekilleştirilmesi hâlâ yapılmadı; taze ölçüm ana sayfa HTML'inin ~%25'inin tekrar eden path verisi olduğunu gösteriyor.
 - **Görsel onaylar:** yukarıdaki "Görsel onay isteyen değişiklikler" bölümü.
+
+## Düzeltme turu (2026-09-02, opus, ana ağaç)
+
+Bu bölüm notun ilk hali yazıldıktan sonra ana ağaçta koşan düzeltme turunun kaydı. Bağımsız doğrulama iki bloklayan bulgu bıraktı: T-56'nın kendisi (dal bu haliyle CI'da yeşile dönemezdi) ve T-56 için hem bu notta hem defterde yazılı olan yanlış düzeltme tarifi.
+
+- **T-56 kapandı (`1e0e115`).** Zincirde bir değil iki `string` kapısı var. `src/lib/seo/alternates.ts:36` `localePath(locale: string, path: string)` kendi parametresini doğrudan `pathnameForLocale`'e geçiriyor, yani yalnızca `pathnameForLocale` daraltılırsa `tsc` aynı sınıftan bir hatayı `alternates.ts:40`'ta veriyor (`TS2345: Argument of type 'string' is not assignable to parameter of type '"en" | "tr"'`). Bu izole bir kopyada ölçüldü. İkisi birlikte daraltıldı: `pathnameForLocale(locale: AppLocale, href: string)` (`src/i18n/navigation.ts`, `AppLocale` `./routing`'den) ve `localePath(locale: Locale, path: string)` (`alternates.ts`, `Locale` zaten `@/lib/content`'ten import ediliyordu). Gerçek çağıranlar (`global-not-found.tsx:86`, `footer.tsx:33`, `status-screen.tsx:45` ve `:50`, `language-switcher.tsx:48`, `absoluteUrl`) zaten dar tip taşıyor, hiçbir çağrı yeri değişmedi.
+- **Yanlış tarif düzeltildi.** Notun "Yeni bulgular" satırı ve `audit/acik-kalanlar.md` T-56 satırı "çağıranlar (`language-switcher.tsx`, `alternates.ts`) zaten doğru tipte değer veriyor" diyordu. `alternates.ts` doğru tipte değer veren bir çağıran değil, zincirdeki ikinci `string` kapısı. Tarif olduğu gibi uygulansaydı bir sonraki oturum kapıyı yine kırmızı bulurdu. İki yer de düzeltildi.
+- **Regresyon testi eklendi.** `tsconfig.json`'ın `include`'u test dosyalarını da kapsıyor, bu yüzden `tests/i18n/navigation.test.ts` ve `tests/seo/alternates.test.ts` her iki yardımcının ilk parametresini derleme zamanında kilitleyen bir koşullu tip taşıyor: parametre yeniden `string`'e genişletilirse koşullu `false`'a düşer ve atama derlenmez. Kırmızı/yeşil doğrulandı: iki imza geçici olarak `string`'e döndürüldüğünde `tsc` dört hata verdi (özgün `TS2322` + `TS6133` + iki testin `TS2322`'si), geri alındığında sıfır hata.
+
+Düzeltme turunun kapıları (`1e0e115`, tsbuildinfo silinerek koşuldu):
+
+| Kapı | Sonuç |
+|---|---|
+| `npm run typecheck` | temiz, 0 hata |
+| `npm run lint` | temiz, `--max-warnings=0` |
+| `npm test` | 75 dosya / 1083 test yeşil |
+| `npm run format` | temiz |
+| `npm run build` | başarılı |
+| `npm run verify:routes` | 38 içerik rotası prerender edildi (en: 5 proje, 3 yazı; tr: 5 proje, 3 yazı) |
+| `npm run verify:docs` | temiz |
 
 ## İlgili dosyalar
 
 - `audit/acik-kalanlar.md` bölüm 11 ("2 Eylül 3. tur"): bu turun tam kimlik listesi (gitignore'da, yerel defter).
 - `scripts/verify-docs.mjs`, `tests/scripts/verify-docs.test.ts` (V-17).
+- `src/i18n/navigation.ts`, `src/lib/seo/alternates.ts`, `tests/i18n/navigation.test.ts`, `tests/seo/alternates.test.ts` (T-56, düzeltme turu).
 - `docs/04-i18n.md` (satır 33-34), `docs/00-ozet-ve-karar.md`, `docs/10-yol-haritasi.md`, `docs/03-tasarim-ui-ux.md`, `docs/05-backend-icerik-ve-servisler.md`, `docs/07-seo-ve-metadata.md`, `docs/09-guvenlik.md`, `docs/README.md`, `README.md`: bu turda tazelenen yaşayan dokümanlar.
