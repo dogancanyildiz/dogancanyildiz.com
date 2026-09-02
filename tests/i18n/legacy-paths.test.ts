@@ -186,3 +186,82 @@ describe("legacyRedirectTarget", () => {
     );
   });
 });
+
+describe("legacy OpenGraph card addresses", () => {
+  const CARD = "/opengraph-image/default";
+
+  it("moves the five published cards whose page address changed", () => {
+    // Every detail page named its own card in og:image and both feeds put it
+    // in media:content, so these were public URLs. Their pages moved; before
+    // the card rule next-intl 307'd them to a path that does not exist.
+    const cases: ReadonlyArray<readonly [string, string]> = [
+      ["/blog/self-hosting-with-coolify", "/en/blog/self-hosting-with-coolify"],
+      ["/projects/gpa-calculator", "/en/projects/gpa-calculator"],
+      [
+        "/projects/ticket-purchasing-system",
+        "/en/projects/ticket-purchasing-system",
+      ],
+      [
+        "/en/blog/capt-sinavina-hazirlik",
+        "/en/blog/capt-preparation-in-a-docker-lab",
+      ],
+      [
+        "/en/blog/ccna-dan-web-guvenligine",
+        "/en/blog/from-ccna-to-web-security",
+      ],
+    ];
+
+    for (const [oldPath, newPath] of cases) {
+      expect(legacyRedirectTarget(`${oldPath}${CARD}`), oldPath).toBe(
+        `${newPath}${CARD}`
+      );
+    }
+  });
+
+  it("sends a card wherever its own page goes, for every detail key", () => {
+    // The rule is derived from the tables, not a fourth table, so this walks
+    // the same keys the page redirects use.
+    const detailKeys = [
+      ...Object.keys(LEGACY_UNPREFIXED),
+      ...Object.keys(LEGACY_EN_PREFIXED),
+    ].filter((key) => key.replace(/^\/en/, "").split("/").length === 3);
+    expect(detailKeys.length).toBeGreaterThanOrEqual(10);
+
+    for (const key of detailKeys) {
+      const page = legacyRedirectTarget(key);
+      expect(page, key).not.toBeNull();
+      expect(legacyRedirectTarget(`${key}${CARD}`), key).toBe(`${page}${CARD}`);
+    }
+  });
+
+  it("resolves a /tr prefixed card in a single hop", () => {
+    expect(
+      legacyRedirectTarget(`/tr/blog/self-hosting-with-coolify${CARD}`)
+    ).toBe(`/yazilar/coolify-ile-kendi-sunucumda${CARD}`);
+    expect(legacyRedirectTarget(`/tr/projects/gpa-calculator${CARD}`)).toBe(
+      `/projeler/not-ortalamasi-hesaplayici${CARD}`
+    );
+  });
+
+  it("leaves the identity card and the canonical cards alone", () => {
+    // /tr/opengraph-image/default still moves, but as a plain /tr leftover:
+    // there is no detail page under it for the card rule to look up.
+    expect(legacyRedirectTarget(`/tr${CARD}`)).toBe(CARD);
+    expect(legacyRedirectTarget(CARD)).toBeNull();
+    expect(legacyRedirectTarget(`/en${CARD}`)).toBeNull();
+    expect(
+      legacyRedirectTarget(`/yazilar/coolify-ile-kendi-sunucumda${CARD}`)
+    ).toBeNull();
+    expect(
+      legacyRedirectTarget(`/en/blog/self-hosting-with-coolify${CARD}`)
+    ).toBeNull();
+    expect(legacyRedirectTarget(`/projeler/hubit${CARD}`)).toBeNull();
+  });
+
+  it("does not invent a card route for a section page", () => {
+    // /blog redirects, but a section page has no card of its own: appending
+    // the suffix to /en/blog would 308 into the same 404.
+    expect(legacyRedirectTarget(`/blog${CARD}`)).toBeNull();
+    expect(legacyRedirectTarget(`/projects${CARD}`)).toBeNull();
+  });
+});

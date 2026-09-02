@@ -136,21 +136,81 @@ function withoutTrailingSlash(pathname: string): string {
 }
 
 /**
- * The permanent target for a legacy URL, or null when the path is not one.
+ * Table lookup for an already normalized path, without the OG suffix rule.
  *
- * Single entry point for src/proxy.ts so the trailing slash normalization
- * cannot be applied to one table and forgotten on the other. The `/tr`
- * branch returns first and never consults the unprefixed table: that is the
- * whole reason the Turkish table exists.
+ * The `/tr` branch returns first and never consults the unprefixed table:
+ * that is the whole reason the Turkish table exists.
  */
-export function legacyRedirectTarget(pathname: string): string | null {
-  const normalized = withoutTrailingSlash(pathname);
+function tableTarget(normalized: string): string | null {
   const turkish = unprefixedTurkishPath(normalized);
-  const target =
+  return (
     turkish ??
     LEGACY_EN_PREFIXED[normalized] ??
     LEGACY_UNPREFIXED[normalized] ??
-    null;
+    null
+  );
+}
+
+/**
+ * The `/opengraph-image/<id>` route Next mounts under a page from the
+ * opengraph-image file convention. `<id>` is whatever generateImageMetadata
+ * returned, `default` here, matched loosely so a future second card still
+ * follows its page.
+ */
+const OG_SUFFIX_PATTERN = /\/opengraph-image\/[^/]+$/;
+
+/**
+ * Whether the path names a content detail page rather than a section or a
+ * static page.
+ *
+ * Only detail pages own a card route of their own; every other page inherits
+ * the one on the [lang] segment, so appending the suffix to, say,
+ * `/blog` -> `/en/blog` would name a route that does not exist and turn a
+ * 404 into a 308 that ends in the same 404.
+ */
+function isDetailPath(pathname: string): boolean {
+  const withoutPrefix = pathname.replace(/^\/(?:en|tr)(?=\/)/, "");
+  return withoutPrefix.split("/").filter(Boolean).length >= 2;
+}
+
+/**
+ * The permanent target for a legacy URL, or null when the path is not one.
+ *
+ * Single entry point for src/proxy.ts so the trailing slash normalization
+ * cannot be applied to one table and forgotten on the other.
+ *
+ * A detail page's OG card is resolved by stripping the suffix, looking the
+ * page up and putting the suffix back on the target. Those addresses were
+ * published: the og:image meta of every detail page and the `media:content`
+ * of both feeds named them, and the five whose slug or section changed
+ * (`/blog/self-hosting-with-coolify`, `/projects/gpa-calculator`,
+ * `/projects/ticket-purchasing-system` and the two `/en/blog/<tr-slug>`
+ * posts) answered 404 while next-intl 307'd them to a path that no longer
+ * exists. The rule costs one branch instead of tripling all three tables,
+ * and it keeps a card on the same hop count as its page.
+ */
+export function legacyRedirectTarget(pathname: string): string | null {
+  const normalized = withoutTrailingSlash(pathname);
+  const target = detailCardTarget(normalized) ?? tableTarget(normalized);
   if (target === null || target === undefined) return null;
   return target === pathname ? null : target;
+}
+
+/**
+ * The card rule, or null when it does not apply.
+ *
+ * Tried before the plain lookup so that a `/tr` prefixed card resolves in one
+ * hop: the Turkish table falls back to the remainder for anything it does not
+ * list, so `/tr/blog/<slug>/opengraph-image/default` would otherwise 308 to
+ * the unprefixed card address and need a second hop from there. The identity
+ * card (`/tr/opengraph-image/default`) has no detail page under it and is
+ * left to the plain lookup.
+ */
+function detailCardTarget(normalized: string): string | null {
+  const ogSuffix = normalized.match(OG_SUFFIX_PATTERN)?.[0];
+  if (!ogSuffix) return null;
+  const body = normalized.slice(0, normalized.length - ogSuffix.length);
+  if (!isDetailPath(body)) return null;
+  const bodyTarget = tableTarget(body);
+  return bodyTarget === null ? null : `${bodyTarget}${ogSuffix}`;
 }
