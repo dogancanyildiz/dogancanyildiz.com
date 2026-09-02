@@ -89,12 +89,20 @@ describe("security contact", () => {
 });
 
 describe("license", () => {
-  it("has a root LICENSE that splits code from content", () => {
+  it("keeps the root LICENSE a plain MIT text so GitHub detects it", () => {
     const content = read("LICENSE");
     expect(content).toMatch(/^MIT License/);
-    expect(content).toContain("content/");
-    expect(content).toContain("public/cv/");
+    expect(content.trim()).toMatch(/SOFTWARE\.$/);
+    expect(content).not.toContain("content/");
     const pkg = JSON.parse(read("package.json")) as { license?: string };
     expect(pkg.license).toBe("MIT");
+  });
+
+  it("splits code from content in LICENSE-CONTENT.md", () => {
+    const content = read("LICENSE-CONTENT.md");
+    expect(content).toContain("content/");
+    expect(content).toContain("public/cv/");
+    expect(content).toContain("SIL Open Font License");
+    expect(read("README.md")).toContain("LICENSE-CONTENT.md");
   });
 });

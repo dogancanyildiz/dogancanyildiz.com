@@ -1018,13 +1018,13 @@ Hedef Coolify sürümü: v4.3.1. Bu adımlar Coolify panelinde el ile yürütül
 ## 1. GitHub App kaynağı
 
 - [ ] Coolify -> Sources -> "+ Add" -> GitHub App.
-- [ ] App'i `dogancanyildiz/portfolio` reposuna kur.
+- [ ] App'i `dogancanyildiz/dogancanyildiz.com` reposuna kur.
 - [ ] Repository permissions: Contents `Read`, Metadata `Read`, Pull requests `Read and write`, Checks `Read and write`, Deployments `Read and write`, Webhooks `Read and write`.
 - [ ] Doğrulama: Coolify kaynak sayfasında repo listesi görünüyor. Pull requests izni eksikse Preview Deployments sessizce çalışmaz, Deploy Key ile bu özellik hiç desteklenmiyor.
 
 ## 2. Uygulama kaynağı
 
-- [ ] "+ New" -> Application -> Private Repository (with GitHub App) -> `dogancanyildiz/portfolio`, branch `main`.
+- [ ] "+ New" -> Application -> Private Repository (with GitHub App) -> `dogancanyildiz/dogancanyildiz.com`, branch `main`.
 - [ ] Build Pack: **Dockerfile**. Nixpacks veya Docker Compose seçilmez.
 - [ ] Base Directory: `/`
 - [ ] Dockerfile Location: `/Dockerfile`

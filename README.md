@@ -1,5 +1,11 @@
 # dogancanyildiz.com
 
+[![CI](https://github.com/dogancanyildiz/dogancanyildiz.com/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dogancanyildiz/dogancanyildiz.com/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/dogancanyildiz/dogancanyildiz.com/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/dogancanyildiz/dogancanyildiz.com/actions/workflows/codeql.yml)
+[![Son sürüm](https://img.shields.io/github/v/release/dogancanyildiz/dogancanyildiz.com?label=s%C3%BCr%C3%BCm)](https://github.com/dogancanyildiz/dogancanyildiz.com/releases/latest)
+[![Lisans: MIT](https://img.shields.io/badge/lisans-MIT-blue.svg)](./LICENSE)
+[![Canlı site](https://img.shields.io/badge/canl%C4%B1-www.dogancanyildiz.com-0a0a0a)](https://www.dogancanyildiz.com)
+
 Doğan Can YILDIZ'ın kişisel portfolyosu: tam yığın web geliştiricisi ve DevOps
 uzmanı. Site, Next.js App Router uygulaması; Vercel olmadan, Coolify yönetimli
 bir sunucuda Traefik ve Cloudflare arkasında self-host ediliyor.
@@ -307,5 +313,5 @@ maddenin şemaya uyduğunu tam derlemeden önce kontrol etmenin en hızlı yolu.
 
 ## Lisans
 
-Kod MIT. Yazılı içerik, CV, görseller ve kişisel marka değil; tam ayrım
-için [LICENSE](./LICENSE).
+Kod MIT ([LICENSE](./LICENSE)). Yazılı içerik, CV, görseller ve kişisel
+marka değil; tam ayrım için [LICENSE-CONTENT.md](./LICENSE-CONTENT.md).

@@ -10,6 +10,46 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-02
+
+### Features
+
+- `9402f39` marka paketi, sertifika rozetleri, Türkçe yollar ve www kanonik host (#45)
+- `8570f6a` **copy**: site metni tek teslim vaadi etrafında yeniden yazıldı (#43)
+- `54fe007` **copy**: rewrite the site copy around a single delivery promise (#42)
+- `3ccc2c5` **i18n**: make Turkish the default locale with localized URLs (#36)
+- `13a97da` identity, consent, contact topic and WhatsApp (#35)
+- `5b212b1` **infra**: add Gatus status widget, Umami stack, and analytics CSP
+
+### Fixes
+
+- `06c0b35` **deps**: restore npm audit fix after lockfile rebase regression (#32) (#47)
+- `c0156c0` denetim takip turu, consent geri alma, erişilebilirlik hedefleri ve backend sertleştirmesi (#44)
+- `bd17329` **deploy**: NEXT_PUBLIC_STATUS_URL build zincirine bağlanır, bayat Resend/Gatus uçları süpürülür (#39)
+- `98ae97f` **ui**: use brand-icon components after lucide 1.34 brand removal
+- `085e3dd` replace lucide brand icons removed in lucide-react 1.0 with simple-icons
+
+### Other
+
+- `8e6561b` record the ultrareview closure and dependency bumps in the living documents (#41)
+- `ddd5d1f` **deps**: bump the npm-minor-patch group across 1 directory with 4 updates (#40)
+- `829ff70` Gözlemlenebilirlik panele, e-posta Mailcow'a; dil değiştirici blocker'ı ve doküman tazeleme (#37)
+- `d12bf84` Denetim kapanışı: 28 Ağustos bulgularının kod tarafı, strict TS, tipli ESLint, render testleri (#34)
+- `5677397` **release**: sync version v0.3.1 (#33)
+- `b3101fd` **deps**: restore npm audit fix dropped during Faz 5 rebase
+- `e332a3f` **deps**: ignore eslint majors in dependabot until eslint-config-next supports ESLint 10
+- `a04616b` **deps**: bump simple-icons from 15.22.0 to 16.28.0
+- `901b6c6` **deps**: npm audit fix for transitive dev dependencies
+- `4dc7d12` **deps**: align @types/node and engines with Node 24, ignore majors dependabot cannot land
+- `9db69a8` **deps**: bump lucide-react from 0.575.0 to 1.34.0
+- `28fbfbc` **deps-dev**: bump shadcn from 3.8.5 to 4.19.0
+- `55f0256` **deps**: bump the npm-minor-patch group with 7 updates
+- `8303d0f` give workflows, jobs and steps readable names
+- `1f11f00` **security**: dependabot, codeql, security policy and license for public repo
+- `fee02e7` **release**: sync version v0.3.0
+
+**Tam değişiklik listesi**: [v0.3.1...v0.4.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.1...v0.4.0)
+
 ## [0.3.1] - 2026-08-28
 
 ### Fixes
@@ -20,7 +60,7 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 - `e393dee` Faz 5: altyapı vitrini, UI kapanışı ve dev hattı güncellemeleri (#31)
 
-**Tam değişiklik listesi**: [v0.3.0...v0.3.1](https://github.com/dogancanyildiz/portfolio/compare/v0.3.0...v0.3.1)
+**Tam değişiklik listesi**: [v0.3.0...v0.3.1](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.0...v0.3.1)
 
 ## [0.3.0] - 2026-08-27
 
@@ -38,7 +78,7 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 - `4195d8f` record the repository settings behind the release flow
 - `0351a76` **release**: sync version v0.2.0
 
-**Tam değişiklik listesi**: [v0.2.0...v0.3.0](https://github.com/dogancanyildiz/portfolio/compare/v0.2.0...v0.3.0)
+**Tam değişiklik listesi**: [v0.2.0...v0.3.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.2.0...v0.3.0)
 
 ## [0.2.0] - 2026-08-27
 
@@ -59,7 +99,7 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 - `068dad1` run the quality gate on dev and main
 - `62eb3bf` **domain**: record the primary domain change
 
-**Tam değişiklik listesi**: [v0.1.0...v0.2.0](https://github.com/dogancanyildiz/portfolio/compare/v0.1.0...v0.2.0)
+**Tam değişiklik listesi**: [v0.1.0...v0.2.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.1.0...v0.2.0)
 
 ## [0.1.0] - 2026-08-27
 
@@ -92,13 +132,14 @@ faz başına bir pull request ile merge edildi.
   `docs/plans/` altında yürütülebilir faz planları, onlara eşlik eden devir
   notları ve elle checklist'ler.
 
-[#2]: https://github.com/dogancanyildiz/portfolio/pull/2
-[#3]: https://github.com/dogancanyildiz/portfolio/pull/3
-[#4]: https://github.com/dogancanyildiz/portfolio/pull/4
-[#5]: https://github.com/dogancanyildiz/portfolio/pull/5
-[#6]: https://github.com/dogancanyildiz/portfolio/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/portfolio/compare/v0.3.1...HEAD
-[0.3.1]: https://github.com/dogancanyildiz/portfolio/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/dogancanyildiz/portfolio/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/dogancanyildiz/portfolio/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/dogancanyildiz/portfolio/commits/main
+[#2]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/2
+[#3]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/3
+[#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
+[#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
+[#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.1...v0.4.0
+[0.3.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/commits/main
