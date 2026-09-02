@@ -95,10 +95,12 @@ describe("blog posting schema", () => {
         expect(data.author).toEqual(personRef());
         // One human wrote and published it: the same node, not two.
         expect(data.publisher).toEqual(data.author);
+        // The post's own card, not the identity one: the page's og:image
+        // points here too, and a consumer handed two different images for the
+        // same page has no way to pick.
+        const prefix = locale === "en" ? "/en" : "";
         expect(data.image).toBe(
-          locale === "en"
-            ? "https://dogancanyildiz.com/en/opengraph-image/default"
-            : "https://dogancanyildiz.com/opengraph-image/default"
+          `https://dogancanyildiz.com${prefix}/blog/${post.slug}/opengraph-image/default`
         );
         expect(data.inLanguage).toBe(locale);
         expect(data.datePublished).toBe(post.date);
@@ -134,6 +136,10 @@ describe("project schema", () => {
       expect((data.creator as Record<string, unknown>)["@id"]).toBe(personId());
       expect(data.url).toBe(
         `https://dogancanyildiz.com/en/projects/${project.slug}`
+      );
+      // Same card the page advertises as og:image.
+      expect(data.image).toBe(
+        `https://dogancanyildiz.com/en/projects/${project.slug}/opengraph-image/default`
       );
       // No updated field means no dateModified at all, rather than a repeat
       // of the creation year.
