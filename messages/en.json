@@ -76,6 +76,8 @@
     "certificateVerifyLabel": "Verify {name}",
     "certificateBadgeAlt": "{name} badge",
     "certificateImageAlt": "{name} certificate",
+    "certificateEnlarge": "Enlarge {name}",
+    "certificatePreviewClose": "Close preview",
     "certificateCredentialId": "Credential ID {id}",
     "educationTitle": "Education",
     "languagesTitle": "Languages",

@@ -74,7 +74,15 @@ describe("certificate list", () => {
       certificates.en.length
     );
     const withBadges = certificates.en.filter((entry) => entry.badge);
-    expect(container.querySelectorAll("img")).toHaveLength(withBadges.length);
+    // Two renders of the same file per credential: the 64px thumbnail on the
+    // row and the large copy inside its closed preview dialog. The dialog is
+    // display:none until it opens, so the second one is never fetched.
+    expect(container.querySelectorAll("img")).toHaveLength(
+      withBadges.length * 2
+    );
+    expect(container.querySelectorAll("dialog")).toHaveLength(
+      withBadges.length
+    );
   });
 
   it("names the credential in the alt text of its own artwork", async () => {
@@ -119,9 +127,22 @@ describe("certificate list", () => {
     const { container } = await renderList("en");
     const linked = certificates.en.filter((entry) => entry.verifyUrl);
 
-    expect(container.querySelectorAll("a")).toHaveLength(linked.length);
+    // Links inside a preview dialog are a repeat of the row's own verify link
+    // for a reader who opened the artwork, and are unreachable until it does.
+    const rowLinks = (scope: ParentNode) =>
+      [...scope.querySelectorAll("a")].filter(
+        (link) => link.closest("dialog") === null
+      );
+
+    expect(rowLinks(container)).toHaveLength(linked.length);
     for (const item of container.querySelectorAll("li")) {
-      expect(item.querySelectorAll("a").length).toBeLessThanOrEqual(1);
+      expect(rowLinks(item).length).toBeLessThanOrEqual(1);
+      // And no row leads anywhere its own row link does not.
+      for (const link of item.querySelectorAll("dialog a")) {
+        expect(link.getAttribute("href")).toBe(
+          rowLinks(item)[0]?.getAttribute("href")
+        );
+      }
     }
 
     const orphan = [...container.querySelectorAll("li")].find((item) =>
@@ -130,10 +151,10 @@ describe("certificate list", () => {
     expect(orphan).toBeDefined();
     expect(orphan?.querySelector("a")).toBeNull();
     expect(orphan?.querySelector("img")).toBeNull();
-    // No apology for the missing link either: the row simply stops at the
-    // name. The issuer sits once above the group as its heading.
+    // No apology for the missing link either: the row stops at the name and
+    // the keyword line. The issuer sits once above the group as its heading.
     expect(orphan?.textContent?.trim()).toBe(
-      "Version Control Systems and Portfolio"
+      "Version Control Systems and PortfolioGit · GitHub · portfolio building"
     );
     const headings = [...container.querySelectorAll("h3")].map((heading) =>
       heading.textContent?.trim()

@@ -234,6 +234,7 @@ describe("profile data", () => {
             name: "Fake",
             issuer: "Fake",
             group: "hackviser",
+            keywords: { en: ["Fake"], tr: ["Sahte"] },
             credentialCategory: "certificate",
             verifyUrl: "javascript:alert(1)" as HttpsUrl,
           },
@@ -248,6 +249,7 @@ describe("profile data", () => {
       name: "Fake",
       issuer: "Fake",
       group: "hackviser",
+      keywords: { en: ["Fake"], tr: ["Sahte"] },
       credentialCategory: "badge",
     };
 

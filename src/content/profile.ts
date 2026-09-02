@@ -110,11 +110,29 @@ export interface CertificateBadge {
   kind: "badge" | "certificate";
 }
 
+/**
+ * The subjects a credential covers, in the two locales.
+ *
+ * The name of a course says almost nothing about what was assessed: "CCNA:
+ * Enterprise Networking, Security, and Automation" and "CyberOps Associate"
+ * read as two identical mysteries to anyone outside the Cisco track. These
+ * are the issuers' own skill tags, copied rather than paraphrased, so the
+ * line under a name is evidence and not marketing.
+ *
+ * Both lists carry the same entries in the same order, so a reader switching
+ * language sees the same claim.
+ */
+export interface CertificateKeywords {
+  en: string[];
+  tr: string[];
+}
+
 export interface CertificateEntry {
   /** Official name as the issuer writes it. Identical in both locales. */
   name: string;
   issuer: string;
   group: CertificateGroupId;
+  keywords: CertificateKeywords;
   issued?: IsoDate;
   credentialId?: string;
   verifyUrl?: HttpsUrl;
@@ -130,6 +148,13 @@ export interface CertificateEntry {
 }
 
 const BADGE_DIRECTORY = "/images/badges/";
+
+/**
+ * Six is where the line stops being a summary. The row prints them on one
+ * muted line under the name, and past six the line wraps into a paragraph
+ * that competes with the credential it is describing.
+ */
+const MAX_KEYWORDS = 6;
 
 /**
  * Fails the build when a certificate carries a link the About page must not
@@ -164,6 +189,25 @@ export function withCheckedCertificates(
           throw new Error(
             `${where} has badge artwork without an intrinsic size: ${entry.badge.width}x${entry.badge.height}`
           );
+        }
+      }
+      const { en, tr } = entry.keywords;
+      if (en.length === 0) {
+        throw new Error(`${where} has no keywords`);
+      }
+      if (en.length !== tr.length) {
+        throw new Error(
+          `${where} has ${en.length} English keywords and ${tr.length} Turkish ones: a reader switching language would see a different claim`
+        );
+      }
+      if (en.length > MAX_KEYWORDS) {
+        throw new Error(
+          `${where} lists ${en.length} keywords, more than the ${MAX_KEYWORDS} the row prints`
+        );
+      }
+      for (const keyword of [...en, ...tr]) {
+        if (keyword.trim() === "") {
+          throw new Error(`${where} has an empty keyword`);
         }
       }
     }
@@ -576,6 +620,10 @@ export const speaking: Record<Locale, SpeakingEntry[]> = {
 const certificateRecords: CertificateEntry[] = [
   {
     name: "Certified Associate Penetration Tester (CAPT)",
+    keywords: {
+      en: ["Hands-on penetration testing", "methodology", "tools", "techniques", "reporting"],
+      tr: ["Uygulamalı sızma testi", "metodoloji", "araçlar", "teknikler", "raporlama"],
+    },
     issuer: "Hackviser",
     group: "hackviser",
     issued: "2025-06-01",
@@ -593,6 +641,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "CyberOps Associate",
+    keywords: {
+      en: ["SOC monitoring", "intrusion analysis", "incident response", "malware analysis", "cryptography"],
+      tr: ["SOC izleme", "saldırı analizi", "olay müdahalesi", "zararlı yazılım analizi", "kriptografi"],
+    },
     issuer: "Cisco Networking Academy",
     group: "cisco-networking-academy",
     issued: "2026-06-02",
@@ -607,6 +659,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "Linux Unhatched",
+    keywords: {
+      en: ["Linux command line", "files and permissions", "processes", "basic scripting"],
+      tr: ["Linux komut satırı", "dosya ve izinler", "süreçler", "temel betikleme"],
+    },
     issuer: "Cisco Networking Academy",
     group: "cisco-networking-academy",
     issued: "2026-02-18",
@@ -621,6 +677,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "Network Technician Career Path",
+    keywords: {
+      en: ["Network fundamentals", "IPv4 and IPv6 addressing", "Cisco IOS", "cabling", "troubleshooting"],
+      tr: ["Ağ temelleri", "IPv4 ve IPv6 adresleme", "Cisco IOS", "kablolama", "sorun giderme"],
+    },
     issuer: "Cisco Networking Academy",
     group: "cisco-networking-academy",
     issued: "2026-02-14",
@@ -635,6 +695,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "Introduction to Cybersecurity",
+    keywords: {
+      en: ["Cyber threats", "network vulnerabilities", "privacy and data confidentiality", "best practices"],
+      tr: ["Siber tehditler", "ağ zafiyetleri", "gizlilik ve veri mahremiyeti", "iyi uygulamalar"],
+    },
     issuer: "Cisco Networking Academy",
     group: "cisco-networking-academy",
     issued: "2026-02-02",
@@ -652,6 +716,10 @@ const certificateRecords: CertificateEntry[] = [
   // visitor can only check what is named.
   {
     name: "CCNA: Enterprise Networking, Security, and Automation",
+    keywords: {
+      en: ["Dynamic routing", "NAT", "QoS", "WAN", "network automation", "threat mitigation"],
+      tr: ["Dinamik yönlendirme", "NAT", "QoS", "WAN", "ağ otomasyonu", "tehdit azaltma"],
+    },
     issuer: "Cisco Networking Academy",
     group: "cisco-networking-academy",
     issued: "2024-07-28",
@@ -666,6 +734,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "CCNA: Switching, Routing, and Wireless Essentials",
+    keywords: {
+      en: ["Switching", "routing", "wireless LAN", "first-hop redundancy", "access security"],
+      tr: ["Anahtarlama", "yönlendirme", "kablosuz LAN", "first-hop yedeklilik", "erişim güvenliği"],
+    },
     issuer: "Cisco Networking Academy",
     group: "cisco-networking-academy",
     issued: "2024-07-22",
@@ -680,6 +752,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "CCNA: Introduction to Networks",
+    keywords: {
+      en: ["Network fundamentals", "IP subnetting", "IPv4 and IPv6", "Ethernet", "switching"],
+      tr: ["Ağ temelleri", "IP alt ağlama", "IPv4 ve IPv6", "Ethernet", "anahtarlama"],
+    },
     issuer: "Cisco Networking Academy",
     group: "cisco-networking-academy",
     issued: "2024-07-20",
@@ -694,6 +770,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "Cisco Networking Academy Learn-A-Thon 2026",
+    keywords: {
+      en: ["Participation badge", "Networking Academy event"],
+      tr: ["Katılım rozeti", "Networking Academy etkinliği"],
+    },
     issuer: "Cisco Networking Academy",
     group: "cisco-networking-academy",
     issued: "2026-04-29",
@@ -711,6 +791,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "Cybersecurity Fundamentals",
+    keywords: {
+      en: ["Threat analysis", "social engineering", "cryptography", "incident response", "risk management"],
+      tr: ["Tehdit analizi", "sosyal mühendislik", "kriptografi", "olay müdahalesi", "risk yönetimi"],
+    },
     issuer: "IBM SkillsBuild",
     group: "ibm-skillsbuild",
     issued: "2024-05-27",
@@ -725,6 +809,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "Explore Emerging Tech",
+    keywords: {
+      en: ["AI", "blockchain", "cloud computing", "cybersecurity", "data analytics", "IoT"],
+      tr: ["Yapay zeka", "blokzincir", "bulut bilişim", "siber güvenlik", "veri analitiği", "IoT"],
+    },
     issuer: "IBM SkillsBuild",
     group: "ibm-skillsbuild",
     issued: "2024-05-16",
@@ -739,6 +827,10 @@ const certificateRecords: CertificateEntry[] = [
   },
   {
     name: "Working in a Digital World: Professional Skills",
+    keywords: {
+      en: ["Agile methods", "presentations", "problem solving", "team collaboration"],
+      tr: ["Çevik yöntemler", "sunum", "problem çözme", "ekip çalışması"],
+    },
     issuer: "IBM SkillsBuild",
     group: "ibm-skillsbuild",
     issued: "2024-05-16",
@@ -756,6 +848,10 @@ const certificateRecords: CertificateEntry[] = [
     // both are gone. The entry stays, with nothing invented to fill the gaps,
     // and the page prints no "unverifiable" apology next to it.
     name: "Version Control Systems and Portfolio",
+    keywords: {
+      en: ["Git", "GitHub", "portfolio building"],
+      tr: ["Git", "GitHub", "portfolyo oluşturma"],
+    },
     issuer: "Global AI Hub",
     group: "global-ai-hub",
     credentialCategory: "certificate",

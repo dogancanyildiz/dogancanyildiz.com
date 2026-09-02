@@ -76,6 +76,8 @@
     "certificateVerifyLabel": "Doğrula: {name}",
     "certificateBadgeAlt": "{name} rozeti",
     "certificateImageAlt": "{name} sertifikası",
+    "certificateEnlarge": "Büyüt: {name}",
+    "certificatePreviewClose": "Önizlemeyi kapat",
     "certificateCredentialId": "Sertifika kimliği {id}",
     "educationTitle": "Eğitim",
     "languagesTitle": "Diller",
