@@ -490,6 +490,15 @@ describe("brand link", () => {
     expect(markAt).toBeLessThan(nameAt);
     expect(source).not.toContain('aria-label={tBrand("name")}');
   });
+
+  it("lets the name ellipsize rather than wrap when the row runs out", () => {
+    // The mark added ~53px to a block that was the name alone, and the row is
+    // a fixed h-16. truncate needs a min-w-0 ancestor to do anything, which is
+    // what the link and its wrapper carry.
+    const source = read("src/components/layout/header.tsx");
+    expect(source).toMatch(/className="truncate text-sm[^"]*"/);
+    expect(source).toContain("flex min-w-0 items-center gap-2.5");
+  });
 });
 
 describe("desktop nav active state", () => {

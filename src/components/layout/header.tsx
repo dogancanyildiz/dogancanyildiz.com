@@ -30,10 +30,12 @@ export function Header({ untranslated }: HeaderProps) {
             className="tap-target group flex min-w-0 items-center gap-2.5 no-underline"
           >
             {/* Decorative, so the link keeps the name as its accessible
-                name. shrink-0 because the name beside it is the part that
-                may truncate on a narrow viewport. */}
+                name. shrink-0 on the mark and truncate on the name: with the
+                mark beside it the block is wide enough that a 320px viewport
+                runs out of row, and without truncate the name wraps inside
+                h-16 instead of ellipsizing. */}
             <BrandMark height={18} className="shrink-0 text-foreground" />
-            <span className="text-sm font-medium tracking-tight text-foreground">
+            <span className="truncate text-sm font-medium tracking-tight text-foreground">
               {tBrand("name")}
             </span>
           </Link>
