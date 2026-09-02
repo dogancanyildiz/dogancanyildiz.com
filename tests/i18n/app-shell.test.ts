@@ -142,8 +142,11 @@ describe("proxy", () => {
     // src/app/favicon.ico is the brand ICO now, so the old 308 to the
     // generated /icon route would shadow a file that answers 200 by itself.
     const config = read("next.config.ts");
+    // Only the favicon rule is locked out. Asserting the absence of the whole
+    // redirects() block would fail the next unrelated redirect for a reason
+    // that has nothing to do with the favicon.
     expect(config).not.toContain('source: "/favicon.ico", destination');
-    expect(config).not.toContain("async redirects()");
+    expect(config).not.toMatch(/destination:\s*"\/icon"/);
     expect(existsSync(join(process.cwd(), "src/app/favicon.ico"))).toBe(true);
   });
 });
