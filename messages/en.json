@@ -2,7 +2,7 @@
   "brand": {
     "name": "Doğan Can YILDIZ",
     "tagline": "Full Stack · DevOps",
-    "role": "Full-Stack Web Developer and DevOps Specialist"
+    "role": "Full Stack Web Developer and DevOps Specialist"
   },
   "nav": {
     "home": "Home",
@@ -25,7 +25,7 @@
     "metricProjectsLabel": "Shipped end to end",
     "metricProjectsValue": "5 apps",
     "metricFocusLabel": "Focus",
-    "metricFocusValue": "Full-stack + DevOps",
+    "metricFocusValue": "Full Stack + DevOps",
     "viewProjects": "View projects",
     "getInTouch": "Write what you need"
   },
@@ -58,8 +58,8 @@
   },
   "about": {
     "title": "About",
-    "description": "How I work, and which jobs I turn down. I am a full-stack developer in Konya, Türkiye.",
-    "lead": "Since November 2024 I have been a full-stack developer at BerrSoft. I write the applications and put them into production.",
+    "description": "How I work, and which jobs I turn down. I am a Full Stack developer in Konya, Türkiye.",
+    "lead": "Since November 2024 I have been a Full Stack developer at BerrSoft. I write the applications and put them into production.",
     "body1": "When a job starts with me it stays with me to the end: I make the first architecture call, and I take the bug that turns up after launch. That leaves the client with something simple: when something breaks, nobody has to work out whose problem it is, and there is no coordination layer in between.",
     "body2": "Networking and security turned into decisions here. After building a ticket purchasing application I ran a penetration test against my own code; the findings rewrote its input validation and its session handling, and moved the container off root. How a system is deployed and what it exposes decides as much as how the code is written.",
     "body3": "The work I take is building a web application and putting it into production. I do not take paid security audits; the test above sat inside a training program. Networking and security are the layer underneath what I deliver. Outside work I spent two years organizing GDG Konya and sat on the GDG Cloud Konya core team.",
@@ -216,11 +216,11 @@
     "digestLabel": "Error reference"
   },
   "metadata": {
-    "defaultTitle": "Doğan Can YILDIZ | Full-Stack Web Developer and DevOps Specialist",
+    "defaultTitle": "Doğan Can YILDIZ | Full Stack Web Developer and DevOps Specialist",
     "siteName": "Doğan Can YILDIZ",
     "defaultDescription": "Five production applications at BerrSoft, taken from architecture to maintenance. I write the application and run the Linux server it ships on. Konya, Türkiye.",
-    "ogAlt": "Doğan Can YILDIZ, Full-Stack Web Developer and DevOps Specialist",
-    "ogAltPage": "{title}. Doğan Can YILDIZ, Full-Stack Web Developer and DevOps Specialist"
+    "ogAlt": "Doğan Can YILDIZ, Full Stack Web Developer and DevOps Specialist",
+    "ogAltPage": "{title}. Doğan Can YILDIZ, Full Stack Web Developer and DevOps Specialist"
   },
   "api": {
     "invalidRequest": "Invalid request. Name, email, topic and message are required.",

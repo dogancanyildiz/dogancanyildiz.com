@@ -8,8 +8,8 @@ export const siteConfig = {
   person: {
     name: "Doğan Can YILDIZ",
     jobTitle: {
-      en: "Full-Stack Web Developer and DevOps Specialist",
-      tr: "Full-Stack Web Geliştirici ve DevOps Uzmanı",
+      en: "Full Stack Web Developer and DevOps Specialist",
+      tr: "Full Stack Web Geliştirici ve DevOps Uzmanı",
     } satisfies Record<AppLocale, string>,
     location: {
       city: "Konya",

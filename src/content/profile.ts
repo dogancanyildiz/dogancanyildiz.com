@@ -293,7 +293,7 @@ export const skills: Record<Locale, SkillGroup[]> = {
 export const experience: Record<Locale, ExperienceEntry[]> = {
   en: [
     {
-      role: "Full-Stack Developer",
+      role: "Full Stack Developer",
       company: "BerrSoft Bilgi Teknolojileri",
       location: "İstanbul",
       period: "11/2024 - Present",
@@ -343,7 +343,7 @@ export const experience: Record<Locale, ExperienceEntry[]> = {
   ],
   tr: [
     {
-      role: "Full-Stack Developer",
+      role: "Full Stack Developer",
       company: "BerrSoft Bilgi Teknolojileri",
       location: "İstanbul",
       period: "11/2024 - Devam ediyor",
