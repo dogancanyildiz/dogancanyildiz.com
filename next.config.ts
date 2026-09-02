@@ -231,12 +231,14 @@ const nextConfig: NextConfig = {
       },
       { source: "/fonts/:path*", headers: [ONE_DAY_CACHE] },
       // The icons are static files under src/app (favicon.ico, icon.png,
-      // apple-icon.png), not the generated routes they replaced. Next serves
-      // them with its own no-store default plus a content hash in the href it
-      // writes into <head>, so without these entries every tab open refetches
-      // an image that only changes when the brand does. The hash in the query
-      // string is what busts the cache when it does change, which is why a one
-      // day max-age is safe here in a way it is not for /cv or /fonts.
+      // apple-icon.png), not the generated routes they replaced. Next writes
+      // "public, max-age=0, must-revalidate" into their build metadata
+      // (.next/server/app/icon.png.meta), so without these entries every tab
+      // open revalidates an image that only changes when the brand does. Next
+      // also puts a content hash in the href it writes into <head>, and that
+      // hash is what busts the cache when the artwork does change, which is
+      // why a one day max-age is safe here in a way it is not for /cv or
+      // /fonts.
       { source: "/favicon.ico", headers: [ONE_DAY_CACHE] },
       { source: "/icon.png", headers: [ONE_DAY_CACHE] },
       { source: "/apple-icon.png", headers: [ONE_DAY_CACHE] },
