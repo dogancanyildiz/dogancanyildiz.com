@@ -47,7 +47,7 @@ export default async function ProjectsPage({
       ) : (
         <p className="section-copy">{t("empty")}</p>
       )}
-      <ContactCta />
+      <ContactCta scope="project" />
     </PageSection>
   );
 }

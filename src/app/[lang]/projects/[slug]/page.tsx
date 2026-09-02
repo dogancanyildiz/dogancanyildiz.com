@@ -162,7 +162,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <MDXContent code={project.code} components={mdxComponents} />
       </div>
 
-      <ContactCta />
+      <ContactCta scope="project" />
     </PageSection>
   );
 }

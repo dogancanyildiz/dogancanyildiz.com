@@ -30,7 +30,7 @@ function jsonResponse(
 async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Name"), "Ada Lovelace");
   await user.type(screen.getByLabelText("Email"), "ada@example.com");
-  await user.selectOptions(screen.getByLabelText("What do you need"), "web");
+  await user.selectOptions(screen.getByLabelText("Topic"), "web");
   await user.type(screen.getByLabelText("Message"), "Hello there");
 }
 
@@ -75,7 +75,7 @@ describe("ContactForm validation", () => {
       "aria-invalid",
       "true"
     );
-    expect(screen.getByLabelText("What do you need")).toHaveAttribute(
+    expect(screen.getByLabelText("Topic")).toHaveAttribute(
       "aria-invalid",
       "true"
     );
@@ -98,10 +98,10 @@ describe("ContactForm validation", () => {
     await user.type(screen.getByLabelText("Message"), "Hello there");
     await user.click(screen.getByRole("button", { name: "Send message" }));
 
-    const topic = screen.getByLabelText("What do you need");
+    const topic = screen.getByLabelText("Topic");
     expect(topic).toHaveAttribute("aria-invalid", "true");
     expect(topic).toHaveFocus();
-    expect(screen.getByText("Please choose a heading.")).toHaveAttribute(
+    expect(screen.getByText("Please choose a topic.")).toHaveAttribute(
       "id",
       "contact-topic-error"
     );
@@ -188,13 +188,11 @@ describe("ContactForm submission", () => {
       "aria-disabled",
       "true"
     );
-    expect(screen.getByLabelText("What do you need")).toHaveAttribute(
+    expect(screen.getByLabelText("Topic")).toHaveAttribute(
       "aria-disabled",
       "true"
     );
-    expect(screen.getByLabelText("What do you need")).not.toHaveAttribute(
-      "disabled"
-    );
+    expect(screen.getByLabelText("Topic")).not.toHaveAttribute("disabled");
     expect(screen.getByRole("status")).toHaveTextContent("Sending");
 
     // A second submit while the first is still in flight must not fire a
@@ -292,7 +290,7 @@ describe("ContactForm rate limiting", () => {
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "ada@example.com" },
     });
-    fireEvent.change(screen.getByLabelText("What do you need"), {
+    fireEvent.change(screen.getByLabelText("Topic"), {
       target: { value: "web" },
     });
     fireEvent.change(screen.getByLabelText("Message"), {

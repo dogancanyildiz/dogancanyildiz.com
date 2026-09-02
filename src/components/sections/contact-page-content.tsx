@@ -1,5 +1,6 @@
 import { Mail, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ContactForm } from "@/components/sections/contact-form";
 import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
@@ -64,13 +65,27 @@ export function ContactPageContent() {
           <p className="text-sm leading-relaxed text-muted-foreground">
             {t("trustBody")}
           </p>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {t("responseExpectation")}
+          {/* The trust block says where a message goes; the retention detail
+              lives on the Privacy page, so the claim carries a way to check
+              it instead of restating the page here. */}
+          <p className="text-sm leading-relaxed">
+            <Link
+              href="/privacy"
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              {t("privacyLink")}
+            </Link>
           </p>
         </div>
       </div>
 
       <div className="space-y-4">
+        {/* The reply promise belongs to the form, not to the privacy block it
+            used to sit under: it is a commitment about the answer, not about
+            what happens to the data. */}
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {t("responseExpectation")}
+        </p>
         <ContactForm />
       </div>
     </PageSection>

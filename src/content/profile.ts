@@ -188,7 +188,6 @@ export const skills: Record<Locale, SkillGroup[]> = {
         "DNS and domain configuration",
         "Website deployment and maintenance",
         "Tech community management",
-        "Public speaking",
       ],
     },
   ],
@@ -286,7 +285,6 @@ export const skills: Record<Locale, SkillGroup[]> = {
         "DNS ve alan adı yapılandırması",
         "Web sitesi yayına alma ve bakımı",
         "Teknoloji topluluğu yönetimi",
-        "Konuşmalar",
       ],
     },
   ],
@@ -300,10 +298,12 @@ export const experience: Record<Locale, ExperienceEntry[]> = {
       location: "İstanbul",
       period: "11/2024 - Present",
       bullets: [
-        "Build web applications with Next.js and React on the front end, Node.js/Express.js and PHP on the back end, designing and consuming RESTful APIs.",
-        "Work across MySQL, MongoDB and SQLite, selecting the right database per project for scalable, maintainable systems.",
-        "Delivered 5 production applications end-to-end, owning the full lifecycle from architecture and API design through deployment and maintenance.",
-        "Automated build and release with GitHub Actions and Coolify, deploying Dockerized applications to self-hosted servers; managed sprint boards and issue tracking in ClickUp.",
+        // The home page experience summary renders bullets[0], so the
+        // measurable delivery fact leads the list rather than the stack.
+        "5 production applications at BerrSoft came out of my hands. Architecture, API design, deployment and the maintenance after launch were all mine.",
+        "The front end is Next.js and React, the back end Node.js/Express.js and PHP; I design the RESTful API that joins the two and consume it on the client.",
+        "The database is a choice I make again on every project: MySQL, MongoDB, SQLite.",
+        "Build and release are automated with GitHub Actions and Coolify; I push the Dockerized applications out to the company's own servers. Sprint boards and issue tracking live in ClickUp.",
       ],
       stack: [
         "Next.js",
@@ -324,8 +324,8 @@ export const experience: Record<Locale, ExperienceEntry[]> = {
       location: "İstanbul",
       period: "06/2021 - 11/2024",
       bullets: [
-        "Built responsive, accessible web interfaces with HTML, CSS, JavaScript and Bootstrap for 5+ client projects.",
-        "Delivered 10+ custom WordPress themes and client-specific websites; improved UI/UX and ensured compatibility across mobile, tablet and desktop.",
+        "5+ client projects got their interfaces from me: HTML, CSS, JavaScript and Bootstrap, responsive and accessible.",
+        "10+ custom WordPress themes and client sites shipped in the same stretch. Every one of them had to hold its layout on mobile, tablet and desktop.",
       ],
       stack: ["HTML", "CSS", "JavaScript", "Bootstrap", "WordPress"],
     },
@@ -335,8 +335,8 @@ export const experience: Record<Locale, ExperienceEntry[]> = {
       location: "Konya",
       period: "07/2024 - 08/2024",
       bullets: [
-        "Developed a vehicle tracking management panel using PHP, JavaScript and third-party API integrations.",
-        "Implemented simulation and API integration for municipal traffic light management.",
+        "The vehicle tracking management panel I built there ran on PHP and JavaScript, with third-party API integrations behind it.",
+        "Traffic light management at the municipality needed a simulation and an API integration; I wrote both.",
       ],
       stack: ["PHP", "JavaScript", "REST APIs"],
     },
@@ -348,10 +348,10 @@ export const experience: Record<Locale, ExperienceEntry[]> = {
       location: "İstanbul",
       period: "11/2024 - Devam ediyor",
       bullets: [
-        "Ön yüzde Next.js ve React, arka yüzde Node.js/Express.js ve PHP ile web uygulamaları geliştiriyorum; RESTful API'leri tasarlıyor ve tüketiyorum.",
-        "MySQL, MongoDB ve SQLite ile çalışıyorum; ölçeklenebilir ve sürdürülebilir sistemler için her projede doğru veritabanını seçiyorum.",
-        "5 üretim uygulamasını uçtan uca teslim ettim; mimari ve API tasarımından yayın ve bakıma kadar tüm yaşam döngüsünü üstlendim.",
-        "GitHub Actions ve Coolify ile derleme ve yayın adımlarını otomatikleştirdim, Docker ile paketlenmiş uygulamaları kendi sunucularımıza yayına aldım; sprint panolarını ve iş takibini ClickUp üzerinde yürüttüm.",
+        "5 üretim uygulaması BerrSoft'ta benim elimden çıktı. Mimari, API tasarımı, yayın ve yayın sonrası bakım bendeydi.",
+        "Ön yüz Next.js ve React, arka yüz Node.js/Express.js ve PHP; ikisini birleştiren RESTful API'yi ben tasarlıyorum, istemci tarafında yine ben tüketiyorum.",
+        "Veritabanı her projede yeniden verdiğim bir karar: MySQL, MongoDB, SQLite.",
+        "Derleme ve yayın GitHub Actions ile Coolify üzerinde otomatik ilerliyor; Docker ile paketlenen uygulamaları şirketin kendi sunucularına ben çıkarıyorum. Sprint panosu ve iş takibi ClickUp'ta duruyor.",
       ],
       stack: [
         "Next.js",
@@ -372,8 +372,8 @@ export const experience: Record<Locale, ExperienceEntry[]> = {
       location: "İstanbul",
       period: "06/2021 - 11/2024",
       bullets: [
-        "5'ten fazla müşteri projesi için HTML, CSS, JavaScript ve Bootstrap ile duyarlı ve erişilebilir web arayüzleri geliştirdim.",
-        "10'dan fazla özel WordPress teması ve müşteriye özel web sitesi teslim ettim; arayüz deneyimini iyileştirdim, mobil, tablet ve masaüstü uyumunu sağladım.",
+        "5'ten fazla müşteri projesinin arayüzü bendeydi: HTML, CSS, JavaScript ve Bootstrap ile duyarlı ve erişilebilir sayfalar yazdım.",
+        "10'dan fazla özel WordPress teması ve müşteriye özel siteyi aynı dönemde teslim ettim. Her biri mobil, tablet ve masaüstünde düzenini korumak zorundaydı.",
       ],
       stack: ["HTML", "CSS", "JavaScript", "Bootstrap", "WordPress"],
     },
@@ -383,8 +383,8 @@ export const experience: Record<Locale, ExperienceEntry[]> = {
       location: "Konya",
       period: "07/2024 - 08/2024",
       bullets: [
-        "PHP, JavaScript ve üçüncü parti API entegrasyonlarıyla bir araç takip yönetim paneli geliştirdim.",
-        "Belediye trafik ışığı yönetimi için simülasyon ve API entegrasyonu uyguladım.",
+        "Araç takip yönetim panelini PHP, JavaScript ve üçüncü parti API entegrasyonlarıyla kurdum.",
+        "Trafik ışığı yönetimi tarafında ise simülasyon ve API entegrasyonu vardı; ikisini de ben yazdım.",
       ],
       stack: ["PHP", "JavaScript", "REST API"],
     },
@@ -398,14 +398,14 @@ export const community: Record<Locale, CommunityEntry[]> = {
       organization: "GDG Cloud Konya",
       period: "05/2025 - 10/2025",
       description:
-        "Organized technical events, hands-on workshops and community projects focused on Google Cloud technologies.",
+        "The core team ran technical events, hands-on workshops and community projects around Google Cloud. I took part in organizing them.",
     },
     {
       role: "Organizer",
       organization: "GDG Konya",
       period: "10/2023 - 10/2025",
       description:
-        "Co-organized tech talks, study jams and networking events across two years, supporting knowledge-sharing around Google technologies.",
+        "Two years of co-organizing tech talks, study jams and networking events around Google technologies.",
     },
   ],
   tr: [
@@ -414,14 +414,14 @@ export const community: Record<Locale, CommunityEntry[]> = {
       organization: "GDG Cloud Konya",
       period: "05/2025 - 10/2025",
       description:
-        "Google Cloud teknolojileri odağında teknik etkinlikler, uygulamalı atölyeler ve topluluk projeleri düzenledim.",
+        "Çekirdek ekip Google Cloud odağında teknik etkinlikler, uygulamalı atölyeler ve topluluk projeleri yürüttü. Ben de bunların organizasyonunda görev aldım.",
     },
     {
       role: "Organizatör",
       organization: "GDG Konya",
       period: "10/2023 - 10/2025",
       description:
-        "İki yıl boyunca teknik konuşmalar, study jam'ler ve tanışma etkinlikleri düzenledim; Google teknolojileri etrafında bilgi paylaşımını destekledim.",
+        "İki yıl boyunca Google teknolojileri etrafında teknik konuşmalar, study jam'ler ve tanışma etkinlikleri düzenledim.",
     },
   ],
 };
