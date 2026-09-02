@@ -19,7 +19,7 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 - [ ] `*.preview` bilerek gri bulut: ücretsiz planda wildcard DNS kayıtları proxy'lenemez. Preview'lar bu yüzden TLS'siz `http` üzerinden ve yalnızca origin firewall'unda allowlist'e alınmış admin IP'sinden erişilebilir, bkz. `docs/deploy/traefik-ve-origin.md`.
 - [ ] Posta DNS kayıtları (MX, DKIM, SPF, DMARC) Mailcow kurulumuna aittir ve proxy'lenmez (gri bulut); 2026-08-31 kararıyla Resend kaldırıldı, gönderim `contact@dogancanyildiz.com` üzerinden Mailcow SMTP ile yapılır, bkz. `docs/deploy/mailcow-smtp.md`.
 - [ ] **Uyarı:** `me@dogancanyildiz.com` alıcı adresini taşıyan MX kayıtlarına dokunulmaz; A/CNAME kayıtlarının eklenmesi mevcut postayı etkilemez.
-- [ ] `dogancanyildiz.com -> www.dogancanyildiz.com` yönlendirmesi (kanonik host www, bölüm 3'teki karar) bu zone'daki bir Redirect Rule ile yapılır, Coolify'ın dahili www ayarı kullanılmaz.
+- [ ] `dogancanyildiz.com -> www.dogancanyildiz.com` yönlendirmesi (kanonik host www, bölüm 3b) bu zone'daki bir Redirect Rule ile yapılır, Coolify'ın dahili www ayarı kullanılmaz.
 
 - [ ] **CAA kaydı** (2026-08-28 denetimi, yoktu): `CAA 0 issue "letsencrypt.org"`, `CAA 0 issue "pki.goog"`, `CAA 0 iodef "mailto:me@dogancanyildiz.com"`. Origin CA'ya geçilirse `letsencrypt.org` satırı kaldırılabilir.
 - [ ] `*.preview` kaydı yalnızca PR preview kullanılacaksa eklenir; kullanılmayacaksa bu satır ve `docs/deploy/coolify-kurulum.md` bölüm 5 kaldırılır (karar sahibinde, 2026-08-28 denetimi F-029).
@@ -65,14 +65,11 @@ concat("https://www.dogancanyildiz.com", http.request.uri.path)
 - [ ] Preserve query string: **açık**
 - [ ] Hedef bilerek `https://www.dogancanyildiz.com` köküne gidiyor. **Güncelleme (2026-08-30):** kökte artık Türkçe servis ediliyor (EN `/en` altında). Eski İngilizce yollar (`/about` vb.) origin'de 308 ile `/en/...`'e taşındığı için `.sh` üzerinden gelen eski bir link fiilen iki atlama yapar (.sh 301 www, sonra 308); bu bilinçli kabul edilir, tek atlama şartı yalnızca `.sh` kuralının kendisi içindir.
 
-**Karar (2026-09-02):** kanonik host www. Apex için ayrı, ikinci bir Redirect Rule eklenir (rule name: `apex to www`, filter: `http.host eq "dogancanyildiz.com"`, hedef: `concat("https://www.dogancanyildiz.com", http.request.uri)` — burada tam `uri` kullanılır, `uri.path` değil, böylece sorgu dizesi ayrı bir "Preserve query string" anahtarına gerek kalmadan korunur —, 301); Coolify'ın dahili www/non-www ayarı bunun için kullanılmaz, tek kaynak burasıdır.
-
 Doğrulama:
 
 ```bash
 curl -sI https://dogancanyildiz.sh/projects | grep -i -E '^(HTTP|location)'
 curl -sI 'https://www.dogancanyildiz.sh/hakkimda?utm_source=x' | grep -i -E '^(HTTP|location)'
-curl -sI 'https://dogancanyildiz.com/hakkimda?utm_source=x' | grep -i -E '^(HTTP|location)'
 ```
 
 Beklenen:
@@ -82,11 +79,48 @@ HTTP/2 301
 location: https://www.dogancanyildiz.com/projects
 HTTP/2 301
 location: https://www.dogancanyildiz.com/hakkimda?utm_source=x
+```
+
+Tek atlama şartı: ikinci bir `301` veya `location` satırı çıkmamalı.
+
+## 3b. Redirect Rule: `apex to www` (dogancanyildiz.com zone'u)
+
+**Karar (2026-09-02):** kanonik host `www.dogancanyildiz.com`, apex ondan 301 ile yönlenir. Bu kural bölüm 1'deki `.com` zone'unda tanımlanır ve bölüm 3'teki `.sh` kuralından **bağımsızdır**: `.sh` kapsam dışı ilan edilip bölüm 3 silinse bile bu bölüm yerinde kalır.
+
+Rules -> Redirect Rules -> Create rule.
+
+- [ ] Rule name: `apex to www`
+- [ ] Custom filter expression:
+
+```
+http.host eq "dogancanyildiz.com"
+```
+
+- [ ] Then: URL redirect -> Type: **Dynamic**
+- [ ] Expression:
+
+```
+concat("https://www.dogancanyildiz.com", http.request.uri)
+```
+
+- [ ] Status code: **301**
+- [ ] Preserve query string: **kapalı** (`http.request.uri` sorgu dizesini zaten taşıyor; bölüm 3'teki kuraldan farklı olarak bu anahtar açık bırakılırsa sorgu iki kez eklenir)
+- [ ] Coolify'ın dahili www/non-www ayarı bunun için kullanılmaz, tek kaynak burasıdır.
+
+Doğrulama:
+
+```bash
+curl -sI 'https://dogancanyildiz.com/hakkimda?utm_source=x' | grep -i -E '^(HTTP|location)'
+```
+
+Beklenen:
+
+```
 HTTP/2 301
 location: https://www.dogancanyildiz.com/hakkimda?utm_source=x
 ```
 
-Tek atlama şartı: ikinci bir `301` veya `location` satırı çıkmamalı.
+Tek atlama şartı burada da geçerli: ikinci bir `301` veya `location` satırı çıkmamalı.
 
 ## 4. Cache Rule: `static assets`
 
@@ -107,14 +141,14 @@ Next.js `/_next/static/` altına zaten `cache-control: public, max-age=31536000,
 
 ## 4b. Managed robots.txt
 
-- [ ] AI Crawl Control veya Security -> Bots altında "Managed robots.txt" **kapalı** (2026-08-28 denetimi: yayınlanan `robots.txt` uygulamanınki değildi, `Sitemap:` ve `Disallow: /api/` satırları yoktu). Uygulamanın `src/app/robots.ts` çıktısı tek kaynak. Doğrulama: `curl -s https://dogancanyildiz.com/robots.txt` içinde `Sitemap: https://dogancanyildiz.com/sitemap.xml` ve `Disallow: /api/` var.
+- [ ] AI Crawl Control veya Security -> Bots altında "Managed robots.txt" **kapalı** (2026-08-28 denetimi: yayınlanan `robots.txt` uygulamanınki değildi, `Sitemap:` ve `Disallow: /api/` satırları yoktu). Uygulamanın `src/app/robots.ts` çıktısı tek kaynak. Doğrulama: `curl -s https://www.dogancanyildiz.com/robots.txt` içinde `Sitemap: https://www.dogancanyildiz.com/sitemap.xml` ve `Disallow: /api/` var (apex üzerinden sorulursa 301 gövdesi döner, uygulamanın çıktısı değil).
 
 Doğrulama (build sonrası gerçek bir asset yolu ile, ikinci istekte `HIT` beklenir):
 
 ```bash
-ASSET=$(curl -s https://dogancanyildiz.com/ | grep -o '/_next/static/[^"]*\.js' | head -1)
-curl -sI "https://dogancanyildiz.com${ASSET}" | grep -i -E '^(cf-cache-status|cache-control)'
-curl -sI "https://dogancanyildiz.com${ASSET}" | grep -i '^cf-cache-status'
+ASSET=$(curl -s https://www.dogancanyildiz.com/ | grep -o '/_next/static/[^"]*\.js' | head -1)
+curl -sI "https://www.dogancanyildiz.com${ASSET}" | grep -i -E '^(cf-cache-status|cache-control)'
+curl -sI "https://www.dogancanyildiz.com${ASSET}" | grep -i '^cf-cache-status'
 ```
 
 Beklenen: ilk çağrıda `cf-cache-status: MISS` ve `cache-control: public, max-age=31536000, immutable`, ikinci çağrıda `cf-cache-status: HIT`.
@@ -142,12 +176,12 @@ Doğrulama:
 
 ```bash
 for i in 1 2 3 4 5 6; do
-  curl -s -o /dev/null -w "$i: %{http_code}\n" -X POST https://dogancanyildiz.com/api/contact \
+  curl -s -o /dev/null -w "$i: %{http_code}\n" -X POST https://www.dogancanyildiz.com/api/contact \
     -H 'content-type: application/json' -d '{}'
 done
 ```
 
-Beklenen: ilk istekler uygulamadan `403` döner (curl `Origin` göndermediği için; `-H 'origin: https://dogancanyildiz.com'` eklenirse boş gövde `400` olur), altıncı istekte Cloudflare `429` verir.
+Beklenen: ilk istekler uygulamadan `403` döner (curl `Origin` göndermediği için; `-H 'origin: https://www.dogancanyildiz.com'` eklenirse boş gövde `400` olur). Apex `Origin` başlığı artık işe yaramaz: `src/app/api/contact/route.ts` `Origin`'i `NEXT_PUBLIC_SITE_URL` ile tam eşleştirdiği ve değer www olduğu için `https://dogancanyildiz.com` gönderen istek `403` alır. Altıncı istekte Cloudflare `429` verir.
 
 ## 6. Bot Fight Mode
 

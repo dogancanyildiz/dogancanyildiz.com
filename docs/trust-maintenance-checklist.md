@@ -43,7 +43,7 @@ merge kapısı değil); geri kalanı elle.
 
 ## Search Console (Person şeması güncellemelerinden sonra)
 
-1. `https://dogancanyildiz.com/` (ve ayrı indekslenmişse `/en`) üzerinde
+1. `https://www.dogancanyildiz.com/` (ve ayrı indekslenmişse `/en`) üzerinde
    URL Inspection.
 2. **Person** zengin sonuç önizlemesini veya kritik hatasız geçerli
    JSON-LD'yi doğrula.

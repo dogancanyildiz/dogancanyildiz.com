@@ -39,9 +39,9 @@ container açılış logunda hata satırı üretir ve `/api/health` `"degraded"`
 ## 4. Uçtan uca test
 
 ```bash
-curl -s -X POST https://dogancanyildiz.com/api/contact \
+curl -s -X POST https://www.dogancanyildiz.com/api/contact \
   -H 'content-type: application/json' \
-  -H 'origin: https://dogancanyildiz.com' \
+  -H 'origin: https://www.dogancanyildiz.com' \
   -H 'x-locale: tr' \
   -d '{"name":"Deploy check","email":"me@dogancanyildiz.com","topic":"other","message":"Mailcow SMTP dogrulama mesaji.","extra_field":""}'
 ```

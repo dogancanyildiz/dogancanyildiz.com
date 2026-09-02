@@ -100,6 +100,23 @@ function checkDomainDirection() {
     "docs/README.md's launch-checklist.md row does not agree on the .sh -> .com direction"
   );
 
+  // The 2026-09-02 decision made www the canonical host, with the apex
+  // 301ing to it at the edge. Nothing in the application can observe that
+  // hop, so the checklist the owner types into the Cloudflare panel is the
+  // only place it is written down: without a guard a later edit could flip
+  // the direction back to www -> apex and no gate would notice.
+  {
+    const cloudflare = readDoc(CLOUDFLARE);
+    check(
+      /apex to www/.test(cloudflare),
+      `${CLOUDFLARE} does not name the apex to www redirect rule`
+    );
+    check(
+      /http\.host eq "dogancanyildiz\.com"/.test(cloudflare),
+      `${CLOUDFLARE} does not filter the apex to www rule on the apex host`
+    );
+  }
+
   const roadmap = readDoc("docs/10-yol-haritasi.md");
   check(
     /curl -I https:\/\/dogancanyildiz\.sh[^\n]*dogancanyildiz\.com/.test(
@@ -166,6 +183,7 @@ function checkLocaleScheme() {
 const COOLIFY = "docs/deploy/coolify-kurulum.md";
 const README = "README.md";
 const TRAEFIK = "docs/deploy/traefik-ve-origin.md";
+const CLOUDFLARE = "docs/deploy/cloudflare-kurulum.md";
 const FAZ1_CHECKLIST = "docs/plans/handoffs/faz-1-manual-checklist.md";
 const FAZ1_HANDOFF = "docs/plans/handoffs/faz-1.md";
 
