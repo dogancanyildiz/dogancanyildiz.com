@@ -13,6 +13,16 @@ import { CSP_REPORT_LIMITS, isCspMeasurementEnabled } from "./mode";
 /** A report is a few hundred bytes, reports+json batches a handful of them. */
 export const MAX_REPORT_BYTES = 64 * 1024;
 
+/**
+ * Reports written to the log from one request.
+ *
+ * The byte cap alone does not bound the log: a minimal reports+json envelope
+ * is a few dozen bytes, so one accepted request can carry well over a thousand
+ * of them and each one costs a line. A browser batches a handful, never this
+ * many, so anything past the cap is noise and is dropped rather than written.
+ */
+export const MAX_REPORTS_PER_REQUEST = 20;
+
 const ACCEPTED_CONTENT_TYPES = [
   // Deprecated report-uri format, still what Firefox and Safari send.
   "application/csp-report",
@@ -102,6 +112,9 @@ function fromReportsJson(body: unknown): NormalizedReport[] {
   }
   const reports: NormalizedReport[] = [];
   for (const entry of body) {
+    if (reports.length >= MAX_REPORTS_PER_REQUEST) {
+      break;
+    }
     const envelope = record(entry);
     if (!envelope || envelope.type !== "csp-violation") {
       continue;
