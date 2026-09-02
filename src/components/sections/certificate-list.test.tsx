@@ -130,8 +130,15 @@ describe("certificate list", () => {
     expect(orphan).toBeDefined();
     expect(orphan?.querySelector("a")).toBeNull();
     expect(orphan?.querySelector("img")).toBeNull();
-    // No apology for the missing link either: the row simply stops.
-    expect(orphan?.textContent).toContain("Global AI Hub");
+    // No apology for the missing link either: the row simply stops at the
+    // name. The issuer sits once above the group as its heading.
+    expect(orphan?.textContent?.trim()).toBe(
+      "Version Control Systems and Portfolio"
+    );
+    const headings = [...container.querySelectorAll("h3")].map((heading) =>
+      heading.textContent?.trim()
+    );
+    expect(headings).toContain("Global AI Hub");
   });
 
   it("sends every verification link off site safely", async () => {

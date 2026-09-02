@@ -26,8 +26,13 @@ const ISSUED_FORMAT = {
  * is the issuer's artwork, not a second navigation affordance. The visible
  * word stays short and repeats down the list, so each link takes an aria
  * label naming its credential: a reader pulling up a list of links gets
- * fourteen distinct entries rather than fourteen identical ones. The label
+ * twelve distinct entries rather than twelve identical ones. The label
  * opens with the visible word, which is what SC 2.5.3 asks of it.
+ *
+ * The issuer is printed once, as the group heading, and not again on every
+ * row; the row's meta line carries only the issue month. Brand names keep
+ * their own casing: the uppercase transform of .meta-label would turn a
+ * Turkish reader's "Cisco" into "CİSCO" with a dotted capital I.
  */
 export async function CertificateList({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "about" });
@@ -47,7 +52,9 @@ export async function CertificateList({ locale }: { locale: Locale }) {
     <div className="space-y-8">
       {groups.map((group) => (
         <div key={group.id} className="space-y-3">
-          <h3 className="meta-label">{group.issuer}</h3>
+          <h3 className="meta-label normal-case tracking-normal">
+            {group.issuer}
+          </h3>
           <ul className="divide-y divide-border">
             {group.entries.map((entry) => (
               <li
@@ -74,20 +81,16 @@ export async function CertificateList({ locale }: { locale: Locale }) {
 
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-sm leading-relaxed">{entry.name}</p>
-                  <p className="meta-label">
-                    {entry.issuer}
-                    {entry.issued ? (
-                      <>
-                        {" · "}
-                        <time dateTime={entry.issued}>
-                          {format.dateTime(
-                            new Date(`${entry.issued}T00:00:00Z`),
-                            ISSUED_FORMAT
-                          )}
-                        </time>
-                      </>
-                    ) : null}
-                  </p>
+                  {entry.issued ? (
+                    <p className="meta-label">
+                      <time dateTime={entry.issued}>
+                        {format.dateTime(
+                          new Date(`${entry.issued}T00:00:00Z`),
+                          ISSUED_FORMAT
+                        )}
+                      </time>
+                    </p>
+                  ) : null}
                   {entry.credentialId ? (
                     <p className="font-mono text-xs text-muted-foreground">
                       {t("certificateCredentialId", { id: entry.credentialId })}
