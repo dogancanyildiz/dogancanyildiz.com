@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { BrandMark } from "@/components/brand/brand-mark";
 import { Link, usePathname } from "@/i18n/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
@@ -28,6 +29,10 @@ export function Header({ untranslated }: HeaderProps) {
             href="/"
             className="tap-target group flex min-w-0 items-center gap-2.5 no-underline"
           >
+            {/* Decorative, so the link keeps the name as its accessible
+                name. shrink-0 because the name beside it is the part that
+                may truncate on a narrow viewport. */}
+            <BrandMark height={18} className="shrink-0 text-foreground" />
             <span className="text-sm font-medium tracking-tight text-foreground">
               {tBrand("name")}
             </span>

@@ -478,6 +478,18 @@ describe("brand link", () => {
     expect(source).toContain('{tBrand("name")}');
     expect(source).not.toContain("sr-only");
   });
+
+  it("puts the logo mark inside the same link without labelling it", () => {
+    const source = read("src/components/layout/header.tsx");
+    // Order matters: the mark reads first visually, and the link's accessible
+    // name has to stay the name text alone, which is what the aria-hidden on
+    // BrandMark (src/components/brand/brand-mark.tsx) buys.
+    const markAt = source.indexOf("<BrandMark");
+    const nameAt = source.indexOf('{tBrand("name")}');
+    expect(markAt).toBeGreaterThan(-1);
+    expect(markAt).toBeLessThan(nameAt);
+    expect(source).not.toContain('aria-label={tBrand("name")}');
+  });
 });
 
 describe("desktop nav active state", () => {
