@@ -41,11 +41,17 @@ Cloudflare 526 verdiği için bölüm 3-5'in canlı URL isteyen maddelerinin hi�
       adres varsa bu, dosya `public/cv/` altında yayınlandığı için herkese açık olur
 - [ ] Sahibi Wikonya projesinin canlı link kontrolünü yaptı; hedef site artık kendini
       "Konya Genç" olarak tanıtıyor, link hâlâ doğru hedefi mi gösteriyor teyit edilmeli
-- [ ] Sertifika `verifyUrl` değerleri henüz teslim edilmedi, sahibinden gelince eklenecek
-- [ ] Proje kapak görselleri henüz teslim edilmedi, sahibinden gelince `cover` ve `coverAlt`
-      ile eklenecek
+- [x] Sertifika `verifyUrl` değerleri 2026-09-02'de teslim alındı ve uygulandı (on üç
+      kayıttan on ikisi Credly/Hackviser doğrulama linkine bağlı, rozet görselleri ve
+      anahtar kelime satırlarıyla birlikte; Global AI Hub kural gereği linksiz kalıyor)
+- [ ] Proje kapak görselleri kısmen teslim edildi (Köklü Hukuk 2026-09-02'de `cover` +
+      `coverAlt` aldı); kalan beş proje hâlâ kapaksız, sahibinden gelince aynı desenle
+      eklenecek
 - [ ] Speaking verisi (etkinlik, konu, tarih) henüz teslim edilmedi, sahibinden gelince
       Konuşmalar bloğu doldurulacak
+- [ ] Yazı ve proje sayfalarının sonundaki paylaş bloğu (X/LinkedIn/WhatsApp/e-posta,
+      bağlantıyı kopyala) ve gösterdiği kart bir tarayıcıda gözle kontrol edildi; kartın
+      kendisi sayfanın kendi OG rotası (`/opengraph-image/default`), kimlik kartı değil
 
 ## 3. SEO ve i18n
 

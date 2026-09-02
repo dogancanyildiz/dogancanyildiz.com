@@ -21,6 +21,11 @@ merge kapısı değil); geri kalanı elle.
       sertifika doğrulama URL'sini düzelt.
 - [ ] `src/content/profile.ts` içindeki sertifika `verifyUrl` değerlerinin
       hâlâ açıldığını doğrula (Credly, Hackviser, Cisco).
+- [ ] Yeni bir sertifika gelirse aynı deseni uygula: rozet görselini
+      `public/images/badges/`e ekle, `issued`, `verifyUrl` (varsa) ve verenin
+      kendi etiketlerinden en çok altı anahtar kelime gir; `withCheckedCertificates`
+      eksik alanı, altıdan fazla veya iki dil arasında eşleşmeyen kelime sayısını
+      build sırasında düşürür.
 - [ ] GitHub, LinkedIn ve site footer linklerini gözden geçir; adın yazımı
       her yerde aynı olmalı.
 - [ ] Search Console: ana URL'de yeni yapılandırılmış veri hatası yok;
