@@ -17,12 +17,21 @@ import { certificateGroupsFor, certificates } from "@/content/profile";
  * component: flip the attribute, fire close, and close the top dialog on
  * Escape. Everything the component itself owns (the scroll lock, the focus
  * return, the outside click) is left out so the tests can catch it.
+ *
+ * It also models one Chrome bug, because the component has to survive it:
+ * once a dialog has been closed by Escape, later close() calls on that same
+ * element shut it without dispatching close, and it never recovers.
+ * Verified in headless Chrome 152 against a bare <dialog> on a page with no
+ * framework on it, so nothing here can fix it; a teardown wired only to
+ * onClose silently stops running.
  */
 function installDialogPolyfill() {
   const proto = window.HTMLDialogElement.prototype;
   if (typeof proto.showModal === "function") return;
 
   const open = new Set<HTMLDialogElement>();
+  const closedByEscape = new WeakSet<HTMLDialogElement>();
+
   proto.showModal = function showModal(this: HTMLDialogElement) {
     this.setAttribute("open", "");
     open.add(this);
@@ -31,12 +40,16 @@ function installDialogPolyfill() {
     if (!this.hasAttribute("open")) return;
     this.removeAttribute("open");
     open.delete(this);
+    if (closedByEscape.has(this)) return;
     this.dispatchEvent(new Event("close"));
   };
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     const top = [...open].at(-1);
-    top?.close();
+    if (!top) return;
+    // The Escape close itself still fires; every close after it does not.
+    top.close();
+    closedByEscape.add(top);
   });
 }
 
@@ -436,6 +449,45 @@ describe("credential preview", () => {
     expect(document.body.style.overflow).toBe("hidden");
 
     await user.keyboard("{Escape}");
+    expect(dialog.hasAttribute("open")).toBe(false);
+    expect(document.body.style.overflow).toBe("");
+  });
+
+  it("gives the page back on a close that follows an Escape", async () => {
+    const user = userEvent.setup();
+    const { container } = await renderList("en");
+    const trigger = screen.getByRole("button", { name: `Enlarge ${CAPT}` });
+    const dialog = dialogFor(container, CAPT);
+
+    await user.click(trigger);
+    await user.keyboard("{Escape}");
+    expect(document.body.style.overflow).toBe("");
+
+    // Chrome dispatches no close event for this second close. Nothing on the
+    // page may depend on it: an ordinary open, Escape, open, close would
+    // otherwise leave the About page stuck at overflow: hidden until reload.
+    await user.click(trigger);
+    expect(document.body.style.overflow).toBe("hidden");
+    await user.click(
+      within(dialog).getByRole("button", { name: "Close preview" })
+    );
+
+    expect(dialog.hasAttribute("open")).toBe(false);
+    expect(document.body.style.overflow).toBe("");
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("gives the page back on a backdrop close that follows an Escape", async () => {
+    const user = userEvent.setup();
+    const { container } = await renderList("en");
+    const trigger = screen.getByRole("button", { name: `Enlarge ${CAPT}` });
+    const dialog = dialogFor(container, CAPT);
+
+    await user.click(trigger);
+    await user.keyboard("{Escape}");
+    await user.click(trigger);
+    fireEvent.click(dialog);
+
     expect(dialog.hasAttribute("open")).toBe(false);
     expect(document.body.style.overflow).toBe("");
   });

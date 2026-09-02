@@ -68,18 +68,32 @@ export function CredentialPreview({
     document.body.style.overflow = "hidden";
   }, []);
 
-  const close = useCallback(() => {
-    dialogRef.current?.close();
-  }, []);
-
-  // Runs for every way out: the close button, Escape, and the backdrop.
-  const handleClose = useCallback(() => {
+  /**
+   * Undo everything open() did. Idempotent, because it runs from both the
+   * close event and the calls that close the dialog directly, and either one
+   * may be the only one that happens.
+   */
+  const release = useCallback(() => {
     document.body.style.overflow = "";
     // Browsers restore focus to the invoker themselves, but only when the
     // invoker is still in the document and still focusable. Asking for it
     // explicitly costs nothing and makes the return testable.
     triggerRef.current?.focus();
   }, []);
+
+  /**
+   * Chrome drops the close event on the first close() that follows a close by
+   * Escape: the dialog shuts, no event is dispatched, and a teardown wired
+   * only to onClose never runs. That left the page locked at
+   * overflow: hidden with no way back short of a reload, from a sequence as
+   * ordinary as open, Escape, open, close. So the lock is released here, next
+   * to the close() that earns it, and onClose stays for the Escape path,
+   * which does fire.
+   */
+  const close = useCallback(() => {
+    dialogRef.current?.close();
+    release();
+  }, [release]);
 
   // A dialog left open when the component unmounts would take the scroll lock
   // with it and leave the page unable to scroll.
@@ -130,7 +144,7 @@ export function CredentialPreview({
 
       <dialog
         ref={dialogRef}
-        onClose={handleClose}
+        onClose={release}
         onClick={handleDialogClick}
         className="credential-dialog"
         aria-label={name}
