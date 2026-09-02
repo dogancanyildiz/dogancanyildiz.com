@@ -111,6 +111,28 @@ describe("footer", () => {
     expect(source).toContain("href={`mailto:${CONTACT_EMAIL_PUBLIC}`}");
   });
 
+  // This invariant was dropped when the layout assertions above replaced it.
+  // It is the only thing standing between the footer and a hand pasted
+  // profile url, which would silently drift away from the sameAs array the
+  // Person JSON-LD publishes from the same module.
+  it("takes every external destination from lib/site, never a literal", () => {
+    expect(source).toContain('from "@/lib/site"');
+    expect(source).toContain("href={SOCIAL.github}");
+    expect(source).toContain("href={SOCIAL.linkedin}");
+    expect(source).toContain(
+      'href={whatsappHref(tContact("whatsappPrefill"))}'
+    );
+    expect(source).toContain("href={`mailto:${CONTACT_EMAIL_PUBLIC}`}");
+
+    const literalUrls = [...source.matchAll(/"(https?:\/\/[^"]*)"/g)].map(
+      (match) => match[1]
+    );
+    expect(literalUrls, "hardcoded url in the footer").toEqual([]);
+    // A literal mailto: would be a second address to keep in sync; the
+    // template literal above reads "mailto:${" and never matches this.
+    expect(source).not.toMatch(/mailto:[a-z0-9]/i);
+  });
+
   it("has no leftover template contact details", () => {
     expect(source).not.toContain("alex@example.com");
     expect(source).not.toContain("Twitter");

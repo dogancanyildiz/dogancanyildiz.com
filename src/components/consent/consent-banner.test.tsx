@@ -45,14 +45,24 @@ describe("ConsentBanner", () => {
 
   it("asks when analytics is configured and no choice is stored", () => {
     renderWithIntl(<Banner />);
+    // A region, not a dialog: nothing here traps focus or closes on Escape,
+    // so announcing a dialog would promise an interaction model the banner
+    // does not implement.
     expect(
-      screen.getByRole("dialog", { name: "Visit counts" })
+      screen.getByRole("region", { name: "Visit counts" })
     ).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("loads no tracker while the question is still unanswered", () => {
+    renderWithIntl(<Banner />);
+    expect(screen.getByRole("region")).toBeInTheDocument();
+    expect(document.querySelector(`script[src="${tag.src}"]`)).toBeNull();
   });
 
   it("stays hidden when analytics is not configured", () => {
     renderWithIntl(<Banner configured={false} />);
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
   });
 
   it("injects the tracker after allow and remembers the choice", async () => {
@@ -61,18 +71,43 @@ describe("ConsentBanner", () => {
     await user.click(
       screen.getByRole("button", { name: "Allow visit counts" })
     );
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
     expect(window.localStorage.getItem(CONSENT_STORAGE_KEY)).toContain(
       '"analytics":true'
     );
     expect(document.querySelector(`script[src="${tag.src}"]`)).not.toBeNull();
   });
 
+  it("honours the choice for this visit when storage refuses the write", async () => {
+    // Safari's private mode throws on setItem. The banner still has to close
+    // and the choice still has to take effect, otherwise the question comes
+    // back on every render for the whole visit.
+    // jsdom serves localStorage through a proxy, so the method has to be
+    // replaced on Storage.prototype; an instance level spy never runs.
+    const setItem = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementation(() => {
+        throw new Error("QuotaExceededError");
+      });
+    const user = userEvent.setup();
+    renderWithIntl(<Banner />);
+
+    await user.click(
+      screen.getByRole("button", { name: "Allow visit counts" })
+    );
+
+    expect(setItem).toHaveBeenCalled();
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    expect(document.querySelector(`script[src="${tag.src}"]`)).not.toBeNull();
+    setItem.mockRestore();
+    expect(window.localStorage.getItem(CONSENT_STORAGE_KEY)).toBeNull();
+  });
+
   it("does not inject the tracker after a refusal", async () => {
     const user = userEvent.setup();
     renderWithIntl(<Banner />);
-    await user.click(screen.getByRole("button", { name: "Not now" }));
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Decline" }));
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
     expect(window.localStorage.getItem(CONSENT_STORAGE_KEY)).toContain(
       '"analytics":false'
     );
@@ -89,7 +124,7 @@ describe("ConsentBanner", () => {
       })
     );
     renderWithIntl(<Banner />);
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
     expect(document.querySelector(`script[src="${tag.src}"]`)).toBeNull();
   });
 });

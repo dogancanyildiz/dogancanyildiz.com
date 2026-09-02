@@ -23,9 +23,14 @@ export function ContactPageContent() {
             />
             <div className="min-w-0">
               <p className="meta-label">{t("emailLabel")}</p>
+              {/* text-sm on its own is a 20px line box, and neither of these
+                  two links sits inside a sentence, so the inline exception to
+                  SC 2.5.8 does not cover them. min-h-6 is the same 24px floor
+                  the project card badges take; the 44px .tap-target is for
+                  standalone controls, not for a link under a label. */}
               <a
                 href={`mailto:${CONTACT_EMAIL_PUBLIC}`}
-                className="break-all text-sm text-primary underline-offset-4 hover:underline"
+                className="inline-block min-h-6 break-all text-sm text-primary underline-offset-4 hover:underline"
               >
                 {CONTACT_EMAIL_PUBLIC}
               </a>
@@ -42,7 +47,7 @@ export function ContactPageContent() {
                 href={whatsappHref(t("whatsappPrefill"))}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-primary underline-offset-4 hover:underline"
+                className="inline-flex min-h-6 items-center text-sm text-primary underline-offset-4 hover:underline"
               >
                 {t("whatsappAction")}
               </a>

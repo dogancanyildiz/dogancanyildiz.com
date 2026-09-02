@@ -13,7 +13,6 @@
   --font-mono: var(--font-mono-stack);
   --color-ring: var(--ring);
   --color-status-up: var(--status-up);
-  --color-status-down: var(--status-down);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
@@ -69,8 +68,11 @@
   --border-strong: oklch(0.635 0.0114 252.9);
   --input-border: var(--border-strong);
   --ring: oklch(0.4794 0.1156 156.3);
+  /* Availability dot in the hero, the site's only status surface. There is
+     no matching "down" token: the Systems panel renders build-time data and
+     links out to Uptime Kuma rather than reporting a live state, so nothing
+     here ever paints a failure. */
   --status-up: oklch(0.4794 0.1156 156.3);
-  --status-down: oklch(0.5054 0.1905 27.5);
   --ambient-grid-line: color-mix(in oklab, var(--foreground) 8%, transparent);
   --ambient-grid-opacity: 0.55;
   --ambient-glow: color-mix(in oklab, var(--foreground) 10%, transparent);
@@ -96,7 +98,6 @@
   --input-border: var(--border-strong);
   --ring: oklch(0.7591 0.1444 158);
   --status-up: oklch(0.7591 0.1444 158);
-  --status-down: oklch(0.7106 0.1661 22.2);
   --ambient-grid-line: color-mix(in oklab, var(--foreground) 4%, transparent);
   --ambient-grid-opacity: 0.5;
   --ambient-glow: color-mix(in oklab, oklch(1 0 0) 10%, transparent);
@@ -307,11 +308,6 @@
 
   .skill-item-list {
     @apply flex flex-wrap gap-2;
-  }
-
-  .pull-quote {
-    @apply text-2xl font-semibold leading-snug tracking-tight text-foreground sm:text-3xl;
-    font-family: var(--font-display-stack);
   }
 
   /* WCAG 2.2 SC 2.5.8 wants 24x24 CSS px minimum. 44px is the comfortable

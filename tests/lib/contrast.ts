@@ -55,9 +55,15 @@ export function compositeOver(fg: Rgb, alpha: number, bg: Rgb): Rgb {
   };
 }
 
-/** WCAG relative luminance, from linear-light sRGB. */
+/**
+ * WCAG relative luminance, from linear-light sRGB. Channels are clamped
+ * first: an oklch() value outside the sRGB gamut converts to a channel below
+ * 0 or above 1, and the browser paints the clamped colour, so the luminance
+ * has to be read off the same clamped value rather than the ideal one.
+ */
 export function relativeLuminance({ r, g, b }: Rgb): number {
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const clamp = (channel: number) => Math.min(1, Math.max(0, channel));
+  return 0.2126 * clamp(r) + 0.7152 * clamp(g) + 0.0722 * clamp(b);
 }
 
 /** WCAG contrast ratio between two relative luminances, order-independent. */

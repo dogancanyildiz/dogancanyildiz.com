@@ -1,7 +1,78 @@
+// @vitest-environment jsdom
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { createElement, type ReactNode } from "react";
+import { describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { isNavItemActive } from "@/lib/nav";
+import { renderWithIntl, resolveServerTree } from "./helpers/render";
+
+// This file is .ts, not .tsx, so the render cases below build their elements
+// with createElement instead of JSX. Renaming it would move a path other
+// suites and the audit trail refer to by name, which is not worth the syntax.
+
+// next-intl's Link and usePathname reach for an App Router context jsdom
+// cannot provide, the same substitution the layout component suites make
+// (see src/components/layout/mobile-menu.test.tsx).
+vi.mock("@/i18n/navigation", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/i18n/navigation")>();
+  return {
+    ...actual,
+    usePathname: () => "/about",
+    useParams: () => ({}),
+    Link: ({
+      href,
+      children,
+      ...props
+    }: { href: string; children?: ReactNode } & Record<string, unknown>) =>
+      createElement("a", { href, ...props }, children),
+  };
+});
+
+vi.mock("next-themes", () => ({
+  useTheme: () => ({ resolvedTheme: "light", setTheme: () => {} }),
+}));
+
+// The Footer is a server component: it reads getTranslations/getLocale from
+// the request scope this render never enters, so both are served from the
+// real English catalog instead.
+vi.mock("next-intl/server", async () => {
+  const messages = (await import("../messages/en.json")).default as Record<
+    string,
+    unknown
+  >;
+  return {
+    getLocale: async () => "en",
+    getTranslations: async (arg?: string | { namespace?: string }) => {
+      const namespace = typeof arg === "string" ? arg : arg?.namespace;
+      return (key: string, values?: Record<string, unknown>) => {
+        const path = namespace ? `${namespace}.${key}` : key;
+        const raw = path
+          .split(".")
+          .reduce<unknown>(
+            (node, segment) => (node as Record<string, unknown>)?.[segment],
+            messages
+          );
+        if (typeof raw !== "string") {
+          throw new Error(`missing message key: en.${path}`);
+        }
+        if (!values) return raw;
+        return Object.entries(values).reduce(
+          (text, [name, value]) => text.replace(`{${name}}`, String(value)),
+          raw
+        );
+      };
+    },
+  };
+});
+
+const { Header } = await import("@/components/layout/header");
+const { Footer } = await import("@/components/layout/footer");
+const { MobileMenu } = await import("@/components/layout/mobile-menu");
+const { ContactPageContent } =
+  await import("@/components/sections/contact-page-content");
+const { default: LocaleError } = await import("@/app/[lang]/error");
 
 const read = (relative: string) =>
   readFileSync(join(process.cwd(), relative), "utf8");
@@ -53,24 +124,152 @@ describe("focus ring survives on form controls", () => {
   });
 });
 
-describe("target size", () => {
-  it("gives every icon-only control at least 44 CSS px", () => {
-    for (const file of [
-      "src/components/layout/mobile-menu.tsx",
-      "src/components/layout/theme-toggle.tsx",
-      "src/components/layout/footer.tsx",
-      "src/components/layout/language-switcher.tsx",
-      "src/components/layout/header.tsx",
-      "src/components/layout/social-links.tsx",
-    ]) {
-      expect(read(file), `${file} has no tap-target`).toContain("tap-target");
-    }
-  });
+// Tailwind's spacing scale is 0.25rem a step and the root font size is the
+// browser default 16px, so `min-h-11` resolves to 44 CSS px.
+const SPACING_STEP_PX = 4;
+/** WCAG 2.2 SC 2.5.8 asks 24; F-062 set 44 for the site's own chrome. */
+const TARGET_FLOOR_PX = 44;
+const MINIMUM_FLOOR_PX = 24;
 
+/**
+ * The smallest height, in CSS px, a class list guarantees at the base
+ * breakpoint. jsdom applies no stylesheet, so the box is derived from the
+ * utilities themselves rather than measured: getBoundingClientRect would
+ * report 0 for every element here and pass by accident.
+ *
+ * Anything carrying a variant (`sm:`, `hover:`) is skipped on purpose. A
+ * target has to be large enough before a breakpoint or a state applies, so a
+ * size that only arrives with one does not count.
+ */
+function guaranteedHeightPx(className: string): number | null {
+  let height: number | null = null;
+  for (const token of className.split(/\s+/)) {
+    if (!token || token.includes(":")) continue;
+    // .tap-target is `min-h-11 min-w-11`, asserted below straight from the
+    // stylesheet so this number cannot drift away from the rule.
+    if (token === "tap-target") {
+      height = Math.max(height ?? 0, 44);
+      continue;
+    }
+    // min-h wins over h and size in the cascade, and all three are read as a
+    // floor here: a control that sets both keeps the larger of the two.
+    const match = /^(?:min-h|h|size)-(\d+(?:\.\d+)?)$/.exec(token);
+    if (match?.[1]) {
+      height = Math.max(height ?? 0, Number(match[1]) * SPACING_STEP_PX);
+    }
+  }
+  return height;
+}
+
+/** Every link and button the render produced, with its derived height. */
+function measuredTargets(container: HTMLElement) {
+  return [...container.querySelectorAll<HTMLElement>("a, button")]
+    .filter((element) => element.closest("[aria-hidden='true']") === null)
+    .map((element) => ({
+      element,
+      label: `${element.tagName.toLowerCase()} "${(element.textContent ?? "").trim() || element.getAttribute("aria-label") || element.getAttribute("href")}"`,
+      height: guaranteedHeightPx(element.className),
+    }));
+}
+
+// The former string search here ("every one of these files mentions
+// tap-target somewhere") could not see a regression: footer.tsx kept the
+// word for its email link while every other footer link dropped to min-h-6,
+// and the assertion stayed green. These render the surfaces instead and read
+// the floor off each control that comes out.
+describe("target size", () => {
   it("keeps the tap-target utility at 44px", () => {
     expect(read("src/app/globals.css")).toMatch(
       /\.tap-target\s*\{[^}]*min-h-11[^}]*min-w-11/
     );
+  });
+
+  it("measures what it is supposed to measure", () => {
+    expect(guaranteedHeightPx("tap-target inline-flex")).toBe(44);
+    expect(guaranteedHeightPx("min-h-6 items-center")).toBe(24);
+    expect(guaranteedHeightPx("size-9 rounded-full")).toBe(36);
+    expect(guaranteedHeightPx("h-9 min-h-11")).toBe(44);
+    expect(guaranteedHeightPx("sm:min-h-11 flex")).toBeNull();
+    expect(guaranteedHeightPx("flex items-center gap-2")).toBeNull();
+  });
+
+  it("gives every header control at least 44 CSS px", () => {
+    const { container } = renderWithIntl(
+      createElement(Header, { untranslated: { en: [], tr: [] } })
+    );
+    const targets = measuredTargets(container);
+    expect(targets.length).toBeGreaterThan(5);
+    for (const { label, height } of targets) {
+      expect(height, `header ${label} has no height floor`).not.toBeNull();
+      expect(height, `header ${label}`).toBeGreaterThanOrEqual(TARGET_FLOOR_PX);
+    }
+  });
+
+  it("gives every footer link at least 44 CSS px", async () => {
+    const { container } = render(
+      await resolveServerTree(createElement(Footer))
+    );
+    const targets = measuredTargets(container);
+    // Five nav routes, privacy, email, WhatsApp, GitHub, LinkedIn and the feed.
+    expect(targets.length).toBeGreaterThanOrEqual(11);
+    for (const { label, height } of targets) {
+      expect(height, `footer ${label} has no height floor`).not.toBeNull();
+      expect(height, `footer ${label}`).toBeGreaterThanOrEqual(TARGET_FLOOR_PX);
+    }
+  });
+
+  it("gives every control inside the open mobile menu at least 44 CSS px", async () => {
+    const user = userEvent.setup();
+    renderWithIntl(createElement(MobileMenu));
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    const panel = await screen.findByRole("dialog");
+
+    const targets = measuredTargets(panel);
+    expect(targets.length).toBeGreaterThan(5);
+    for (const { label, height } of targets) {
+      expect(height, `mobile menu ${label} has no height floor`).not.toBeNull();
+      expect(height, `mobile menu ${label}`).toBeGreaterThanOrEqual(
+        TARGET_FLOOR_PX
+      );
+    }
+  });
+
+  it("gives the error boundary's two ways out at least 44 CSS px", () => {
+    // The boundary logs the original error from an effect; that console call
+    // is the point of the component, not noise this test needs to see.
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { container } = renderWithIntl(
+      createElement(LocaleError, {
+        error: new Error("render failed"),
+        retry: () => {},
+      })
+    );
+    const targets = measuredTargets(container);
+    expect(targets).toHaveLength(2);
+    for (const { label, height } of targets) {
+      expect(height, `error page ${label}`).toBeGreaterThanOrEqual(
+        TARGET_FLOOR_PX
+      );
+    }
+  });
+
+  it("keeps the contact detail links above the 24px floor of SC 2.5.8", () => {
+    // These two are not chrome controls, so they take the same 24px floor the
+    // project card badges do rather than the 44px one. Neither sits inside a
+    // sentence, so the inline exception to SC 2.5.8 does not cover them:
+    // text-sm alone leaves a 20px line box.
+    const { container } = renderWithIntl(createElement(ContactPageContent));
+    for (const selector of [
+      'a[href^="mailto:"]',
+      'a[href^="https://wa.me/"]',
+    ]) {
+      const link = container.querySelector<HTMLElement>(selector);
+      expect(link, `${selector} is missing`).not.toBeNull();
+      expect(
+        guaranteedHeightPx(link?.className ?? ""),
+        selector
+      ).toBeGreaterThanOrEqual(MINIMUM_FLOOR_PX);
+    }
   });
 });
 

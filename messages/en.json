@@ -179,6 +179,8 @@
     "storageBody": "Theme preference is stored by the browser (localStorage), not as a cookie. Your measurement choice sits in the same place, under the key dcy-consent. Neither reaches me as a tracking cookie.",
     "analyticsTitle": "Visit counts",
     "analyticsBody": "If you allow it, visits are counted by Umami on my own server, and Umami sets no cookie. The script loads only after you say yes. Necessary storage, meaning the theme and this choice itself, does not wait on that yes, because the site needs it to work.",
+    "whatsappTitle": "WhatsApp",
+    "whatsappBody": "The WhatsApp link in the footer opens a chat inside WhatsApp, which Meta runs. A message sent that way travels through Meta rather than through my own server, and Meta's own terms cover it. Email and the contact form stay available if you would rather not use it.",
     "formTitle": "Contact form",
     "formBody": "The form sends your name, your email, the topic you picked and your message to me through my own mail server. I use them to write back, and I neither sell them nor pass them on. The server also reads the IP address a request comes from to limit abuse; your message body and your email address are never written to the server log.",
     "contactTitle": "Contact",
@@ -188,8 +190,12 @@
     "title": "Visit counts",
     "body": "This site does not use measurement cookies. Theme stays in your browser. Visit counts run on a cookieless Umami instance on my own server and load only if you allow them.",
     "accept": "Allow visit counts",
-    "reject": "Not now",
-    "privacy": "Privacy"
+    "reject": "Decline",
+    "privacy": "Privacy",
+    "manageAllowed": "Visit counts are on. The script loads on this browser.",
+    "manageDeclined": "Visit counts are off. No measurement script loads.",
+    "manageUnset": "You have not answered yet, so nothing is counted.",
+    "revoke": "Withdraw"
   },
   "errorPage": {
     "title": "This page failed to load",

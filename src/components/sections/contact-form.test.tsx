@@ -208,6 +208,42 @@ describe("ContactForm submission", () => {
     });
   });
 
+  it("refuses a topic change while the request is in flight", async () => {
+    // aria-disabled paints the select and stops the pointer, but a keyboard
+    // user can still walk the options, and the request already carries the
+    // topic the visitor submitted. The change has to be refused, not styled.
+    let resolveFetch!: (value: Response) => void;
+    fetchMock.mockImplementation(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        })
+    );
+    const user = userEvent.setup();
+    renderWithIntl(<ContactForm />);
+
+    await fillValidForm(user);
+    await user.click(screen.getByRole("button", { name: "Send message" }));
+
+    const topic = screen.getByLabelText("Topic");
+    expect(topic).toHaveValue("web");
+
+    await user.selectOptions(topic, "devops");
+    expect(topic).toHaveValue("web");
+
+    await act(async () => {
+      resolveFetch(jsonResponse(200, {}));
+      await Promise.resolve();
+    });
+
+    // The success path resets the form, and the controlled select has to go
+    // back to the placeholder with the rest of the fields.
+    expect(screen.getByLabelText("Topic")).toHaveValue("");
+    // Once the request is done the field takes changes again.
+    await user.selectOptions(screen.getByLabelText("Topic"), "security");
+    expect(screen.getByLabelText("Topic")).toHaveValue("security");
+  });
+
   it("shows the timeout message when the request aborts", async () => {
     // A real AbortSignal.timeout() rejection is instanceof Error in every
     // browser that ships it (Chromium and Firefox both make DOMException

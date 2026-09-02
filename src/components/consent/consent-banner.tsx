@@ -8,6 +8,12 @@ import { useConsent } from "./consent-provider";
 /**
  * Asks once whether visit counts may load. Hidden when analytics is not
  * configured, or when a choice is already stored.
+ *
+ * A landmark region, not a dialog: nothing here traps focus, nothing closes
+ * on Escape and the page behind it stays fully usable, so role="dialog"
+ * would promise a screen reader an interaction model the banner does not
+ * implement. The choice itself is never lost by ignoring the banner; it can
+ * be made or changed later on /privacy.
  */
 export function ConsentBanner() {
   const t = useTranslations("consent");
@@ -19,9 +25,8 @@ export function ConsentBanner() {
 
   return (
     <div
-      role="dialog"
+      role="region"
       aria-labelledby="consent-title"
-      aria-describedby="consent-body"
       className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 p-4 backdrop-blur-md sm:p-5"
     >
       <div className="page-shell flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -29,10 +34,7 @@ export function ConsentBanner() {
           <p id="consent-title" className="text-sm font-medium text-foreground">
             {t("title")}
           </p>
-          <p
-            id="consent-body"
-            className="text-sm leading-6 text-muted-foreground"
-          >
+          <p className="text-sm leading-6 text-muted-foreground">
             {t("body")}{" "}
             <Link
               href="/privacy"
