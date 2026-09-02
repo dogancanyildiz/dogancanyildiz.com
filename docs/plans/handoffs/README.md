@@ -22,6 +22,7 @@ Bu dizin, portfolio modernizasyon projesinin her fazından sonra teslim edilen d
 | faz-4-manual-checklist.md | 4 | Site sahibine yapması gereken manuel adımlar | Tamamlanacak |
 | faz-5-manual-checklist.md | 5 | Cloudflare DNS, Coolify Gatus/Umami kaynakları, Umami paneli, env ve canlı doğrulama | Panel adımları tamamlanacak (kod PR #31 ile merged) |
 | denetim-kapanisi-2026-08-28.md | denetim | 28 Ağustos denetim raporundaki açık bulguların kapanış devir notu: kümeler, kararlar, sahibine kalanlar | Yazıldı, PR #34 (dev) açık |
+| denetim-takip-2026-09-02.md | denetim (3. tur) | 31 Ağustos incelemesinin (V-) maddelerinin takip devir notu: 5 küme, kararlar, yeni bulgular (T-56 typecheck regresyonu dahil), sahibine kalanlar | Yazıldı, dal `feature/audit-followups` |
 
 ## Okuma sırası
 
@@ -61,6 +62,7 @@ Her manuel checklist şunu içerir:
 - **Faz 4**: İçerik pipeline (✓ merged PR #6, 2026-08-27)
 - **Faz 5**: Altyapı vitrini, otomasyonlar (✓ kod merged PR #31, 2026-08-28, v0.3.1; panel adımları `faz-5-manual-checklist.md`'de açık; ayrı bir faz-5.md devir notu yazılmadı, kapsam PR #31 gövdesinde ve `docs/10-yol-haritasi.md` Faz 5 bölümünde)
 - **Denetim kapanışı**: 28 Ağustos denetimindeki açık bulgular (`denetim-kapanisi-2026-08-28.md`)
+- **Denetim takip (3. tur)**: 31 Ağustos incelemesinin V- maddeleri, `feature/audit-followups` (`denetim-takip-2026-09-02.md`)
 
 ## Notlar
 
