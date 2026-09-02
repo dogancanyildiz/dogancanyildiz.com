@@ -1,6 +1,6 @@
 # Fazlı Yol Haritası
 
-Durum: Kod tarafı uygulandı (Faz 0-5 main'de: PR #2-#6, #31; v0.3.1), 28 Ağustos denetim kapanışı `feature/audit-closure` dalında; kalan: Faz 5 panel adımları, launch kapısının manuel maddeleri, sahibinin teslimatları · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
+Durum: Kod tarafı uygulandı (Faz 0-5 main'de: PR #2-#6, #31; v0.3.1), 28 Ağustos denetim kapanışı `feature/audit-closure` dalında, 31 Ağustos incelemesi ve 2 Eylül 3. tur (`feature/audit-followups`) sonraki dallarda kapatıldı; kalan: Faz 5 panel adımları, launch kapısının manuel maddeleri, sahibinin teslimatları, bir typecheck regresyonu (T-56, bkz. `audit/acik-kalanlar.md` bölüm 11) · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -176,6 +176,7 @@ Faz sırasının mantığı bağımlılık zinciri: Faz 0 hiçbir şeye bağlı 
 - **Faz 5** (PR #31, main'e merge 2026-08-28, v0.3.1): Gatus ve Umami compose dosyaları, `status.ts` + Systems bölümü, build SHA/tarih, CSP'de Umami origin'i, x-default, 404 locale, footer yılı, iki EN blog çevirisi; Coolify/Cloudflare panel adımları `docs/plans/handoffs/faz-5-manual-checklist.md` ile açık.
 - **Denetim kapanışı** (dal `feature/audit-closure`, 2026-08-28): yukarıdaki alt bölüm; kapılar birleşik ağaçta yeşil (typecheck, lint `--max-warnings=0`, vitest, prettier, build 35 statik sayfa + 3 dinamik API rotası, `verify:routes` 32 içerik rotası, `verify:docs`). PR #34 ile dev'e merge edildi (2026-08-29).
 - **Kapanış sonrası** (dev, 2026-08-29..09-02): PR #35 (topic alanı, consent, /privacy, WhatsApp) ve PR #36 (TR varsayılan locale, yerelleştirilmiş URL'ler, 308 tablosu) başka oturumlarda; PR #37 gözlemlenebilirlik panele (Uptime Kuma + merkezi Umami) + Mailcow SMTP + dil değiştirici blocker düzeltmesi; PR #39 ultrareview kapanışı (Dockerfile `NEXT_PUBLIC_STATUS_URL` ARG'ı + bayat referans süpürmesi + `SMTP_*` sızıntı bekçileri); PR #40 bağımlılık grubu (next-intl 4.14.1 dahil dört minor/patch). Ayrıntı `docs/plans/handoffs/denetim-kapanisi-2026-08-28.md` ek notlarında.
+- **3. tur** (dal `feature/audit-followups`, 2026-09-02): 5 dosya-ayrık küme (frontend-perf, ui-a11y, backend, seo-i18n-content, test-quality-deps) + kontrol oturumu; 31 Ağustos incelemesinin V-2..V-18 maddelerinin neredeyse tamamı kapandı (ayrıntı `audit/acik-kalanlar.md` bölüm 11). Kapılar: typecheck **kırık** (`src/i18n/navigation.ts:21`, T-18'in next-intl `AppConfig` augmentation'ından, tsbuildinfo temizlenmeden çalıştırılırsa gizleniyor), lint temiz, test 75 dosya/1080 test, format temiz, `verify:docs` yeşil (yeni locale şeması koruması dahil). Ayrıntı `docs/plans/handoffs/denetim-takip-2026-09-02.md`.
 
 ## Riskler ve tripwire'lar
 
