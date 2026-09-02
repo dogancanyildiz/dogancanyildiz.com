@@ -44,6 +44,12 @@ vi.mock("next-intl/server", async () => {
   >;
   return {
     getLocale: async () => "en",
+    // Backed by the platform's own Intl, which is what next-intl wraps in
+    // production; the certificate list formats its issue dates through it.
+    getFormatter: async () => ({
+      dateTime: (value: Date, options?: Intl.DateTimeFormatOptions) =>
+        new Intl.DateTimeFormat("en", options).format(value),
+    }),
     getTranslations: async (arg?: string | { namespace?: string }) => {
       const namespace = typeof arg === "string" ? arg : arg?.namespace;
       return (key: string, values?: Record<string, unknown>) => {
@@ -72,6 +78,8 @@ const { Footer } = await import("@/components/layout/footer");
 const { MobileMenu } = await import("@/components/layout/mobile-menu");
 const { ContactPageContent } =
   await import("@/components/sections/contact-page-content");
+const { CertificateList } =
+  await import("@/components/sections/certificate-list");
 const { default: LocaleError } = await import("@/app/[lang]/error");
 
 const read = (relative: string) =>
@@ -229,6 +237,27 @@ describe("target size", () => {
     for (const { label, height } of targets) {
       expect(height, `mobile menu ${label} has no height floor`).not.toBeNull();
       expect(height, `mobile menu ${label}`).toBeGreaterThanOrEqual(
+        TARGET_FLOOR_PX
+      );
+    }
+  });
+
+  it("gives every control in the certificate list at least 44 CSS px", async () => {
+    const { container } = render(
+      await resolveServerTree(createElement(CertificateList, { locale: "en" }))
+    );
+    // Two controls per credential with artwork (the preview trigger and its
+    // close button), plus a verify link on the row and a second inside the
+    // preview. The closed dialogs are display:none, which is why these are
+    // read off the DOM rather than through a role query.
+    const targets = measuredTargets(container);
+    expect(targets.length).toBeGreaterThan(40);
+    for (const { label, height } of targets) {
+      expect(
+        height,
+        `certificates ${label} has no height floor`
+      ).not.toBeNull();
+      expect(height, `certificates ${label}`).toBeGreaterThanOrEqual(
         TARGET_FLOOR_PX
       );
     }

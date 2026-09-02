@@ -1,4 +1,10 @@
-import { existsSync, openSync, readSync, closeSync } from "node:fs";
+import {
+  existsSync,
+  openSync,
+  readFileSync,
+  readSync,
+  closeSync,
+} from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -88,6 +94,23 @@ function intrinsicSize(path: string): { width: number; height: number } {
   }
 }
 
+/**
+ * The width and height of an SVG's viewBox. A vector has no pixels to report,
+ * so what profile.ts writes for one is an aspect ratio; this is the ratio the
+ * file actually declares, read from the markup rather than from any renderer.
+ */
+function viewBoxSize(path: string): { width: number; height: number } {
+  const markup = readFileSync(path, "utf8");
+  const viewBox = /viewBox="([^"]+)"/.exec(markup)?.[1];
+  expect(viewBox, `${path} has no viewBox`).toBeDefined();
+  const parts = (viewBox ?? "")
+    .trim()
+    .split(/[\s,]+/)
+    .map(Number);
+  expect(parts, path).toHaveLength(4);
+  return { width: parts[2] as number, height: parts[3] as number };
+}
+
 function entryId(entry: CertificateEntry): string {
   return `${entry.group}/${entry.name}`;
 }
@@ -155,6 +178,117 @@ describe("profile data", () => {
         height: badge.height,
       });
     }
+  });
+
+  it("gives every credential the same keyword line in both locales", () => {
+    for (const locale of LOCALES) {
+      for (const certificate of certificates[locale]) {
+        const { en, tr } = certificate.keywords;
+        // A reader who switches language has to see the same claim, so the
+        // two lists carry the same number of tags in the same order.
+        expect(tr.length, certificate.name).toBe(en.length);
+        expect(en.length, certificate.name).toBeGreaterThan(0);
+        // The row prints these on one muted line; past six it stops being a
+        // summary and turns into a paragraph competing with the name.
+        expect(en.length, certificate.name).toBeLessThanOrEqual(6);
+        for (const keyword of [...en, ...tr]) {
+          expect(keyword.trim(), certificate.name).not.toBe("");
+        }
+      }
+    }
+  });
+
+  it("keeps the keyword lines identical across the two locale lists", () => {
+    // One record list feeds both locales, and this is what says so: a keyword
+    // edit that reaches only certificates.en would be a silent split.
+    expect(certificates.en.map((entry) => entry.keywords)).toEqual(
+      certificates.tr.map((entry) => entry.keywords)
+    );
+  });
+
+  it("fails the check on a keyword line that cannot be printed", () => {
+    const base: CertificateEntry = {
+      name: "Fake",
+      issuer: "Fake",
+      group: "hackviser",
+      keywords: { en: ["Fake"], tr: ["Sahte"] },
+      credentialCategory: "badge",
+    };
+
+    expect(() =>
+      withCheckedCertificates({
+        en: [{ ...base, keywords: { en: [], tr: [] } }],
+        tr: [],
+      })
+    ).toThrow(/no keywords/);
+
+    expect(() =>
+      withCheckedCertificates({
+        en: [{ ...base, keywords: { en: ["a", "b"], tr: ["a"] } }],
+        tr: [],
+      })
+    ).toThrow(/different claim/);
+
+    expect(() =>
+      withCheckedCertificates({
+        en: [
+          {
+            ...base,
+            keywords: {
+              en: ["a", "b", "c", "d", "e", "f", "g"],
+              tr: ["a", "b", "c", "d", "e", "f", "g"],
+            },
+          },
+        ],
+        tr: [],
+      })
+    ).toThrow(/more than the 6/);
+
+    expect(() =>
+      withCheckedCertificates({
+        en: [{ ...base, keywords: { en: ["  "], tr: ["a"] } }],
+        tr: [],
+      })
+    ).toThrow(/empty keyword/);
+  });
+
+  it("ships every school emblem it points at, at the size it claims", () => {
+    for (const locale of LOCALES) {
+      for (const school of education[locale]) {
+        const logo = school.logo;
+        if (logo === undefined) continue;
+        expect(logo.src.startsWith("/images/schools/"), logo.src).toBe(true);
+        const path = join(process.cwd(), "public", logo.src);
+        expect(existsSync(path), `missing ${logo.src}`).toBe(true);
+
+        if (logo.src.endsWith(".svg")) {
+          // A vector has no intrinsic pixel size, so the pair in profile.ts is
+          // an aspect ratio and that is what is checked. The tolerance is the
+          // rounding of the normalization, not slack: 861/200 against
+          // 119.51/27.76 is four decimal places apart.
+          const box = viewBoxSize(path);
+          expect(logo.width / logo.height, logo.src).toBeCloseTo(
+            box.width / box.height,
+            3
+          );
+        } else {
+          // next/image reserves the box from these two numbers, so a wrong
+          // value is a layout shift on a real visit.
+          expect(intrinsicSize(path), logo.src).toEqual({
+            width: logo.width,
+            height: logo.height,
+          });
+        }
+      }
+    }
+  });
+
+  it("shows the same school the same way in both locales", () => {
+    // The emblem is not translated: an entry that drifts is one locale
+    // showing a school the other does not.
+    expect(education.en.map((entry) => entry.logo)).toEqual(
+      education.tr.map((entry) => entry.logo)
+    );
   });
 
   it("groups the certificates by issuer, each issuer once", () => {
