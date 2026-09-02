@@ -55,7 +55,7 @@ Cloudflare 526 verdiği için bölüm 3-5'in canlı URL isteyen maddelerinin hi�
       `/projeler`, `/en/about`, `/en/projects`, bir proje detayı ve iki dilli blog yazısı tek tek
       tarandı, self-referencing ve karşılıklı hreflang hatası yok
 - [ ] Yalnız TR olan blog yazısının `/en/blog/<slug>` adresi 404 dönüyor ve EN sitemap'inde geçmiyor
-- [ ] 308 tablosu doğrulandı: `/about` -> `/en/about`, `/projects` -> `/en/projects`, `/contact` -> `/en/contact`, `/blog` -> `/en/blog`, `/blog/<eski-slug>` -> `/en/blog/<en-slug>`, `/tr/hakkimda` benzeri fazla önekler ve `/tr/about` prefix'siz TR karşılığına tek 308 ile düşüyor; hiçbir zincirde döngü yok
+- [ ] 308 tablosu doğrulandı: `/about` -> `/en/about`, `/projects` -> `/en/projects`, `/contact` -> `/en/contact`, `/blog` -> `/en/blog`, `/blog/capt-sinavina-hazirlik` -> `/yazilar/capt-sinavina-hazirlik` (öneksiz Türkçe slug Türkçe kalır), `/en/blog/capt-sinavina-hazirlik` -> `/en/blog/capt-preparation-in-a-docker-lab`, `/projeler/gpa-calculator` -> `/projeler/not-ortalamasi-hesaplayici`, `/tr/hakkimda` benzeri fazla önekler ve `/tr/about` prefix'siz TR karşılığına tek 308 ile düşüyor; hiçbir zincirde döngü yok (tam tablo: `docs/04-i18n.md`)
 - [ ] `robots.txt` doğru domain'i ve `Disallow: /api/` satırını içeriyor
 - [ ] `/feed.xml` (TR) ve `/en/feed.xml` 200 ve `application/rss+xml` dönüyor; `/tr/feed.xml` 308 ile köke düşüyor
 - [ ] `/opengraph-image` (TR kökü) ve `/en/opengraph-image` ile bir blog/proje OG rotası 200 ve PNG dönüyor

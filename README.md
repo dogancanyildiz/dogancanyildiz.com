@@ -86,10 +86,15 @@ katmanlarına ve derleme loglarına sızdırır.
   (`translationKey` eşler, `slug` değil).
 - Dil yönlendirmesi `src/i18n/routing.ts`; `src/proxy.ts` uygular. Accept-Language
   otomatik yönlendirmesi ve locale cookie kapalı: tek sinyal URL.
-- Eski prefix'siz İngilizce sayfalar (`/about`, `/projects`, `/contact`,
-  `/privacy`, `/blog` dahil) ve eski slug'lar (`/blog/<eski-slug>`,
-  `/projects/<eski-slug>`) `/en/...`'e 308. Fazla `/tr/...` adresleri
-  prefix'siz Türkçe kanoniğe gider. Tam tablo: `src/i18n/legacy-paths.ts`.
+- Eski prefix'siz adreslerin hedefi slug'ın dilinden gelir: bölüm yolları ve
+  İngilizce slug'lı detaylar (`/about`, `/projects`, `/contact`, `/privacy`,
+  `/blog`, `/blog/self-hosting-with-coolify`, `/projects/<slug>`) `/en/...`'e
+  308; Türkçe slug'lı detaylar (`/blog/capt-sinavina-hazirlik`,
+  `/blog/ccna-dan-web-guvenligine`) `/yazilar/<aynı-slug>`'a 308. Slug'ı
+  değişen `/projeler/<eski-slug>` adresleri yeni TR slug'a, `/en` prefix'li
+  eski slug'lar yeni EN slug'a gider. Fazla `/tr/...` adresleri prefix'siz
+  Türkçe kanoniğe gider. Tam tablo: `src/i18n/legacy-paths.ts`, gerekçe:
+  `docs/04-i18n.md`.
 - Mesajlar `messages/en.json` ve `messages/tr.json`. İki dosya aynı anahtar
   kümesini taşımak zorunda.
 - `src/app/[lang]/` altındaki her sayfa ve layout `setRequestLocale(lang)`
