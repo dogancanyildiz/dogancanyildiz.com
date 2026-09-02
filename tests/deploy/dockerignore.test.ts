@@ -30,6 +30,11 @@ describe(".dockerignore", () => {
     "!README.md",
     "docker-compose.yml",
     "tsconfig.tsbuildinfo",
+    // T-15: a fixture that vendors its own node_modules, and velite's own
+    // cache/lock directories alongside .velite, are still just build context
+    // noise the production image never needs.
+    "tests/fixtures/node_modules",
+    ".velite-*",
   ];
 
   it.each(required)("excludes %s from the build context", (pattern) => {
