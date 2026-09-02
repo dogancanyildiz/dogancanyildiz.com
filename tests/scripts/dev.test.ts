@@ -123,6 +123,43 @@ describe("scripts/dev.mjs", () => {
     expect(result.stdout).toContain('next started ["dev","--port","4000"]');
   });
 
+  it("escalates to SIGKILL when a child ignores the polite shutdown signal", async () => {
+    // Without an escalation, terminateOthers sends a single SIGTERM and then
+    // waits on the exit event forever, so a child that ignores it hangs the
+    // wrapper (and, in a real terminal, leaves the developer with a dev
+    // server they have to kill by hand).
+    const result = await runDev({
+      NEXT_EXIT_DELAY_MS: "50",
+      NEXT_EXIT_CODE: "3",
+      VELITE_IGNORE_SIGNALS: "1",
+      PORTFOLIO_DEV_KILL_TIMEOUT_MS: "200",
+    });
+
+    expect(result.stdout).toContain("velite ignoring SIGTERM");
+    expect(result.stdout).toContain(
+      "ignored SIGTERM for 200ms, sending SIGKILL"
+    );
+    // The first child to stop still decides the exit code.
+    expect(result.code).toBe(3);
+  });
+
+  it("shuts down cleanly when a child fails to start at all", async () => {
+    // A spawn failure emits "error", not "exit". Counting that child twice
+    // (once per event) would let this process exit while the sibling is still
+    // running, which is the orphan F-088 was about.
+    const result = await runDev({
+      PORTFOLIO_DEV_VELITE_BIN: join(
+        process.cwd(),
+        "tests/fixtures/fake-bin/does-not-exist.mjs"
+      ),
+    });
+
+    // Resolving at all means the wrapper exited instead of hanging on a
+    // settled counter that never reaches two.
+    expect(result.code).toBe(1);
+    expect(result.stdout).toContain("[dev] failed to start velite");
+  });
+
   it("starts velite with --watch regardless of extra CLI arguments", async () => {
     const result = await runDev(
       { NEXT_EXIT_DELAY_MS: "50", NEXT_EXIT_CODE: "0" },

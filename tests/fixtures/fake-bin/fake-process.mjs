@@ -9,8 +9,17 @@ const prefix = role.toUpperCase();
 
 console.log(`${role} started ${JSON.stringify(process.argv.slice(2))}`);
 
+// Stands in for a child that ignores a polite shutdown request: the handler
+// is still registered (so the signal does not kill the process by default)
+// but it never exits, which is what scripts/dev.mjs escalates to SIGKILL.
+const ignoreSignals = process.env[`${prefix}_IGNORE_SIGNALS`] === "1";
+
 function handle(signal) {
   console.log(`${role} received ${signal}`);
+  if (ignoreSignals) {
+    console.log(`${role} ignoring ${signal}`);
+    return;
+  }
   process.exit(Number(process.env[`${prefix}_SIGNAL_EXIT_CODE`] ?? "0"));
 }
 
