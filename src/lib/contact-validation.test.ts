@@ -208,6 +208,38 @@ describe("validateBody header injection", () => {
     ).toEqual({ ok: false, reason: "invalid", field: "email" });
   });
 
+  // The accepted address is handed to nodemailer as Reply-To. A comma or a
+  // semicolon there turns one value into an address list, and the angle
+  // brackets, quotes, parentheses and colon are the rest of the RFC 5322
+  // address grammar, so none of them may survive validation.
+  it.each([
+    "visitor,attacker@mail.invalid",
+    "visitor;attacker@mail.invalid",
+    "<visitor@mail.invalid>",
+    'visitor"name@mail.invalid',
+    "visitor(comment)@mail.invalid",
+    "visitor:name@mail.invalid",
+    "visitor@mail,invalid.example",
+    "visitor@mail.invalid>",
+  ])("rejects %j, which would not stay one address in Reply-To", (email) => {
+    expect(validateBody({ ...validBody, email })).toEqual({
+      ok: false,
+      reason: "invalid",
+      field: "email",
+    });
+  });
+
+  it("still accepts the addresses real visitors have", () => {
+    for (const email of [
+      "visitor+tag@mail.invalid",
+      "first.last@sub.mail.invalid",
+      "o'brien@mail.invalid",
+      "çiçek@mail.invalid",
+    ]) {
+      expect(validateBody({ ...validBody, email }).ok).toBe(true);
+    }
+  });
+
   it("keeps the newlines a real message needs", () => {
     const message = "First line.\r\n\tIndented second line.\nThird line.";
     const result = validateBody({ ...validBody, message });

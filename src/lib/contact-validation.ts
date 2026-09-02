@@ -70,7 +70,23 @@ export const MAX_BODY_BYTES =
  */
 export const HONEYPOT_FIELD = "extra_field";
 
-export const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[a-z]{2,}$/i;
+/**
+ * The characters that structure an RFC 5322 address list: the separators, the
+ * angle brackets around a route address, the quotes around a quoted local
+ * part, the parentheses around a comment and the group colon.
+ *
+ * The accepted address is handed to the mail transport as Reply-To, and one
+ * comma is all it takes for "visitor,attacker@mail.invalid" to arrive as two
+ * addresses. The pattern below stays deliberately permissive about everything
+ * else, including non ASCII local parts, so a real visitor is never turned
+ * away; it only refuses the values that cannot survive as a single address.
+ */
+const ADDRESS_DELIMITERS = '\\s@,;:<>"\\\\()\\[\\]';
+
+export const EMAIL_PATTERN = new RegExp(
+  `^[^${ADDRESS_DELIMITERS}]+@[^${ADDRESS_DELIMITERS}.]+(\\.[^${ADDRESS_DELIMITERS}.]+)*\\.[a-z]{2,}$`,
+  "i"
+);
 
 /**
  * Any CR, LF, NUL or other C0 control character in a single line field. Those
