@@ -19,23 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Scope of the MIT license above: the source code of the site (everything not
-listed below).
-
-Not covered, all rights reserved, Copyright (c) 2026 Doğan Can Yıldız:
-
-- Written content and personal data: content/ (blog posts, project case
-  studies), messages/*.json (site copy), src/content/ (profile, experience,
-  testimonials), public/cv/, public/images/, docs/ and the personal name,
-  photo and branding used on the site.
-
-You may reuse the code to build your own site. Please do not republish the
-texts, the case studies, the CV or the images, and do not present the site
-as your own.
-
-Third-party assets keep their own licenses: the vendored fonts under
-src/fonts/ and public/fonts/ are distributed under the SIL Open Font License,
-see the LICENSE-*.txt files next to them.
