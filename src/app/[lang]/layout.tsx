@@ -10,7 +10,7 @@ import "../globals.css";
 import { fontVariables } from "@/fonts";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
-import { getUntranslatedPaths, type Locale } from "@/lib/content";
+import { getUntranslatedPaths } from "@/lib/content";
 import { buildOpenGraph } from "@/lib/seo/alternates";
 import { ThemeProvider } from "@/components/theme-provider";
 import { layoutUmamiTag } from "@/components/umami-script";
@@ -51,23 +51,30 @@ export const viewport: Viewport = {
 // Namespaces the client tree actually reads through useTranslations. Kept
 // narrow on purpose: server-only namespaces such as about, notFound,
 // metadata, api and systems never cross the RSC boundary, so they never
-// prefetch into every locale's client bundle. tests/accessibility.test.ts
-// ("client message payload") scans every "use client" component's
-// useTranslations calls and fails if any of them needs a namespace missing
-// from this list.
+// prefetch into every locale's client bundle. hero, home, projects and blog
+// are server-only for the same reason: the sections that render them
+// (hero.tsx, skills-strip.tsx, project-list.tsx, post-list.tsx) all read
+// through getTranslations, so the client never asked for them either.
+// tests/accessibility.test.ts ("client message payload") scans every
+// "use client" component's useTranslations calls and fails if any of them
+// needs a namespace missing from this list.
 const CLIENT_MESSAGE_NAMESPACES = [
   "nav",
   "brand",
-  "hero",
-  "home",
   "footer",
-  "projects",
-  "blog",
   "contact",
   "errorPage",
   "consent",
   "a11y",
 ] as const;
+
+// The namespaces above that belong to a single route rather than to the
+// shell. contact is the largest namespace in the catalog and the only client
+// component that reads it is the form on /contact, so the shell leaves it
+// out and src/app/[lang]/contact/page.tsx serves it to its own subtree from
+// a second provider. Everything else on the list belongs to the header,
+// footer, consent banner or error boundary, which render on every route.
+const ROUTE_SCOPED_MESSAGE_NAMESPACES = ["contact"] as const;
 
 function pickMessages(
   messages: Record<string, unknown>,
@@ -78,6 +85,18 @@ function pickMessages(
     if (namespace in messages) picked[namespace] = messages[namespace];
   }
   return picked;
+}
+
+function omitMessages(
+  messages: Record<string, unknown>,
+  namespaces: readonly string[]
+): Record<string, unknown> {
+  const kept: Record<string, unknown> = {};
+  for (const [namespace, value] of Object.entries(messages)) {
+    if (namespaces.includes(namespace)) continue;
+    kept[namespace] = value;
+  }
+  return kept;
 }
 
 export async function generateMetadata({
@@ -121,14 +140,23 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   const t = await getTranslations({ locale: lang, namespace: "a11y" });
   const messages = await getMessages();
   const clientMessages = pickMessages(messages, CLIENT_MESSAGE_NAMESPACES);
+  const shellMessages = omitMessages(
+    clientMessages,
+    ROUTE_SCOPED_MESSAGE_NAMESPACES
+  );
   const analyticsTag = layoutUmamiTag();
 
-  // Computed for every locale, not just the current one: the language
-  // switcher needs to know, for each target locale it links to, whether the
-  // current path is translated there. See src/i18n/switch-target.ts.
-  const untranslated = Object.fromEntries(
-    routing.locales.map((locale) => [locale, getUntranslatedPaths(locale)])
-  ) as Record<Locale, string[]>;
+  // Computed for the locales the language switcher can navigate to, so it
+  // knows for each target whether the current path is translated there. See
+  // src/i18n/switch-target.ts. The current locale is skipped: the page being
+  // rendered exists in the locale it is rendered in, so its own list can
+  // never contain the current path, and the switcher already falls back to
+  // an empty list for a locale the map does not carry.
+  const untranslated: Record<string, string[]> = Object.fromEntries(
+    routing.locales
+      .filter((locale) => locale !== lang)
+      .map((locale) => [locale, getUntranslatedPaths(locale)])
+  );
 
   return (
     <html lang={lang} className={fontVariables} suppressHydrationWarning>
@@ -139,7 +167,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
           enableSystem
           disableTransitionOnChange
         >
-          <NextIntlClientProvider messages={clientMessages}>
+          <NextIntlClientProvider messages={shellMessages}>
             <ConsentProvider tag={analyticsTag}>
               <a href="#main" className="skip-link">
                 {t("skipToContent")}
