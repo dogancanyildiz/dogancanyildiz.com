@@ -190,6 +190,95 @@ describe("opengraph image render", () => {
 });
 
 /**
+ * The per page cards. These routes draw the requested slug into the prompt
+ * line, so what they will and will not render for is a security property, not
+ * a routing detail: shipped without dynamicParams they answered 200 with an
+ * attacker chosen string above the owner's name, for a path whose page 404s.
+ */
+describe("per page opengraph images", () => {
+  const ROUTES = [
+    {
+      section: "blog",
+      file: "src/app/[lang]/blog/[slug]/opengraph-image.tsx",
+      load: () => import("@/app/[lang]/blog/[slug]/opengraph-image"),
+      slugs: async () => (await import("@/lib/content")).getPostSlugs("tr"),
+    },
+    {
+      section: "projects",
+      file: "src/app/[lang]/projects/[slug]/opengraph-image.tsx",
+      load: () => import("@/app/[lang]/projects/[slug]/opengraph-image"),
+      slugs: async () => (await import("@/lib/content")).getProjectSlugs("tr"),
+    },
+  ] as const;
+
+  it.each(ROUTES)(
+    "$section gates the card on the slug existing, in the handler",
+    async ({ file }) => {
+      const source = read(file);
+      expect(source).toContain("notFound()");
+      // dynamicParams = false would be the tidier gate and 404s every card,
+      // real slugs included: Next puts no concrete path for a metadata image
+      // route in the prerender manifest, so fallback: false matches nothing.
+      expect(source).not.toContain("export const dynamicParams");
+      // The lookup has to come before the fonts are read, otherwise an
+      // unknown slug still pays for a satori render.
+      expect(source.indexOf("notFound()")).toBeLessThan(
+        source.indexOf("loadOgFonts()")
+      );
+    }
+  );
+
+  it.each(ROUTES)(
+    "$section draws a png for a real slug",
+    async ({ load, slugs }) => {
+      const [slug] = await slugs();
+      if (!slug) throw new Error("the tr collection is empty");
+      const route = await load();
+
+      const response = await route.default({
+        params: Promise.resolve({ lang: "tr", slug }),
+      });
+
+      expect(response.status).toBe(200);
+      const body = Buffer.from(await response.arrayBuffer());
+      expect([...body.subarray(0, 4)]).toEqual([0x89, 0x50, 0x4e, 0x47]);
+      expect(body.length).toBeGreaterThan(1000);
+    },
+    30_000
+  );
+
+  it.each(ROUTES)(
+    "$section refuses to draw a card for a slug that does not exist",
+    async ({ load }) => {
+      const route = await load();
+
+      // notFound() throws the NEXT_HTTP_ERROR_FALLBACK;404 sentinel rather
+      // than returning, so an image is never produced for the path.
+      await expect(
+        route.default({
+          params: Promise.resolve({
+            lang: "tr",
+            slug: "CLICK HERE FREE BITCOIN now",
+          }),
+        })
+      ).rejects.toThrow(/NEXT_HTTP_ERROR_FALLBACK;404|NEXT_NOT_FOUND/);
+    },
+    30_000
+  );
+
+  it.each(ROUTES)(
+    "$section prompt names the file, and only from a slug that exists",
+    async ({ file, section }) => {
+      const source = read(file);
+      expect(source).toContain(`$ cat ${section}/`);
+      // The optional chain was what let an unknown slug through with an empty
+      // title band instead of a 404.
+      expect(source).not.toMatch(/title=\{(post|project)\?\./);
+    }
+  );
+});
+
+/**
  * The icons are exported brand files now, not next/og routes. satori could
  * only draw an approximation of the mark on its built-in face; these are the
  * real artwork, so the assertions are about the files being present, the right

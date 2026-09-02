@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { ImageResponse } from "next/og";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -39,9 +40,13 @@ export async function generateImageMetadata({
 }: {
   params: ImageParams;
 }) {
-  const { locale } = await resolveParams(params);
+  const { locale, slug } = await resolveParams(params);
   const t = await getTranslations({ locale, namespace: "metadata" });
-  return [{ id: OG_IMAGE_ID, size, contentType, alt: t("ogAlt") }];
+  const project = getProject(locale, slug);
+  // The alt has to describe the card that is actually served, and this one
+  // leads with the project title. The enumeration call has no real slug.
+  const alt = project ? t("ogAltPage", { title: project.title }) : t("ogAlt");
+  return [{ id: OG_IMAGE_ID, size, contentType, alt }];
 }
 
 /**
@@ -55,13 +60,17 @@ export default async function ProjectOGImage({
 }) {
   const { locale, slug } = await resolveParams(params);
   const project = getProject(locale, slug);
+  // Same gate as the blog card, for the same reason: without it any path
+  // under /projects answered 200 with its own slug drawn into the prompt.
+  // See that file for why dynamicParams cannot do this job.
+  if (!project) notFound();
   const fonts = await loadOgFonts();
 
   return new ImageResponse(
     <OgCard
       locale={locale}
       prompt={`$ cat projects/${slug}.md`}
-      title={project?.title}
+      title={project.title}
     />,
     { ...size, fonts }
   );

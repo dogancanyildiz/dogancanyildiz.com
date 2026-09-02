@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { ImageResponse } from "next/og";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -39,9 +40,14 @@ export async function generateImageMetadata({
 }: {
   params: ImageParams;
 }) {
-  const { locale } = await resolveParams(params);
+  const { locale, slug } = await resolveParams(params);
   const t = await getTranslations({ locale, namespace: "metadata" });
-  return [{ id: OG_IMAGE_ID, size, contentType, alt: t("ogAlt") }];
+  const post = getPost(locale, slug);
+  // The card this route draws leads with the post title, so the identity alt
+  // would describe an image that is no longer on it. The enumeration call
+  // arrives without a real slug, and then the identity line is all there is.
+  const alt = post ? t("ogAltPage", { title: post.title }) : t("ogAlt");
+  return [{ id: OG_IMAGE_ID, size, contentType, alt }];
 }
 
 /**
@@ -53,13 +59,27 @@ export async function generateImageMetadata({
 export default async function PostOGImage({ params }: { params: ImageParams }) {
   const { locale, slug } = await resolveParams(params);
   const post = getPost(locale, slug);
+  // The gate on what this route will draw, and the only one available.
+  //
+  // Left to fall back (`post?.title`), the card answered 200 for any path
+  // under /blog, including one whose page 404s, with the requested slug drawn
+  // verbatim into the prompt line above the owner's name: the text on a card
+  // served from his own domain became the caller's to choose. notFound() runs
+  // before the fonts are read, so an unknown slug costs a lookup rather than a
+  // satori render.
+  //
+  // `dynamicParams = false` looks like the tidier fix and is not usable here:
+  // Next registers no concrete path for a metadata image route in the
+  // prerender manifest (only the dynamic entry), so setting it turns every
+  // card, real slugs included, into a 404. Verified on next start.
+  if (!post) notFound();
   const fonts = await loadOgFonts();
 
   return new ImageResponse(
     <OgCard
       locale={locale}
       prompt={`$ cat blog/${slug}.md`}
-      title={post?.title}
+      title={post.title}
     />,
     { ...size, fonts }
   );
