@@ -50,6 +50,26 @@ describe("validateBody", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("ignores a honeypot the form did not post at all", () => {
+    expect(validateBody({ ...validBody }).ok).toBe(true);
+    expect(validateBody({ ...validBody, [HONEYPOT_FIELD]: null }).ok).toBe(
+      true
+    );
+  });
+
+  it.each([1, true, ["spam"], { href: "spam" }])(
+    "treats a non string honeypot value (%j) as filled",
+    (value) => {
+      // The field is a text input, so anything but a string is a client that
+      // is not the form. Reading only the string case let a bot walk past the
+      // honeypot by posting a number.
+      expect(validateBody({ ...validBody, [HONEYPOT_FIELD]: value })).toEqual({
+        ok: false,
+        reason: "honeypot",
+      });
+    }
+  );
+
   it("does not use a honeypot name a browser autofill would recognise", () => {
     expect(HONEYPOT_FIELD).not.toMatch(/website|url|company|organization/i);
     // A field the browser fills is a field that silently eats real messages.

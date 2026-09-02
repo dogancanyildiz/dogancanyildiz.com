@@ -127,8 +127,15 @@ export function validateBody(body: unknown): ValidationResult {
 
   const raw = body as Record<string, unknown>;
 
+  // The honeypot is a text input, so the form posts a string or nothing at
+  // all. Any other type is a caller that is not the form, and reading only the
+  // string case let a bot walk past the trap by sending a number.
   const honeypotValue = raw[HONEYPOT_FIELD];
-  if (typeof honeypotValue === "string" && honeypotValue.trim().length > 0) {
+  const honeypotFilled =
+    typeof honeypotValue === "string"
+      ? honeypotValue.trim().length > 0
+      : honeypotValue !== undefined && honeypotValue !== null;
+  if (honeypotFilled) {
     return { ok: false, reason: "honeypot" };
   }
 
