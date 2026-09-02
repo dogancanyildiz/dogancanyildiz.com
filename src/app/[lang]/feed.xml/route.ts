@@ -59,6 +59,11 @@ export async function GET(
       // changing it would redeliver the entire archive to every subscriber a
       // second time. Never bump it. tests/seo/feed.test.ts pins the literal
       // string.
+      //
+      // The authority here (dogancanyildiz.com) is a tag URI identifier per
+      // RFC 4151, not a resolvable URL: the 2026-09-02 canonical host
+      // decision (www) changes what NEXT_PUBLIC_SITE_URL resolves to, not
+      // this fixed guid, so it stays the bare apex regardless of host.
       const guid = `tag:dogancanyildiz.com,2026:post/${locale}/${post.translationKey}`;
       return [
         "    <item>",
