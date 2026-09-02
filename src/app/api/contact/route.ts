@@ -75,18 +75,61 @@ function localeFromHeader(value: string | null): AppLocale | null {
   return candidate && isAppLocale(candidate) ? candidate : null;
 }
 
-/** The page the form was submitted from, e.g. https://host/en/contact. */
+/**
+ * A browser always attaches Origin to a cross origin or same origin POST, so a
+ * missing header means the caller is not a browser form and is refused too.
+ * Outside production any localhost origin is accepted, otherwise next dev on a
+ * spare port could never submit the form.
+ */
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) {
+    return false;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(origin);
+  } catch {
+    return false;
+  }
+
+  try {
+    if (parsed.origin === siteUrl()) {
+      return true;
+    }
+  } catch {
+    // NEXT_PUBLIC_SITE_URL missing is a deployment fault, not a reason to
+    // accept an unverifiable origin.
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+  return parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+}
+
+/**
+ * The page the form was submitted from, e.g. https://host/en/contact.
+ *
+ * Only a Referer from an origin this site actually serves is read. Any other
+ * page can send one, and a foreign "/en/..." path would otherwise pick the
+ * language of the answer and leave the Accept-Language branch below
+ * unreachable for every visitor who arrived through an external link.
+ */
 function localeFromReferer(value: string | null): AppLocale | null {
   if (!value) {
     return null;
   }
-  let pathname: string;
+  let referer: URL;
   try {
-    pathname = new URL(value).pathname;
+    referer = new URL(value);
   } catch {
     return null;
   }
-  return localeFromPathname(pathname);
+  if (!isAllowedOrigin(referer.origin)) {
+    return null;
+  }
+  return localeFromPathname(referer.pathname);
 }
 
 /**
@@ -146,39 +189,6 @@ function isJsonRequest(contentType: string | null): boolean {
   const mediaType = (contentType ?? "").split(";")[0]?.trim().toLowerCase();
 
   return mediaType === "application/json";
-}
-
-/**
- * A browser always attaches Origin to a cross origin or same origin POST, so a
- * missing header means the caller is not a browser form and is refused too.
- * Outside production any localhost origin is accepted, otherwise next dev on a
- * spare port could never submit the form.
- */
-function isAllowedOrigin(origin: string | null): boolean {
-  if (!origin) {
-    return false;
-  }
-
-  let parsed: URL;
-  try {
-    parsed = new URL(origin);
-  } catch {
-    return false;
-  }
-
-  try {
-    if (parsed.origin === siteUrl()) {
-      return true;
-    }
-  } catch {
-    // NEXT_PUBLIC_SITE_URL missing is a deployment fault, not a reason to
-    // accept an unverifiable origin.
-  }
-
-  if (process.env.NODE_ENV === "production") {
-    return false;
-  }
-  return parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
 }
 
 type ResponseOptions = {

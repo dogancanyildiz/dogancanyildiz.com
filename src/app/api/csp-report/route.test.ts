@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   CSP_REPORT_RATE_LIMIT,
+  MAX_REPORTS_PER_REQUEST,
   MAX_REPORT_BYTES,
   type NormalizedReport,
   cspReportRateLimiter,
@@ -120,6 +121,24 @@ describe("POST /api/csp-report", () => {
     expect(JSON.parse(firstWarning(warn))).toMatchObject({
       directive: "style-src-attr",
     });
+  });
+
+  it("logs a bounded number of reports however long the batch is", async () => {
+    const warn = vi.spyOn(console, "warn");
+    // A minimal envelope is a few dozen bytes, so one request under the body
+    // cap can carry thousands of them. Without a cap on the batch, a single
+    // allowed request turns into thousands of log lines.
+    const batch = Array.from({ length: 500 }, () => ({
+      type: "csp-violation",
+      body: { effectiveDirective: "script-src-elem" },
+    }));
+
+    const response = await POST(
+      post(batch, { contentType: "application/reports+json" })
+    );
+
+    expect(response.status).toBe(204);
+    expect(warn.mock.calls.length).toBe(MAX_REPORTS_PER_REQUEST);
   });
 
   it("rejects a content type the browsers never send", async () => {
