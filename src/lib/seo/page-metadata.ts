@@ -26,6 +26,11 @@ export async function buildPageMetadata(
     authors?: string[];
     tags?: string[];
     /**
+     * Locale relative path of this page's own OG card, from ogImagePathFor.
+     * Omitted, the page advertises the identity image on the [lang] segment.
+     */
+    imagePath?: string;
+    /**
      * The title is already complete and must not be suffixed. Used by the
      * home page, whose title carries the name and the role and would read
      * "Doğan Can YILDIZ | ... | Doğan Can YILDIZ" under the template.
@@ -67,6 +72,7 @@ export async function buildPageMetadata(
       modifiedTime: options.modifiedTime,
       authors: options.authors,
       tags: options.tags,
+      imagePath: options.imagePath,
     }),
   };
 }

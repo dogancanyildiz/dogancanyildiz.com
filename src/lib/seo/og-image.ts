@@ -17,3 +17,18 @@ export const OG_IMAGE_CONTENT_TYPE = "image/png";
  * /[lang]/opengraph-image/[__metadata_id__].
  */
 export const OG_IMAGE_PATH = `/opengraph-image/${OG_IMAGE_ID}`;
+
+/**
+ * Same path for a page that has an opengraph-image.tsx of its own.
+ *
+ * The file convention hangs the image off the segment it sits in, so the card
+ * for /blog/foo is served from /blog/foo/opengraph-image/default. A page that
+ * ships one has to name it here as well, for the reason in the block above:
+ * its openGraph object replaces the inherited one, image included, so
+ * returning metadata without this would leave the page advertising the
+ * identity card while its own image sat unreferenced.
+ */
+export function ogImagePathFor(pagePath: string): string {
+  const base = pagePath === "/" ? "" : pagePath.replace(/\/+$/, "");
+  return `${base}${OG_IMAGE_PATH}`;
+}

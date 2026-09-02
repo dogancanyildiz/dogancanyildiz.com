@@ -21,6 +21,7 @@ import {
 } from "@/lib/content";
 import { buildBlogPosting, buildBreadcrumbList } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
+import { ogImagePathFor } from "@/lib/seo/og-image";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocaleAndSlug } from "@/lib/route-params";
 
@@ -51,6 +52,9 @@ export async function generateMetadata({
     modifiedTime: post.updated ?? post.date,
     authors: [siteConfig.person.name],
     tags: post.tags,
+    // This page has an opengraph-image.tsx of its own; without naming it the
+    // openGraph object here would keep pointing at the identity card.
+    imagePath: ogImagePathFor(`/blog/${slug}`),
   });
 }
 

@@ -19,6 +19,7 @@ import {
   buildProjectCreativeWork,
 } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
+import { ogImagePathFor } from "@/lib/seo/og-image";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocaleAndSlug } from "@/lib/route-params";
 
@@ -48,6 +49,9 @@ export async function generateMetadata({
     ...(project.updated ? { modifiedTime: project.updated } : {}),
     authors: [siteConfig.person.name],
     tags: project.stack,
+    // This page has an opengraph-image.tsx of its own; without naming it the
+    // openGraph object here would keep pointing at the identity card.
+    imagePath: ogImagePathFor(`/projects/${slug}`),
   });
 }
 

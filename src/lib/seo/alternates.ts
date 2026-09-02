@@ -87,6 +87,12 @@ export function buildOpenGraph(
     modifiedTime?: string;
     authors?: string[];
     tags?: string[];
+    /**
+     * Locale relative path of the card this page publishes. Defaults to the
+     * identity image on the [lang] segment; a page with an opengraph-image of
+     * its own passes ogImagePathFor(its path).
+     */
+    imagePath?: string;
   }
 ): NonNullable<Metadata["openGraph"]> {
   // article:author, article:modified_time and article:tag only mean anything
@@ -118,7 +124,7 @@ export function buildOpenGraph(
     // one, image included. See src/lib/seo/og-image.ts.
     images: [
       {
-        url: absoluteUrl(locale, OG_IMAGE_PATH),
+        url: absoluteUrl(locale, content.imagePath ?? OG_IMAGE_PATH),
         type: OG_IMAGE_CONTENT_TYPE,
         width: OG_IMAGE_SIZE.width,
         height: OG_IMAGE_SIZE.height,

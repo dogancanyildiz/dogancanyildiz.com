@@ -234,19 +234,68 @@ describe("page openGraph metadata", () => {
         }
       ).images;
 
-      // The opengraph-image.tsx file convention only reaches the [lang]
-      // segment. A page that returns its own openGraph drops the inherited
-      // image unless it names it again.
+      // Next merges metadata shallowly and replaces openGraph wholesale, so a
+      // page that returns its own object drops the inherited image unless it
+      // names one. Detail pages name their own card, everything else falls
+      // back to the identity image on the [lang] segment.
       expect(images).toHaveLength(1);
       const [ogImage] = images;
       if (!ogImage) throw new Error(`${page.name} published no og image`);
+
+      const ownCard = /^(projects|blog)\//.test(page.name);
+      const segment = ownCard ? page.path : "";
+      const prefix = locale === "en" ? "/en" : "";
       expect(ogImage.url).toBe(
-        locale === "en"
-          ? "https://dogancanyildiz.com/en/opengraph-image/default"
-          : "https://dogancanyildiz.com/opengraph-image/default"
+        `https://dogancanyildiz.com${prefix}${segment}/opengraph-image/default`
       );
       expect(ogImage.width).toBe(1200);
       expect(ogImage.alt).toBeTruthy();
+    }
+  );
+
+  it.each([
+    {
+      section: "blog",
+      route: () => import("@/app/[lang]/blog/[slug]/opengraph-image"),
+    },
+    {
+      section: "projects",
+      route: () => import("@/app/[lang]/projects/[slug]/opengraph-image"),
+    },
+  ])(
+    "$section detail pages have a card at the path their metadata names",
+    async ({ section, route: load }) => {
+      const { ogImagePathFor } = await import("@/lib/seo/og-image");
+      const route = await load();
+
+      // Every slug the page prerenders has to have an image param too,
+      // otherwise the url in og:image resolves to nothing.
+      const slugs = new Set(
+        route.generateStaticParams().map(({ lang, slug }) => `${lang}/${slug}`)
+      );
+      const expected =
+        section === "blog"
+          ? routing.locales.flatMap((locale) =>
+              getPostSlugs(locale).map((slug) => `${locale}/${slug}`)
+            )
+          : routing.locales.flatMap((locale) =>
+              getProjectSlugs(locale).map((slug) => `${locale}/${slug}`)
+            );
+      expect([...slugs].sort()).toEqual([...expected].sort());
+
+      expect(ogImagePathFor(`/${section}/some-slug`)).toBe(
+        `/${section}/some-slug/opengraph-image/default`
+      );
+
+      const [image] = await route.generateImageMetadata({
+        params: Promise.resolve({
+          lang: "tr",
+          slug: [...expected][0]?.split("/")[1] ?? "",
+        }),
+      });
+      if (!image) throw new Error(`${section} card published no image id`);
+      expect(image.id).toBe("default");
+      expect(image.alt).toBeTruthy();
     }
   );
 
