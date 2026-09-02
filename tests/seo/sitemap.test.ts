@@ -15,7 +15,7 @@ describe("sitemap", () => {
     expect(urls).toContain("https://dogancanyildiz.com/en/about");
     expect(urls).toContain("https://dogancanyildiz.com/projeler");
     expect(urls).toContain("https://dogancanyildiz.com/en/projects");
-    expect(urls).toContain("https://dogancanyildiz.com/blog");
+    expect(urls).toContain("https://dogancanyildiz.com/yazilar");
     expect(urls).toContain("https://dogancanyildiz.com/en/blog");
     expect(urls).toContain("https://dogancanyildiz.com/iletisim");
     expect(urls).toContain("https://dogancanyildiz.com/en/contact");

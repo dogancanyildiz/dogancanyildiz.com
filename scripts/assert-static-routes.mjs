@@ -40,6 +40,12 @@ export async function readLocales() {
 
 /**
  * Pages that must be prerendered in every locale. "" is the locale root.
+ *
+ * These are INTERNAL route paths, not the public localized URLs. next-intl
+ * rewrites /yazilar onto /tr/blog, so the prerender manifest is keyed in
+ * English; writing /yazilar here would break the gate silently, because
+ * nothing would match and the check would report a route as missing while it
+ * is in fact prerendered.
  */
 export const LOCALE_PAGES = [
   "",

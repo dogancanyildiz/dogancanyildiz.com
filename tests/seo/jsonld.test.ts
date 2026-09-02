@@ -73,7 +73,7 @@ describe("buildBreadcrumbList", () => {
         "@type": "ListItem",
         position: 1,
         name: "Yazılar",
-        item: "https://dogancanyildiz.com/blog",
+        item: "https://dogancanyildiz.com/yazilar",
       },
       {
         "@type": "ListItem",

@@ -94,7 +94,12 @@ describe("scripts/assert-static-routes.mjs", () => {
   it("covers every public page of the routing config", async () => {
     // A page added to routing.ts and forgotten here would never be checked
     // for being prerendered in both locales.
-    const dynamic = ["/projects/[slug]", "/blog/[slug]"];
+    const dynamic = [
+      "/projects/[slug]",
+      "/blog/[slug]",
+      "/projects/[slug]/opengraph-image/[id]",
+      "/blog/[slug]/opengraph-image/[id]",
+    ];
     const expected = Object.keys(pathnames)
       .filter((pathname) => !dynamic.includes(pathname))
       .map((pathname) => (pathname === "/" ? "" : pathname))
@@ -105,6 +110,18 @@ describe("scripts/assert-static-routes.mjs", () => {
 
   it("documents why opengraph-image is not in the required list", () => {
     expect(script()).toContain("opengraph-image is intentionally excluded");
+  });
+
+  it("says LOCALE_PAGES holds internal routes, not localized URLs", () => {
+    // The prerender manifest is keyed by the internal route (/tr/blog),
+    // because next-intl rewrites /yazilar onto it. Writing the localized
+    // path here would break the gate silently: nothing would match and the
+    // check would report a missing route that is in fact prerendered.
+    const content = script();
+    expect(content).toContain("These are INTERNAL route paths");
+    expect(content).toContain("/yazilar");
+    expect(LOCALE_PAGES).toContain("/blog");
+    expect(LOCALE_PAGES).not.toContain("/yazilar");
   });
 
   it("fails the check when api routes are prerendered", () => {

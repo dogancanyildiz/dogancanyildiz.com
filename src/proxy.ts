@@ -1,6 +1,6 @@
 import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
-import { legacyRedirectTarget } from "@/i18n/legacy-en-paths";
+import { legacyRedirectTarget } from "@/i18n/legacy-paths";
 import { routing } from "@/i18n/routing";
 import { isLocalizedRoutePath } from "@/lib/locale-from-pathname";
 

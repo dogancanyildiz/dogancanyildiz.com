@@ -71,7 +71,9 @@ describe("localePath", () => {
 describe("absoluteUrl", () => {
   it("joins the site url with the locale path", () => {
     expect(siteUrl()).toBe("https://dogancanyildiz.com");
-    expect(absoluteUrl("tr", "/blog")).toBe("https://dogancanyildiz.com/blog");
+    expect(absoluteUrl("tr", "/blog")).toBe(
+      "https://dogancanyildiz.com/yazilar"
+    );
     expect(absoluteUrl("en", "/")).toBe("https://dogancanyildiz.com/en");
   });
 });

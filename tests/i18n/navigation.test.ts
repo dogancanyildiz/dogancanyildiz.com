@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getPathname, pathnameForLocale } from "@/i18n/navigation";
+import {
+  contentHref,
+  getPathname,
+  ogImageHref,
+  pathnameForLocale,
+} from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { switchTargetPath } from "@/i18n/switch-target";
 
@@ -24,7 +29,7 @@ describe("locale aware navigation", () => {
           params: { slug: "design-system" },
         },
       })
-    ).toBe("/projects/design-system");
+    ).toBe("/projeler/design-system");
     expect(
       getPathname({
         locale: "en",
@@ -35,15 +40,72 @@ describe("locale aware navigation", () => {
       })
     ).toBe("/en/projects/design-system");
   });
+
+  it("localizes the section roots", () => {
+    expect(getPathname({ locale: "tr", href: "/blog" })).toBe("/yazilar");
+    expect(getPathname({ locale: "en", href: "/blog" })).toBe("/en/blog");
+    expect(getPathname({ locale: "tr", href: "/projects" })).toBe("/projeler");
+    expect(getPathname({ locale: "en", href: "/projects" })).toBe(
+      "/en/projects"
+    );
+  });
+});
+
+describe("contentHref", () => {
+  it("builds the localized detail path for each locale", () => {
+    expect(contentHref("tr", "post", "capt-sinavina-hazirlik")).toBe(
+      "/yazilar/capt-sinavina-hazirlik"
+    );
+    expect(contentHref("en", "post", "capt-preparation-in-a-docker-lab")).toBe(
+      "/en/blog/capt-preparation-in-a-docker-lab"
+    );
+    expect(contentHref("tr", "project", "not-ortalamasi-hesaplayici")).toBe(
+      "/projeler/not-ortalamasi-hesaplayici"
+    );
+    expect(contentHref("en", "project", "gpa-calculator")).toBe(
+      "/en/projects/gpa-calculator"
+    );
+  });
+});
+
+describe("ogImageHref", () => {
+  it("hangs the card off the localized detail path", () => {
+    expect(ogImageHref("tr", "project", "hubit")).toBe(
+      "/projeler/hubit/opengraph-image/default"
+    );
+    expect(ogImageHref("en", "project", "hubit")).toBe(
+      "/en/projects/hubit/opengraph-image/default"
+    );
+    expect(ogImageHref("tr", "post", "ccna-dan-web-guvenligine")).toBe(
+      "/yazilar/ccna-dan-web-guvenligine/opengraph-image/default"
+    );
+    expect(ogImageHref("en", "post", "from-ccna-to-web-security")).toBe(
+      "/en/blog/from-ccna-to-web-security/opengraph-image/default"
+    );
+  });
 });
 
 describe("pathnameForLocale", () => {
-  it("prefixes a runtime slug the pathnames map does not list", () => {
-    expect(pathnameForLocale("tr", "/blog/trace-logs")).toBe(
-      "/blog/trace-logs"
+  it("prefixes a fixed path the pathnames map does not list", () => {
+    // The identity OG card is the same path in both locales, so it stays out
+    // of the map and only picks up the as-needed prefix here.
+    expect(pathnameForLocale("tr", "/opengraph-image/default")).toBe(
+      "/opengraph-image/default"
     );
-    expect(pathnameForLocale("en", "/blog/trace-logs")).toBe(
-      "/en/blog/trace-logs"
+    expect(pathnameForLocale("en", "/opengraph-image/default")).toBe(
+      "/en/opengraph-image/default"
+    );
+  });
+
+  it("refuses a dynamic template, which has to go through contentHref", () => {
+    // Contract guard. Handing a template string to next-intl's getPathname
+    // reaches compileLocalizedPathname with no params, which throws rather
+    // than leaking a literal "[slug]" into an href.
+    expect(() => pathnameForLocale("tr", "/blog/[slug]")).toThrow(
+      /Insufficient params/
+    );
+    expect(() => pathnameForLocale("en", "/projects/[slug]")).toThrow(
+      /Insufficient params/
     );
   });
 
