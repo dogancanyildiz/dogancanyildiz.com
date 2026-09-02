@@ -32,8 +32,12 @@
  * an old unprefixed detail URL goes to the locale its slug was written in.
  * `/blog/capt-sinavina-hazirlik` is a Turkish slug, so it goes to the
  * Turkish page; `/projects/<slug>` is English-shaped, so it goes to `/en`.
- * The two `/projeler/<old-slug>` rows cover the Turkish projects whose slug
- * changed, which would otherwise 404 under dynamicParams = false.
+ *
+ * The last three rows are the Turkish content whose slug changed, keyed by
+ * the new Turkish section path. Those addresses were never published (the
+ * Turkish sections were `/blog` and `/projects` until 2026-09-02), so nothing
+ * links to them; they are here because under dynamicParams = false the old
+ * slug under the new section is a 404, and answering it costs one line.
  */
 export const LEGACY_UNPREFIXED: Readonly<Record<string, string>> = {
   "/about": "/en/about",
@@ -50,6 +54,7 @@ export const LEGACY_UNPREFIXED: Readonly<Record<string, string>> = {
   "/projects/koklu-hukuk": "/en/projects/koklu-hukuk",
   "/projects/gpa-calculator": "/en/projects/gpa-calculator",
   "/projects/ticket-purchasing-system": "/en/projects/ticket-purchasing-system",
+  "/yazilar/self-hosting-with-coolify": "/yazilar/coolify-ile-kendi-sunucumda",
   "/projeler/gpa-calculator": "/projeler/not-ortalamasi-hesaplayici",
   "/projeler/ticket-purchasing-system": "/projeler/bilet-satin-alma-sistemi",
 };
@@ -113,10 +118,17 @@ function unprefixedTurkishPath(pathname: string): string | null {
  * Drops a trailing slash, except on the root.
  *
  * Every table above is keyed by the slashless form, so `/about/` and
- * `/tr/about/` used to miss the lookup entirely and fall through to next-intl,
- * which then read `/about/` as the English slug of the Turkish about page.
- * The site does not serve trailing slash URLs, so normalizing here costs one
- * redirect hop instead of leaking the old ranking to the wrong page.
+ * `/tr/about/` would miss the lookup entirely and fall through to next-intl,
+ * which then reads `/about/` as the English slug of the Turkish about page.
+ *
+ * A safety net rather than the live path: with the default trailingSlash
+ * setting Next.js strips the slash in its own 308 before proxy.ts runs, so a
+ * request for `/about/` reaches this module as `/about` and a visitor typing
+ * the slash spends two hops (`/about/` -> `/about` -> `/en/about`), verified
+ * on `next start` 2026-09-02. Making it one hop would mean
+ * skipTrailingSlashRedirect: true in next.config.ts, which hands every
+ * trailing slash on the site to this function; not worth it for an address
+ * shape the site never linked to.
  */
 function withoutTrailingSlash(pathname: string): string {
   if (pathname === "/") return pathname;

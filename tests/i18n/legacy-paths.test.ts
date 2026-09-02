@@ -156,6 +156,18 @@ describe("legacyRedirectTarget", () => {
     );
   });
 
+  it("answers an old slug under the new Turkish section path", () => {
+    // Never published addresses: /yazilar and /projeler/<slug> only exist
+    // since 2026-09-02. Without these rows dynamicParams = false turns them
+    // into a 404 for anyone who edits the section of a working URL by hand.
+    expect(legacyRedirectTarget("/yazilar/self-hosting-with-coolify")).toBe(
+      "/yazilar/coolify-ile-kendi-sunucumda"
+    );
+    expect(legacyRedirectTarget("/projeler/gpa-calculator")).toBe(
+      "/projeler/not-ortalamasi-hesaplayici"
+    );
+  });
+
   it("returns null for a path it does not own", () => {
     expect(legacyRedirectTarget("/")).toBeNull();
     expect(legacyRedirectTarget("/yazilar")).toBeNull();
