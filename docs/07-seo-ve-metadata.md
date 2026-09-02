@@ -84,6 +84,11 @@ Dal `feature/audit-closure`; kanıt `src/app/[lang]/opengraph-image.tsx`, `src/l
 - **Hata sınırları.** `src/app/[lang]/error.tsx` (client, next-intl `errorPage` namespace'i, Next 16.3'ün kararlı `retry` prop'u) ve `src/app/global-error.tsx` (kendi html/body, fontlar).
 - **Canlı doğrulama hâlâ yok:** Search Console, hreflang aracı, paylaşım önizlemesi ve Rich Results Test site 526 verdiği için koşulmadı.
 
+## Uygulama durumu (2026-09-02)
+
+- **Eski öneksiz `/blog` listesi yönlendirilmiyor (bilinçli kabul, V-5).** `/blog` iki dilde de aynı yol olduğu için öneksiz adres artık Türkçe listenin kanoniği; 308 tablosuna eklenmesi kanonik sayfayı kendi adresinden sürerdi. Eski İngilizce `/blog` sıralaması bu yüzden Türkçe listeye düşüyor, İngilizce giriş noktası `/en/blog`. Tam gerekçe ve reddedilen "tek dilli slug'ı `/en/blog/<slug>`'a yönlendir" seçeneği: [04-i18n.md](./04-i18n.md), "Eski öneksiz `/blog` yönlendirilmiyor".
+- **`/feed.xml` dil değiştirdi, yönlendirilemiyor (V-16).** TR-varsayılan geçişinden önce öneksiz `/feed.xml` İngilizce feed'di, şimdi Türkçe feed. Aynı adres iki dilin kanoniği olamayacağı için eski aboneler için bir yönlendirme yok: İngilizce takip etmek isteyen `/en/feed.xml`'e kendi geçmek zorunda. Yumuşatma, feed'i tanınır kılmak: kanal başlığı ve her sayfanın `<link rel="alternate" type="application/rss+xml">` başlığı artık locale'e göre ayrışıyor ("Doğan Can YILDIZ · Yazılar" ve "Doğan Can YILDIZ · Writing"), `<language>` öğesi zaten locale'i yazıyordu. İki feed de prerender ediliyor (`scripts/assert-static-routes.mjs`) ve her sayfa yalnızca kendi dilinin feed'ini duyuruyor. Sahibi isterse tek seferlik bir duyuru yazısı geçişi feed içinden de anlatabilir; bu bir içerik kararı, kod değil.
+
 ## Riskler ve tripwire'lar
 
 | Risk | Tripwire / doğrulama | Kaynak |

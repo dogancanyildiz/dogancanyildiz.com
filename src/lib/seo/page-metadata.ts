@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/content";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo/alternates";
+import {
+  buildAlternates,
+  buildOpenGraph,
+  feedTitle,
+} from "@/lib/seo/alternates";
 
 /**
  * Shared metadata builder for every locale routed page. Reads the site name
@@ -33,6 +37,10 @@ export async function buildPageMetadata(
   const siteName = t("siteName");
   const imageAlt = t("ogAlt");
 
+  // The feed link every page advertises is the one of its own locale, and a
+  // reader offers it by title, so the title has to be localized too.
+  const tBlog = await getTranslations({ locale, namespace: "blog" });
+
   // The document <title> gets the brand from the layout's title template, but
   // openGraph has no template: a raw "About" is what a share card would show.
   // Applying the same suffix here keeps the two in step.
@@ -43,7 +51,12 @@ export async function buildPageMetadata(
   return {
     title: options.absoluteTitle ? { absolute: options.title } : options.title,
     description: options.description,
-    alternates: buildAlternates(locale, path, options.availableLocales),
+    alternates: buildAlternates(
+      locale,
+      path,
+      options.availableLocales,
+      feedTitle(tBlog("title"))
+    ),
     openGraph: buildOpenGraph(locale, path, {
       title: openGraphTitle,
       description: options.description,

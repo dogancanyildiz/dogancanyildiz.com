@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { readingMetadata } from "../velite.config";
 
 // The real velite binary, not "npx velite": npx re-resolves and can fall
 // back to a network install when the local bin is not on PATH, which turns
@@ -96,4 +97,56 @@ describe("velite content schema", () => {
     // decision made in the schema builder, not something the parser blurs.
     expect(String(post.date).slice(0, 10)).toBe("2026-08-01");
   }, 60_000);
+});
+
+describe("reading metadata", () => {
+  it("counts a Turkish word as one word", () => {
+    // velite's own s.metadata() matches /[a-zA-Z]+/, so "Türkiye" counted as
+    // "T" plus "rkiye" and the Turkish posts came out 40 to 47 percent longer
+    // than they are, in the reading time and in the BlogPosting wordCount.
+    expect(readingMetadata("Türkiye'de ağır işler").wordCount).toBe(3);
+    expect(readingMetadata("İstanbul'da sunucu çöktü").wordCount).toBe(3);
+    expect(readingMetadata("one two three").wordCount).toBe(3);
+  });
+
+  it("keeps a hyphenated or apostrophed word whole", () => {
+    expect(readingMetadata("self-hosting").wordCount).toBe(1);
+    expect(readingMetadata("don't").wordCount).toBe(1);
+  });
+
+  it("never reports less than a minute", () => {
+    expect(readingMetadata("").readingTime).toBe(1);
+    expect(readingMetadata("tek kelime").readingTime).toBe(1);
+  });
+
+  it("rounds a long body to the nearest minute", () => {
+    const words = Array.from({ length: 800 }, () => "kelime").join(" ");
+    expect(readingMetadata(words).wordCount).toBe(800);
+    expect(readingMetadata(words).readingTime).toBe(3);
+  });
+
+  it("matches the counts the build wrote for the real posts", () => {
+    const posts = JSON.parse(
+      readFileSync(join(process.cwd(), ".velite/posts.json"), "utf8")
+    ) as { locale: string; slug: string; metadata: { wordCount: number } }[];
+
+    const pairs = new Map<string, Record<string, number>>();
+    for (const post of posts) {
+      expect(
+        post.metadata.wordCount,
+        `${post.locale}/${post.slug}`
+      ).toBeGreaterThan(0);
+      const entry = pairs.get(post.slug) ?? {};
+      entry[post.locale] = post.metadata.wordCount;
+      pairs.set(post.slug, entry);
+    }
+
+    for (const [slug, counts] of pairs) {
+      if (counts.en === undefined || counts.tr === undefined) continue;
+      // Turkish says the same thing in fewer words here, so the translation is
+      // the shorter one. The ASCII word split made it the longer one every
+      // time, which is what gave the inflated reading time away.
+      expect(counts.tr, slug).toBeLessThan(counts.en);
+    }
+  });
 });

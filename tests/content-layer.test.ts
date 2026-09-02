@@ -10,6 +10,7 @@ import {
   getProjectSlugs,
   getProjects,
   getUntranslatedPaths,
+  readingMinutes,
   toPostCardData,
   toProjectCardData,
 } from "@/lib/content";
@@ -87,10 +88,14 @@ describe("project content layer", () => {
     }
   });
 
-  it("builds a locale neutral href in the card dto", () => {
+  it("carries the slug and the outbound links in the card dto", () => {
     for (const project of getProjects("en")) {
       const card = toProjectCardData(project);
-      expect(card.href).toBe(`/projects/${project.slug}`);
+      // The list builds its link from {pathname, params} so next-intl can
+      // localize it; a prebuilt href string would be a second, locale blind
+      // source for the same URL.
+      expect(card.slug).toBe(project.slug);
+      expect(card).not.toHaveProperty("href");
       expect(card.title).toBe(project.title);
       expect(card.liveUrl).toBe(project.links.live ?? null);
       expect(card.repoUrl).toBe(project.links.repo ?? null);
@@ -102,6 +107,35 @@ describe("project content layer", () => {
       for (const slug of getProjectSlugs(locale)) {
         expect(slug).toMatch(SLUG_PATTERN);
       }
+    }
+  });
+
+  it("keeps the non prose fields of a translated project identical", () => {
+    // Only the prose differs between the two files of one project. If the
+    // Turkish file says featured: true and the English one does not, the two
+    // home pages advertise different work, and an ordering or year that drifts
+    // makes the same project look like two different ones to a reader who
+    // switches language mid visit. Nothing in the schema enforces this, so a
+    // single forgotten line in one of the two files is all it takes.
+    for (const project of getProjects("en")) {
+      const other = getProject("tr", project.slug);
+      if (!other) continue;
+      expect(
+        {
+          featured: other.featured,
+          order: other.order,
+          year: other.year,
+          draft: other.draft,
+          links: other.links,
+        },
+        project.slug
+      ).toEqual({
+        featured: project.featured,
+        order: project.order,
+        year: project.year,
+        draft: project.draft,
+        links: project.links,
+      });
     }
   });
 
@@ -130,6 +164,18 @@ describe("post content layer", () => {
     }
   );
 
+  it("keeps the publish date of a translated post identical", () => {
+    // Two dates for one post means the two locales disagree about when it was
+    // published, in the list order, in the sitemap lastmod and in the
+    // BlogPosting datePublished.
+    for (const post of getPosts("en")) {
+      const other = getPost("tr", post.slug);
+      if (!other) continue;
+      expect(other.date, post.slug).toBe(post.date);
+      expect(other.updated ?? null, post.slug).toBe(post.updated ?? null);
+    }
+  });
+
   it("finds every listed post by its own slug and locale", () => {
     for (const locale of routing.locales) {
       for (const post of getPosts(locale)) {
@@ -142,13 +188,26 @@ describe("post content layer", () => {
     expect(getPostLocales("nothing")).toEqual([]);
   });
 
-  it("builds a locale neutral href and a reading time of at least a minute", () => {
+  it("carries the slug and a reading time of at least a minute", () => {
     for (const post of getPosts("tr")) {
       const card = toPostCardData(post);
-      expect(card.href).toBe(`/blog/${post.slug}`);
+      expect(card.slug).toBe(post.slug);
+      expect(card).not.toHaveProperty("href");
       expect(card.readingTime).toBeGreaterThanOrEqual(1);
       expect(card.date).toBe(post.date);
       expect(card.date).toMatch(/^\d{4}-\d{2}-\d{2}/);
+    }
+  });
+
+  it("rounds the reading time through one helper", () => {
+    // The list card and the post header both display it; two roundings are
+    // one edit away from the two disagreeing about the same post.
+    expect(readingMinutes({ metadata: { readingTime: 0.2 } })).toBe(1);
+    expect(readingMinutes({ metadata: { readingTime: 4.4 } })).toBe(4);
+    expect(readingMinutes({ metadata: { readingTime: 4.5 } })).toBe(5);
+
+    for (const post of getPosts("en")) {
+      expect(toPostCardData(post).readingTime).toBe(readingMinutes(post));
     }
   });
 

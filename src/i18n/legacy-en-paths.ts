@@ -40,3 +40,31 @@ export function unprefixedTurkishPath(pathname: string): string | null {
   const rest = pathname === "/tr" ? "/" : pathname.slice("/tr".length);
   return LEGACY_TR_PREFIXED_NAV[rest] ?? rest;
 }
+
+/**
+ * Drops a trailing slash, except on the root.
+ *
+ * Both tables above are keyed by the slashless form, so `/about/` and
+ * `/tr/about/` used to miss the lookup entirely and fall through to next-intl,
+ * which then read `/about/` as the English slug of the Turkish about page.
+ * The site does not serve trailing slash URLs, so normalizing here costs one
+ * redirect hop instead of leaking the old ranking to the wrong page.
+ */
+function withoutTrailingSlash(pathname: string): string {
+  if (pathname === "/") return pathname;
+  return pathname.replace(/\/+$/, "") || "/";
+}
+
+/**
+ * The permanent target for a legacy URL, or null when the path is not one.
+ *
+ * Single entry point for src/proxy.ts so the trailing slash normalization
+ * cannot be applied to one table and forgotten on the other.
+ */
+export function legacyRedirectTarget(pathname: string): string | null {
+  const normalized = withoutTrailingSlash(pathname);
+  const target =
+    LEGACY_EN_PAGE_REDIRECTS[normalized] ?? unprefixedTurkishPath(normalized);
+  if (target === null || target === undefined) return null;
+  return target === pathname ? null : target;
+}

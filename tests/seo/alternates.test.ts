@@ -28,6 +28,28 @@ describe("localePath", () => {
       "/en/projects/cargo-pilot"
     );
   });
+
+  it("does not prefix a path that already carries a locale segment", () => {
+    // A caller that hands over an already public path (a switcher target, a
+    // pathname read off the current request) used to get /en/en/about, and
+    // /tr was left as is even though the Turkish canonical is unprefixed.
+    expect(localePath("en", "/en")).toBe("/en");
+    expect(localePath("en", "/en/about")).toBe("/en/about");
+    expect(localePath("tr", "/tr")).toBe("/");
+    expect(localePath("tr", "/tr/about")).toBe("/hakkimda");
+  });
+
+  it("re-points a path carrying the other locale at the asked for locale", () => {
+    expect(localePath("tr", "/en/about")).toBe("/hakkimda");
+    expect(localePath("en", "/tr/about")).toBe("/en/about");
+  });
+
+  it("leaves a slug that only starts with locale letters alone", () => {
+    expect(localePath("en", "/projects/entrypoint")).toBe(
+      "/en/projects/entrypoint"
+    );
+    expect(localePath("tr", "/blog/trace-logs")).toBe("/blog/trace-logs");
+  });
 });
 
 describe("absoluteUrl", () => {

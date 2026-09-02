@@ -9,7 +9,8 @@ import { siteConfig } from "@/lib/site-config";
  *
  * The `@id` is the same on both locale home pages and in every article's
  * author and publisher slot, so all of them describe one entity instead of
- * three. `url` follows it and stays on the english root: a per locale url
+ * three. `url` follows it and stays on the default locale root (Turkish since
+ * the 2026-08-30 switch; it was the English root before): a per locale url
  * would give the same `@id` two different homes, which is exactly the split
  * the shared id is there to close. Only `jobTitle` is translated, because it
  * is a label rather than an identifier.
