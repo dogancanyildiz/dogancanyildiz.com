@@ -319,6 +319,48 @@
     @apply flex flex-wrap gap-2;
   }
 
+  /* The credential preview overlay is the platform <dialog>, so there is no
+     portal and no overlay div: showModal() puts the element in the top layer,
+     above the header and above every stacking context on the page, with no
+     z-index anywhere in this rule.
+
+     Padding is zero on purpose. The panel inside carries the inset instead, so
+     every pixel of the dialog that is not the panel is backdrop, and a click
+     there reports the dialog itself as event.target, which is what
+     credential-preview.tsx reads to close on an outside click.
+
+     632px is 600px of content plus the panel's 16px inset on both sides, so
+     the large image is served at exactly the width the sizes attribute
+     promises the browser. */
+  .credential-dialog {
+    @apply m-auto overflow-auto rounded-md border border-border bg-card p-0 text-foreground;
+    max-width: min(90vw, 632px);
+    max-height: 85vh;
+  }
+
+  /* Opening fades rather than snapping. A keyframe, not a transition: a closed
+     dialog is display:none, so there is no start value to transition from, and
+     the base layer's prefers-reduced-motion block already clamps every
+     animation-duration to 0.01ms. The backdrop is deliberately left out of
+     the fade, since ::backdrop is not matched by that block's * selector and
+     would keep animating when a visitor asked for no motion. */
+  .credential-dialog[open] {
+    animation: credential-dialog-in 150ms ease-out;
+  }
+
+  .credential-dialog-panel {
+    @apply p-4;
+  }
+
+  /* ::backdrop inherits from the dialog that originates it, so one rule covers
+     both themes through the tokens. The flat scrim on the first line is the
+     fallback an engine that does not resolve var() here falls back to. */
+  .credential-dialog::backdrop {
+    background-color: rgb(0 0 0 / 0.6);
+    background-color: color-mix(in oklab, var(--background) 85%, transparent);
+    backdrop-filter: blur(4px);
+  }
+
   /* WCAG 2.2 SC 2.5.8 wants 24x24 CSS px minimum. 44px is the comfortable
      target and costs nothing in a single column layout. */
   .tap-target {
@@ -488,6 +530,15 @@
   50%,
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes credential-dialog-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
