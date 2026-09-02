@@ -76,9 +76,18 @@ function listSourceFiles(dir: string): string[] {
 const STRING_LITERAL_PATTERN =
   /'([^'\\]*(?:\\.[^'\\]*)*)'|"([^"\\]*(?:\\.[^"\\]*)*)"/g;
 
+// Block comments and whole-line comments come out first. An apostrophe in a
+// comment (a contraction in a JSDoc sentence) used to open a "string" that
+// swallowed every real literal up to the next apostrophe, so keys that were
+// plainly in use came back as unconsumed. Trailing comments stay, because a
+// line comment regex cannot tell `// note` from `"https://..."` inside a
+// literal on the same line.
+const stripComments = (source: string) =>
+  source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
 function stringLiteralsIn(source: string): Set<string> {
   const literals = new Set<string>();
-  for (const match of source.matchAll(STRING_LITERAL_PATTERN)) {
+  for (const match of stripComments(source).matchAll(STRING_LITERAL_PATTERN)) {
     literals.add(match[1] ?? match[2] ?? "");
   }
   return literals;
