@@ -179,6 +179,8 @@
     "storageBody": "Tema tercihi çerez değil, tarayıcının localStorage'ında duruyor. Ölçüm tercihiniz de aynı yerde, dcy-consent anahtarıyla. İkisi de bana takip çerezi olarak ulaşmıyor.",
     "analyticsTitle": "Ziyaret sayımı",
     "analyticsBody": "İzin verirseniz ziyaretler kendi sunucumdaki Umami ile sayılır ve Umami çerez koymaz. Betik ancak siz evet dedikten sonra yükleniyor. Tema ve bu tercih gibi zorunlu depolama o onayı beklemez, çünkü sitenin çalışması için gerekli.",
+    "whatsappTitle": "WhatsApp",
+    "whatsappBody": "Alt bilgideki WhatsApp bağlantısı sohbeti WhatsApp uygulamasında açar; WhatsApp'ı Meta işletiyor. Oradan yazdığınız mesaj benim sunucumdan değil, Meta üzerinden geçer ve Meta'nın kendi koşulları geçerli olur. İstemezseniz e-posta ve iletişim formu her zaman açık.",
     "formTitle": "İletişim formu",
     "formBody": "Form; adınızı, e-postanızı, seçtiğiniz konuyu ve mesajınızı kendi posta sunucum üzerinden bana iletir. Bunları yanıt yazmak için kullanırım, satmam ve başkasına vermem. Sunucu ayrıca isteğin geldiği IP adresini kötüye kullanımı sınırlamak için okur; mesajınızın gövdesi ve e-posta adresiniz sunucu günlüğüne yazılmaz.",
     "contactTitle": "İletişim",

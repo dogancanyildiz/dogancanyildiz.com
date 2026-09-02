@@ -15,6 +15,7 @@ const SECTIONS = [
   ["whoTitle", "whoBody"],
   ["storageTitle", "storageBody"],
   ["analyticsTitle", "analyticsBody"],
+  ["whatsappTitle", "whatsappBody"],
   ["formTitle", "formBody"],
   ["contactTitle", "contactBody"],
 ] as const;
