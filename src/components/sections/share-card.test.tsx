@@ -169,14 +169,22 @@ describe("share card", () => {
     expect(href.startsWith("https://wa.me/?text=")).toBe(true);
   });
 
-  it("opens every share target in a new tab without leaking the opener", async () => {
+  it("opens the web targets in a new tab without leaking the opener, and mailto in place", async () => {
     const { container } = await renderCard("en", "/blog/a-slug");
     const links = [...container.querySelectorAll("a")];
 
     expect(links).toHaveLength(4);
     for (const link of links) {
-      expect(link.getAttribute("target")).toBe("_blank");
-      expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+      const href = link.getAttribute("href") ?? "";
+      if (href.startsWith("mailto:")) {
+        // A mail handler is not a document; target=_blank would leave an
+        // empty tab behind in several browsers.
+        expect(link.hasAttribute("target")).toBe(false);
+        expect(link.hasAttribute("rel")).toBe(false);
+      } else {
+        expect(link.getAttribute("target")).toBe("_blank");
+        expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+      }
       // A title attribute would duplicate the visible label as a tooltip
       // that touch users never get.
       expect(link.hasAttribute("title")).toBe(false);

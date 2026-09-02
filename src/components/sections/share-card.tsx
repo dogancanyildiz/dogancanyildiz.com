@@ -112,10 +112,15 @@ export async function ShareCard({ locale, path, title }: ShareCardProps) {
       <ul className="flex flex-wrap items-center gap-x-5">
         {links.map(({ key, label, href, icon }) => (
           <li key={key}>
+            {/* mailto is not a document: a new tab for it is an empty tab
+                left behind once the mail client opens, so only the three web
+                targets leave the page. */}
             <a
               href={href}
-              target="_blank"
-              rel="noopener noreferrer"
+              target={href.startsWith("mailto:") ? undefined : "_blank"}
+              rel={
+                href.startsWith("mailto:") ? undefined : "noopener noreferrer"
+              }
               className={shareLinkClass}
             >
               {icon}
@@ -135,7 +140,7 @@ export async function ShareCard({ locale, path, title }: ShareCardProps) {
         />
         {/* Printed whatever the clipboard does, so a reader whose browser
             refuses the write still has the address to select by hand. */}
-        <span className="min-w-0 break-all font-mono text-xs text-muted-foreground">
+        <span className="min-w-0 font-mono text-xs break-words text-muted-foreground [overflow-wrap:anywhere]">
           {url}
         </span>
       </div>
