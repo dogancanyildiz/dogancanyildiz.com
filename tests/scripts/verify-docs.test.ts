@@ -23,6 +23,15 @@ describe("scripts/verify-docs.mjs", () => {
     expect(content).toContain("traefik-ve-origin.md");
   });
 
+  it("guards the locale scheme against the pre-2026-08-30 English-at-root wording", () => {
+    const content = script();
+    expect(content).toContain("STALE_LOCALE_SCHEME");
+    expect(content).toContain("checkLocaleScheme");
+    // Same exception the domain check reuses: a marked historical note, or
+    // docs/plans/**, is allowed to still describe the old scheme.
+    expect(content).toContain("HISTORICAL_MARKER");
+  });
+
   it("exits non zero and lists every problem when a check fails", () => {
     const content = script();
     expect(content).toContain("process.exit(1)");
