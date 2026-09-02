@@ -181,6 +181,12 @@
     html {
       scroll-behavior: auto;
     }
+    /* The header cursor blinks with a stepped keyframe; the generic clamp
+       below would run it once in 0.01ms, so it is switched off outright and
+       the block simply stays lit. */
+    .brand-cursor {
+      animation: none;
+    }
     *,
     *::before,
     *::after {
@@ -314,6 +320,14 @@
      target and costs nothing in a single column layout. */
   .tap-target {
     @apply min-h-11 min-w-11;
+  }
+
+  /* The green block in the brand mark is a terminal cursor, so in the header
+     it blinks like one: roughly 530ms lit, 530ms dark, no fade. One flash per
+     second on a 16px block is far under the WCAG 2.3.1 three-per-second
+     threshold, and the reduced-motion block above keeps it steady. */
+  .brand-cursor {
+    animation: brand-cursor 1.06s step-end infinite;
   }
 
   .skip-link {
@@ -453,5 +467,16 @@
   .content-entry:hover {
     outline: 2px solid Highlight;
     outline-offset: -2px;
+  }
+}
+
+@keyframes brand-cursor {
+  0%,
+  49.99% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
   }
 }

@@ -33,6 +33,18 @@ describe("BrandMark", () => {
     expect(container.innerHTML).not.toContain("#2b3036");
   });
 
+  it("blinks the cursor only when asked, through a class and not inline style", () => {
+    const steady = render(<BrandMark />);
+    expect(steady.container.querySelector("rect")?.getAttribute("class")).toBe(
+      "fill-primary"
+    );
+    steady.unmount();
+    const blinking = render(<BrandMark cursor="blink" />);
+    const rect = blinking.container.querySelector("rect");
+    expect(rect?.getAttribute("class")).toBe("fill-primary brand-cursor");
+    expect(rect?.getAttribute("style")).toBeNull();
+  });
+
   it("derives the width from the viewBox so the mark never distorts", () => {
     const { container } = render(<BrandMark height={40} />);
     const svg = container.querySelector("svg");

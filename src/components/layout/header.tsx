@@ -36,7 +36,11 @@ export function Header({ untranslated }: HeaderProps) {
                 emulation), so only the mark shows there and the first span
                 keeps the name for assistive tech; from 480px up the second
                 block is the visible one. */}
-            <BrandMark height={24} className="shrink-0 text-foreground" />
+            <BrandMark
+              height={24}
+              cursor="blink"
+              className="shrink-0 text-foreground"
+            />
             <span className="sr-only min-[480px]:hidden">{tBrand("name")}</span>
             <span className="hidden min-w-0 items-center gap-2.5 min-[480px]:flex">
               <span

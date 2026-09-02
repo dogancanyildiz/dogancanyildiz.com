@@ -23,9 +23,19 @@ interface BrandMarkProps {
   /** Rendered height in px; the width follows the viewBox ratio. */
   height?: number;
   className?: string;
+  /**
+   * "blink" animates the green block like a terminal cursor (CSS only, off
+   * under prefers-reduced-motion). Default is steady: a mark inside running
+   * text or a footer should not pulse.
+   */
+  cursor?: "steady" | "blink";
 }
 
-export function BrandMark({ height = 22, className }: BrandMarkProps) {
+export function BrandMark({
+  height = 22,
+  className,
+  cursor = "steady",
+}: BrandMarkProps) {
   return (
     <svg
       viewBox={VIEW_BOX}
@@ -47,7 +57,9 @@ export function BrandMark({ height = 22, className }: BrandMarkProps) {
         y="-9.5"
         width="16.7"
         height="9.5"
-        className="fill-primary"
+        className={
+          cursor === "blink" ? "fill-primary brand-cursor" : "fill-primary"
+        }
       />
     </svg>
   );

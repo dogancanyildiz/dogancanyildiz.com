@@ -100,3 +100,33 @@ describe("no animation runtime in the bundle", () => {
     }
   });
 });
+
+describe("brand cursor blink", () => {
+  const css = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8");
+
+  it("is a stepped CSS keyframe, roughly one flash per second", () => {
+    expect(css).toMatch(
+      /\.brand-cursor\s*\{[^}]*animation:\s*brand-cursor 1\.06s step-end infinite/
+    );
+    expect(css).toContain("@keyframes brand-cursor");
+  });
+
+  it("stays lit under prefers-reduced-motion instead of ending dark", () => {
+    const reduced = css.slice(
+      css.indexOf("@media (prefers-reduced-motion: reduce)")
+    );
+    expect(reduced).toMatch(/\.brand-cursor\s*\{\s*animation:\s*none;\s*\}/);
+  });
+
+  it("is opted into by the header alone", () => {
+    const usages = readdirSync(join(process.cwd(), "src"), { recursive: true })
+      .map(String)
+      .filter((file) => file.endsWith(".tsx") && !file.endsWith(".test.tsx"))
+      .filter((file) =>
+        readFileSync(join(process.cwd(), "src", file), "utf8").includes(
+          'cursor="blink"'
+        )
+      );
+    expect(usages).toEqual(["components/layout/header.tsx"]);
+  });
+});
