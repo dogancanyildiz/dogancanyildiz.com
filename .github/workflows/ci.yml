@@ -26,8 +26,15 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "npm"
+      # --ignore-scripts skips every dependency's install lifecycle script.
+      # Only five packages in this tree actually carry one (see the same
+      # comment in Dockerfile), all native addons that resolve their prebuilt
+      # binary through a platform specific optionalDependency instead; the
+      # scripts exist as a from-source fallback. npm rebuild reruns just
+      # those five. Note that the sharp in that set is velite's nested copy,
+      # not the root sharp@0.35, which carries no install script.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts && npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher
       - name: Review dependency changes
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0

@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "predev": "velite --clean --strict",
-    "dev": "velite --watch & next dev",
+    "dev": "node scripts/dev.mjs",
     "build": "velite --clean --strict && next build",
     "build:content": "velite --clean --strict",
     "build:app": "next build",

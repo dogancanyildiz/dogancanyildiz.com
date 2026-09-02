@@ -50,6 +50,20 @@ describe("Dockerfile", () => {
     expect(dockerfile()).not.toMatch(/npm install/);
   });
 
+  it("installs with --ignore-scripts and rebuilds only the native addons that need it", () => {
+    // F-075: a plain "npm ci" runs every dependency's install/postinstall
+    // script unreviewed. --ignore-scripts skips all of them, then "npm
+    // rebuild" explicitly reruns it for just the packages that carry one
+    // (native addons whose prebuilt binary otherwise resolves through a
+    // platform specific optionalDependency, verified end to end against this
+    // image: see the comment above this RUN line).
+    const content = dockerfile();
+    expect(content).toContain("npm ci --no-audit --no-fund --ignore-scripts");
+    expect(content).toContain(
+      "npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher"
+    );
+  });
+
   it("uses npm run build as the single build entry point", () => {
     expect(dockerfile()).toMatch(/RUN npm run build/);
   });

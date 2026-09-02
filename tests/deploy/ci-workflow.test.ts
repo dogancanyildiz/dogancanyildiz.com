@@ -38,6 +38,19 @@ describe("ci workflow", () => {
     }
   });
 
+  it("installs with --ignore-scripts and rebuilds only the native addons that need it", () => {
+    // F-075: skip every dependency's install/postinstall/preinstall script by
+    // default, then explicitly rerun it for the handful of packages that
+    // actually carry one and need it (native addons with a platform specific
+    // optionalDependency binary). A bare "npm ci" here would silently start
+    // trusting every dependency's install script again.
+    const content = workflow();
+    expect(content).toContain("npm ci --ignore-scripts");
+    expect(content).toContain(
+      "npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher"
+    );
+  });
+
   it("never runs verify:links as part of the merge gate", () => {
     // Moved to .github/workflows/links.yml: a third party outage should not
     // block every merge to dev or main. See tests/deploy/links-workflow.test.ts.
