@@ -36,8 +36,10 @@ describe("typography tokens", () => {
     );
   });
 
-  it("keeps the display stack on the two editorial surfaces", () => {
-    for (const selector of [".pull-quote", ".prose-content blockquote"]) {
+  it("keeps the display stack on the one editorial surface left", () => {
+    // .pull-quote used to be the second one. It never had a call site, so it
+    // was deleted rather than kept alive by this assertion.
+    for (const selector of [".prose-content blockquote"]) {
       const rule = css.slice(css.indexOf(`${selector} {`));
       expect(
         rule.slice(0, rule.indexOf("}")),
@@ -120,10 +122,15 @@ describe("colour tokens", () => {
     }
   });
 
-  it("exposes solid status tokens for the Faz 5 widget", () => {
+  it("ships one status token per theme, for the one status surface", () => {
     expect(css.match(/--status-up:/g)).toHaveLength(2);
-    expect(css.match(/--status-down:/g)).toHaveLength(2);
     expect(css).toContain("--color-status-up: var(--status-up);");
+    // --status-down was defined in both themes and mapped into the Tailwind
+    // namespace for a live monitoring panel that was then decided against:
+    // the Systems section renders build-time data and links out to Uptime
+    // Kuma instead, so nothing on the site ever paints a failure state.
+    expect(css).not.toContain("--status-down");
+    expect(css).not.toContain("--color-status-down");
   });
 
   it("uses a solid focus ring colour, no alpha suffix", () => {
@@ -477,24 +484,12 @@ describe("no dead classes in the shipped stylesheet", () => {
   // call site, otherwise it is bytes on every page for nothing. This used to
   // be an existence assertion, which kept retired utilities alive instead of
   // catching them.
-  // Classes exempt from the usage assertion, each with the state it is
-  // exempted for, because an allowlist that never checks itself just hides
-  // what it was meant to flag.
-  //   unused:   no call site yet and none expected until a sibling branch
-  //             lands. The check below asserts it really is unused, so the
-  //             entry cannot outlive its reason.
-  //   retiring: still used today; a sibling branch removes the last consumer
-  //             and the second audit round deletes the rule. The check below
-  //             asserts it really is still used.
-  const PENDING = new Map<
-    string,
-    { state: "unused" | "retiring"; why: string }
-  >([
-    [
-      "pull-quote",
-      { state: "unused", why: "quote surface, wired up by the content branch" },
-    ],
-  ]);
+  //
+  // It also used to carry a PENDING allowlist, holding .pull-quote as
+  // "unused, wired up by the content branch". Three phases later no branch
+  // had wired it up, so the rule was deleted and the allowlist with it: an
+  // exemption that outlives the work it was waiting for is just a slower way
+  // of shipping dead CSS.
 
   it("finds the classes it is supposed to check", () => {
     expect(declared.size).toBeGreaterThan(20);
@@ -505,28 +500,9 @@ describe("no dead classes in the shipped stylesheet", () => {
     const used = sourceFiles.some(({ body }) =>
       new RegExp(`(?<![\\w-])${name}(?![\\w-])`).test(body)
     );
-    const pending = PENDING.get(name);
-    if (pending) {
-      expect(
-        used,
-        pending.state === "unused"
-          ? `.${name} is allowlisted as unused but has a call site now; drop it from PENDING`
-          : `.${name} is allowlisted as retiring but has no call site left; delete the rule`
-      ).toBe(pending.state === "retiring");
-      return;
-    }
     expect(used, `.${name} is defined in globals.css but never used`).toBe(
       true
     );
-  });
-
-  it("keeps the pending allowlist to classes the stylesheet still defines", () => {
-    for (const name of PENDING.keys()) {
-      expect(
-        declared.has(name),
-        `.${name} is allowlisted but no longer defined`
-      ).toBe(true);
-    }
   });
 });
 
