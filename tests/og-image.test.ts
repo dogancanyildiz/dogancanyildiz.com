@@ -151,20 +151,63 @@ describe("opengraph image render", () => {
   }, 30_000);
 });
 
-describe("icon", () => {
-  const source = read("src/app/icon.tsx");
-  const mark = read("src/lib/brand-mark.tsx");
+/**
+ * The icons are exported brand files now, not next/og routes. satori could
+ * only draw an approximation of the mark on its built-in face; these are the
+ * real artwork, so the assertions are about the files being present, the right
+ * size and free of the provenance chunk the design tool writes.
+ */
+describe("app icons", () => {
+  const iconFile = (relative: string) =>
+    readFileSync(join(process.cwd(), relative));
 
-  it("renders the DCY monogram on the new palette", () => {
-    expect(source).toContain("BrandMarkImage");
-    expect(mark).toContain("BrandMarkText");
-    expect(mark).toContain(">C<");
-    expect(mark).toContain("#0a0c0f");
-    expect(mark).toContain("#4fcc8d");
-    expect(source).not.toContain('background: "black"');
+  it("ships no generated icon routes any more", () => {
+    expect(existsSync(join(process.cwd(), "src/app/icon.tsx"))).toBe(false);
+    expect(existsSync(join(process.cwd(), "src/app/apple-icon.tsx"))).toBe(
+      false
+    );
   });
 
-  it("has no stale create-next-app favicon.ico to outrank it in the page head", () => {
-    expect(existsSync(join(process.cwd(), "src/app/favicon.ico"))).toBe(false);
+  it("ships a brand favicon.ico carrying three png entries", () => {
+    const ico = iconFile("src/app/favicon.ico");
+    // ICONDIR: reserved 0, type 1 (icon), then the image count.
+    expect(ico.readUInt16LE(0)).toBe(0);
+    expect(ico.readUInt16LE(2)).toBe(1);
+    expect(ico.readUInt16LE(4)).toBe(3);
+
+    // Each ICONDIRENTRY: width and height as single bytes, then the payload
+    // offset. Every payload is a png, which is what keeps 48x48 small.
+    const sizes = [0, 1, 2].map((index) => {
+      const entry = 6 + index * 16;
+      const offset = ico.readUInt32LE(entry + 12);
+      expect(ico.subarray(offset, offset + 8).toString("hex")).toBe(
+        "89504e470d0a1a0a"
+      );
+      return ico[entry];
+    });
+    expect(sizes).toEqual([16, 32, 48]);
+  });
+
+  it("ships icon.png at 192 and apple-icon.png at 180", () => {
+    // IHDR is the first chunk of a png: width and height at byte 16 and 20,
+    // colour type at 25 (6 = RGBA, 2 = RGB).
+    const icon = iconFile("src/app/icon.png");
+    expect(icon.readUInt32BE(16)).toBe(192);
+    expect(icon.readUInt32BE(20)).toBe(192);
+
+    const apple = iconFile("src/app/apple-icon.png");
+    expect(apple.readUInt32BE(16)).toBe(180);
+    expect(apple.readUInt32BE(20)).toBe(180);
+    // iOS composites a transparent apple-touch-icon onto white, which would
+    // put a white ring around the dark tile, so this one is flattened.
+    expect(apple[25]).toBe(2);
+  });
+
+  it("carries no content credentials chunk from the design export", () => {
+    for (const relative of ["src/app/icon.png", "src/app/apple-icon.png"]) {
+      // caBX is the C2PA JUMBF box. It is 5.7 KB of provenance metadata on a
+      // 1.6 KB image and has no business being served to every visitor.
+      expect(iconFile(relative).includes("caBX"), relative).toBe(false);
+    }
   });
 });

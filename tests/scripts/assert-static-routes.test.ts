@@ -77,10 +77,17 @@ describe("scripts/assert-static-routes.mjs", () => {
     for (const route of [
       "/robots.txt",
       "/sitemap.xml",
-      "/icon",
-      "/apple-icon",
+      "/favicon.ico",
+      "/icon.png",
+      "/apple-icon.png",
     ]) {
       expect(required).toContain(route);
+    }
+    // The extensionless names were the generated next/og routes. They are
+    // gone, and a stale entry here would pass silently while nothing checked
+    // the files that replaced them.
+    for (const route of ["/icon", "/apple-icon"]) {
+      expect(required).not.toContain(route);
     }
   });
 

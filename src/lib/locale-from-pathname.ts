@@ -11,12 +11,6 @@ export function localeFromPathname(pathname: string): AppLocale {
 /** Segments the router owns; next-intl must never rewrite them. */
 const RESERVED_PREFIXES = ["/api", "/_next", "/_vercel"];
 
-/**
- * App root metadata routes. They live outside the [lang] segment and have no
- * locale prefix to rewrite to.
- */
-const RESERVED_EXACT = ["/icon", "/apple-icon"];
-
 const LOCALE_PREFIX = new RegExp(`^/(${routing.locales.join("|")})(/|$)`);
 
 /**
@@ -28,11 +22,13 @@ const LOCALE_PREFIX = new RegExp(`^/(${routing.locales.join("|")})(/|$)`);
  * /feed.xml is the unprefixed entry point that redirects into one, and anything
  * else whose last segment carries a dot is a file (robots.txt, favicon.ico,
  * static assets), not a page.
+ *
+ * There is no extensionless exception list any more. The app root metadata
+ * routes used to be generated (/icon, /apple-icon) and needed one; they are
+ * static files now (favicon.ico, icon.png, apple-icon.png), so the dot rule
+ * already covers them.
  */
 export function isLocalizedRoutePath(pathname: string): boolean {
-  if (RESERVED_EXACT.includes(pathname)) {
-    return false;
-  }
   if (
     RESERVED_PREFIXES.some(
       (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)

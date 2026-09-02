@@ -119,10 +119,10 @@ describe("asset caching", () => {
     }
   });
 
-  it("caches the generated icon routes for a day", async () => {
+  it("caches the static icon files for a day", async () => {
     const { forSource } = await loadHeaders("production");
 
-    for (const source of ["/icon", "/apple-icon"]) {
+    for (const source of ["/favicon.ico", "/icon.png", "/apple-icon.png"]) {
       expect(value(forSource(source), "Cache-Control")).toBe(
         "public, max-age=86400"
       );

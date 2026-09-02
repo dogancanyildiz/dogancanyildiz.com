@@ -41,7 +41,7 @@ describe("proxy x-pathname", () => {
   });
 
   it("writes the header on the reserved segments too", () => {
-    for (const path of ["/api/health", "/icon", "/_next/static/chunk.js"]) {
+    for (const path of ["/api/health", "/icon.png", "/_next/static/chunk.js"]) {
       const response = proxy(
         new NextRequest(`https://dogancanyildiz.com${path}`, {
           headers: { "x-pathname": "/tr/hack" },
