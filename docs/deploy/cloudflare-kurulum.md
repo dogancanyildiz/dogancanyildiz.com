@@ -19,7 +19,7 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 - [ ] `*.preview` bilerek gri bulut: ücretsiz planda wildcard DNS kayıtları proxy'lenemez. Preview'lar bu yüzden TLS'siz `http` üzerinden ve yalnızca origin firewall'unda allowlist'e alınmış admin IP'sinden erişilebilir, bkz. `docs/deploy/traefik-ve-origin.md`.
 - [ ] Posta DNS kayıtları (MX, DKIM, SPF, DMARC) Mailcow kurulumuna aittir ve proxy'lenmez (gri bulut); 2026-08-31 kararıyla Resend kaldırıldı, gönderim `contact@dogancanyildiz.com` üzerinden Mailcow SMTP ile yapılır, bkz. `docs/deploy/mailcow-smtp.md`.
 - [ ] **Uyarı:** `me@dogancanyildiz.com` alıcı adresini taşıyan MX kayıtlarına dokunulmaz; A/CNAME kayıtlarının eklenmesi mevcut postayı etkilemez.
-- [ ] `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi bu zone'daki bir Redirect Rule ile yapılır (bölüm 3), Coolify'ın dahili www ayarı kullanılmaz.
+- [ ] `dogancanyildiz.com -> www.dogancanyildiz.com` yönlendirmesi (kanonik host www, bölüm 3'teki karar) bu zone'daki bir Redirect Rule ile yapılır, Coolify'ın dahili www ayarı kullanılmaz.
 
 - [ ] **CAA kaydı** (2026-08-28 denetimi, yoktu): `CAA 0 issue "letsencrypt.org"`, `CAA 0 issue "pki.goog"`, `CAA 0 iodef "mailto:me@dogancanyildiz.com"`. Origin CA'ya geçilirse `letsencrypt.org` satırı kaldırılabilir.
 - [ ] `*.preview` kaydı yalnızca PR preview kullanılacaksa eklenir; kullanılmayacaksa bu satır ve `docs/deploy/coolify-kurulum.md` bölüm 5 kaldırılır (karar sahibinde, 2026-08-28 denetimi F-029).
@@ -58,29 +58,32 @@ Rules -> Redirect Rules -> Create rule.
 - [ ] Expression:
 
 ```
-concat("https://dogancanyildiz.com", http.request.uri.path)
+concat("https://www.dogancanyildiz.com", http.request.uri.path)
 ```
 
 - [ ] Status code: **301**
 - [ ] Preserve query string: **açık**
-- [ ] Hedef bilerek `https://dogancanyildiz.com` köküne gidiyor. **Güncelleme (2026-08-30):** kökte artık Türkçe servis ediliyor (EN `/en` altında). Eski İngilizce yollar (`/about` vb.) origin'de 308 ile `/en/...`'e taşındığı için `.sh` üzerinden gelen eski bir link fiilen iki atlama yapar (.sh 301 .com, sonra 308); bu bilinçli kabul edilir, tek atlama şartı yalnızca `.sh` kuralının kendisi içindir.
+- [ ] Hedef bilerek `https://www.dogancanyildiz.com` köküne gidiyor. **Güncelleme (2026-08-30):** kökte artık Türkçe servis ediliyor (EN `/en` altında). Eski İngilizce yollar (`/about` vb.) origin'de 308 ile `/en/...`'e taşındığı için `.sh` üzerinden gelen eski bir link fiilen iki atlama yapar (.sh 301 www, sonra 308); bu bilinçli kabul edilir, tek atlama şartı yalnızca `.sh` kuralının kendisi içindir.
 
-Ayrıca `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi için ikinci, ayrı bir Redirect Rule eklenir (rule name: `www to apex`, filter: `http.host eq "www.dogancanyildiz.com"`, hedef: `concat("https://dogancanyildiz.com", http.request.uri.path)`, 301, path korunur); Coolify'ın dahili www/non-www ayarı bunun için kullanılmaz, tek kaynak burasıdır.
+**Karar (2026-09-02):** kanonik host www. Apex için ayrı, ikinci bir Redirect Rule eklenir (rule name: `apex to www`, filter: `http.host eq "dogancanyildiz.com"`, hedef: `concat("https://www.dogancanyildiz.com", http.request.uri)` — burada tam `uri` kullanılır, `uri.path` değil, böylece sorgu dizesi ayrı bir "Preserve query string" anahtarına gerek kalmadan korunur —, 301); Coolify'ın dahili www/non-www ayarı bunun için kullanılmaz, tek kaynak burasıdır.
 
 Doğrulama:
 
 ```bash
 curl -sI https://dogancanyildiz.sh/projects | grep -i -E '^(HTTP|location)'
 curl -sI 'https://www.dogancanyildiz.sh/hakkimda?utm_source=x' | grep -i -E '^(HTTP|location)'
+curl -sI 'https://dogancanyildiz.com/hakkimda?utm_source=x' | grep -i -E '^(HTTP|location)'
 ```
 
 Beklenen:
 
 ```
 HTTP/2 301
-location: https://dogancanyildiz.com/projects
+location: https://www.dogancanyildiz.com/projects
 HTTP/2 301
-location: https://dogancanyildiz.com/hakkimda?utm_source=x
+location: https://www.dogancanyildiz.com/hakkimda?utm_source=x
+HTTP/2 301
+location: https://www.dogancanyildiz.com/hakkimda?utm_source=x
 ```
 
 Tek atlama şartı: ikinci bir `301` veya `location` satırı çıkmamalı.

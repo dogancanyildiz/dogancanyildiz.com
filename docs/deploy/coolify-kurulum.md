@@ -22,8 +22,10 @@ Hedef Coolify sürümü: v4.3.1. Bu adımlar Coolify panelinde el ile yürütül
 
 **Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; tarihsel kurulum tersini tarif ediyordu.
 
-- [ ] Domains: `https://dogancanyildiz.com`
-- [ ] "Redirect" ayarı (www -> non-www): Coolify'ın dahili www yönlendirmesi **kullanılmaz**. `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi de dahil olmak üzere tüm domain yönlendirmesi Cloudflare Redirect Rules'ta tek yerden tanımlanır, bkz. `docs/deploy/cloudflare-kurulum.md`.
+**Karar (2026-09-02):** kanonik host www. Apex, edge'de (Cloudflare) `www.dogancanyildiz.com`'a 301 ile yönlendiği için origin'e normalde hiç düşmez; yine de Coolify uygulamasına iki domain de tanımlanır, apex yedek olarak kalır (Cloudflare önünde bir kesinti veya yanlış yapılandırma durumunda origin apex isteğini de yanıtlayabilsin diye).
+
+- [ ] Domains: `https://www.dogancanyildiz.com` ve `https://dogancanyildiz.com` (Traefik ikisi için de sertifika üretir ve router tanımlar).
+- [ ] "Redirect" ayarı (www -> non-www): Coolify'ın dahili www yönlendirmesi **kullanılmaz**. `dogancanyildiz.com -> www.dogancanyildiz.com` yönlendirmesi dahil tüm domain yönlendirmesi Cloudflare Redirect Rules'ta tek yerden tanımlanır, bkz. `docs/deploy/cloudflare-kurulum.md`.
 
 ## 4. Env değişkenleri
 
@@ -31,17 +33,17 @@ Coolify'da her değişkenin yanındaki "Build Variable?" kutusu, o değişkenin 
 
 | Değişken | Build Variable? | Değer | Gerekçe |
 |---|---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | **Evet** | `https://dogancanyildiz.com` | `next build` bunu client bundle'a inline ediyor ve Dockerfile'daki `ARG NEXT_PUBLIC_SITE_URL` varsayılansız (commit `fc470e0`). Build Variable işaretlenmezse build sessizce `undefined` bırakmaz, `resolveSiteUrl` hatasıyla Coolify build logunda durur (`/robots.txt` prerender adımı). |
+| `NEXT_PUBLIC_SITE_URL` | **Evet** | `https://www.dogancanyildiz.com` | `next build` bunu client bundle'a inline ediyor ve Dockerfile'daki `ARG NEXT_PUBLIC_SITE_URL` varsayılansız (commit `fc470e0`). Build Variable işaretlenmezse build sessizce `undefined` bırakmaz, `resolveSiteUrl` hatasıyla Coolify build logunda durur (`/robots.txt` prerender adımı). |
 | `SMTP_HOST` + `SMTP_PORT` + `SMTP_USER` + `SMTP_PASSWORD` | Hayır (Runtime) | Mailcow submission bilgileri, uygulama parolası (`docs/deploy/mailcow-smtp.md`) | Sır. Build variable image katmanlarına ve build loglarına sızabilir. |
 | `CONTACT_EMAIL` | Hayır (Runtime) | `me@dogancanyildiz.com` | Yalnızca sunucu tarafındaki contact route okuyor. |
 | `FROM_EMAIL` | Hayır (Runtime) | `contact@dogancanyildiz.com` | Aynı gerekçe. Mailcow'da tanımlı, DKIM imzalı adres olmalı, bkz. `docs/deploy/mailcow-smtp.md`. |
 | `TRUST_CF_CONNECTING_IP` | Hayır (Runtime) | Task 9 tamamlanana kadar `false`, sonra `true` | Faz 0'ın `trustsCloudflareHeaders()` kapısı. Traefik `forwardedHeaders.trustedIPs` set edilmeden ve origin yalnızca Cloudflare adreslerine kısıtlanmadan `true` yapılırsa rate limit anahtarı istemcinin uydurduğu başlıktan türer ve limit tamamen atlanabilir. Bkz. `docs/deploy/traefik-ve-origin.md` bölüm 2 ve 5. |
 
 - [ ] Doğrulama: deploy sonrası Coolify build logunda `SMTP_PASSWORD` değeri geçmiyor (Runtime sırlar build'e hiç girmemeli, Build Variable işaretli tek değerler `NEXT_PUBLIC_*` ve `UMAMI_*`).
-- [ ] Doğrulama: canlı sayfanın HTML kaynağında `https://dogancanyildiz.com` geçiyor (`NEXT_PUBLIC_SITE_URL` gerçekten gömülmüş).
+- [ ] Doğrulama: canlı sayfanın HTML kaynağında `https://www.dogancanyildiz.com` geçiyor (`NEXT_PUBLIC_SITE_URL` gerçekten gömülmüş).
 - [ ] Doğrulama: `TRUST_CF_CONNECTING_IP` yalnızca Task 9 bittikten sonra `true` yapıldı; PR preview ortamlarında `false` kalıyor (preview'lar Cloudflare'ın arkasında değil).
 - [ ] Build değişkenleri `NEXT_PUBLIC_BUILD_SHA` (Coolify `SOURCE_COMMIT`) ve `NEXT_PUBLIC_BUILD_DATE` (deploy zamanı, ISO) set; boşsa Systems paneli "son yayın" alanını gizler ve footer yıl basmaz. Faz 5 değişkenleri (`NEXT_PUBLIC_STATUS_URL`, `UMAMI_SCRIPT_URL` ve `UMAMI_WEBSITE_ID`, üçü de Build) `docs/runbooks/infrastructure.md`'de. `CSP_REPORT_ONLY=1` yalnızca tek bir ölçüm deploy'u için Build değişkeni olarak eklenir ve sonra kaldırılır.
-- [ ] Doğrulama: container açılış logunda `SMTP_*`, `CONTACT_EMAIL`, `FROM_EMAIL` için hata satırı yok ve `curl -s https://dogancanyildiz.com/api/health` gövdesinde `"status":"ok"` (eksik mail değişkeni `"degraded"` üretir, HTTP yine 200).
+- [ ] Doğrulama: container açılış logunda `SMTP_*`, `CONTACT_EMAIL`, `FROM_EMAIL` için hata satırı yok ve `curl -s https://www.dogancanyildiz.com/api/health` gövdesinde `"status":"ok"` (eksik mail değişkeni `"degraded"` üretir, HTTP yine 200).
 
 ## 5. Auto deploy ve Preview Deployments
 

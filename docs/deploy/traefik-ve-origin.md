@@ -149,14 +149,14 @@ http:
     redirect-to-com:
       redirectRegex:
         regex: "^https://(www\\.)?dogancanyildiz\\.sh/(.*)"
-        replacement: "https://dogancanyildiz.com/${2}"
+        replacement: "https://www.dogancanyildiz.com/${2}"
         permanent: true
 ```
 
-**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; middleware adı ve regex yönü sahibinin son kararına göre güncellendi (tarihsel kurulum tersini tarif ediyordu).
+**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; middleware adı ve regex yönü sahibinin son kararına göre güncellendi (tarihsel kurulum tersini tarif ediyordu). **Karar (2026-09-02):** kanonik host www; bu yedek regex'in hedefi de apex yerine doğrudan www'ye gider, Cloudflare Redirect Rules'taki canlı `sh to com` kuralıyla aynı hedefi taşır.
 
 - [ ] Dosya kaydedilir, proxy yeniden başlatılır.
-- [ ] `${2}` ikinci yakalama grubudur, `(www\.)?` birinci grubu tüketir. Hedef doğrudan `https://dogancanyildiz.com/` köküne gider, `/en`'e değil; zincirli yönlendirme yasağı burada da geçerli.
+- [ ] `${2}` ikinci yakalama grubudur, `(www\.)?` birinci grubu tüketir. Hedef doğrudan `https://www.dogancanyildiz.com/` köküne gider, `/en`'e değil; zincirli yönlendirme yasağı burada da geçerli.
 
 ## 4. Uygulamaya middleware etiketleri
 

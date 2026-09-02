@@ -85,7 +85,10 @@ function checkDomainDirection() {
 
   const checklist = readDoc("docs/launch-checklist.md");
   check(
-    /dogancanyildiz\.sh -> dogancanyildiz\.com/.test(checklist),
+    // The 2026-09-02 decision made www the canonical host: the .sh redirect's
+    // final hop is now www.dogancanyildiz.com, so the www. prefix is optional
+    // here on purpose, not a loosening of the direction check itself.
+    /dogancanyildiz\.sh -> (www\.)?dogancanyildiz\.com/.test(checklist),
     "docs/launch-checklist.md does not state the .sh -> .com redirect"
   );
 

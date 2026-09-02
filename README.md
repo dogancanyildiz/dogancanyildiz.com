@@ -159,10 +159,12 @@ Uygulamayı Coolify bu git deposundan yayınlar:
 3. Konteyner sağlık kontrolü `/api/health`.
 4. Traefik TLS sonlandırır, HSTS ve sıkıştırma ekler, Cloudflare aralıklarına
    `forwardedHeaders.trustedIPs` ile güvenir.
-5. Cloudflare proxied kipte, SSL Full (strict). `dogancanyildiz.sh` →
-   `dogancanyildiz.com` yönlendirmesi yolu koruyan tek atlamalı Cloudflare
-   Redirect Rule olarak planlı; `.sh` henüz kayıtlı değil, kural canlı değil
-   (`docs/plans/README.md`).
+5. Cloudflare proxied kipte, SSL Full (strict). Kanonik host www (karar
+   2026-09-02): `dogancanyildiz.sh` → `www.dogancanyildiz.com` yönlendirmesi
+   yolu koruyan tek atlamalı Cloudflare Redirect Rule olarak planlı; `.sh`
+   henüz kayıtlı değil, kural canlı değil (`docs/plans/README.md`). Apex
+   (`dogancanyildiz.com`) da ayrı bir Redirect Rule ile aynı www adresine
+   yönlenir.
 
 `Dockerfile`, `.dockerignore` ve GitHub Actions kapısı bu depoda. CI
 bağımlılık incelemesi, lint, typecheck, coverage'lı test, `verify:docs`,
