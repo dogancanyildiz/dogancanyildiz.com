@@ -118,16 +118,25 @@ const PAGES: PageCase[] = [
     path: "/updating",
     load: () => import("@/app/[lang]/updating/page"),
   },
-  ...getProjectSlugs("en").map((slug) => ({
-    name: `projects/${slug}`,
-    path: `/projects/${slug}`,
-    extraParams: { slug },
-    load: () => import("@/app/[lang]/projects/[slug]/page"),
-  })),
-  // The locale is baked into the case name because a bilingual post (like
-  // self-hosting-with-coolify) produces one PAGES entry per locale that
-  // otherwise share the same `blog/<slug>` name, which would collapse into
-  // duplicate it.each test titles.
+  // The locale is baked into the case name and each case is scoped to its
+  // own locale, because a project's slug is no longer guaranteed to be the
+  // same in both locales (not-ortalamasi-hesaplayici and
+  // bilet-satin-alma-sistemi are Turkish renames of gpa-calculator and
+  // ticket-purchasing-system). Sharing one PAGES entry across both locales,
+  // as this used to, would call generateMetadata with the English slug under
+  // the Turkish locale and hit notFound() for exactly those two projects.
+  ...routing.locales.flatMap((locale) =>
+    getProjectSlugs(locale).map((slug) => ({
+      name: `projects/${slug} [${locale}]`,
+      path: `/projects/${slug}`,
+      extraParams: { slug },
+      locales: [locale],
+      load: () => import("@/app/[lang]/projects/[slug]/page"),
+    }))
+  ),
+  // Same reason: a bilingual post (like self-hosting-with-coolify) produces
+  // one PAGES entry per locale that otherwise share the same `blog/<slug>`
+  // name, which would collapse into duplicate it.each test titles.
   ...routing.locales.flatMap((locale) =>
     getPostSlugs(locale).map((slug) => ({
       name: `blog/${slug} [${locale}]`,
@@ -406,7 +415,7 @@ describe("page openGraph metadata", () => {
 
   it("marks the post detail page openGraph type as article with its published time", async () => {
     const postPage = PAGES.find(
-      (page) => page.name === "blog/self-hosting-with-coolify [tr]"
+      (page) => page.name === "blog/coolify-ile-kendi-sunucumda [tr]"
     );
     if (!postPage) throw new Error("no post detail page case found");
     const locale = postPage.locales?.[0] ?? "en";

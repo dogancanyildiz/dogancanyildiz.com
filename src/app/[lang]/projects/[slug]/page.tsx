@@ -14,7 +14,11 @@ import { GithubIcon } from "@/components/ui/brand-icon";
 import { SkillTag } from "@/components/ui/skill-tag";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { getProject, getProjectLocales, getProjectSlugs } from "@/lib/content";
+import {
+  getProject,
+  getProjectLocalesByKey,
+  getProjectSlugs,
+} from "@/lib/content";
 import {
   buildBreadcrumbList,
   buildProjectCreativeWork,
@@ -47,7 +51,7 @@ export async function generateMetadata({
   return buildPageMetadata(locale, `/projects/${slug}`, {
     title: project.title,
     description: project.summary,
-    availableLocales: getProjectLocales(slug),
+    availableLocales: getProjectLocalesByKey(project.translationKey),
     type: "article",
     ...(project.updated ? { modifiedTime: project.updated } : {}),
     authors: [siteConfig.person.name],

@@ -37,6 +37,7 @@ const eslintConfig = defineConfig([
     "tests/fixtures/.velite-invalid/**",
     "tests/fixtures/.velite-invalid-links/**",
     "tests/fixtures/.velite-schema-fields/**",
+    "tests/fixtures/.velite-duplicate-key/**",
     // Local Claude Code state, including agent worktrees that carry their own
     // node_modules and .next output:
     ".claude/**",

@@ -16,7 +16,7 @@ import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import {
   getPost,
-  getPostLocales,
+  getPostLocalesByKey,
   getPostSlugs,
   readingMinutes,
 } from "@/lib/content";
@@ -49,7 +49,7 @@ export async function generateMetadata({
   return buildPageMetadata(locale, `/blog/${slug}`, {
     title: post.title,
     description: post.summary,
-    availableLocales: getPostLocales(slug),
+    availableLocales: getPostLocalesByKey(post.translationKey),
     type: "article",
     publishedTime: post.date,
     modifiedTime: post.updated ?? post.date,

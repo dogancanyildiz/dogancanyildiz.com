@@ -5,6 +5,7 @@ import type { AppLocale } from "@/i18n/routing";
 export type Locale = AppLocale;
 export type Project = (typeof projects)[number];
 export type Post = (typeof posts)[number];
+export type ContentKind = "post" | "project";
 
 export interface CoverImage {
   src: string;
@@ -107,10 +108,29 @@ export function getProjectSlugs(locale: Locale): string[] {
   return getProjects(locale).map((project) => project.slug);
 }
 
-export function getProjectLocales(slug: string): Locale[] {
+/** The project with this translationKey in this locale, if any. */
+export function getProjectByKey(
+  locale: Locale,
+  key: string
+): Project | undefined {
+  return getProjects(locale).find((project) => project.translationKey === key);
+}
+
+/**
+ * Locales that actually carry a translation of this key.
+ *
+ * Named ...ByKey rather than reusing getProjectLocales(slug: string) on
+ * purpose (R-4 in the localized paths plan): the old name took a slug and
+ * most projects have the same slug in both locales, so a stale call site
+ * passing a slug would still compile and silently return the wrong set only
+ * for the projects whose slug differs per locale. The new name makes the
+ * parameter's meaning part of the signature, so every call site had to be
+ * looked at once when this changed.
+ */
+export function getProjectLocalesByKey(key: string): Locale[] {
   const locales: Locale[] = [];
   for (const locale of routing.locales) {
-    if (getProject(locale, slug)) locales.push(locale);
+    if (getProjectByKey(locale, key)) locales.push(locale);
   }
   return locales;
 }
@@ -131,12 +151,44 @@ export function getPostSlugs(locale: Locale): string[] {
   return getPosts(locale).map((post) => post.slug);
 }
 
-export function getPostLocales(slug: string): Locale[] {
+/** The post with this translationKey in this locale, if any. */
+export function getPostByKey(locale: Locale, key: string): Post | undefined {
+  return getPosts(locale).find((post) => post.translationKey === key);
+}
+
+/** See the comment on getProjectLocalesByKey; same rename, same reason. */
+export function getPostLocalesByKey(key: string): Locale[] {
   const locales: Locale[] = [];
   for (const locale of routing.locales) {
-    if (getPost(locale, slug)) locales.push(locale);
+    if (getPostByKey(locale, key)) locales.push(locale);
   }
   return locales;
+}
+
+/** Every locale's slug for a translationKey; a locale with no translation is absent. */
+export function slugsByKey(
+  kind: ContentKind,
+  key: string
+): Partial<Record<Locale, string>> {
+  const result: Partial<Record<Locale, string>> = {};
+  for (const locale of routing.locales) {
+    const item =
+      kind === "post"
+        ? getPostByKey(locale, key)
+        : getProjectByKey(locale, key);
+    if (item) result[locale] = item.slug;
+  }
+  return result;
+}
+
+export function postSlugsByKey(key: string): Partial<Record<Locale, string>> {
+  return slugsByKey("post", key);
+}
+
+export function projectSlugsByKey(
+  key: string
+): Partial<Record<Locale, string>> {
+  return slugsByKey("project", key);
 }
 
 /**

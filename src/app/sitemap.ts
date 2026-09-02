@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import {
-  getPostLocales,
+  getPostLocalesByKey,
   getPosts,
-  getProjectLocales,
+  getProjectLocalesByKey,
   getProjects,
 } from "@/lib/content";
 import { absoluteUrl, buildLanguageAlternates } from "@/lib/seo/alternates";
@@ -59,7 +59,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "monthly",
         priority: 0.7,
         alternates: {
-          languages: languagesFor(path, getProjectLocales(project.slug)),
+          languages: languagesFor(
+            path,
+            getProjectLocalesByKey(project.translationKey)
+          ),
         },
       });
     }
@@ -72,7 +75,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "yearly",
         priority: 0.6,
         alternates: {
-          languages: languagesFor(path, getPostLocales(post.slug)),
+          languages: languagesFor(
+            path,
+            getPostLocalesByKey(post.translationKey)
+          ),
         },
       });
     }
