@@ -3,6 +3,11 @@ import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { getPosts, type Locale } from "@/lib/content";
 import { absoluteUrl, feedTitle } from "@/lib/seo/alternates";
+import {
+  OG_IMAGE_CONTENT_TYPE,
+  OG_IMAGE_SIZE,
+  ogImagePathFor,
+} from "@/lib/seo/og-image";
 import { escapeXml } from "@/lib/seo/xml";
 
 export const dynamic = "force-static";
@@ -31,6 +36,16 @@ export async function GET(
   const items = posts
     .map((post) => {
       const url = absoluteUrl(locale, `/blog/${post.slug}`);
+      // Each post draws its own card (src/app/[lang]/blog/[slug]/opengraph-image.tsx),
+      // so a reader that renders images has one per entry instead of falling
+      // back to the site identity card, or to nothing.
+      //
+      // Media RSS rather than <enclosure>: enclosure's `length` attribute is
+      // the byte size of the file, and the card is rendered on request by a
+      // metadata image route, so the feed would have to fetch every PNG at
+      // build time only to fill in a number no reader needs. media:content
+      // leaves length optional and carries the dimensions instead.
+      const cardUrl = absoluteUrl(locale, ogImagePathFor(`/blog/${post.slug}`));
       return [
         "    <item>",
         `      <title>${escapeXml(post.title)}</title>`,
@@ -38,6 +53,7 @@ export async function GET(
         `      <guid isPermaLink="true">${escapeXml(url)}</guid>`,
         `      <pubDate>${new Date(post.date).toUTCString()}</pubDate>`,
         `      <description>${escapeXml(post.summary)}</description>`,
+        `      <media:content url="${escapeXml(cardUrl)}" type="${OG_IMAGE_CONTENT_TYPE}" medium="image" width="${OG_IMAGE_SIZE.width}" height="${OG_IMAGE_SIZE.height}" />`,
         "    </item>",
       ].join("\n");
     })
@@ -60,7 +76,11 @@ export async function GET(
 
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
+    // media: is declared on the root element, not per item, because an
+    // undeclared prefix makes the whole document ill formed rather than one
+    // element unreadable. No channel level <image> next to it: RSS 2.0 caps
+    // that element at 144x400 px, which the 1200x630 card cannot meet.
+    '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">',
     "  <channel>",
     // Localized, because the two feeds are otherwise indistinguishable in a
     // reader: the unprefixed /feed.xml used to be the English one and is now

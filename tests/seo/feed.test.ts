@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routing } from "@/i18n/routing";
 import { getPosts } from "@/lib/content";
+import { absoluteUrl } from "@/lib/seo/alternates";
+import { ogImagePathFor } from "@/lib/seo/og-image";
 import { escapeXml } from "@/lib/seo/xml";
 
 // next-intl/server resolves to its client build outside a Next request, so
@@ -153,6 +155,48 @@ describe("rss feed route", () => {
 
     expect(dates.length).toBeGreaterThan(1);
     expect(dates).toEqual([...dates].sort((a, b) => b - a));
+  });
+
+  it("declares the media rss namespace on the root element", async () => {
+    const { body } = await feedFor("tr");
+
+    // An item carrying an undeclared prefix is not a broken element, it is a
+    // document a conforming parser refuses whole.
+    expect(body).toContain('xmlns:media="http://search.yahoo.com/mrss/"');
+    expect(body.indexOf("xmlns:media")).toBeLessThan(
+      body.indexOf("<media:content")
+    );
+  });
+
+  it.each([...routing.locales])(
+    "gives every %s item the card of its own post",
+    async (locale) => {
+      const { body } = await feedFor(locale);
+      const cards = [...body.matchAll(/<media:content ([^>]*?)\/>/g)].flatMap(
+        (match) => match[1] ?? []
+      );
+
+      expect(cards).toHaveLength(getPosts(locale).length);
+
+      for (const [index, attributes] of cards.entries()) {
+        const post = getPosts(locale)[index];
+        expect(attributes).toContain(
+          `url="${absoluteUrl(locale, ogImagePathFor(`/blog/${post?.slug}`))}"`
+        );
+        expect(attributes).toContain('type="image/png"');
+        expect(attributes).toContain('medium="image"');
+        expect(attributes).toContain('width="1200"');
+        expect(attributes).toContain('height="630"');
+      }
+    }
+  );
+
+  it("keeps the channel free of an <image> the card cannot fit", async () => {
+    // RSS 2.0 caps the channel image at 144x400; the 1200x630 card would be
+    // advertised at a size no reader honours.
+    const { body } = await feedFor("tr");
+
+    expect(body).not.toContain("<image>");
   });
 
   it("falls back to the default locale for an unrouted lang", async () => {
