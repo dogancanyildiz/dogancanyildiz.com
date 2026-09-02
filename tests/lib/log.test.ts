@@ -80,4 +80,29 @@ describe("describeError", () => {
     expect(describeError({ secret: true })).toBe("UnknownError");
     expect(describeError("boom")).toBe("boom");
   });
+
+  it("keeps the provider error code next to the name", () => {
+    // nodemailer names almost every failure "Error" and puts the part an
+    // operator can act on in code: EAUTH, ECONNECTION, EENVELOPE.
+    const error = Object.assign(
+      new Error("550 rejected: visitor@mail.invalid"),
+      {
+        code: "EENVELOPE",
+      }
+    );
+
+    expect(describeError(error)).toBe("Error/EENVELOPE");
+  });
+
+  it("drops a code that is not a short code shaped token", () => {
+    // A library is free to put anything in code, and a sentence there could
+    // carry the payload the name is kept clean of.
+    const wordy = Object.assign(new Error("x"), {
+      code: "550 rejected: visitor@mail.invalid",
+    });
+    const numeric = Object.assign(new Error("x"), { code: 550 });
+
+    expect(describeError(wordy)).toBe("Error");
+    expect(describeError(numeric)).toBe("Error");
+  });
 });

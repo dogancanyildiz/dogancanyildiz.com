@@ -431,6 +431,28 @@ describe("POST /api/contact mail failures", () => {
     expect(line).not.toContain(validPayload.message);
   });
 
+  it("keeps the SMTP error code in the log line without the message", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    send.mockRejectedValue(
+      // The shape nodemailer actually throws: a generic name, the part an
+      // operator can act on in code, and the envelope quoted in the message.
+      Object.assign(new Error("550 rejected: visitor@mail.invalid"), {
+        code: "EENVELOPE",
+      })
+    );
+
+    await POST(contactRequest());
+
+    const logged = error.mock.calls[0];
+    if (!logged) {
+      throw new Error("console.error was not called");
+    }
+    const line = String(logged[0]);
+
+    expect(line).toContain("EENVELOPE");
+    expect(line).not.toContain(validPayload.email);
+  });
+
   it("answers 504 when the provider does not respond in time", async () => {
     vi.useFakeTimers();
     vi.spyOn(console, "error").mockImplementation(() => {});
