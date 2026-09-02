@@ -132,7 +132,7 @@ Büyüklük: L. En çok elle yazılan içerik burada, iki dilde.
 - [x] `tests/no-template-residue.test.ts` dosya sistemi taraması (git bağımlılığı kaldırıldı, 2026-08-28).
 - [x] `tests/messages.test.ts` namespace eşleşmesi yalnızca gerçek `useTranslations` namespace'leri için (2026-08-28).
 
-(`/favicon.ico` sorunu Faz 4'te çözüldü: `next.config.ts` `redirects()` ile 308 -> `/icon`; burada ayrıca madde değil.)
+(`/favicon.ico` sorunu Faz 4'te 308 -> `/icon` yönlendirmesiyle çözülmüştü; 2026-09-02'de yönlendirme kalktı, `src/app/favicon.ico` marka ICO'su olarak servis ediliyor. Burada ayrıca madde değil.)
 
 Bitti sayılma kriteri (2026-08-30 kararıyla güncellendi): Uptime Kuma `/api/health` monitörüyle yayında ve bir bildirim kanalı test edildi; Systems paneli build bilgisini ve `NEXT_PUBLIC_STATUS_URL` linkini gösteriyor, sayfada hostname/port/IP yok; Dependabot en az bir dependency PR açmış veya merged (2026-08-28: dokuz PR merge edildi, kriter sağlandı); site merkezi Umami'ye (`umami.dravcore.com`) ekli ve sayfa yüklemesi CSP ihlali vermiyor. Runbook: `docs/runbooks/infrastructure.md`. Gerçek durum: Kuma kurulmadı, site kaydı yapılmadı, site 526.
 
