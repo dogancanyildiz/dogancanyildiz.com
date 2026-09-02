@@ -21,7 +21,6 @@ export interface ProjectCardData {
   stack: string[];
   year: number;
   outcome: string;
-  href: string;
   liveUrl: string | null;
   repoUrl: string | null;
   cover: CoverImage | null;
@@ -34,7 +33,6 @@ export interface PostCardData {
   date: string;
   tags: string[];
   readingTime: number;
-  href: string;
 }
 
 /**
@@ -181,11 +179,23 @@ export function toProjectCardData(project: Project): ProjectCardData {
     stack: project.stack,
     year: project.year,
     outcome: project.outcome,
-    href: `/projects/${project.slug}`,
     liveUrl: project.links.live ?? null,
     repoUrl: project.links.repo ?? null,
     cover: toCover(project.cover),
   };
+}
+
+/**
+ * Reading time in whole minutes, never below one.
+ *
+ * velite's metadata carries a fractional estimate. The list card and the post
+ * header both show it and each used to round it on its own, which is one edit
+ * away from the two disagreeing about the same post.
+ */
+export function readingMinutes(post: {
+  metadata: { readingTime: number };
+}): number {
+  return Math.max(1, Math.round(post.metadata.readingTime));
 }
 
 export function toPostCardData(post: Post): PostCardData {
@@ -195,7 +205,6 @@ export function toPostCardData(post: Post): PostCardData {
     summary: post.summary,
     date: post.date,
     tags: post.tags,
-    readingTime: Math.max(1, Math.round(post.metadata.readingTime)),
-    href: `/blog/${post.slug}`,
+    readingTime: readingMinutes(post),
   };
 }
