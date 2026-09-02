@@ -11,6 +11,7 @@ import { MDXContent } from "@/components/content/mdx-content";
 import { mdxComponents } from "@/components/content/mdx-components";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
+import { ShareCard } from "@/components/sections/share-card";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import {
@@ -121,6 +122,8 @@ export default async function PostPage({ params }: PostPageProps) {
       <div className="prose-content">
         <MDXContent code={post.code} components={mdxComponents} />
       </div>
+
+      <ShareCard locale={locale} path={`/blog/${slug}`} title={post.title} />
 
       <ContactCta />
     </PageSection>

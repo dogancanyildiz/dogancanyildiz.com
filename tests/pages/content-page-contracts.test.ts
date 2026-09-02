@@ -94,6 +94,37 @@ describe("empty states", () => {
   });
 });
 
+describe("share block placement", () => {
+  it.each([
+    ["blog post", BLOG_DETAIL, "/blog/${slug}"],
+    ["project", PROJECT_DETAIL, "/projects/${slug}"],
+  ])("closes the %s article on the share block", (_name, file, path) => {
+    const source = read(file);
+
+    expect(source).toContain("<ShareCard");
+    // The card belongs to the page the reader just finished, so it is handed
+    // the page's own path rather than falling back to the identity image.
+    expect(source).toContain(`path={\`${path}\`}`);
+  });
+
+  it.each([
+    ["blog post", BLOG_DETAIL],
+    ["project", PROJECT_DETAIL],
+  ])(
+    "puts it after the %s prose and before the contact call",
+    (_name, file) => {
+      const source = read(file);
+      const prose = source.indexOf("prose-content");
+      const share = source.indexOf("<ShareCard");
+      const cta = source.indexOf("<ContactCta");
+
+      expect(prose).toBeGreaterThan(-1);
+      expect(share).toBeGreaterThan(prose);
+      expect(cta).toBeGreaterThan(share);
+    }
+  );
+});
+
 describe("mdx element overrides", () => {
   const tableOverride = mdxComponents.table;
   if (!tableOverride) {

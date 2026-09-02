@@ -101,6 +101,17 @@
     "back": "Tüm yazılar",
     "empty": "Henüz yazı yok."
   },
+  "share": {
+    "title": "Paylaş",
+    "lead": "Bu sayfanın bağlantısı paylaşıldığında görünen kart.",
+    "x": "X'te paylaş",
+    "linkedin": "LinkedIn'de paylaş",
+    "whatsapp": "WhatsApp'ta paylaş",
+    "email": "E-posta ile gönder",
+    "copy": "Bağlantıyı kopyala",
+    "copied": "Kopyalandı",
+    "copyFailed": "Kopyalanamadı, adresi seçip kopyalayın"
+  },
   "contact": {
     "title": "İletişim",
     "description": "Yapılmasını istediğiniz işi yazın, kapsamı ve ilk adımı birlikte netleştirelim.",

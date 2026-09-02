@@ -101,6 +101,17 @@
     "back": "All posts",
     "empty": "No posts yet."
   },
+  "share": {
+    "title": "Share",
+    "lead": "The card this page shows when its link is shared.",
+    "x": "Share on X",
+    "linkedin": "Share on LinkedIn",
+    "whatsapp": "Share on WhatsApp",
+    "email": "Send by email",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "copyFailed": "Could not copy, select the address instead"
+  },
   "contact": {
     "title": "Contact",
     "description": "Tell me the scope and the deadline, and we can settle the first step from there.",

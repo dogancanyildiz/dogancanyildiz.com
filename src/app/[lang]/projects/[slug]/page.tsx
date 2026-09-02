@@ -8,6 +8,7 @@ import { MDXContent } from "@/components/content/mdx-content";
 import { mdxComponents } from "@/components/content/mdx-components";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
+import { ShareCard } from "@/components/sections/share-card";
 import { Button } from "@/components/ui/button";
 import { GithubIcon } from "@/components/ui/brand-icon";
 import { SkillTag } from "@/components/ui/skill-tag";
@@ -170,6 +171,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <div className="prose-content">
         <MDXContent code={project.code} components={mdxComponents} />
       </div>
+
+      <ShareCard
+        locale={locale}
+        path={`/projects/${slug}`}
+        title={project.title}
+      />
 
       <ContactCta scope="project" />
     </PageSection>
