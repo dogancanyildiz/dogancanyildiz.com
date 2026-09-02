@@ -6,6 +6,12 @@ import {
   localePath,
   siteUrl,
 } from "@/lib/seo/alternates";
+import type { Locale } from "@/lib/content";
+
+/** First parameter of a function type, for the compile time guard below. */
+type LocaleParam<T> = T extends (locale: infer L, ...rest: never[]) => unknown
+  ? L
+  : never;
 
 beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://dogancanyildiz.com");
@@ -42,6 +48,16 @@ describe("localePath", () => {
   it("re-points a path carrying the other locale at the asked for locale", () => {
     expect(localePath("tr", "/en/about")).toBe("/hakkimda");
     expect(localePath("en", "/tr/about")).toBe("/en/about");
+  });
+
+  it("keeps its locale parameter narrowed to the routed locales", () => {
+    // localePath hands its locale straight to pathnameForLocale, so it is the
+    // second string gate on the same chain: narrowing only pathnameForLocale
+    // moves the tsc error here instead of clearing it.
+    const narrowed: LocaleParam<typeof localePath> extends Locale
+      ? true
+      : false = true;
+    expect(narrowed).toBe(true);
   });
 
   it("leaves a slug that only starts with locale letters alone", () => {

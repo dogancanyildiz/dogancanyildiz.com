@@ -33,7 +33,7 @@ const LEADING_LOCALE = new RegExp(`^/(?:${routing.locales.join("|")})(?=/|$)`);
  * and localePath("tr", "/tr") returned "/tr", which is not the Turkish
  * canonical but a URL the proxy 308s away from.
  */
-export function localePath(locale: string, path: string): string {
+export function localePath(locale: Locale, path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   const trimmed = normalized === "/" ? "/" : normalized.replace(/\/+$/, "");
   const unprefixed = trimmed.replace(LEADING_LOCALE, "") || "/";
