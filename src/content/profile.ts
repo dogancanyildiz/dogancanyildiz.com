@@ -106,6 +106,7 @@ export const skills: Record<Locale, SkillGroup[]> = {
         "TypeScript",
         "React",
         "Next.js",
+        "Tailwind CSS",
         "Bootstrap",
       ],
       featured: true,
@@ -114,7 +115,12 @@ export const skills: Record<Locale, SkillGroup[]> = {
       id: "backend",
       order: 2,
       title: "Backend",
-      items: ["Node.js / Express.js", "PHP", "RESTful API design"],
+      items: [
+        "Node.js / Express.js",
+        "C# / ASP.NET MVC",
+        "PHP",
+        "RESTful API design",
+      ],
       featured: true,
     },
     {
@@ -203,6 +209,7 @@ export const skills: Record<Locale, SkillGroup[]> = {
         "TypeScript",
         "React",
         "Next.js",
+        "Tailwind CSS",
         "Bootstrap",
       ],
       featured: true,
@@ -211,7 +218,12 @@ export const skills: Record<Locale, SkillGroup[]> = {
       id: "backend",
       order: 2,
       title: "Backend",
-      items: ["Node.js / Express.js", "PHP", "RESTful API tasarımı"],
+      items: [
+        "Node.js / Express.js",
+        "C# / ASP.NET MVC",
+        "PHP",
+        "RESTful API tasarımı",
+      ],
       featured: true,
     },
     {
