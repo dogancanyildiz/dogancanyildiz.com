@@ -117,6 +117,11 @@ describe("project content layer", () => {
     // makes the same project look like two different ones to a reader who
     // switches language mid visit. Nothing in the schema enforces this, so a
     // single forgotten line in one of the two files is all it takes.
+    //
+    // cover is in the comparison for the same reason: the alt text is prose
+    // and belongs to its language, but the image itself is the same
+    // screenshot, and one locale showing a cover the other does not have is
+    // the visual version of the same drift.
     for (const project of getProjects("en")) {
       const other = getProject("tr", project.slug);
       if (!other) continue;
@@ -127,6 +132,7 @@ describe("project content layer", () => {
           year: other.year,
           draft: other.draft,
           links: other.links,
+          cover: other.cover?.src ?? null,
         },
         project.slug
       ).toEqual({
@@ -135,7 +141,25 @@ describe("project content layer", () => {
         year: project.year,
         draft: project.draft,
         links: project.links,
+        cover: project.cover?.src ?? null,
       });
+    }
+  });
+
+  it("gives every project cover an alt text in its own locale", () => {
+    // coverAlt is optional in the schema, and an empty one is the documented
+    // way to mark a decorative image. A project cover is never decorative: it
+    // is a screenshot of the work the page is about, so a missing alt text
+    // here is a screen reader being told nothing about the only picture on
+    // the page.
+    for (const locale of routing.locales) {
+      for (const project of getProjects(locale)) {
+        if (!project.cover) continue;
+        expect(
+          project.coverAlt,
+          `${locale}/${project.slug} has a cover with no coverAlt`
+        ).toBeTruthy();
+      }
     }
   });
 

@@ -52,11 +52,13 @@ describe("velite content schema", () => {
     expect(result.output).toMatch(/https:\/\//);
   }, 60_000);
 
-  // updated, coverAlt and draft-on-a-project were added by the audit and no
-  // real content file sets any of them yet, so nothing ever compiled them: a
-  // wrong type would have surfaced on the day an author first used one. This
-  // fixture puts all three through the real pipeline.
-  it("compiles the optional frontmatter fields no content file uses yet", () => {
+  // updated, coverAlt and draft-on-a-project were added by the audit. The
+  // Köklü Hukuk case study now uses cover and coverAlt, but updated and a
+  // drafted project still have no real file behind them, and none of the
+  // three had ever been compiled when this fixture was written. It puts all
+  // of them through the real pipeline so a wrong type fails here rather than
+  // on the day an author first reaches for one.
+  it("compiles the optional frontmatter fields, including the unused ones", () => {
     const result = runVelite("tests/fixtures/velite.schema-fields.config.ts");
     expect(result.status, result.output).toBe(0);
 
