@@ -476,12 +476,19 @@ describe("brand link", () => {
     const source = read("src/components/layout/header.tsx");
     expect(source).not.toContain('aria-label={tBrand("name")}');
     expect(source).toContain('{tBrand("name")}');
-    // A bare sr-only would hide the name everywhere. The only allowed form is
-    // the max-width variant: below 420px the row cannot hold the mark, the
-    // name and the 44px controls, so the mark stands alone there and the name
-    // stays in the accessible name; from 420px up it is visible again.
-    expect(source).not.toMatch(/["\s]sr-only/);
-    expect(source).toContain("max-[419px]:sr-only");
+    // One sr-only copy of the name exists for phones only, paired with
+    // min-[480px]:hidden; the visible lockup takes over from 480px up. A second
+    // sr-only, or one without the breakpoint pair, would hide the name
+    // everywhere.
+    expect(source.match(/sr-only/g)).toHaveLength(1);
+    expect(source).toContain('className="sr-only min-[480px]:hidden"');
+    expect(source).toContain("min-[480px]:flex");
+    // The tagline is decorative brand copy, not part of the link's name.
+    const taglineAt = source.indexOf('{tBrand("tagline")}');
+    expect(taglineAt).toBeGreaterThan(-1);
+    expect(source.slice(taglineAt - 200, taglineAt)).toContain(
+      'aria-hidden="true"'
+    );
   });
 
   it("puts the logo mark inside the same link without labelling it", () => {
@@ -501,8 +508,9 @@ describe("brand link", () => {
     // a fixed h-16. truncate needs a min-w-0 ancestor to do anything, which is
     // what the link and its wrapper carry.
     const source = read("src/components/layout/header.tsx");
-    expect(source).toMatch(/className="truncate text-sm[^"]*"/);
+    expect(source).toMatch(/className="truncate text-\[15px\][^"]*"/);
     expect(source).toContain("flex min-w-0 items-center gap-2.5");
+    expect(source).toContain("flex min-w-0 flex-col");
   });
 });
 

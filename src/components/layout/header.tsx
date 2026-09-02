@@ -29,17 +29,37 @@ export function Header({ untranslated }: HeaderProps) {
             href="/"
             className="tap-target group flex min-w-0 items-center gap-2.5 no-underline"
           >
-            {/* Decorative, so the link keeps the name as its accessible
-                name. Below 420px the row cannot hold the mark, the name and
-                the 44px controls together (measured 320 and 375 viewports),
-                so the name drops to screen readers only and the mark stands
-                alone; from 420px up it is back and ellipsizes if it must. */}
-            <BrandMark height={18} className="shrink-0 text-foreground" />
-            <span className="truncate text-sm font-medium tracking-tight text-foreground max-[419px]:sr-only">
-              {tBrand("name")}
+            {/* The owner's lockup: mark, hairline, the name over a mono
+                tagline. Mark and tagline are decorative, so the link's
+                accessible name is the name alone. Below 480px the row cannot
+                hold the lockup next to the 44px controls (measured with device
+                emulation), so only the mark shows there and the first span
+                keeps the name for assistive tech; from 480px up the second
+                block is the visible one. */}
+            <BrandMark height={24} className="shrink-0 text-foreground" />
+            <span className="sr-only min-[480px]:hidden">{tBrand("name")}</span>
+            <span className="hidden min-w-0 items-center gap-2.5 min-[480px]:flex">
+              <span
+                aria-hidden="true"
+                className="h-7 w-px shrink-0 bg-border-strong"
+              />
+              <span className="flex min-w-0 flex-col gap-1">
+                <span className="truncate text-[15px] leading-none font-medium tracking-tight text-foreground">
+                  {tBrand("name")}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="truncate font-mono text-[11px] leading-none tracking-wide text-primary"
+                >
+                  {tBrand("tagline")}
+                </span>
+              </span>
             </span>
           </Link>
-          <div className="hidden md:block">
+          {/* lg, not md: on an iPad in portrait (768 to 834px) the nav, the
+              controls and these two icons together left the lockup no room
+              and the name ellipsized; the footer carries the same links. */}
+          <div className="hidden lg:block">
             <SocialLinks
               githubLabel={t("footer.github")}
               linkedinLabel={t("footer.linkedin")}
@@ -53,7 +73,7 @@ export function Header({ untranslated }: HeaderProps) {
             the left is the side that gives way. */}
         <div className="flex shrink-0 items-center gap-3">
           <nav aria-label={t("nav.menu")} className="hidden md:block">
-            <ul className="flex items-center gap-5">
+            <ul className="flex items-center gap-3 lg:gap-5">
               {navItems.map(({ href, key }) => {
                 const isActive = isNavItemActive(pathname, href);
                 return (
