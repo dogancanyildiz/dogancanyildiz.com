@@ -1,7 +1,7 @@
 ---
 title: Ticket Purchasing System
 slug: ticket-purchasing-system
-summary: A containerized ticket purchasing application I attacked first and then hardened, built during the Siber Vatan program.
+summary: A ticket purchasing application I wrote for the Siber Vatan training program, running in a single container. Once it worked I ran a penetration test and a vulnerability analysis against my own code.
 role: Cybersecurity project, Siber Vatan program
 stack:
   - PHP
@@ -10,8 +10,8 @@ stack:
 year: 2025
 links:
   repo: https://github.com/dogancanyildiz/bilet-satin-alma
-outcome: The findings from the penetration test were closed with input validation, secure session handling and a hardened Docker deployment.
-featured: true
+outcome: "The findings changed the purchase flow: I moved validation to the boundary, and the app now runs in a container that never runs as root."
+featured: false
 order: 2
 ---
 

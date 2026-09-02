@@ -7,6 +7,7 @@ const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 const PROJECT_LIST = "src/components/sections/project-list.tsx";
 const POST_LIST = "src/components/sections/post-list.tsx";
 const EXPERIENCE_SUMMARY = "src/components/sections/experience-summary.tsx";
+const HOME = "src/app/[lang]/page.tsx";
 
 describe("project card badge links", () => {
   it("clears the 24px target floor WCAG 2.2 SC 2.5.8 asks for", () => {
@@ -37,6 +38,50 @@ describe("project card badge links", () => {
     expect(badgeRow, "badge row wrapper is missing").not.toBeNull();
     expect(badgeRow?.[1]).toContain("relative");
     expect(badgeRow?.[1]).toContain("z-10");
+  });
+});
+
+describe("project card outcome", () => {
+  it("keeps the outcome line on the card, not only on the detail page", () => {
+    // The listing copy promises the reader that every card says what changed.
+    // Dropping this line from the card leaves that promise on the page with
+    // nothing behind it, and every other test here still passes.
+    const source = read(PROJECT_LIST);
+    expect(source).toContain("{project.outcome}");
+    expect(source).toContain(
+      '<span className="meta-label">{t("outcome")}</span>'
+    );
+  });
+});
+
+describe("home page section order", () => {
+  it("puts the live systems panel after the writing and before the cta", () => {
+    // The funnel is: work, experience, capabilities, writing, systems, cta.
+    // The panel speaks to engineers, so it earns its screen once the reader
+    // has been through the proof, and never in the middle of the page.
+    const source = read(HOME);
+    const at = (marker: string) => {
+      const index = source.indexOf(marker);
+      expect(index, `${marker} is missing from ${HOME}`).toBeGreaterThan(-1);
+      return index;
+    };
+
+    const order = [
+      "<Hero ",
+      "<ProjectList ",
+      "<ExperienceSummary ",
+      "<SkillsStrip ",
+      "<PostList ",
+      "<Systems />",
+      "<ContactCta />",
+    ].map((marker) => at(marker));
+
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it("leaves the cv download to the about page", () => {
+    expect(read(HOME)).not.toContain("hasCv");
+    expect(read("src/components/sections/hero.tsx")).not.toContain("CV_PATH");
   });
 });
 

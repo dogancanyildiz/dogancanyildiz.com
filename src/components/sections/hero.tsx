@@ -1,13 +1,11 @@
-import { ArrowRight, Download } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { DisplayHeading } from "@/components/ui/display-heading";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { CV_PATH } from "@/lib/site";
 
 interface HeroProps {
-  showCv: boolean;
   profileImageSrc?: string | null;
 }
 
@@ -17,10 +15,18 @@ interface HeroProps {
  * `opacity: 0` into the prerendered HTML and kept the largest paint waiting for
  * the client bundle. Nothing in this section is interactive, so it also keeps
  * the translation lookups out of the client bundle.
+ *
+ * The CV download lives on the About page only. Next to the availability badge
+ * it read as a job application, and the first screen belongs to a visitor who
+ * came to have work done.
  */
-export async function Hero({ showCv, profileImageSrc }: HeroProps) {
+export async function Hero({ profileImageSrc }: HeroProps) {
   const t = await getTranslations();
 
+  // Both metrics resolve on the About page: the years come from the work
+  // history and the five applications are the BerrSoft delivery bullet. The
+  // projects list holds a different five (the case studies), so pointing this
+  // number there sent the reader to items that were never the ones counted.
   const metrics = [
     {
       label: t("hero.metricYearsLabel"),
@@ -30,7 +36,7 @@ export async function Hero({ showCv, profileImageSrc }: HeroProps) {
     {
       label: t("hero.metricProjectsLabel"),
       value: t("hero.metricProjectsValue"),
-      href: "/projects" as const,
+      href: "/about" as const,
     },
   ];
 
@@ -69,11 +75,11 @@ export async function Hero({ showCv, profileImageSrc }: HeroProps) {
 
           <div className="metric-strip">
             {metrics.map((metric) => (
-              <div className="metric-cell" key={metric.href}>
+              <div className="metric-cell" key={metric.label}>
                 <p className="meta-label">{metric.label}</p>
                 <p className="mt-1 font-mono text-2xl font-medium tabular-nums text-foreground sm:text-3xl">
-                  {/* The visible link text is a bare number, so the accessible
-                      name restates the metric label it sits under. */}
+                  {/* The visible link text is the metric value on its own, so
+                      the accessible name restates the label it sits under. */}
                   <Link
                     href={metric.href}
                     prefetch={false}
@@ -103,14 +109,6 @@ export async function Hero({ showCv, profileImageSrc }: HeroProps) {
             <Button asChild variant="outline" size="lg">
               <Link href="/contact">{t("hero.getInTouch")}</Link>
             </Button>
-            {showCv ? (
-              <Button asChild variant="ghost" size="lg">
-                <a href={CV_PATH} download>
-                  <Download className="size-4" />
-                  {t("hero.downloadCv")}
-                </a>
-              </Button>
-            ) : null}
           </div>
         </div>
       </div>

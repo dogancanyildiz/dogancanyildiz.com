@@ -16,7 +16,6 @@ import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
 import { Link } from "@/i18n/navigation";
 import { skills } from "@/content/profile";
-import { hasCv } from "@/lib/cv";
 import { featuredSkillGroups } from "@/lib/skills";
 import { profileImagePath } from "@/lib/profile-image";
 import {
@@ -70,7 +69,7 @@ export default async function HomePage({
         name={tMeta("siteName")}
         description={tMeta("defaultDescription")}
       />
-      <Hero showCv={hasCv()} profileImageSrc={profileImagePath()} />
+      <Hero profileImageSrc={profileImagePath()} />
       <PageSection innerClassName="space-y-12">
         <div className="space-y-8">
           <PageHeader
@@ -94,8 +93,6 @@ export default async function HomePage({
 
         <ExperienceSummary locale={locale} />
 
-        <Systems />
-
         <SkillsStrip groups={featuredSkillGroups(skills[locale])} />
 
         {latestPosts.length > 0 ? (
@@ -115,6 +112,12 @@ export default async function HomePage({
             <PostList posts={latestPosts} headingLevel="h3" />
           </div>
         ) : null}
+
+        {/* Last before the call to action on purpose: the live panel is proof
+            for a reader who already got through the work and the writing, and
+            in the middle of the page it cost a screen of funnel to an audience
+            of one engineer. */}
+        <Systems />
 
         <ContactCta />
       </PageSection>
