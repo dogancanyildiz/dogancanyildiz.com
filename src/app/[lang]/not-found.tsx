@@ -4,7 +4,6 @@ import {
   StatusScreen,
   statusLinksFor,
 } from "@/components/status/status-screen";
-import type { Locale } from "@/lib/content";
 
 /**
  * Inert while experimental.globalNotFound is on.
@@ -26,7 +25,7 @@ import type { Locale } from "@/lib/content";
  * params and has to stay a synchronous component.
  */
 export default function LocaleNotFound() {
-  const locale = useLocale() as Locale;
+  const locale = useLocale();
   const t = useTranslations("notFound");
   const tNav = useTranslations("nav");
   const tBrand = useTranslations("brand");

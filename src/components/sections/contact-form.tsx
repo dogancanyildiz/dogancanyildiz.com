@@ -37,12 +37,12 @@ const FIELDS: ContactField[] = ["name", "email", "topic", "message"];
  * so the text attached to the field comes from the same catalog the client
  * validation uses.
  */
-const SERVER_FIELD_ERROR: Record<ContactField, string> = {
+const SERVER_FIELD_ERROR = {
   name: "errorNameInvalid",
   email: "errorEmailInvalid",
   topic: "errorTopicRequired",
   message: "errorMessageInvalid",
-};
+} as const satisfies Record<ContactField, string>;
 
 export function ContactForm() {
   const t = useTranslations("contact.form");
