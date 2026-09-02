@@ -188,8 +188,12 @@
     "title": "Visit counts",
     "body": "This site does not use measurement cookies. Theme stays in your browser. Visit counts run on a cookieless Umami instance on my own server and load only if you allow them.",
     "accept": "Allow visit counts",
-    "reject": "Not now",
-    "privacy": "Privacy"
+    "reject": "Decline",
+    "privacy": "Privacy",
+    "manageAllowed": "Visit counts are on. The script loads on this browser.",
+    "manageDeclined": "Visit counts are off. No measurement script loads.",
+    "manageUnset": "You have not answered yet, so nothing is counted.",
+    "revoke": "Withdraw"
   },
   "errorPage": {
     "title": "This page failed to load",

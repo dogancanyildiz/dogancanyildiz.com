@@ -5,6 +5,7 @@ import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocale } from "@/lib/route-params";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/layout/page-section";
+import { ConsentControls } from "@/components/consent/consent-controls";
 
 interface PrivacyPageProps {
   params: Promise<{ lang: string }>;
@@ -49,6 +50,10 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
           <section key={headingKey} className="space-y-2">
             <h2 className="section-heading">{t(headingKey)}</h2>
             <p className="section-copy">{t(bodyKey)}</p>
+            {/* The switch belongs under the paragraph that explains it,
+                rather than in a section of its own that repeats the same
+                sentence. It renders nothing when analytics is unconfigured. */}
+            {headingKey === "analyticsTitle" ? <ConsentControls /> : null}
           </section>
         ))}
       </div>

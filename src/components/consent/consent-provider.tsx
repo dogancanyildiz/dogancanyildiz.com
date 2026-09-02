@@ -86,8 +86,19 @@ export function resetConsentMemory() {
   cachedSnapshot = SERVER_SNAPSHOT;
 }
 
+/**
+ * Every script element this provider injected for `tag`. Matched on the
+ * resolved `src` property rather than an attribute selector, because the tag
+ * url is arbitrary text and would have to be escaped to sit inside one.
+ */
+function trackerScripts(tag: UmamiTag): HTMLScriptElement[] {
+  return [...document.querySelectorAll("script")].filter(
+    (script) => script.src === tag.src
+  );
+}
+
 function injectTracker(tag: UmamiTag) {
-  if (document.querySelector(`script[src="${tag.src}"]`)) {
+  if (trackerScripts(tag).length > 0) {
     return;
   }
   const script = document.createElement("script");
@@ -98,6 +109,19 @@ function injectTracker(tag: UmamiTag) {
     script.dataset.domains = tag.domains;
   }
   document.body.appendChild(script);
+}
+
+/**
+ * Undoes injectTracker when a visitor withdraws consent. Removing the element
+ * stops nothing that is already running, so the global the script installs
+ * goes with it: window.umami is how every later call reaches the collector,
+ * and without this a withdrawal would only take effect on the next reload.
+ */
+function removeTracker(tag: UmamiTag) {
+  for (const script of trackerScripts(tag)) {
+    script.remove();
+  }
+  delete (window as { umami?: unknown }).umami;
 }
 
 export function ConsentProvider({
@@ -116,20 +140,30 @@ export function ConsentProvider({
   const choice = snapshot.known ? snapshot.value : null;
 
   useEffect(() => {
-    if (!ready || !tag || !isAnalyticsAllowed(choice)) {
+    if (!ready || !tag) {
       return;
     }
-    injectTracker(tag);
+    if (isAnalyticsAllowed(choice)) {
+      injectTracker(tag);
+      return;
+    }
+    // Reached on a withdrawal from /privacy and on a storage event from
+    // another tab, as well as on the plain "no choice yet" first render.
+    removeTracker(tag);
   }, [ready, tag, choice]);
 
   const setAnalytics = useCallback((analytics: boolean) => {
     const serialized = serializeConsent(analytics);
-    memoryOverride = parseConsent(serialized) ?? undefined;
     try {
       window.localStorage.setItem(CONSENT_STORAGE_KEY, serialized);
+      // The write landed, so storage is the record again. Holding on to the
+      // in-memory copy would pin this tab to its own value and make it ignore
+      // a later change made in another tab.
+      memoryOverride = undefined;
     } catch {
-      // Private mode can refuse localStorage; memoryOverride still closes
-      // the banner for this visit.
+      // Private mode can refuse localStorage; the in-memory copy still closes
+      // the banner and honours the choice for this visit.
+      memoryOverride = parseConsent(serialized) ?? undefined;
     }
     emitConsentChange();
   }, []);

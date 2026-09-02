@@ -188,8 +188,12 @@
     "title": "Ziyaret sayımı",
     "body": "Bu sitede ölçüm çerezi yok. Tema tercihiniz tarayıcınızda kalır. Ziyaret sayımı kendi sunucumdaki çerezsiz Umami ile yapılır ve yalnızca siz izin verirseniz yüklenir.",
     "accept": "Sayıma izin ver",
-    "reject": "Şimdi değil",
-    "privacy": "Gizlilik"
+    "reject": "Reddet",
+    "privacy": "Gizlilik",
+    "manageAllowed": "Ziyaret sayımı açık. Betik bu tarayıcıda yükleniyor.",
+    "manageDeclined": "Ziyaret sayımı kapalı. Hiçbir ölçüm betiği yüklenmiyor.",
+    "manageUnset": "Henüz yanıt vermediniz, bu yüzden sayım yapılmıyor.",
+    "revoke": "Geri al"
   },
   "errorPage": {
     "title": "Bu sayfa yüklenemedi",
