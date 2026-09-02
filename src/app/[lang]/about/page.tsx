@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { SkillCategoryList } from "@/components/sections/skill-group-grid";
 import { AboutSubnav } from "@/components/sections/about-subnav";
+import { CertificateList } from "@/components/sections/certificate-list";
 import { TestimonialsBand } from "@/components/sections/testimonials-band";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import {
@@ -14,7 +15,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/layout/page-section";
 import { ContactCta } from "@/components/sections/contact-cta";
 import {
-  certificates,
   community,
   education,
   experience,
@@ -57,7 +57,6 @@ export default async function AboutPage({ params }: AboutPageProps) {
   const talks = speaking[locale];
   const roles = experience[locale];
   const communityRoles = community[locale];
-  const certificateList = certificates[locale];
   const schools = education[locale];
   const showCv = hasCv();
   const profileImageSrc = profileImagePath();
@@ -222,38 +221,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
         className="space-y-5 border-t border-border pt-8 scroll-mt-32"
       >
         <h2 className="section-heading">{t("certificatesTitle")}</h2>
-        {certificateList.length > 0 ? (
-          <ul className="divide-y divide-border">
-            {certificateList.map((certificate) => (
-              <li key={certificate.name} className="space-y-1 py-4 first:pt-0">
-                <p className="text-sm leading-relaxed">
-                  {certificate.name}
-                  {certificate.verifyUrl ? (
-                    <>
-                      {" "}
-                      <a
-                        href={certificate.verifyUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary underline underline-offset-4"
-                      >
-                        {t("certificateVerify")}
-                      </a>
-                    </>
-                  ) : null}
-                </p>
-                <p className="meta-label">{certificate.issuer}</p>
-                {certificate.detail ? (
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {certificate.detail}
-                  </p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="section-copy">{t("emptyList")}</p>
-        )}
+        <CertificateList locale={locale} />
       </section>
 
       <section

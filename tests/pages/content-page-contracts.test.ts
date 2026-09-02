@@ -15,6 +15,7 @@ const PROJECT_DETAIL = "src/app/[lang]/projects/[slug]/page.tsx";
 const BLOG_DETAIL = "src/app/[lang]/blog/[slug]/page.tsx";
 const PROJECTS_INDEX = "src/app/[lang]/projects/page.tsx";
 const HOME = "src/app/[lang]/page.tsx";
+const CERTIFICATE_LIST = "src/components/sections/certificate-list.tsx";
 
 /**
  * Accessibility decisions revert silently. Alt text that describes the page
@@ -90,7 +91,11 @@ describe("empty states", () => {
     // which reads as a broken page rather than as an empty one.
     expect(read(PROJECTS_INDEX)).toContain('t("empty")');
     expect(read(HOME)).toContain('tProjects("empty")');
-    expect(read(ABOUT).match(/t\("emptyList"\)/g) ?? []).toHaveLength(4);
+    // Three sections still live in the page (experience, community,
+    // education); the certificate section moved into its own component and
+    // took its empty state with it.
+    expect(read(ABOUT).match(/t\("emptyList"\)/g) ?? []).toHaveLength(3);
+    expect(read(CERTIFICATE_LIST)).toContain('t("emptyList")');
   });
 });
 

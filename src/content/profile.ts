@@ -114,13 +114,6 @@ export interface CertificateEntry {
   /** Official name as the issuer writes it. Identical in both locales. */
   name: string;
   issuer: string;
-  /**
-   * Free text under the name. Nothing sets it any more: the one entry that
-   * did, a "CCNA complete track" line listing three courses, became the three
-   * badges those courses actually issue. The field goes when the About page
-   * stops reading it.
-   */
-  detail?: string;
   group: CertificateGroupId;
   issued?: IsoDate;
   credentialId?: string;
