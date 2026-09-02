@@ -127,6 +127,24 @@ describe("rss feed route", () => {
     expect(textInside(body, "language")).toEqual(["tr"]);
   });
 
+  it("names the language of the feed in its channel title", async () => {
+    // The unprefixed /feed.xml used to be the English feed and is now the
+    // Turkish one, and a reader shows the channel title, not the URL. Two
+    // feeds called "Doğan Can YILDIZ" give a subscriber nothing to tell them
+    // apart, so the title carries the localized section name as well.
+    const en = await feedFor("en");
+    const tr = await feedFor("tr");
+
+    const [enTitle] = textInside(en.body, "title");
+    const [trTitle] = textInside(tr.body, "title");
+
+    expect(enTitle).toContain("Doğan Can YILDIZ");
+    expect(trTitle).toContain("Doğan Can YILDIZ");
+    expect(enTitle).toContain("Writing");
+    expect(trTitle).toContain("Yazılar");
+    expect(enTitle).not.toBe(trTitle);
+  });
+
   it("lists the posts newest first", async () => {
     const { body } = await feedFor("en");
     const dates = textInside(body, "pubDate").map((value) =>

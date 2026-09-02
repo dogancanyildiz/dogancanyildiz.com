@@ -309,7 +309,7 @@ describe("page openGraph metadata", () => {
     async ({ locale, page }) => {
       const metadata = await metadataFor(page, locale);
       const types = metadata.alternates?.types as
-        Record<string, { url: string }[]> | undefined;
+        Record<string, { url: string; title: string }[]> | undefined;
       const feedLinks = types?.["application/rss+xml"];
 
       expect(feedLinks, `${page.name} has no rss feed alternate`).toBeTruthy();
@@ -317,6 +317,11 @@ describe("page openGraph metadata", () => {
         locale === "en"
           ? "https://dogancanyildiz.com/en/feed.xml"
           : "https://dogancanyildiz.com/feed.xml"
+      );
+      // The reader UI offers the link by its title, so the two feeds have to
+      // read differently: both used to be offered as the bare name.
+      expect(String(feedLinks?.[0]?.title)).toContain(
+        locale === "en" ? "Writing" : "Yazılar"
       );
     }
   );

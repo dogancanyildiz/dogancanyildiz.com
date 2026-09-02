@@ -45,6 +45,20 @@ export function absoluteUrl(locale: Locale, path: string): string {
 }
 
 /**
+ * Title of one locale's rss feed, for the channel element and for the
+ * `<link rel="alternate">` that offers it.
+ *
+ * The two feeds carry the same author, so the bare name left a subscriber with
+ * two identical entries. That matters more than usual here: the unprefixed
+ * /feed.xml used to be the English feed and is now the Turkish one, and a
+ * reader shows this title rather than the URL. `sectionTitle` is the localized
+ * blog title, which is what makes the two read differently.
+ */
+export function feedTitle(sectionTitle: string): string {
+  return `${siteConfig.person.name} · ${sectionTitle}`;
+}
+
+/**
  * og:locale values for the routed locales. Facebook and LinkedIn expect the
  * underscore form, not the BCP 47 tag used by the html lang attribute.
  */
@@ -155,7 +169,9 @@ export function buildLanguageAlternates(
 export function buildAlternates(
   currentLocale: Locale,
   path: string,
-  availableLocales: Locale[]
+  availableLocales: Locale[],
+  /** Localized feed title; the bare name when a caller has no translator. */
+  rssTitle: string = siteConfig.person.name
 ): {
   canonical: string;
   languages: Record<string, string>;
@@ -173,7 +189,7 @@ export function buildAlternates(
       "application/rss+xml": [
         {
           url: absoluteUrl(currentLocale, "/feed.xml"),
-          title: siteConfig.person.name,
+          title: rssTitle,
         },
       ],
     },
