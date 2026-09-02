@@ -1,3 +1,4 @@
+import { certificates } from "@/content/profile";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import type { Locale, Post, Project } from "@/lib/content";
@@ -49,6 +50,30 @@ export function personRef(): Record<string, unknown> {
     name: siteConfig.person.name,
     url: identityUrl(),
   };
+}
+
+/**
+ * The Person node's credentials, one EducationalOccupationalCredential each.
+ *
+ * Only the fields a consumer can act on: what the credential is called, who
+ * recognizes it, when it was issued, and the issuer's own page for checking
+ * it. `url` is that verification page, so a record with no working link
+ * carries no url rather than a link to this site's own About section, which
+ * would verify nothing. Nothing here is localized, because a credential name
+ * is issued in one language and keeps it.
+ */
+export function buildCredentials(locale: Locale): Record<string, unknown>[] {
+  return certificates[locale].map((entry) => ({
+    "@type": "EducationalOccupationalCredential",
+    name: entry.name,
+    credentialCategory: entry.credentialCategory,
+    recognizedBy: {
+      "@type": "Organization",
+      name: entry.issuer,
+    },
+    ...(entry.issued ? { dateCreated: entry.issued } : {}),
+    ...(entry.verifyUrl ? { url: entry.verifyUrl } : {}),
+  }));
 }
 
 export interface BreadcrumbItem {

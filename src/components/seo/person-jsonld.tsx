@@ -1,7 +1,7 @@
 import type { AppLocale } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import { profileImagePath } from "@/lib/profile-image";
-import { identityUrl, personId } from "@/lib/seo/jsonld";
+import { buildCredentials, identityUrl, personId } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
 
 /**
@@ -43,6 +43,10 @@ export function PersonJsonLd({ locale }: { locale: AppLocale }) {
       addressCountry: siteConfig.person.location.country,
     },
     sameAs: [...siteConfig.person.sameAs],
+    // Every certificate the About page lists, each pointing at the issuer's
+    // own verification page. A claim a reader can check is worth more in the
+    // graph than one more adjective in knowsAbout.
+    hasCredential: buildCredentials(locale),
   };
 
   return (

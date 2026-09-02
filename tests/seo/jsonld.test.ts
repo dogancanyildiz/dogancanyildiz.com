@@ -1,8 +1,12 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { certificates } from "@/content/profile";
 import { routing } from "@/i18n/routing";
 import {
   buildBlogPosting,
   buildBreadcrumbList,
+  buildCredentials,
   buildProjectCreativeWork,
   buildWebSite,
   identityUrl,
@@ -145,5 +149,61 @@ describe("project schema", () => {
       // of the creation year.
       expect("dateModified" in data).toBe(Boolean(project.updated));
     }
+  });
+});
+
+describe("buildCredentials", () => {
+  it("describes every certificate the About page lists", () => {
+    for (const locale of routing.locales) {
+      const credentials = buildCredentials(locale);
+
+      expect(credentials).toHaveLength(certificates[locale].length);
+      for (const [index, node] of credentials.entries()) {
+        const entry = certificates[locale][index];
+        expect(node["@type"]).toBe("EducationalOccupationalCredential");
+        expect(node.name).toBe(entry?.name);
+        expect(node.recognizedBy).toEqual({
+          "@type": "Organization",
+          name: entry?.issuer,
+        });
+        expect(["certificate", "badge"]).toContain(node.credentialCategory);
+      }
+    }
+  });
+
+  it("carries a url only where the issuer publishes one to check", () => {
+    for (const node of buildCredentials("en")) {
+      if (!("url" in node)) continue;
+      expect(node.url).toMatch(/^https:\/\//);
+    }
+    // The Global AI Hub record has neither a working verification page nor a
+    // date. A url pointing back at this site's own About section would claim
+    // a check that does not exist.
+    const orphan = buildCredentials("en").find(
+      (node) => node.name === "Version Control Systems and Portfolio"
+    );
+    expect(orphan).toBeDefined();
+    expect("url" in (orphan ?? {})).toBe(false);
+    expect("dateCreated" in (orphan ?? {})).toBe(false);
+  });
+
+  it("dates a credential with the day printed on it", () => {
+    const capt = buildCredentials("tr").find((node) =>
+      String(node.name).includes("CAPT")
+    );
+
+    expect(capt?.dateCreated).toBe("2025-06-01");
+    expect(capt?.url).toBe("https://hackviser.com/verify?id=HV-CAPT-02TKGO4Q");
+    expect(capt?.credentialCategory).toBe("certificate");
+  });
+
+  it("hangs the list off the Person node, not off each page", () => {
+    const source = readFileSync(
+      join(process.cwd(), "src/components/seo/person-jsonld.tsx"),
+      "utf8"
+    );
+
+    expect(source).toContain("hasCredential");
+    expect(source).toContain("buildCredentials(locale)");
   });
 });
