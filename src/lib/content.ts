@@ -1,4 +1,5 @@
 import { posts, projects } from "#site/content";
+import { contentHref } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
 
@@ -192,34 +193,46 @@ export function projectSlugsByKey(
 }
 
 /**
- * Content paths that exist in at least one locale but not in `locale`.
+ * Where each content page of `locale` lives in every locale that has it.
  *
- * The language switcher uses this to avoid linking to a 404: switching to a
- * locale that has no translation for the current project or post should land
- * on the section root instead of the untranslated detail page. Draft posts
- * are excluded on both sides because they come from getPostSlugs, which
- * already applies the draft filter.
+ * Shape: kind -> this locale's slug -> target locale -> that locale's public
+ * path. The current locale is in the map too, because the switcher renders a
+ * link for it as well and that link has to stay on the page the visitor is
+ * reading rather than drop to the section root.
+ *
+ * This replaces getUntranslatedPaths, which listed the content paths missing
+ * from a locale and let the switcher keep the current path whenever it was
+ * not on the list. That worked only while a translation shared its slug
+ * across locales. It no longer does: /yazilar/coolify-ile-kendi-sunucumda and
+ * /en/blog/self-hosting-with-coolify are one post and share no segment, so a
+ * path can neither be looked up nor reused as the other locale's path. A
+ * missing translation is now the absence of an entry, so the "is it missing"
+ * answer and the "where is it" answer can no longer disagree.
+ *
+ * The draft filter applies through getPosts / getProjects on both sides.
  */
-export function getUntranslatedPaths(locale: Locale): string[] {
-  const paths: string[] = [];
+export type TranslationMap = Record<
+  ContentKind,
+  Record<string, Record<string, string>>
+>;
 
-  const allProjectSlugs = new Set(
-    routing.locales.flatMap((candidate) => getProjectSlugs(candidate))
-  );
-  const translatedProjectSlugs = new Set(getProjectSlugs(locale));
-  for (const slug of allProjectSlugs) {
-    if (!translatedProjectSlugs.has(slug)) paths.push(`/projects/${slug}`);
+export function buildTranslationMap(locale: Locale): TranslationMap {
+  const map: TranslationMap = { post: {}, project: {} };
+
+  for (const kind of ["post", "project"] as const) {
+    const entries = kind === "post" ? getPosts(locale) : getProjects(locale);
+    for (const entry of entries) {
+      const slugs = slugsByKey(kind, entry.translationKey);
+      const targets: Record<string, string> = {};
+      for (const target of routing.locales) {
+        const slug = slugs[target];
+        if (slug) targets[target] = contentHref(target, kind, slug);
+      }
+      map[kind][entry.slug] = targets;
+    }
   }
 
-  const allPostSlugs = new Set(
-    routing.locales.flatMap((candidate) => getPostSlugs(candidate))
-  );
-  const translatedPostSlugs = new Set(getPostSlugs(locale));
-  for (const slug of allPostSlugs) {
-    if (!translatedPostSlugs.has(slug)) paths.push(`/blog/${slug}`);
-  }
-
-  return paths.sort();
+  return map;
 }
 
 export function toProjectCardData(project: Project): ProjectCardData {

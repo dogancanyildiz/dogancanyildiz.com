@@ -236,7 +236,7 @@ describe("application shell", () => {
     // getPathname honours localePrefix "as-needed", so the Turkish link is
     // /hakkimda and not /tr/about. Link with an explicit locale prop always
     // forces the prefix and would 308 a default-locale URL.
-    expect(source).toContain("pathnameForLocale(locale, target)");
+    expect(source).toContain("pathnameForLocale(locale,");
     expect(source).not.toContain("locale={locale}");
     expect(source).not.toContain("setLocale");
     expect(source).not.toContain("document.cookie");
@@ -244,9 +244,11 @@ describe("application shell", () => {
 
   it("falls back to the section root for untranslated content", () => {
     const source = read("src/components/layout/language-switcher.tsx");
-    expect(source).toContain(
-      'import { switchTargetPath } from "@/i18n/switch-target"'
-    );
+    // The fallback is now the absence of an entry in the translation map,
+    // not a second list of untranslated paths: a per locale slug makes the
+    // path unusable as the lookup key.
+    expect(source).toContain("SECTION_TEMPLATE[kind]");
+    expect(source).not.toContain("@/i18n/switch-target");
   });
 
   it("moved the page bodies into reusable section components", () => {

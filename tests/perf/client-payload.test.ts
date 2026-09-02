@@ -122,12 +122,21 @@ describe("contact route message provider", () => {
   });
 });
 
-describe("untranslated path map", () => {
-  const layout = read(LAYOUT);
+describe("translation map", () => {
+  it("stays under 4 KB per locale in the RSC payload", async () => {
+    // The layout hands this map to the header on every page, including the
+    // ones that never open the language switcher, so it travels whether it
+    // is read or not. The budget is a tripwire, not a limit the current
+    // content is anywhere near: growth is linear in the number of content
+    // entries, and when it trips, plan section 4.5's alternative (push the
+    // map down to a provider rendered only by the detail templates, or down
+    // to the single key that page needs) is what to reach for.
+    const { buildTranslationMap } = await import("@/lib/content");
+    const { routing } = await import("@/i18n/routing");
 
-  it("only carries the locales the language switcher can navigate to", () => {
-    // The page being rendered exists in the locale it is rendered in, so the
-    // current locale's own list is always empty and never has to travel.
-    expect(layout).toMatch(/\.filter\(\(locale\) => locale !== lang\)/);
+    for (const locale of routing.locales) {
+      const size = JSON.stringify(buildTranslationMap(locale)).length;
+      expect(size, `${locale} translation map`).toBeLessThan(4096);
+    }
   });
 });

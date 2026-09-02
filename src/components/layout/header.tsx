@@ -11,10 +11,13 @@ import { isNavItemActive, navItems } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
-  untranslated: Record<string, string[]>;
+  // Passed straight through to the language switcher; see the comment on
+  // LanguageSwitcherProps for the shape and for why it stays a plain Record
+  // instead of importing TranslationMap from @/lib/content.
+  translations: Record<string, Record<string, Record<string, string>>>;
 }
 
-export function Header({ untranslated }: HeaderProps) {
+export function Header({ translations }: HeaderProps) {
   const pathname = usePathname();
   const t = useTranslations();
   const tBrand = useTranslations("brand");
@@ -81,7 +84,7 @@ export function Header({ untranslated }: HeaderProps) {
           {/* Its own <nav aria-label="Language">, so it sits beside the
               primary nav rather than inside it to avoid nesting landmarks. */}
           <div className="flex items-center gap-1.5">
-            <LanguageSwitcher untranslated={untranslated} />
+            <LanguageSwitcher translations={translations} />
             <ThemeToggle />
             <MobileMenu />
           </div>

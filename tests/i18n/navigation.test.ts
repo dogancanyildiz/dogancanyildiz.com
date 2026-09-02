@@ -6,7 +6,6 @@ import {
   pathnameForLocale,
 } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
-import { switchTargetPath } from "@/i18n/switch-target";
 
 /** First parameter of a function type, for the compile time guards below. */
 type LocaleParam<T> = T extends (locale: infer L, ...rest: never[]) => unknown
@@ -119,35 +118,5 @@ describe("pathnameForLocale", () => {
       ? true
       : false = true;
     expect(narrowed).toBe(true);
-  });
-});
-
-describe("switchTargetPath", () => {
-  it("falls back to the blog root for an untranslated post", () => {
-    expect(
-      switchTargetPath("/blog/self-hosting-with-coolify", [
-        "/blog/self-hosting-with-coolify",
-      ])
-    ).toBe("/blog");
-  });
-
-  it("falls back to the projects root for an untranslated project", () => {
-    expect(
-      switchTargetPath("/projects/cargo-pilot", ["/projects/cargo-pilot"])
-    ).toBe("/projects");
-  });
-
-  it("falls back to the root for any other untranslated path", () => {
-    expect(switchTargetPath("/somewhere", ["/somewhere"])).toBe("/");
-  });
-
-  it("leaves a translated path unchanged", () => {
-    expect(
-      switchTargetPath("/about", ["/blog/self-hosting-with-coolify"])
-    ).toBe("/about");
-  });
-
-  it("leaves the root unchanged even if it were listed as untranslated", () => {
-    expect(switchTargetPath("/", [])).toBe("/");
   });
 });

@@ -11,7 +11,6 @@ import {
   getProjectLocalesByKey,
   getProjectSlugs,
   getProjects,
-  getUntranslatedPaths,
   postSlugsByKey,
   readingMinutes,
   toPostCardData,
@@ -284,34 +283,6 @@ describe("post content layer", () => {
   });
 });
 
-describe("untranslated paths", () => {
-  it("names only paths that are missing in the given locale", () => {
-    for (const locale of routing.locales) {
-      for (const path of getUntranslatedPaths(locale)) {
-        const [, section, slug] = path.split("/");
-        if (!slug) {
-          throw new Error(`unexpected untranslated path: ${path}`);
-        }
-        const lookup = section === "blog" ? getPost : getProject;
-
-        expect(lookup(locale, slug), path).toBeUndefined();
-        expect(
-          routing.locales.some((candidate) => lookup(candidate, slug)),
-          path
-        ).toBe(true);
-      }
-    }
-  });
-
-  it("returns a sorted list with no duplicates", () => {
-    for (const locale of routing.locales) {
-      const paths = getUntranslatedPaths(locale);
-      expect(paths).toEqual([...paths].sort());
-      expect(new Set(paths).size).toBe(paths.length);
-    }
-  });
-});
-
 // A synthetic collection, because the real content is fully bilingual and
 // carries no draft: the draft filter and the single locale branch have no
 // real input to run against, and both are exactly the code whose failure
@@ -443,13 +414,6 @@ describe("content translated into one locale only", () => {
 
     expect(content.getPostLocalesByKey("en-only")).toEqual(["en"]);
     expect(content.getProjectLocalesByKey("tr-only")).toEqual(["tr"]);
-  });
-
-  it("names the missing translation so the language switcher can avoid a 404", async () => {
-    const content = await contentWith({ posts, projects }, "production");
-
-    expect(content.getUntranslatedPaths("tr")).toEqual(["/blog/en-only"]);
-    expect(content.getUntranslatedPaths("en")).toEqual(["/projects/tr-only"]);
   });
 
   it("does not leak the other locale into the hreflang set", async () => {

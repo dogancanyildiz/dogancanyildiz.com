@@ -195,7 +195,7 @@ describe("target size", () => {
 
   it("gives every header control at least 44 CSS px", () => {
     const { container } = renderWithIntl(
-      createElement(Header, { untranslated: { en: [], tr: [] } })
+      createElement(Header, { translations: { post: {}, project: {} } })
     );
     const targets = measuredTargets(container);
     expect(targets.length).toBeGreaterThan(5);
