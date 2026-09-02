@@ -51,5 +51,19 @@ Thumbs.db
 .velite
 public/static
 
+# Velite's alternate output directories used by the test fixtures
+# (tests/fixtures/.velite-invalid and friends). The "**/" prefix is load
+# bearing: a slash free pattern is matched against the whole relative path
+# with Go's filepath.Match, so a bare ".velite-*" would only ever hit a root
+# level directory and none of these live at the root. Verified against a real
+# "docker build" over a throwaway context.
+**/.velite-*
+
+# A test fixture that vendors its own node_modules (isolated module
+# resolution cases) is still just test fixtures: never needed to build or run
+# the production image. Same root only rule as above, hence the explicit path
+# rather than relying on the "node_modules" line at the top of this file.
+tests/fixtures/node_modules
+
 # Side service compose stacks (Gatus, Umami). Deployed as separate Coolify resources.
 infra

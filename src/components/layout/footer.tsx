@@ -11,8 +11,12 @@ import {
 } from "@/components/ui/brand-icon";
 import { CONTACT_EMAIL_PUBLIC, SOCIAL, whatsappHref } from "@/lib/site";
 
+// .tap-target, not the bare 24px floor SC 2.5.8 asks for: these are
+// standalone links stacked in a column, not words inside a sentence, so the
+// exception for inline targets does not cover them. The rows read taller for
+// it, which is the cost of a thumb sized target on a phone.
 const footerTextLinkClass =
-  "inline-flex min-h-6 items-center gap-2 text-sm text-muted-foreground no-underline transition-colors hover:text-foreground";
+  "tap-target inline-flex items-center gap-2 text-sm text-muted-foreground no-underline transition-colors hover:text-foreground";
 
 export async function Footer() {
   const year = buildInfo.year;

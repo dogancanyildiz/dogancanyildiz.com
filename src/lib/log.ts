@@ -57,13 +57,26 @@ export function log(
 }
 
 /**
- * Turns an unknown thrown value into a short, safe label. Only the error name
- * is used: a message can quote the payload that caused it, and the payload is
- * exactly what must not reach the log.
+ * A provider error code, e.g. EAUTH or ECONNECTION. Anything longer or with a
+ * space in it is not a code, it is prose, and prose is where the payload that
+ * caused the error ends up.
+ */
+const ERROR_CODE_PATTERN = /^[A-Za-z][A-Za-z0-9_]{0,31}$/;
+
+/**
+ * Turns an unknown thrown value into a short, safe label.
+ *
+ * The message never appears: it can quote the payload that caused it, and the
+ * payload is exactly what must not reach the log. The name alone is often not
+ * enough to act on, though, because nodemailer throws a plain "Error" and puts
+ * the actionable part in `code`, so a code shaped `code` is kept next to it.
  */
 export function describeError(error: unknown): string {
   if (error instanceof Error) {
-    return error.name;
+    const code = (error as { code?: unknown }).code;
+    return typeof code === "string" && ERROR_CODE_PATTERN.test(code)
+      ? `${error.name}/${code}`
+      : error.name;
   }
   return typeof error === "string" ? error : "UnknownError";
 }

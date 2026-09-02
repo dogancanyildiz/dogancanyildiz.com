@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getPathname } from "@/i18n/navigation";
+import { getPathname, pathnameForLocale } from "@/i18n/navigation";
+import type { AppLocale } from "@/i18n/routing";
 import { switchTargetPath } from "@/i18n/switch-target";
+
+/** First parameter of a function type, for the compile time guards below. */
+type LocaleParam<T> = T extends (locale: infer L, ...rest: never[]) => unknown
+  ? L
+  : never;
 
 describe("locale aware navigation", () => {
   it("keeps Turkish on the root, prefixes English, and localizes nav slugs", () => {
@@ -28,6 +34,29 @@ describe("locale aware navigation", () => {
         },
       })
     ).toBe("/en/projects/design-system");
+  });
+});
+
+describe("pathnameForLocale", () => {
+  it("prefixes a runtime slug the pathnames map does not list", () => {
+    expect(pathnameForLocale("tr", "/blog/trace-logs")).toBe(
+      "/blog/trace-logs"
+    );
+    expect(pathnameForLocale("en", "/blog/trace-logs")).toBe(
+      "/en/blog/trace-logs"
+    );
+  });
+
+  it("keeps its locale parameter narrowed to the routed locales", () => {
+    // Compile time half of the test. src/types/next-intl.d.ts narrows the
+    // next-intl AppConfig Locale, so getPathname stopped accepting a bare
+    // string and a `locale: string` parameter here broke `npm run typecheck`,
+    // which is a CI gate (.github/workflows/ci.yml). Widening it back makes
+    // the conditional resolve to false and this assignment stops compiling.
+    const narrowed: LocaleParam<typeof pathnameForLocale> extends AppLocale
+      ? true
+      : false = true;
+    expect(narrowed).toBe(true);
   });
 });
 

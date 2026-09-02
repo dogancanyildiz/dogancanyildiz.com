@@ -1,5 +1,5 @@
 # Tasarım Yönü, UI/UX ve Frontend
-Durum: Uygulandı (Faz 3, PR #5; içerik Faz 4, PR #6; UI/güven güncellemesi PR #11; 2026-08-28 denetim kapanışı: kontrast, token sözleşmesi, landmark/odak, hareket kararı), kalan: sahibinin görsel onayları ve tarayıcı turu · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı (Faz 3, PR #5; içerik Faz 4, PR #6; UI/güven güncellemesi PR #11; 2026-08-28 denetim kapanışı: kontrast, token sözleşmesi, landmark/odak, hareket kararı; 2026-09-02 3. tur: hedef boyutu sweep'i, consent geri alma kontrolü), kalan: sahibinin görsel onayları ve tarayıcı turu · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -105,6 +105,15 @@ Dal `feature/audit-closure`; kanıt `src/app/globals.css`, `tests/design-tokens.
 - **Fontlar.** Instrument Serif kalıyor ama preload kapalı; `geistSansExt` preload açık (Türkçe glifler ilk ekranda); sans ve display yüzlerinin son web yüzü `adjustFontFallback` ile metrik uyumlu fallback taşıyor, mono `false` (Next yalnızca Arial/Times kabul ediyor); latin yüzlerinde `adjustFontFallback` unicode-range bölünmesi nedeniyle kapalı kalmalı. CLS canlıda ölçülmedi (site 526).
 - **Doğrulama turunun eklediği güvenlik ağı:** `design-tokens.test.ts` artık kaynakta kullanılan her proje sınıfının `globals.css`'te tanımlı olduğunu da denetliyor (ölü CSS temizliği `.display-hero`'yu götürmüştü, hero h1 gövde boyutunda kalmıştı; geri geldi). Türkçe 404 kendi ana sayfasına ve diğer dile link veriyor.
 - **Hâlâ açık:** tarayıcı ekran görüntüsü turu ve yukarıdaki dört görsel onay (hareket katmanının tamamen kalkması dahil); proje kapakları teslimat bekliyor.
+
+## Uygulama durumu (2026-09-02, 3. tur)
+
+Dal `feature/audit-followups`; 31 Ağustos incelemesinin hedef boyutu ve consent bulguları bu turda kapandı.
+
+- **Hedef boyutu sweep'i** (**görsel onay**). Footer metin bağlantıları (`footerTextLinkClass`) `min-h-6` (24px) yerine `tap-target` (44px) aldı; sayfa/elsewhere sütunları satır başına ~20px büyüdü, footer belirgin şekilde uzadı. Header marka linki de `tap-target` aldı (görünür ölçü değişmedi, zaten `h-16` satırın içindeydi). Contact sayfasındaki e-posta ve WhatsApp linkleri 24px SC 2.5.8 tabanına çıktı (4px büyüme). Hata sınırının (`error.tsx`) iki butonu 36px'ten 44px'e çıktı. Hepsi `tests/accessibility.test.ts`'in yeni render tabanlı kontrolleriyle (`guaranteedHeightPx`, `measuredTargets`) kilitli; eski dizge arama testi footer regresyonunu göremiyordu, kaldırıldı.
+- **Consent geri alınabilir oldu.** `/privacy`'de yeni `ConsentControls` istemci bileşeni (durum cümlesi `role="status"` bölgesinde + tek geri alma/izin verme düğmesi); banner artık `role="dialog"` değil `role="region"` (odak çalma, `aria-modal`, Escape yok, kararla uyumlu). "Şimdi değil" -> "Reddet" oldu (ret kalıcı davranışıyla artık metin de uyumlu). `privacy.formBody` `topic` alanından bahsediyor, yeni `privacy.whatsappTitle`/`whatsappBody` WhatsApp mesajının Meta üzerinden gittiğini söylüyor.
+- **Mobil menü odak tuzağı artık test ediliyor**, form konu (`topic`) alanı gönderim sırasında kilitleniyor (diğer alanlarla tutarlı).
+- **Hâlâ açık (bilinçli, sahibinde):** consent banner'ın `position: fixed` alt bant olması, cevaplanmadan önce odaklı bir footer linkini gizleyebilir (SC 2.4.11, düşük risk); dış linklerde (footer/header/contact WhatsApp) yeni sekmede açıldığına dair görünür/duyurulan bir işaret yok (WCAG 3.2.5, AAA, isteğe bağlı).
 
 ## Riskler ve tripwire'lar
 

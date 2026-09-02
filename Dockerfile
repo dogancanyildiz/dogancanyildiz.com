@@ -16,7 +16,31 @@
 FROM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
+# --ignore-scripts skips every package's install/postinstall/preinstall
+# lifecycle script (arbitrary code from the dependency tree, run automatically
+# on a plain "npm ci"). The five packages that actually carry one of those
+# scripts here (`npm query ":attr(scripts, [install]), :attr(scripts,
+# [postinstall])"`) are all native addons that ship a prebuilt binary as a
+# platform specific optionalDependency (@img/sharp-*, @esbuild/*,
+# @swc/core-*, @unrs/resolver-binding-*, @parcel/watcher-*): npm's own
+# platform resolution already installs the right one from package-lock.json,
+# so the script exists only to double check that or, lacking a prebuilt
+# binary for the current platform, compile from source. "npm rebuild" reruns
+# just those five scripts, still without letting the rest of the tree run
+# arbitrary code. Verified against this image (linux/amd64 musl): sharp loads
+# and calls into libvips at runtime, and `npm run build` completes end to end,
+# with or without the rebuild step, so it is kept here as a deliberate safety
+# net rather than a step this setup has been observed to need.
+# One detail worth knowing when this list is revisited: the sharp that
+# actually carries a script is velite's nested copy
+# (node_modules/velite/node_modules/sharp), not the root sharp@0.35, which
+# has no install script at all. "npm rebuild sharp" therefore reruns the
+# nested "node install/check.js || npm run build", whose fallback is a
+# from-source libvips build. package-lock.json pins
+# @img/sharp-linuxmusl-x64 and @img/sharp-libvips-linuxmusl-x64 for both
+# copies, so the prebuilt path is the one taken here.
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --ignore-scripts && \
+    npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher
 
 # ---------------------------------------------------------------------------
 # Stage 2: builder

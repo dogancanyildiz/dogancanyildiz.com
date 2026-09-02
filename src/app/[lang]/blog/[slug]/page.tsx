@@ -13,7 +13,12 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { getPost, getPostLocales, getPostSlugs } from "@/lib/content";
+import {
+  getPost,
+  getPostLocales,
+  getPostSlugs,
+  readingMinutes,
+} from "@/lib/content";
 import { buildBlogPosting, buildBreadcrumbList } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
@@ -87,9 +92,7 @@ export default async function PostPage({ params }: PostPageProps) {
             })}
           </time>
           <span aria-hidden="true"> · </span>
-          {t("readingTime", {
-            minutes: Math.max(1, Math.round(post.metadata.readingTime)),
-          })}
+          {t("readingTime", { minutes: readingMinutes(post) })}
         </p>
         <h1 className="page-title">{post.title}</h1>
         <p className="section-copy">{post.summary}</p>

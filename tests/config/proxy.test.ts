@@ -84,6 +84,32 @@ describe("proxy x-pathname", () => {
     }
   });
 
+  it("recognises the legacy URLs with a trailing slash", () => {
+    // A trailing slash used to walk straight past the lookup table: /about/
+    // reached next-intl, which read it as the English slug of the Turkish
+    // about page and sent the old English ranking to /hakkimda.
+    for (const [from, to] of [
+      ["/about/", "/en/about"],
+      ["/projects/", "/en/projects"],
+      ["/tr/about/", "/hakkimda"],
+      ["/tr/blog/capt-sinavina-hazirlik/", "/blog/capt-sinavina-hazirlik"],
+      ["/tr/", "/"],
+    ] as const) {
+      const response = proxy(
+        new NextRequest(`https://dogancanyildiz.com${from}`)
+      );
+      expect(response.status, from).toBe(308);
+      expect(response.headers.get("location"), from).toBe(
+        `https://dogancanyildiz.com${to}`
+      );
+    }
+  });
+
+  it("leaves the site root alone", () => {
+    const response = proxy(new NextRequest("https://dogancanyildiz.com/"));
+    expect(response.status).not.toBe(308);
+  });
+
   it("does not redirect a project detail off the Turkish canonical", () => {
     const response = proxy(
       new NextRequest("https://dogancanyildiz.com/projects/hubit")

@@ -1,6 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  contrastRatio,
+  readOklchToken,
+  relativeLuminance,
+} from "./lib/contrast";
 
 const repoPath = (relative: string) => join(process.cwd(), relative);
 const read = (relative: string) => readFileSync(repoPath(relative), "utf8");
@@ -36,8 +41,10 @@ describe("typography tokens", () => {
     );
   });
 
-  it("keeps the display stack on the two editorial surfaces", () => {
-    for (const selector of [".pull-quote", ".prose-content blockquote"]) {
+  it("keeps the display stack on the one editorial surface left", () => {
+    // .pull-quote used to be the second one. It never had a call site, so it
+    // was deleted rather than kept alive by this assertion.
+    for (const selector of [".prose-content blockquote"]) {
       const rule = css.slice(css.indexOf(`${selector} {`));
       expect(
         rule.slice(0, rule.indexOf("}")),
@@ -120,10 +127,15 @@ describe("colour tokens", () => {
     }
   });
 
-  it("exposes solid status tokens for the Faz 5 widget", () => {
+  it("ships one status token per theme, for the one status surface", () => {
     expect(css.match(/--status-up:/g)).toHaveLength(2);
-    expect(css.match(/--status-down:/g)).toHaveLength(2);
     expect(css).toContain("--color-status-up: var(--status-up);");
+    // --status-down was defined in both themes and mapped into the Tailwind
+    // namespace for a live monitoring panel that was then decided against:
+    // the Systems section renders build-time data and links out to Uptime
+    // Kuma instead, so nothing on the site ever paints a failure state.
+    expect(css).not.toContain("--status-down");
+    expect(css).not.toContain("--color-status-down");
   });
 
   it("uses a solid focus ring colour, no alpha suffix", () => {
@@ -140,43 +152,20 @@ describe("colour tokens", () => {
   });
 });
 
-// oklch -> linear sRGB -> WCAG relative luminance. The palette is written in
-// oklch, so a contrast assertion has to convert it rather than trust a hex
-// comment that can drift away from the token.
-function oklchToLinearSrgb(L: number, C: number, hDeg: number) {
-  const h = (hDeg * Math.PI) / 180;
-  const a = C * Math.cos(h);
-  const b = C * Math.sin(h);
-  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
-  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
-  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
-  return [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
-  ] as const;
-}
-
-function relativeLuminance(oklchValue: string) {
-  const match = oklchValue.match(
-    /oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)/
+// The palette is written in oklch, so a contrast assertion has to convert it
+// rather than trust a hex comment that can drift away from the token. The
+// conversion used to be a second copy of the maths in tests/lib/contrast.ts,
+// which no suite imported: two implementations of the same WCAG formula, one
+// of them unreachable. This file is the consumer that helper was missing.
+function tokenContrast(
+  theme: "light" | "dark",
+  foreground: string,
+  background: string
+) {
+  return contrastRatio(
+    relativeLuminance(readOklchToken(css, foreground, theme)),
+    relativeLuminance(readOklchToken(css, background, theme))
   );
-  if (!match) throw new Error(`not an oklch() value: ${oklchValue}`);
-  // Destructuring the fixed length tuple before mapping keeps each channel a
-  // definite number; .map() would widen it to number[].
-  const [r, g, b] = oklchToLinearSrgb(
-    Number(match[1]),
-    Number(match[2]),
-    Number(match[3])
-  );
-  const clamp = (channel: number) => Math.min(1, Math.max(0, channel));
-  return 0.2126 * clamp(r) + 0.7152 * clamp(g) + 0.0722 * clamp(b);
-}
-
-function contrastRatio(a: string, b: string) {
-  const [x, y] = [relativeLuminance(a), relativeLuminance(b)];
-  const [hi, lo] = x > y ? [x, y] : [y, x];
-  return (hi + 0.05) / (lo + 0.05);
 }
 
 const themeBlocks = {
@@ -197,22 +186,14 @@ describe("control boundary contrast (WCAG 1.4.11)", () => {
   // is: it only ever paints decorative hairlines.
   for (const theme of ["light", "dark"] as const) {
     it(`keeps --border-strong at 3:1 on the ${theme} background`, () => {
-      const block = themeBlocks[theme];
-      const ratio = contrastRatio(
-        tokenValue(block, "--border-strong"),
-        tokenValue(block, "--background")
-      );
+      const ratio = tokenContrast(theme, "border-strong", "background");
       expect(ratio, `${theme}: ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(
         3
       );
     });
 
     it(`keeps --border-strong at 3:1 on the ${theme} card surface`, () => {
-      const block = themeBlocks[theme];
-      const ratio = contrastRatio(
-        tokenValue(block, "--border-strong"),
-        tokenValue(block, "--card")
-      );
+      const ratio = tokenContrast(theme, "border-strong", "card");
       expect(ratio, `${theme}: ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(
         3
       );
@@ -477,24 +458,12 @@ describe("no dead classes in the shipped stylesheet", () => {
   // call site, otherwise it is bytes on every page for nothing. This used to
   // be an existence assertion, which kept retired utilities alive instead of
   // catching them.
-  // Classes exempt from the usage assertion, each with the state it is
-  // exempted for, because an allowlist that never checks itself just hides
-  // what it was meant to flag.
-  //   unused:   no call site yet and none expected until a sibling branch
-  //             lands. The check below asserts it really is unused, so the
-  //             entry cannot outlive its reason.
-  //   retiring: still used today; a sibling branch removes the last consumer
-  //             and the second audit round deletes the rule. The check below
-  //             asserts it really is still used.
-  const PENDING = new Map<
-    string,
-    { state: "unused" | "retiring"; why: string }
-  >([
-    [
-      "pull-quote",
-      { state: "unused", why: "quote surface, wired up by the content branch" },
-    ],
-  ]);
+  //
+  // It also used to carry a PENDING allowlist, holding .pull-quote as
+  // "unused, wired up by the content branch". Three phases later no branch
+  // had wired it up, so the rule was deleted and the allowlist with it: an
+  // exemption that outlives the work it was waiting for is just a slower way
+  // of shipping dead CSS.
 
   it("finds the classes it is supposed to check", () => {
     expect(declared.size).toBeGreaterThan(20);
@@ -505,28 +474,9 @@ describe("no dead classes in the shipped stylesheet", () => {
     const used = sourceFiles.some(({ body }) =>
       new RegExp(`(?<![\\w-])${name}(?![\\w-])`).test(body)
     );
-    const pending = PENDING.get(name);
-    if (pending) {
-      expect(
-        used,
-        pending.state === "unused"
-          ? `.${name} is allowlisted as unused but has a call site now; drop it from PENDING`
-          : `.${name} is allowlisted as retiring but has no call site left; delete the rule`
-      ).toBe(pending.state === "retiring");
-      return;
-    }
     expect(used, `.${name} is defined in globals.css but never used`).toBe(
       true
     );
-  });
-
-  it("keeps the pending allowlist to classes the stylesheet still defines", () => {
-    for (const name of PENDING.keys()) {
-      expect(
-        declared.has(name),
-        `.${name} is allowlisted but no longer defined`
-      ).toBe(true);
-    }
   });
 });
 

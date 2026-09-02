@@ -1,6 +1,6 @@
 # DevOps, Docker, Coolify ve Deploy Hattı
 
-Durum: Kod tarafı uygulandı: Dockerfile, CI, compose, checklist'ler (Faz 1, PR #3), release akışı (PR #7/#8), 2026-08-28 CI/Docker/release sertleştirmesi (`feature/audit-closure`); panel adımları sahibinde, canlı site 2026-08-28'de 526 · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
+Durum: Kod tarafı uygulandı: Dockerfile, CI, compose, checklist'ler (Faz 1, PR #3), release akışı (PR #7/#8), 2026-08-28 CI/Docker/release sertleştirmesi (`feature/audit-closure`), 2026-09-02 3. tur (`npm ci --ignore-scripts` + beş native paketin rebuild'i ci.yml, links.yml ve Dockerfile'da; `scripts/dev.mjs` velite ve next dev'i tek sahipte tutuyor; `.dockerignore` fixture node_modules ve `.velite-*` dizinlerini dışlıyor); panel adımları sahibinde, canlı site 2026-09-02'de hâlâ 526 · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
 
 ## Özet
 

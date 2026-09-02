@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { UNKNOWN_IP, getClientIp, isIpAddress } from "./client-ip";
+import {
+  UNKNOWN_IP,
+  getClientIp,
+  isIpAddress,
+  normalizeClientIp,
+} from "./client-ip";
 
 function headersOf(entries: Record<string, string>): Headers {
   return new Headers(entries);
@@ -90,5 +95,73 @@ describe("getClientIp", () => {
       "x-forwarded-for": "also-not-an-ip",
     });
     expect(getClientIp(headers, { trustCloudflare: true })).toBe(UNKNOWN_IP);
+  });
+
+  it("gives one ipv6 visitor one key however the address is written", () => {
+    const compressed = headersOf({ "x-forwarded-for": "2001:db8::1" });
+    const expanded = headersOf({
+      "x-forwarded-for": "2001:0DB8:0000:0000:0000:0000:0000:0001",
+    });
+
+    expect(getClientIp(expanded, { trustCloudflare: false })).toBe(
+      getClientIp(compressed, { trustCloudflare: false })
+    );
+  });
+
+  it("normalizes the cloudflare header the same way", () => {
+    const headers = headersOf({ "cf-connecting-ip": "2001:0db8::0001" });
+    expect(getClientIp(headers, { trustCloudflare: true })).toBe(
+      normalizeClientIp("2001:db8::1")
+    );
+  });
+
+  it("strips the port a proxy may append to the nearest hop", () => {
+    const ipv4 = headersOf({
+      "x-forwarded-for": "198.51.100.4, 203.0.113.9:54321",
+    });
+    const ipv6 = headersOf({ "x-forwarded-for": "[2001:db8::1]:54321" });
+
+    expect(getClientIp(ipv4, { trustCloudflare: false })).toBe("203.0.113.9");
+    expect(getClientIp(ipv6, { trustCloudflare: false })).toBe(
+      normalizeClientIp("2001:db8::1")
+    );
+  });
+});
+
+describe("normalizeClientIp", () => {
+  it("leaves an ipv4 address as it is", () => {
+    expect(normalizeClientIp("203.0.113.9")).toBe("203.0.113.9");
+  });
+
+  it("rejects anything that is not an address", () => {
+    expect(normalizeClientIp("not-an-ip")).toBeNull();
+    expect(normalizeClientIp("")).toBeNull();
+    expect(normalizeClientIp("203.000.113.9")).toBeNull();
+  });
+
+  it("collapses an ipv6 address onto its /64 block", () => {
+    // The smallest block an ISP hands to one subscriber. Without this a
+    // visitor walks the host part and buys a fresh budget per request.
+    expect(normalizeClientIp("2001:db8:1:2:3:4:5:6")).toBe(
+      normalizeClientIp("2001:db8:1:2:ffff:ffff:ffff:ffff")
+    );
+    expect(normalizeClientIp("2001:db8:1:2::1")).toBe("2001:db8:1:2::/64");
+  });
+
+  it("keeps different /64 blocks apart", () => {
+    expect(normalizeClientIp("2001:db8:1:2::1")).not.toBe(
+      normalizeClientIp("2001:db8:1:3::1")
+    );
+  });
+
+  it("drops the zone id so one interface is not two keys", () => {
+    expect(normalizeClientIp("fe80::1%eth0")).toBe(
+      normalizeClientIp("fe80::1")
+    );
+  });
+
+  it("maps an ipv4 mapped ipv6 address onto the plain ipv4 key", () => {
+    expect(normalizeClientIp("::ffff:203.0.113.9")).toBe("203.0.113.9");
+    expect(normalizeClientIp("::FFFF:cb00:7109")).toBe("203.0.113.9");
   });
 });

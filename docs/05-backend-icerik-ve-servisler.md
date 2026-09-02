@@ -1,5 +1,5 @@
 # Backend, İçerik Pipeline ve Servisler
-Durum: Uygulandı: içerik pipeline ve contact (Faz 0, Faz 4), status widget ve Umami kodu (Faz 5, PR #31), contact API 2026-08-28 denetim kapanışında yeniden sertleştirildi; kalan: Gatus ve Umami container'larının Coolify'da açılması · Karar: 2026-08-27 · Güncelleme: 2026-08-28 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı: içerik pipeline ve contact (Faz 0, Faz 4), status widget ve Umami kodu (Faz 5, PR #31), contact API 2026-08-28 denetim kapanışında ve 2026-09-02 3. turda yeniden sertleştirildi; kalan: Uptime Kuma ve merkezi Umami'nin panelde kurulması (Gatus ve repo içi Umami 2026-08-30'da kaldırıldı) · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -156,6 +156,18 @@ Gatus seçimi dokümante JSON API'sine dayanıyor; özel tasarımlı, sunucu tar
 - **Karar değişikliği (2026-08-30): Gatus ve status okuyucusu kaldırıldı.** Gerçek izleme Coolify'daki Uptime Kuma'ya taşındı (servis kataloğundan, panelde yönetilir); Kuma'nın JSON iç yapısı dokümante olmadığı için Systems paneli üçüncü taraftan veri ÇEKMEZ. Panel yalnızca build verisini gösterir (son yayın tarihi `timeZoneName: "short"` ile, commit SHA, stack satırı) ve `NEXT_PUBLIC_STATUS_URL` doluysa Kuma'nın public status sayfasına link verir (yalnızca https kabul edilir, boşsa satır gizlenir). `src/lib/status.ts`, `GATUS_URL` ve ana sayfanın 60 sn revalidate'i kaldırıldı; ana sayfa tamamen statik. `buildInfo.year` yalnızca `NEXT_PUBLIC_BUILD_DATE`'ten türer; tarih yoksa footer yıl basmaz.
 - **Karar değişikliği (2026-08-30): gözlemlenebilirlik panele taşındı, `infra/` silindi.** Umami merkezi kuruluma geçti: `umami.dravcore.com` (sahibinin altyapı domain'i, kendi sunucusu), bu site orada bir website olarak eklenir; koddaki tek değişiklik izinli origin (`src/lib/analytics.ts` `UMAMI_ORIGIN`) ve CSP. `data-domains="dogancanyildiz.com"` sayesinde aynı Umami'deki diğer siteler veri karıştırmaz; gizlilik metni doğru kalır (sunucu yine sahibinin). Uptime Kuma Coolify servis kataloğundan kurulur, bildirimleri kendi sağlayıcılarıyla yapar; `GATUS_ALERT_WEBHOOK_URL` diye bir şey artık yok. Repoda compose/config kalmadı, imaj sürümleri panelde sabitlenir. Kurulum: `docs/plans/handoffs/faz-5-manual-checklist.md`, runbook: `docs/runbooks/infrastructure.md`. Aynı sunucu körlüğü (sunucu düşerse izleyici de düşer) Kuma'da da geçerli; harici tek prob önerisi duruyor.
 - **İçerik şeması genişledi:** posts ve projects için opsiyonel `updated` (isodate), `coverAlt`; projects için `draft` (prod'da filtrelenir); `links.live`/`links.repo` yalnızca `https://`. `ProjectMeta` ve `Screenshot` MDX kısayolları hiçbir içerik kullanmadığı ve planlanmadığı için kaldırıldı; tablo `.table-wrap` ile sarılır.
+
+## Uygulama durumu (2026-09-02, 3. tur)
+
+Dal `feature/audit-followups`; contact ve csp-report route'larına 31 Ağustos incelemesinin ve bu turun bulguları işlendi, kanıt `src/app/api/contact/route.ts`, `src/lib/contact-validation.ts`, `src/lib/client-ip.ts`, `src/app/api/csp-report/report.ts`, `src/lib/log.ts`.
+
+- **Referer locale artık yalnızca site origin'inden okunuyor.** `localeFromReferer` önceden herhangi bir mutlak URL'i ayrıştırıyordu; başka bir origin'den gelen bir Referer, `Accept-Language`'e hiç bakılmadan `resolveLocale`'i domine edebiliyordu. Artık Referer'ın origin'i sitenin kendisiyle eşleşmiyorsa yok sayılıyor.
+- **IP normalizasyonu ile rate limit anahtarı tekilleşti.** `src/lib/client-ip.ts` çözümlenen IP'yi canonical forma getiriyor; aynı IPv6 istemcisi artık farklı yazımlarla taze kova üretemiyor. Cloudflare'ın arkasındaki tek edge adresinin ziyaretçileri hâlâ aynı kovayı paylaşıyor, bunun düzeltmesi panelde (`TRUST_CF_CONNECTING_IP=true`, yalnızca origin kilidinden SONRA) kalıyor.
+- **Honeypot artık yalnızca string olmayan değerlere de tuzak sayıyor**: `{"extra_field": 1}` gibi bir gövde önceden trap sayılmıyordu (alan `ALLOWED_FIELDS` içinde olduğu için bilinmeyen alan reddi de yakalamıyordu) ve posta gönderiliyordu; artık `undefined`/`null` dışında her değer dolu tuzak sayılır.
+- **Reply-To artık tek adrese sıkı sıkıya bağlı.** E-posta regex'i virgül/noktalı virgül/açı parantezi gibi adres-listesi ayraçlarını da reddediyor; ziyaretçinin kendi girdiği değer `replyTo`'ya iki adres olarak giremiyor. Uluslararası adresler (`ö`, `ç` gibi) hâlâ kabul ediliyor.
+- **CSP raporlayıcı artık istek başına en fazla 20 rapor logluyor** (önceden yalnızca 64 KB'lık gövde sınırı vardı; bir istek binlerce küçük rapor taşıyabiliyordu).
+- **Hata logları SMTP kodu koruyor:** `describeError` artık `code` alanını (varsa, kısa bir belirteçse) `name`'in yanına ekliyor; önceden nodemailer'ın hemen her hatası yalnızca `"Error"` olarak loglanıyordu, `EAUTH`/`ECONNECTION`/`ETLS` ayrımı kayboluyordu.
+- **F-148 doğrulandı, değişmedi:** `subject` doğrulamadan ve API'den tamamen kalktı, bilinmeyen alan 400 alıyor.
 
 ## Riskler ve tripwire'lar
 

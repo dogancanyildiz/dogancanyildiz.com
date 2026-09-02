@@ -22,9 +22,11 @@ export function Header({ untranslated }: HeaderProps) {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
       <div className="page-shell flex h-16 items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-1">
+          {/* tap-target costs nothing visually inside the h-16 row, and the
+              brand link is a standalone control like every other one here. */}
           <Link
             href="/"
-            className="group flex min-w-0 items-center gap-2.5 no-underline"
+            className="tap-target group flex min-w-0 items-center gap-2.5 no-underline"
           >
             <span className="text-sm font-medium tracking-tight text-foreground">
               {tBrand("name")}

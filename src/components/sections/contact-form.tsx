@@ -37,12 +37,12 @@ const FIELDS: ContactField[] = ["name", "email", "topic", "message"];
  * so the text attached to the field comes from the same catalog the client
  * validation uses.
  */
-const SERVER_FIELD_ERROR: Record<ContactField, string> = {
+const SERVER_FIELD_ERROR = {
   name: "errorNameInvalid",
   email: "errorEmailInvalid",
   topic: "errorTopicRequired",
   message: "errorMessageInvalid",
-};
+} as const satisfies Record<ContactField, string>;
 
 export function ContactForm() {
   const t = useTranslations("contact.form");
@@ -51,6 +51,12 @@ export function ContactForm() {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [retrySeconds, setRetrySeconds] = useState(0);
+  // The one controlled field. readOnly does nothing to a <select> and
+  // disabled would drop it out of the tab order mid request, so holding the
+  // value in state is what lets the lock below actually refuse a change:
+  // React restores the rendered value whenever an onChange leaves it
+  // unchanged, which is exactly what a keyboard driven change has to hit.
+  const [topic, setTopic] = useState("");
 
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -212,6 +218,9 @@ export function ContactForm() {
       setStatus("success");
       requestFocus("status");
       form.reset();
+      // form.reset() puts the uncontrolled fields back; the controlled one
+      // takes its value from state and has to be cleared alongside them.
+      setTopic("");
     } catch (error) {
       const timedOut = error instanceof Error && error.name === "TimeoutError";
       setErrorMessage(timedOut ? t("errorTimeout") : t("error"));
@@ -285,7 +294,14 @@ export function ContactForm() {
           id="topic"
           name="topic"
           ref={topicRef}
-          defaultValue=""
+          value={topic}
+          onChange={(event) => {
+            // The lock, in the one form it can take on a select. Every other
+            // field is readOnly while the request is in flight; ignoring the
+            // change here makes React put the previous option back.
+            if (busy) return;
+            setTopic(event.target.value);
+          }}
           required
           aria-invalid={fieldErrors.topic ? true : undefined}
           aria-describedby={describedBy("topic")}

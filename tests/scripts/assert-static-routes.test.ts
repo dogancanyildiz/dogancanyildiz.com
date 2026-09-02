@@ -2,6 +2,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import * as prettier from "prettier";
 import { describe, expect, it } from "vitest";
+import { pathnames, routing } from "@/i18n/routing";
+// The script exports its route derivation and only runs the check when node
+// invokes it directly, so importing it here does not read a build manifest.
+import {
+  LOCALE_PAGES,
+  readLocales,
+  requiredRoutes,
+} from "../../scripts/assert-static-routes.mjs";
 
 const scriptPath = join(process.cwd(), "scripts/assert-static-routes.mjs");
 const script = () => readFileSync(scriptPath, "utf8");
@@ -25,8 +33,16 @@ describe("scripts/assert-static-routes.mjs", () => {
     expect(content).toContain("readFile");
   });
 
-  it("requires both locales for every top level content route", () => {
-    const content = script();
+  it("reads its locale list out of the routing config", async () => {
+    // The list used to be hand written here, so adding a locale to
+    // routing.ts left this check verifying half the site while still
+    // reporting a pass.
+    expect(await readLocales()).toEqual([...routing.locales]);
+  });
+
+  it("requires every locale for every top level content route", async () => {
+    const required = requiredRoutes(await readLocales());
+
     for (const route of [
       "/en",
       "/tr",
@@ -47,20 +63,37 @@ describe("scripts/assert-static-routes.mjs", () => {
       "/en/feed.xml",
       "/tr/feed.xml",
     ]) {
-      expect(content).toContain(`"${route}"`);
+      expect(required).toContain(route);
     }
   });
 
+  it("grows the required list with the locale list", () => {
+    expect(requiredRoutes(["en", "tr", "de"])).toContain("/de/about");
+    expect(requiredRoutes(["en"])).not.toContain("/tr/about");
+  });
+
   it("requires the root level static metadata routes", () => {
-    const content = script();
+    const required = requiredRoutes(["en"]);
     for (const route of [
       "/robots.txt",
       "/sitemap.xml",
       "/icon",
       "/apple-icon",
     ]) {
-      expect(content).toContain(`"${route}"`);
+      expect(required).toContain(route);
     }
+  });
+
+  it("covers every public page of the routing config", async () => {
+    // A page added to routing.ts and forgotten here would never be checked
+    // for being prerendered in both locales.
+    const dynamic = ["/projects/[slug]", "/blog/[slug]"];
+    const expected = Object.keys(pathnames)
+      .filter((pathname) => !dynamic.includes(pathname))
+      .map((pathname) => (pathname === "/" ? "" : pathname))
+      .sort();
+
+    expect([...LOCALE_PAGES].sort()).toEqual(expected);
   });
 
   it("documents why opengraph-image is not in the required list", () => {

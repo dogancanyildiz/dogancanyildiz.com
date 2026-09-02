@@ -1,5 +1,6 @@
 import { createNavigation } from "next-intl/navigation";
 import { routing } from "./routing";
+import type { AppLocale } from "./routing";
 
 export const { Link, redirect, usePathname, useRouter, getPathname } =
   createNavigation(routing);
@@ -15,8 +16,12 @@ export type AppHref = Parameters<typeof getPathname>[0]["href"];
  * getPathname for a string that may be a concrete slug (`/blog/foo`) or an
  * internal pathname (`/about`). The generated AppHref union only lists the
  * static keys, so callers with a runtime path have to go through here.
+ *
+ * The locale stays a narrow AppLocale: src/types/next-intl.d.ts narrows the
+ * next-intl AppConfig Locale to the routed locales, so getPathname no longer
+ * accepts a bare string and a widened parameter here would break tsc.
  */
-export function pathnameForLocale(locale: string, href: string): string {
+export function pathnameForLocale(locale: AppLocale, href: string): string {
   return getPathname({
     locale,
     href: href as AppHref,

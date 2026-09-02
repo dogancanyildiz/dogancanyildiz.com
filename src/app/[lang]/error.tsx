@@ -43,11 +43,14 @@ export default function LocaleError({
             {t("digestLabel")}: <code>{error.digest}</code>
           </p>
         ) : null}
+        {/* size="sm" is a 36px box. These two are the only way off a crashed
+            page, so they take the same 44px floor every other standalone
+            control on the site does. */}
         <div className="flex flex-wrap gap-3">
-          <Button size="sm" onClick={() => retry()}>
+          <Button size="sm" className="tap-target" onClick={() => retry()}>
             {t("retry")}
           </Button>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="tap-target">
             <Link href="/">{t("backHome")}</Link>
           </Button>
         </div>

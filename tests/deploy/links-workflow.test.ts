@@ -42,6 +42,19 @@ describe("links workflow", () => {
     expect(content).toMatch(/@[0-9a-f]{40} # v\d/);
   });
 
+  it("installs with --ignore-scripts, like ci.yml and the Dockerfile", () => {
+    // F-075 hardened the install in ci.yml and the Dockerfile but left this
+    // one on a bare "npm ci". Same package.json, same lifecycle script
+    // surface, and this job runs unattended on a schedule, so it gets the
+    // same treatment.
+    const content = workflow();
+    expect(content).toContain("npm ci --ignore-scripts");
+    expect(content).toContain(
+      "npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher"
+    );
+    expect(content).not.toMatch(/run: npm ci$/m);
+  });
+
   it("grants read only repository access", () => {
     expect(workflow()).toMatch(/permissions:\s*\n\s*contents: read/);
   });

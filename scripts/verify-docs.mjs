@@ -128,6 +128,35 @@ function checkDomainDirection() {
 }
 
 // ---------------------------------------------------------------------------
+// Locale scheme: the 2026-08-30 decision flipped the default locale to
+// Turkish (TR at the root, EN under /en). A document still describing the
+// original English-at-root scheme as the current one, with no marker that
+// the direction reversed, sends a reader to build against a routing table
+// that no longer exists. Same shape as the domain check above: a stale
+// pattern, a historical-marker exception, docs/plans/** excluded (it is a
+// record of what was true when each phase ran, not a living document).
+// ---------------------------------------------------------------------------
+
+const STALE_LOCALE_SCHEME =
+  /İngilizce (kökte|varsayılan)|EN kökte|EN prefix'siz|İngilizce prefix'siz/;
+
+function checkLocaleScheme() {
+  const files = [...markdownFiles("docs"), README];
+
+  for (const file of files) {
+    const lines = readFileSync(join(root, file), "utf8").split("\n");
+    lines.forEach((line, index) => {
+      if (!STALE_LOCALE_SCHEME.test(line)) return;
+      if (HISTORICAL_MARKER.test(line)) return;
+      problems.push(
+        `${file}:${index + 1}: describes the pre-2026-08-30 locale scheme ` +
+          `(English at the root) as current, with no historical marker: ${line.trim()}`
+      );
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Deploy checklists match the shipped behaviour.
 // ---------------------------------------------------------------------------
 
@@ -255,6 +284,7 @@ function checkDeployDocs() {
 }
 
 checkDomainDirection();
+checkLocaleScheme();
 checkDeployDocs();
 
 if (problems.length > 0) {

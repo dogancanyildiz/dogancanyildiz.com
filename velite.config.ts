@@ -31,6 +31,36 @@ function httpsUrl() {
     });
 }
 
+/** Words a reader gets through in a minute. velite's own default. */
+const WORDS_PER_MINUTE = 265;
+
+/**
+ * A word: letters or digits, optionally joined by an apostrophe or a hyphen.
+ * Unicode aware on purpose, see readingMetadata.
+ */
+const WORD = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
+
+/**
+ * Word count and reading time for a post body.
+ *
+ * velite's s.metadata() counts words with an ASCII only pattern, so every
+ * Turkish letter splits a word in two: "Türkiye" counts as "T" plus "rkiye".
+ * The Turkish posts came out 40 to 47 percent longer than they are, and that
+ * number is published as `wordCount` in the BlogPosting JSON-LD and drives the
+ * reading time shown on the post. Counting with a Unicode class treats a word
+ * as one word in both languages.
+ */
+export function readingMetadata(plain: string): {
+  readingTime: number;
+  wordCount: number;
+} {
+  const wordCount = (plain.match(WORD) ?? []).length;
+  return {
+    wordCount,
+    readingTime: Math.max(1, Math.round(wordCount / WORDS_PER_MINUTE)),
+  };
+}
+
 const projects = defineCollection({
   name: "Project",
   pattern: "projects/**/*.mdx",
@@ -85,9 +115,15 @@ const posts = defineCollection({
       draft: s.boolean().default(false),
       path: s.path(),
       code: s.mdx(),
+      // Kept for its validation (an empty body is a schema error) and for the
+      // field type; the counts themselves are replaced below.
       metadata: s.metadata(),
     })
-    .transform((data) => ({ ...data, locale: localeFromPath(data.path) })),
+    .transform((data, { meta }) => ({
+      ...data,
+      locale: localeFromPath(data.path),
+      metadata: readingMetadata(meta.plain ?? ""),
+    })),
 });
 
 // Exported so the test fixtures (tests/fixtures/velite.invalid.config.ts,

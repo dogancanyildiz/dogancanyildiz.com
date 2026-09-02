@@ -57,10 +57,6 @@ async function documentLocale(): Promise<Locale> {
   return localeFromPathname(pathname);
 }
 
-async function messages(locale: string, namespace: string) {
-  return getTranslations({ locale, namespace });
-}
-
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await documentLocale();
   const t = await getTranslations({ locale, namespace: "notFound" });
@@ -69,12 +65,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function GlobalNotFound() {
   const locale = await documentLocale();
-  const t = await messages(locale, "notFound");
-  const tNav = await messages(locale, "nav");
-  const tBrand = await messages(locale, "brand");
+  const t = await getTranslations({ locale, namespace: "notFound" });
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+  const tBrand = await getTranslations({ locale, namespace: "brand" });
   const secondaryLocale = routing.locales.find((other) => other !== locale);
   const secondary = secondaryLocale
-    ? await messages(secondaryLocale, "notFound")
+    ? await getTranslations({ locale: secondaryLocale, namespace: "notFound" })
     : null;
 
   const links = [

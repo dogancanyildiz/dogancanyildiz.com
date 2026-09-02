@@ -1,5 +1,5 @@
 # SEO, Metadata ve Yapılandırılmış Veri
-Durum: Uygulandı (Faz 2 ve Faz 4; 2026-08-28 denetim kapanışı; **2026-08-30, PR #36:** TR varsayılan, x-default ve JSON-LD kimlikleri TR köküne, eski EN yolları 308), kalan: Search Console ve hreflang canlı doğrulaması · Karar: 2026-08-27 · Güncelleme: 2026-08-30 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı (Faz 2 ve Faz 4; 2026-08-28 denetim kapanışı; **2026-08-30, PR #36:** TR varsayılan, x-default ve JSON-LD kimlikleri TR köküne, eski EN yolları 308; 2026-09-02 3. tur: TR kelime sayımı Unicode'a geçti, çeviri paritesi testle kilitlendi), kalan: Search Console ve hreflang canlı doğrulaması · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -83,6 +83,13 @@ Dal `feature/audit-closure`; kanıt `src/app/[lang]/opengraph-image.tsx`, `src/l
 - **Bilinçli kabuller.** Kök canonical/hreflang eğik çizgisiz, sitemap `loc`'u eğik çizgili (tutarlılık iddiası yok, F-154). **2026-08-30 güncellemesi (F-155'in tersine dönüşü):** `/en/*` artık kanonik İngilizce adres; fazla `/tr/*` önekleri ve eski öneksiz İngilizce nav yolları kalıcı 308 ile yeni kanonik adrese gider (`src/i18n/legacy-en-paths.ts` + proxy). **CV indekslenmez:** `/cv/*` `X-Robots-Tag: noindex, nofollow` (karar, `robots.ts` değişmedi).
 - **Hata sınırları.** `src/app/[lang]/error.tsx` (client, next-intl `errorPage` namespace'i, Next 16.3'ün kararlı `retry` prop'u) ve `src/app/global-error.tsx` (kendi html/body, fontlar).
 - **Canlı doğrulama hâlâ yok:** Search Console, hreflang aracı, paylaşım önizlemesi ve Rich Results Test site 526 verdiği için koşulmadı.
+
+## Uygulama durumu (2026-09-02)
+
+- **Eski öneksiz `/blog` listesi yönlendirilmiyor (bilinçli kabul, V-5).** `/blog` iki dilde de aynı yol olduğu için öneksiz adres artık Türkçe listenin kanoniği; 308 tablosuna eklenmesi kanonik sayfayı kendi adresinden sürerdi. Eski İngilizce `/blog` sıralaması bu yüzden Türkçe listeye düşüyor, İngilizce giriş noktası `/en/blog`. Tam gerekçe ve reddedilen "tek dilli slug'ı `/en/blog/<slug>`'a yönlendir" seçeneği: [04-i18n.md](./04-i18n.md), "Eski öneksiz `/blog` yönlendirilmiyor".
+- **`/feed.xml` dil değiştirdi, yönlendirilemiyor (V-16).** TR-varsayılan geçişinden önce öneksiz `/feed.xml` İngilizce feed'di, şimdi Türkçe feed. Aynı adres iki dilin kanoniği olamayacağı için eski aboneler için bir yönlendirme yok: İngilizce takip etmek isteyen `/en/feed.xml`'e kendi geçmek zorunda. Yumuşatma, feed'i tanınır kılmak: kanal başlığı ve her sayfanın `<link rel="alternate" type="application/rss+xml">` başlığı artık locale'e göre ayrışıyor ("Doğan Can YILDIZ · Yazılar" ve "Doğan Can YILDIZ · Writing"), `<language>` öğesi zaten locale'i yazıyordu. İki feed de prerender ediliyor (`scripts/assert-static-routes.mjs`) ve her sayfa yalnızca kendi dilinin feed'ini duyuruyor. Sahibi isterse tek seferlik bir duyuru yazısı geçişi feed içinden de anlatabilir; bu bir içerik kararı, kod değil.
+- **Türkçe kelime sayımı Unicode'a geçti.** Velite'ın varsayılan `s.metadata()`'sı kelimeleri `/[a-zA-Z]+/` ile sayıyordu, yani `"Türkiye"` iki kelime (`"T"` + `"rkiye"`) sayılıyordu; TR yazılarda kelime sayısı ve okuma süresi yüzde 40-47 şişikti, bu sayı `BlogPosting` JSON-LD'sinde `wordCount` olarak da yayınlanıyordu. `velite.config.ts` artık Unicode `\p{L}\p{N}` kelime sınıfıyla kendi metadata'sını hesaplıyor (265 wpm). Test: `tests/content-schema.test.ts` "reading metadata" bloğu.
+- **Çeviri paritesi ve yayın tarihi artık testle kilitli.** Bir projenin `featured`/`order`/`year`/`draft`/`links` alanları veya bir yazının yayın tarihi iki dil dosyasında ayrışırsa `tests/content-layer.test.ts` kırmızı verir; önceden şema bunu hiç kontrol etmiyordu.
 
 ## Riskler ve tripwire'lar
 

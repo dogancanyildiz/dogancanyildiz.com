@@ -2,9 +2,8 @@ import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { getPosts, type Locale } from "@/lib/content";
-import { absoluteUrl } from "@/lib/seo/alternates";
+import { absoluteUrl, feedTitle } from "@/lib/seo/alternates";
 import { escapeXml } from "@/lib/seo/xml";
-import { siteConfig } from "@/lib/site-config";
 
 export const dynamic = "force-static";
 // Layouts do not wrap route handlers, so the [lang] layout's dynamicParams
@@ -63,7 +62,10 @@ export async function GET(
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
     "  <channel>",
-    `    <title>${escapeXml(siteConfig.person.name)}</title>`,
+    // Localized, because the two feeds are otherwise indistinguishable in a
+    // reader: the unprefixed /feed.xml used to be the English one and is now
+    // the Turkish one, and a subscriber sees this title, not the URL.
+    `    <title>${escapeXml(feedTitle(t("title")))}</title>`,
     `    <link>${escapeXml(blogUrl)}</link>`,
     `    <description>${escapeXml(t("description"))}</description>`,
     `    <language>${locale}</language>`,
