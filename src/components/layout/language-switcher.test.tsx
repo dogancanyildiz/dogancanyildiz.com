@@ -22,12 +22,12 @@ beforeEach(() => {
 });
 
 describe("LanguageSwitcher", () => {
-  it("shows the TR/EN labels with an sr-only language name for each", () => {
+  it("shows TR then EN, default locale first, with an sr-only language name for each", () => {
     renderWithIntl(<LanguageSwitcher untranslated={{ en: [], tr: [] }} />);
     const links = screen.getAllByRole("link");
     expect(links.map((link) => link.textContent)).toEqual([
-      "EN (English)",
       "TR (Türkçe)",
+      "EN (English)",
     ]);
   });
 

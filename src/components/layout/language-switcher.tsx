@@ -37,32 +37,48 @@ export function LanguageSwitcher({ untranslated }: LanguageSwitcherProps) {
   const pathname = fillPathname(usePathname(), params);
   const t = useTranslations("nav");
 
+  // Default locale first: the site is Turkish on the root, so TR leads.
+  const ordered = [
+    routing.defaultLocale,
+    ...routing.locales.filter((locale) => locale !== routing.defaultLocale),
+  ];
+
   return (
     <nav
       aria-label={t("languageLabel")}
-      className="flex rounded-full border border-border-strong bg-background/60 p-1"
+      // Flat, like the nav links beside it: no pill, no box. The active
+      // locale carries the foreground colour and a primary underline, the
+      // hairline between the two is the same strong token the lockup uses.
+      className="flex items-center font-mono"
     >
-      {routing.locales.map((locale) => {
+      {ordered.map((locale, index) => {
         const isActive = locale === activeLocale;
         const target = switchTargetPath(pathname, untranslated[locale] ?? []);
         const href = pathnameForLocale(locale, target);
         return (
-          <a
-            key={locale}
-            href={href}
-            hrefLang={locale}
-            lang={locale}
-            aria-current={isActive ? "true" : undefined}
-            className={cn(
-              "tap-target inline-flex items-center rounded-full px-3 text-[0.72rem] font-semibold uppercase tracking-[0.2em] no-underline transition-colors",
-              isActive
-                ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {localeLabels[locale]}
-            <span className="sr-only"> ({localeNames[locale]})</span>
-          </a>
+          <span key={locale} className="flex items-center">
+            {index > 0 ? (
+              <span
+                aria-hidden="true"
+                className="h-3.5 w-px shrink-0 bg-border-strong"
+              />
+            ) : null}
+            <a
+              href={href}
+              hrefLang={locale}
+              lang={locale}
+              aria-current={isActive ? "true" : undefined}
+              className={cn(
+                "tap-target inline-flex items-center px-2.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] transition-colors",
+                isActive
+                  ? "text-foreground underline decoration-primary decoration-2 underline-offset-8"
+                  : "text-muted-foreground no-underline hover:text-foreground"
+              )}
+            >
+              {localeLabels[locale]}
+              <span className="sr-only"> ({localeNames[locale]})</span>
+            </a>
+          </span>
         );
       })}
     </nav>

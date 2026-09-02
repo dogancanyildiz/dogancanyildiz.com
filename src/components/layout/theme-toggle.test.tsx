@@ -23,11 +23,12 @@ describe("ThemeToggle", () => {
     // element, it only lacks the resolved theme until mount.
     expect(button).not.toHaveAttribute("disabled");
     expect(button).not.toHaveAttribute("aria-disabled");
-    // The size/border classes come from the same Button element on every
+    // The size and radius classes come from the same Button element on every
     // mount state: nothing here differs between the pre-hydration render and
     // the one after resolvedTheme settles, so there is no layout jump.
     expect(button.className).toContain("tap-target");
-    expect(button.className).toContain("border-border-strong");
+    expect(button.className).toContain("rounded-md");
+    expect(button.className).not.toContain("border-border-strong");
   });
 
   it("reports aria-pressed=true once resolvedTheme resolves to dark, with the same classes", async () => {
@@ -36,7 +37,8 @@ describe("ThemeToggle", () => {
     const button = screen.getByRole("button", { name: "Toggle theme" });
     expect(button).toHaveAttribute("aria-pressed", "true");
     expect(button.className).toContain("tap-target");
-    expect(button.className).toContain("border-border-strong");
+    expect(button.className).toContain("rounded-md");
+    expect(button.className).not.toContain("border-border-strong");
     expect(container.querySelectorAll("button")).toHaveLength(1);
   });
 

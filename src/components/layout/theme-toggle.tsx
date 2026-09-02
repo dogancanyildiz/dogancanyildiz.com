@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 /**
  * A single render path for every mount state. The icon swap is a pure CSS
  * dark: variant, driven by the .dark class next-themes' blocking script sets
- * on <html> before hydration, so the button never changes box size, border
- * or icon between the server render and the hydrated client render. Before
+ * on <html> before hydration, so the button never changes box size or icon
+ * between the server render and the hydrated client render. Before
  * resolvedTheme settles (its first read is undefined) aria-pressed reads
  * false, which matches what the CSS variant already shows by default.
  */
@@ -21,7 +21,8 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon-sm"
-      className="tap-target border border-border-strong bg-background"
+      // Flat like the language switcher: the icon is the control, no box.
+      className="tap-target rounded-md"
       aria-label={t("a11y.toggleTheme")}
       aria-pressed={resolvedTheme === "dark"}
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}

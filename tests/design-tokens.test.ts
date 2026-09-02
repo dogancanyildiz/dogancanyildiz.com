@@ -223,24 +223,32 @@ describe("control boundary contrast (WCAG 1.4.11)", () => {
     expect(button).not.toMatch(/outline:\s*\n?\s*"border border-border /);
   });
 
-  // The header controls draw a full box border and that border is the only
-  // thing marking them as controls, so they belong to the same rule as the
-  // outline button. They live in another branch's files; if one of them is
-  // reworked, this is the assertion that says why the token matters.
-  const boxedControls = [
+  // The header controls used to draw a full box border from the strong token.
+  // Since 2026-09-02 they are flat (the owner found the pill and the circle
+  // out of place next to the text nav): no box at all, and the one hairline
+  // left, between TR and EN, still comes from the strong token so it clears
+  // 3:1 like every other control boundary.
+  const flatControls = [
     "src/components/layout/theme-toggle.tsx",
     "src/components/layout/language-switcher.tsx",
   ];
 
-  it.each(boxedControls)("draws %s from the strong token", (path) => {
-    const source = read(path);
-    expect(source).toContain("border-border-strong");
-    // No alpha either: --border-strong clears 3:1 at full opacity and nowhere
-    // near it once it is faded into the background.
-    expect(
-      source,
-      `${path} still has a weak or faded control border`
-    ).not.toMatch(/border-border(?!-strong)|border-border-strong\//);
+  it.each(flatControls)(
+    "keeps %s flat and off the weak border token",
+    (path) => {
+      const source = read(path);
+      expect(source).not.toMatch(/\bborder(-[trblxy])? border-/);
+      expect(source).not.toMatch(
+        /border-border(?!-strong)|border-border-strong\//
+      );
+      expect(source).not.toContain("rounded-full");
+    }
+  );
+
+  it("draws the language hairline from the strong token", () => {
+    expect(read("src/components/layout/language-switcher.tsx")).toContain(
+      "bg-border-strong"
+    );
   });
 });
 
