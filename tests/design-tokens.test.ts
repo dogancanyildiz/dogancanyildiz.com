@@ -1,6 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  contrastRatio,
+  readOklchToken,
+  relativeLuminance,
+} from "./lib/contrast";
 
 const repoPath = (relative: string) => join(process.cwd(), relative);
 const read = (relative: string) => readFileSync(repoPath(relative), "utf8");
@@ -147,43 +152,20 @@ describe("colour tokens", () => {
   });
 });
 
-// oklch -> linear sRGB -> WCAG relative luminance. The palette is written in
-// oklch, so a contrast assertion has to convert it rather than trust a hex
-// comment that can drift away from the token.
-function oklchToLinearSrgb(L: number, C: number, hDeg: number) {
-  const h = (hDeg * Math.PI) / 180;
-  const a = C * Math.cos(h);
-  const b = C * Math.sin(h);
-  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
-  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
-  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
-  return [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
-  ] as const;
-}
-
-function relativeLuminance(oklchValue: string) {
-  const match = oklchValue.match(
-    /oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)/
+// The palette is written in oklch, so a contrast assertion has to convert it
+// rather than trust a hex comment that can drift away from the token. The
+// conversion used to be a second copy of the maths in tests/lib/contrast.ts,
+// which no suite imported: two implementations of the same WCAG formula, one
+// of them unreachable. This file is the consumer that helper was missing.
+function tokenContrast(
+  theme: "light" | "dark",
+  foreground: string,
+  background: string
+) {
+  return contrastRatio(
+    relativeLuminance(readOklchToken(css, foreground, theme)),
+    relativeLuminance(readOklchToken(css, background, theme))
   );
-  if (!match) throw new Error(`not an oklch() value: ${oklchValue}`);
-  // Destructuring the fixed length tuple before mapping keeps each channel a
-  // definite number; .map() would widen it to number[].
-  const [r, g, b] = oklchToLinearSrgb(
-    Number(match[1]),
-    Number(match[2]),
-    Number(match[3])
-  );
-  const clamp = (channel: number) => Math.min(1, Math.max(0, channel));
-  return 0.2126 * clamp(r) + 0.7152 * clamp(g) + 0.0722 * clamp(b);
-}
-
-function contrastRatio(a: string, b: string) {
-  const [x, y] = [relativeLuminance(a), relativeLuminance(b)];
-  const [hi, lo] = x > y ? [x, y] : [y, x];
-  return (hi + 0.05) / (lo + 0.05);
 }
 
 const themeBlocks = {
@@ -204,22 +186,14 @@ describe("control boundary contrast (WCAG 1.4.11)", () => {
   // is: it only ever paints decorative hairlines.
   for (const theme of ["light", "dark"] as const) {
     it(`keeps --border-strong at 3:1 on the ${theme} background`, () => {
-      const block = themeBlocks[theme];
-      const ratio = contrastRatio(
-        tokenValue(block, "--border-strong"),
-        tokenValue(block, "--background")
-      );
+      const ratio = tokenContrast(theme, "border-strong", "background");
       expect(ratio, `${theme}: ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(
         3
       );
     });
 
     it(`keeps --border-strong at 3:1 on the ${theme} card surface`, () => {
-      const block = themeBlocks[theme];
-      const ratio = contrastRatio(
-        tokenValue(block, "--border-strong"),
-        tokenValue(block, "--card")
-      );
+      const ratio = tokenContrast(theme, "border-strong", "card");
       expect(ratio, `${theme}: ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(
         3
       );
