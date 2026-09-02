@@ -2,8 +2,6 @@
    scans docs/ and tests/, and class names quoted in the plan documents (the
    retired emerald shadow among them) end up in the compiled stylesheet. */
 @import "tailwindcss" source("../");
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -13,26 +11,13 @@
   --font-sans: var(--font-sans-stack);
   --font-display: var(--font-display-stack);
   --font-mono: var(--font-mono-stack);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-status-up: var(--status-up);
-  --color-status-down: var(--status-down);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input-border: var(--input-border);
   --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
@@ -40,17 +25,10 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
 }
 
 :root {
@@ -71,9 +49,6 @@
   --background: oklch(0.9846 0.0017 247.8);
   --foreground: oklch(0.2066 0.0101 248.3);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2066 0.0101 248.3);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2066 0.0101 248.3);
   /* Emerald survives in exactly three roles: primary, ring and status. */
   --primary: oklch(0.4794 0.1156 156.3);
   --primary-foreground: oklch(1 0 0);
@@ -82,30 +57,22 @@
   --muted: oklch(0.9482 0.0034 247.9);
   --muted-foreground: oklch(0.5044 0.0114 252.9);
   --accent: oklch(0.9265 0.0052 247.9);
-  --accent-foreground: oklch(0.2066 0.0101 248.3);
   --destructive: oklch(0.5054 0.1905 27.5);
-  --destructive-foreground: oklch(1 0 0);
+  /* Decorative hairlines only. Anything that has to be perceivable as a
+     control boundary uses --border-strong instead. */
   --border: oklch(0.9265 0.0052 247.9);
   --input: oklch(0.9265 0.0052 247.9);
+  /* WCAG 1.4.11 wants 3:1 against the adjacent surface for the boundary of a
+     control. This lands at 3.28:1 on --background and 3.43:1 on --card; the
+     old --border sat at 1.19:1. */
+  --border-strong: oklch(0.635 0.0114 252.9);
+  --input-border: var(--border-strong);
   --ring: oklch(0.4794 0.1156 156.3);
+  /* Availability dot in the hero, the site's only status surface. There is
+     no matching "down" token: the Systems panel renders build-time data and
+     links out to Uptime Kuma rather than reporting a live state, so nothing
+     here ever paints a failure. */
   --status-up: oklch(0.4794 0.1156 156.3);
-  --status-down: oklch(0.5054 0.1905 27.5);
-  /* Panels and cards mix their shadow from this. --foreground would do in
-     light mode but is near white in dark mode and paints a halo instead. */
-  --shadow-color: oklch(0.2066 0.0101 248.3);
-  --chart-1: oklch(0.4794 0.1156 156.3);
-  --chart-2: oklch(0.5044 0.0114 252.9);
-  --chart-3: oklch(0.6998 0.0123 252.1);
-  --chart-4: oklch(0.9265 0.0052 247.9);
-  --chart-5: oklch(0.2066 0.0101 248.3);
-  --sidebar: oklch(0.9846 0.0017 247.8);
-  --sidebar-foreground: oklch(0.2066 0.0101 248.3);
-  --sidebar-primary: oklch(0.4794 0.1156 156.3);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.9482 0.0034 247.9);
-  --sidebar-accent-foreground: oklch(0.2066 0.0101 248.3);
-  --sidebar-border: oklch(0.9265 0.0052 247.9);
-  --sidebar-ring: oklch(0.4794 0.1156 156.3);
   --ambient-grid-line: color-mix(in oklab, var(--foreground) 8%, transparent);
   --ambient-grid-opacity: 0.55;
   --ambient-glow: color-mix(in oklab, var(--foreground) 10%, transparent);
@@ -116,9 +83,6 @@
   --background: oklch(0.1535 0.0072 258.4);
   --foreground: oklch(0.9629 0.0025 228.8);
   --card: oklch(0.2032 0.0093 255.6);
-  --card-foreground: oklch(0.9629 0.0025 228.8);
-  --popover: oklch(0.2032 0.0093 255.6);
-  --popover-foreground: oklch(0.9629 0.0025 228.8);
   --primary: oklch(0.7591 0.1444 158);
   --primary-foreground: oklch(0.1535 0.0072 258.4);
   --secondary: oklch(0.2373 0.0113 254.1);
@@ -126,28 +90,14 @@
   --muted: oklch(0.2373 0.0113 254.1);
   --muted-foreground: oklch(0.6998 0.0123 252.1);
   --accent: oklch(0.2667 0.011 254);
-  --accent-foreground: oklch(0.9629 0.0025 228.8);
   --destructive: oklch(0.7106 0.1661 22.2);
-  --destructive-foreground: oklch(0.1535 0.0072 258.4);
   --border: oklch(0.2993 0.0107 254);
   --input: oklch(0.2993 0.0107 254);
+  /* 3.56:1 against the dark --background; the old --border sat at 1.43:1. */
+  --border-strong: oklch(0.52 0.0146 254);
+  --input-border: var(--border-strong);
   --ring: oklch(0.7591 0.1444 158);
   --status-up: oklch(0.7591 0.1444 158);
-  --status-down: oklch(0.7106 0.1661 22.2);
-  --shadow-color: oklch(0 0 0);
-  --chart-1: oklch(0.7591 0.1444 158);
-  --chart-2: oklch(0.6998 0.0123 252.1);
-  --chart-3: oklch(0.5044 0.0114 252.9);
-  --chart-4: oklch(0.2993 0.0107 254);
-  --chart-5: oklch(0.9629 0.0025 228.8);
-  --sidebar: oklch(0.1535 0.0072 258.4);
-  --sidebar-foreground: oklch(0.9629 0.0025 228.8);
-  --sidebar-primary: oklch(0.7591 0.1444 158);
-  --sidebar-primary-foreground: oklch(0.1535 0.0072 258.4);
-  --sidebar-accent: oklch(0.2373 0.0113 254.1);
-  --sidebar-accent-foreground: oklch(0.9629 0.0025 228.8);
-  --sidebar-border: oklch(0.2993 0.0107 254);
-  --sidebar-ring: oklch(0.7591 0.1444 158);
   --ambient-grid-line: color-mix(in oklab, var(--foreground) 4%, transparent);
   --ambient-grid-opacity: 0.5;
   --ambient-glow: color-mix(in oklab, oklch(1 0 0) 10%, transparent);
@@ -182,16 +132,8 @@
     z-index: -1;
     pointer-events: none;
     background-image:
-      linear-gradient(
-        to right,
-        var(--ambient-grid-line) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        to bottom,
-        var(--ambient-grid-line) 1px,
-        transparent 1px
-      );
+      linear-gradient(to right, var(--ambient-grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--ambient-grid-line) 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: linear-gradient(to bottom, black 0%, transparent 45%);
     opacity: var(--ambient-grid-opacity);
@@ -233,11 +175,20 @@
   button {
     -webkit-tap-highlight-color: transparent;
   }
-  /* Covers everything motion does not: CSS transitions, tw-animate-css classes
-     and the smooth scroll behaviour on html. */
+  /* The site animates through CSS alone, so this is the whole reduced-motion
+     surface: transitions, keyframes and the smooth scroll behaviour on html. */
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
+    }
+    /* The header cursor blinks with a stepped keyframe; the generic clamp
+       below would run it once in 0.01ms, so it is switched off outright and
+       the block simply stays lit. */
+    .brand-cursor {
+      animation: none;
+    }
+    .status-pulse {
+      animation: none;
     }
     *,
     *::before,
@@ -247,48 +198,39 @@
       transition-duration: 0.01ms !important;
       transition-delay: 0ms !important;
     }
-    /* Motion sets opacity:0 in hidden before hydration; keep content visible. */
-    .motion-item {
-      opacity: 1 !important;
-      transform: none !important;
-    }
   }
 }
 
-@layer utilities {
+/* These are component classes, not utilities, and they belong in the
+   components layer. Tailwind appends anything a project writes in the
+   utilities layer after its own generated utilities, so a class such as
+   .content-entry used to outrank every utility of equal specificity written on
+   the same element: `lg:grid-cols-[...]` on a row and `normal-case
+   tracking-normal` on a pill both compiled and both lost. The components layer
+   sits below utilities, so a utility on the element now wins, which is what
+   every call site assumes. */
+@layer components {
   .page-shell {
     @apply relative mx-auto w-full max-w-6xl px-4 sm:px-6;
-  }
-
-  .page-shell-narrow {
-    @apply relative mx-auto w-full max-w-4xl px-4 sm:px-6;
-  }
-
-  .page-shell-reading {
-    @apply relative mx-auto w-full max-w-5xl px-4 sm:px-6;
   }
 
   .section-space {
     @apply py-12 sm:py-16 lg:py-20;
   }
 
-  .section-space-lg {
-    @apply py-14 sm:py-16 lg:py-24;
-  }
-
-  .section-divider {
-    @apply border-t border-border;
-  }
-
   .surface-panel {
     @apply rounded-2xl border border-border/60 bg-card/50;
   }
 
+  /* 0.75rem is the floor for uppercase mono that carries information: below
+     it the wide tracking and the caps stop being readable at arm's length.
+     The section level label (.eyebrow) sits one step above that floor so
+     the hierarchy against inline meta text survives the raise. */
   .eyebrow {
-    @apply font-mono text-[0.7rem] font-medium uppercase tracking-[0.18em] text-muted-foreground;
+    @apply font-mono text-[0.8125rem] font-medium uppercase tracking-[0.12em] text-muted-foreground;
   }
 
-  /* Home-only display scale - restrained, not billboard-sized. */
+  /* Display scale - restrained, not billboard-sized. */
   .display-hero {
     @apply text-4xl font-semibold tracking-tight text-balance leading-tight sm:text-5xl lg:text-6xl;
   }
@@ -309,21 +251,8 @@
     @apply text-3xl font-semibold tracking-tight leading-tight sm:text-4xl;
   }
 
-  .section-title {
-    @apply text-4xl font-semibold tracking-tight leading-tight sm:text-5xl;
-  }
-
   .section-heading {
     @apply text-2xl font-semibold leading-snug tracking-tight sm:text-3xl;
-  }
-
-  .section-label {
-    @apply mb-4 inline-flex items-center gap-2 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-muted-foreground;
-  }
-  .section-label::before {
-    content: "";
-    @apply size-1.5 shrink-0 rounded-full bg-foreground;
-    animation: pulse-dot 2s ease-in-out infinite;
   }
 
   .section-copy {
@@ -331,23 +260,7 @@
   }
 
   .meta-label {
-    @apply font-mono text-[0.65rem] font-medium uppercase tracking-[0.2em] text-muted-foreground;
-  }
-
-  .info-tile {
-    @apply relative py-5 transition-colors;
-  }
-
-  .inset-panel {
-    @apply space-y-3;
-  }
-
-  .list-divider > * + * {
-    @apply border-t border-border;
-  }
-
-  .list-row {
-    @apply relative py-5 transition-colors;
+    @apply font-mono text-[0.75rem] font-medium uppercase tracking-[0.1em] text-muted-foreground;
   }
 
   .content-stack {
@@ -358,8 +271,16 @@
     @apply relative grid grid-cols-[2.75rem_minmax(0,1fr)] gap-x-4 rounded-xl px-2 py-5 transition-colors sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:gap-x-6 sm:px-4;
   }
 
-  .content-entry:hover {
+  /* Keyboard focus has to land the same tint the pointer gets; the row is a
+     link target and :hover alone leaves tab users without a position cue.
+     The hover half is gated so a tap does not leave the tint stuck on. */
+  .content-entry:focus-within {
     @apply bg-accent/35;
+  }
+  @media (hover: hover) {
+    .content-entry:hover {
+      @apply bg-accent/35;
+    }
   }
 
   .content-index {
@@ -367,7 +288,7 @@
   }
 
   .tag-pill {
-    @apply inline-flex items-center rounded-full border border-border/70 bg-background/60 px-2.5 py-0.5 font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em] text-muted-foreground;
+    @apply inline-flex items-center rounded-full border border-border/70 bg-background/60 px-2.5 py-0.5 font-mono text-[0.75rem] font-medium uppercase tracking-[0.1em] text-muted-foreground;
   }
 
   .outcome-accent {
@@ -375,7 +296,7 @@
   }
 
   .entry-arrow {
-    @apply ml-auto size-4 shrink-0 translate-x-0 text-muted-foreground opacity-100 transition-all duration-200 sm:opacity-0 sm:group-hover:translate-x-0.5 sm:group-hover:text-primary sm:group-hover:opacity-100;
+    @apply ml-auto size-4 shrink-0 translate-x-0 text-muted-foreground opacity-100 transition-all duration-200 sm:opacity-0 sm:group-hover:translate-x-0.5 sm:group-hover:text-primary sm:group-hover:opacity-100 sm:group-focus-within:translate-x-0.5 sm:group-focus-within:text-primary sm:group-focus-within:opacity-100;
   }
 
   .metric-strip {
@@ -384,14 +305,6 @@
 
   .metric-cell {
     @apply sm:px-6 first:sm:pl-0 last:sm:pr-0;
-  }
-
-  .tech-logo-strip {
-    @apply flex flex-wrap items-center gap-2 sm:gap-3;
-  }
-
-  .tech-logo-chip {
-    @apply inline-flex size-10 items-center justify-center rounded-xl border border-border/70 bg-background/60 transition-colors hover:border-primary/30 hover:bg-accent/40;
   }
 
   .skill-category-list {
@@ -406,19 +319,71 @@
     @apply flex flex-wrap gap-2;
   }
 
-  .prose-measure {
-    max-width: 66ch;
+  /* The credential preview overlay is the platform <dialog>, so there is no
+     portal and no overlay div: showModal() puts the element in the top layer,
+     above the header and above every stacking context on the page, with no
+     z-index anywhere in this rule.
+
+     Padding is zero on purpose. The panel inside carries the inset instead, so
+     every pixel of the dialog that is not the panel is backdrop, and a click
+     there reports the dialog itself as event.target, which is what
+     credential-preview.tsx reads to close on an outside click.
+
+     632px is 600px of content plus the panel's 16px inset on both sides, so
+     the large image is served at exactly the width the sizes attribute
+     promises the browser. */
+  .credential-dialog {
+    @apply m-auto overflow-auto rounded-md border border-border bg-card p-0 text-foreground;
+    /* An explicit width, not a max-width. A dialog is width: fit-content by
+       default, and shrink-to-fit ignores the percentage width of the image
+       inside it, so the box collapsed onto the max-content of the credential
+       name underneath: 164px of panel around a 130px badge. */
+    width: min(90vw, 632px);
+    max-height: 85vh;
   }
 
-  .pull-quote {
-    @apply text-2xl font-semibold leading-snug tracking-tight text-foreground sm:text-3xl;
-    font-family: var(--font-display-stack);
+  /* Opening fades rather than snapping. A keyframe, not a transition: a closed
+     dialog is display:none, so there is no start value to transition from, and
+     the base layer's prefers-reduced-motion block already clamps every
+     animation-duration to 0.01ms. The backdrop is deliberately left out of
+     the fade, since ::backdrop is not matched by that block's * selector and
+     would keep animating when a visitor asked for no motion. */
+  .credential-dialog[open] {
+    animation: credential-dialog-in 150ms ease-out;
+  }
+
+  .credential-dialog-panel {
+    @apply p-4;
+  }
+
+  /* ::backdrop inherits from the dialog that originates it, so one rule covers
+     both themes through the tokens. The flat scrim on the first line is the
+     fallback an engine that does not resolve var() here falls back to. */
+  .credential-dialog::backdrop {
+    background-color: rgb(0 0 0 / 0.6);
+    background-color: color-mix(in oklab, var(--background) 85%, transparent);
+    backdrop-filter: blur(4px);
   }
 
   /* WCAG 2.2 SC 2.5.8 wants 24x24 CSS px minimum. 44px is the comfortable
      target and costs nothing in a single column layout. */
   .tap-target {
     @apply min-h-11 min-w-11;
+  }
+
+  /* The green block in the brand mark is a terminal cursor, so in the header
+     it blinks like one: roughly 530ms lit, 530ms dark, no fade. One flash per
+     second on a 16px block is far under the WCAG 2.3.1 three-per-second
+     threshold, and the reduced-motion block above keeps it steady. */
+  .brand-cursor {
+    animation: brand-cursor 1.06s step-end infinite;
+  }
+
+  /* The availability dot in the hero breathes rather than blinks: a status
+     light, not a cursor. One slow cycle every 1.6s, opacity only, and the
+     reduced-motion block keeps it steady. */
+  .status-pulse {
+    animation: status-pulse 1.6s ease-in-out infinite;
   }
 
   .skip-link {
@@ -431,26 +396,6 @@
     padding: 0.5rem 1rem;
   }
 
-  @keyframes pulse-dot {
-    0%,
-    100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(0.6);
-      opacity: 0.6;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .section-label::before {
-      animation: none;
-    }
-  }
-}
-
-@layer components {
   .prose-content {
     @apply space-y-5 text-base leading-[1.6] text-foreground/85 sm:text-lg;
     max-width: 66ch;
@@ -461,14 +406,21 @@
   .prose-content h3 {
     @apply mt-8 text-xl leading-snug text-foreground;
   }
+  .prose-content h4 {
+    @apply mt-6 text-lg leading-snug text-foreground;
+  }
   .prose-content a {
     @apply text-primary underline underline-offset-4;
   }
   /* rehype-autolink-headings wraps every heading in an anchor; keep those
      looking like headings, not like inline links. */
   .prose-content h2 > a,
-  .prose-content h3 > a {
+  .prose-content h3 > a,
+  .prose-content h4 > a {
     @apply text-foreground no-underline;
+  }
+  .prose-content strong {
+    @apply font-semibold text-foreground;
   }
   .prose-content ul {
     @apply list-disc space-y-2 pl-6;
@@ -476,11 +428,47 @@
   .prose-content ol {
     @apply list-decimal space-y-2 pl-6;
   }
+  .prose-content blockquote {
+    @apply border-l-2 border-border-strong pl-4 italic text-foreground/90;
+    font-family: var(--font-display-stack);
+  }
+  .prose-content hr {
+    @apply my-8 border-0 border-t border-border;
+  }
+  /* kbd draws a key cap: the boundary is the meaning, so it takes the strong
+     token. The code surfaces below are panels with their own fill, where the
+     hairline is decoration and --border is the right weight. */
+  .prose-content kbd {
+    @apply rounded border border-border-strong px-1.5 py-0.5 font-mono text-[0.8em] text-foreground;
+  }
   .prose-content pre {
     @apply overflow-x-auto rounded-[1.25rem] border border-border p-4 font-mono text-sm;
   }
   .prose-content :not(pre) > code {
     @apply rounded border border-border px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+  /* A bare table carries no minimum width and its cells break long words, so
+     it wraps down to a 375px viewport instead of pushing the page sideways.
+     Wrapped in .table-wrap it gets the comfortable minimum width and scrolls
+     inside the wrapper instead. */
+  .prose-content table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+  .prose-content th,
+  .prose-content td {
+    @apply border-b border-border px-3 py-2 align-top;
+    /* anywhere, not break-word: only anywhere lowers the cell's min-content
+       width, which is what keeps a long URL from widening the whole table. */
+    overflow-wrap: anywhere;
+  }
+  .prose-content th {
+    @apply font-mono text-[0.75rem] font-medium uppercase tracking-[0.1em] text-muted-foreground;
+  }
+  .table-wrap {
+    @apply w-full max-w-full overflow-x-auto;
+  }
+  .prose-content .table-wrap > table {
+    @apply min-w-[34rem];
   }
   /* Shiki's dual theme output (themes: { light, dark }, defaultColor: false)
      only writes the --shiki-* custom properties inline; it leaves picking a
@@ -494,5 +482,76 @@
   .dark .prose-content .shiki span {
     color: var(--shiki-dark);
     background-color: var(--shiki-dark-bg);
+  }
+}
+
+/* Deliberately unlayered: unlayered rules outrank every @layer, so these hold
+   no matter which component class or utility painted the element. Forced
+   colours repaint backgrounds and borders from the system palette, which turns
+   the ambient grid and glow into flat blocks and drops token borders into the
+   background. */
+@media (forced-colors: active) {
+  body::before,
+  body::after {
+    display: none;
+  }
+  input,
+  textarea,
+  select,
+  .surface-panel,
+  .tag-pill,
+  .skip-link,
+  .prose-content pre,
+  .prose-content blockquote,
+  .prose-content :not(pre) > code,
+  .prose-content th,
+  .prose-content td,
+  .prose-content kbd {
+    border-color: CanvasText;
+  }
+  :focus-visible {
+    outline-color: Highlight;
+  }
+  /* The row tint is the only hover and focus cue on a content entry and
+     forced colours flatten it, so restate it as a visible outline. */
+  .content-entry:focus-within {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+@media (forced-colors: active) and (hover: hover) {
+  .content-entry:hover {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+@keyframes brand-cursor {
+  0%,
+  49.99% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes credential-dialog-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
   }
 }

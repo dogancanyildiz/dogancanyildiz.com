@@ -1,28 +1,15 @@
+import { resolveUmamiTag, type UmamiTag } from "@/lib/analytics";
+
 /**
- * Self-hosted, cookieless Umami tracker.
- *
- * Both values are public by definition, they end up in the HTML source anyway,
- * but they are read here on the server instead of through NEXT_PUBLIC_* so that
- * nothing extra is inlined into the client bundle. They are supplied to the
- * image as Docker build arguments (see Dockerfile), because this layout is
- * prerendered: a runtime-only variable would render an empty tag.
- *
- * The origin used here must stay identical to UMAMI_ORIGIN in next.config.ts,
- * otherwise the CSP blocks the request.
+ * Resolves the Umami tag for the locale layout. Env is read on the server
+ * so nothing extra is inlined into the client bundle. The script itself
+ * is injected by ConsentProvider only after the visitor allows measurement.
  */
-export function UmamiScript() {
-  const scriptUrl = process.env.UMAMI_SCRIPT_URL?.trim();
-  const websiteId = process.env.UMAMI_WEBSITE_ID?.trim();
-
-  if (!scriptUrl || !websiteId) {
-    return null;
-  }
-
-  return (
-    <script
-      async
-      src={`${scriptUrl.replace(/\/+$/, "")}/script.js`}
-      data-website-id={websiteId}
-    />
-  );
+export function layoutUmamiTag(): UmamiTag | null {
+  return resolveUmamiTag({
+    scriptUrl: process.env.UMAMI_SCRIPT_URL,
+    websiteId: process.env.UMAMI_WEBSITE_ID,
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+    isProduction: process.env.NODE_ENV === "production",
+  });
 }

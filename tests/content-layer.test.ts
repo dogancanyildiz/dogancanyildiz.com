@@ -1,108 +1,510 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { routing } from "@/i18n/routing";
 import {
+  getHomeProjects,
   getPost,
-  getPostLocales,
+  getPostByKey,
+  getPostLocalesByKey,
   getPosts,
   getProject,
-  getProjectLocales,
+  getProjectByKey,
+  getProjectLocalesByKey,
   getProjectSlugs,
   getProjects,
-  getUntranslatedPaths,
+  postSlugsByKey,
+  readingMinutes,
   toPostCardData,
   toProjectCardData,
 } from "@/lib/content";
 
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/**
+ * These tests deliberately assert properties rather than the current slug
+ * list. The list version broke on every new post and had to be hand edited,
+ * which trains an author to update the expectation instead of reading the
+ * failure, and it never actually checked the behaviour the content layer is
+ * responsible for.
+ *
+ * The behaviour that content cannot demonstrate on its own (a draft, a post
+ * that exists in one locale only) is covered further down against a synthetic
+ * collection.
+ */
 describe("project content layer", () => {
-  it("returns only english projects for the en locale", () => {
+  it.each([...routing.locales])(
+    "returns only %s projects for that locale",
+    (locale) => {
+      const list = getProjects(locale);
+      expect(list.length).toBeGreaterThan(0);
+      expect(list.every((project) => project.locale === locale)).toBe(true);
+    }
+  );
+
+  it("sorts projects by order, then newest year, then title", () => {
     const list = getProjects("en");
-    expect(list.length).toBeGreaterThan(0);
-    expect(list.every((project) => project.locale === "en")).toBe(true);
+    for (let index = 1; index < list.length; index += 1) {
+      const previous = list[index - 1];
+      const current = list[index];
+      if (!previous || !current) {
+        throw new Error(`missing project around index ${index}`);
+      }
+      if (previous.order !== current.order) {
+        expect(previous.order).toBeLessThan(current.order);
+        continue;
+      }
+      if (previous.year !== current.year) {
+        expect(previous.year).toBeGreaterThan(current.year);
+        continue;
+      }
+      expect(previous.title.localeCompare(current.title, "en")).toBeLessThan(0);
+    }
   });
 
-  it("sorts projects by order ascending", () => {
-    const orders = getProjects("en").map((project) => project.order);
-    const sorted = [...orders].sort((a, b) => a - b);
-    expect(orders).toEqual(sorted);
-  });
-
-  it("finds cargo-pilot by slug", () => {
-    const project = getProject("en", "cargo-pilot");
-    expect(project?.title).toBe("Cargo Pilot");
+  it("finds every listed project by its own slug and locale", () => {
+    for (const locale of routing.locales) {
+      for (const project of getProjects(locale)) {
+        expect(getProject(locale, project.slug)?.title).toBe(project.title);
+      }
+    }
   });
 
   it("returns undefined for an unknown slug", () => {
     expect(getProject("en", "does-not-exist")).toBeUndefined();
   });
 
-  it("lists the locales a slug is translated into", () => {
-    expect(getProjectLocales("cargo-pilot")).toEqual(["en", "tr"]);
-    expect(getProjectLocales("does-not-exist")).toEqual([]);
+  it("lists no locales for a translationKey that does not exist", () => {
+    expect(getProjectLocalesByKey("does-not-exist")).toEqual([]);
   });
 
-  it("builds a locale neutral href in the card dto", () => {
-    const project = getProject("en", "cargo-pilot")!;
-    const card = toProjectCardData(project);
-    expect(card.href).toBe("/projects/cargo-pilot");
-    expect(card.title).toBe("Cargo Pilot");
-    expect(card.liveUrl).toBe("https://cargopilot.divizyon.org");
-    expect(card.repoUrl).toBeNull();
-    expect(card.cover).toBeNull();
+  it("lists exactly the locales a translationKey is actually present in", () => {
+    // Looped by translationKey, not slug: a project is free to publish under
+    // a different slug per locale, and the two Turkish renames in this
+    // content set (gpa-calculator, ticket-purchasing-system) do exactly that.
+    for (const project of getProjects("en")) {
+      const locales = getProjectLocalesByKey(project.translationKey);
+      expect(locales.length).toBeGreaterThan(0);
+      for (const locale of locales) {
+        expect(getProjectByKey(locale, project.translationKey)).toBeDefined();
+      }
+      for (const locale of routing.locales) {
+        if (locales.includes(locale)) continue;
+        expect(getProjectByKey(locale, project.translationKey)).toBeUndefined();
+      }
+    }
+  });
+
+  it("carries the slug and the outbound links in the card dto", () => {
+    for (const project of getProjects("en")) {
+      const card = toProjectCardData(project);
+      // The list builds its link from {pathname, params} so next-intl can
+      // localize it; a prebuilt href string would be a second, locale blind
+      // source for the same URL.
+      expect(card.slug).toBe(project.slug);
+      expect(card).not.toHaveProperty("href");
+      expect(card.title).toBe(project.title);
+      expect(card.liveUrl).toBe(project.links.live ?? null);
+      expect(card.repoUrl).toBe(project.links.repo ?? null);
+    }
   });
 
   it("never returns a slug that is not a valid url segment", () => {
-    for (const slug of getProjectSlugs("en")) {
-      expect(slug).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+    for (const locale of routing.locales) {
+      for (const slug of getProjectSlugs(locale)) {
+        expect(slug).toMatch(SLUG_PATTERN);
+      }
+    }
+  });
+
+  it("keeps the non prose fields of a translated project identical", () => {
+    // Only the prose differs between the two files of one project. If the
+    // Turkish file says featured: true and the English one does not, the two
+    // home pages advertise different work, and an ordering or year that drifts
+    // makes the same project look like two different ones to a reader who
+    // switches language mid visit. Nothing in the schema enforces this, so a
+    // single forgotten line in one of the two files is all it takes.
+    //
+    // cover is in the comparison for the same reason: the alt text is prose
+    // and belongs to its language, but the image itself is the same
+    // screenshot, and one locale showing a cover the other does not have is
+    // the visual version of the same drift.
+    for (const project of getProjects("en")) {
+      // Paired by translationKey, not slug: not-ortalamasi-hesaplayici and
+      // bilet-satin-alma-sistemi are the Turkish files of gpa-calculator and
+      // ticket-purchasing-system, under a different slug on purpose. Pairing
+      // by slug would silently skip exactly the two files this check exists
+      // to catch drift in.
+      const other = getProjectByKey("tr", project.translationKey);
+      if (!other) continue;
+      expect(
+        {
+          featured: other.featured,
+          order: other.order,
+          year: other.year,
+          draft: other.draft,
+          links: other.links,
+          cover: other.cover?.src ?? null,
+        },
+        project.translationKey
+      ).toEqual({
+        featured: project.featured,
+        order: project.order,
+        year: project.year,
+        draft: project.draft,
+        links: project.links,
+        cover: project.cover?.src ?? null,
+      });
+    }
+  });
+
+  it("gives every project cover an alt text in its own locale", () => {
+    // coverAlt is optional in the schema, and an empty one is the documented
+    // way to mark a decorative image. A project cover is never decorative: it
+    // is a screenshot of the work the page is about, so a missing alt text
+    // here is a screen reader being told nothing about the only picture on
+    // the page.
+    for (const locale of routing.locales) {
+      for (const project of getProjects(locale)) {
+        if (!project.cover) continue;
+        expect(
+          project.coverAlt,
+          `${locale}/${project.slug} has a cover with no coverAlt`
+        ).toBeTruthy();
+      }
+    }
+  });
+
+  it("only publishes https outbound links", () => {
+    for (const locale of routing.locales) {
+      for (const project of getProjects(locale)) {
+        for (const url of [project.links.live, project.links.repo]) {
+          if (!url) continue;
+          expect(url.startsWith("https://"), url).toBe(true);
+        }
+      }
     }
   });
 });
 
 describe("post content layer", () => {
-  it("has three turkish posts and three english posts sorted newest first", () => {
-    const trPosts = getPosts("tr");
-    expect(trPosts.map((post) => post.slug)).toEqual([
-      "self-hosting-with-coolify",
-      "capt-sinavina-hazirlik",
-      "ccna-dan-web-guvenligine",
+  it.each([...routing.locales])(
+    "returns only %s posts, newest first",
+    (locale) => {
+      const list = getPosts(locale);
+      expect(list.length).toBeGreaterThan(0);
+      expect(list.every((post) => post.locale === locale)).toBe(true);
+
+      const dates = list.map((post) => post.date);
+      expect(dates).toEqual([...dates].sort().reverse());
+    }
+  );
+
+  it("keeps the publish date of a translated post identical", () => {
+    // Two dates for one post means the two locales disagree about when it was
+    // published, in the list order, in the sitemap lastmod and in the
+    // BlogPosting datePublished.
+    for (const post of getPosts("en")) {
+      // Paired by translationKey, not slug: coolify-ile-kendi-sunucumda is
+      // the Turkish file of self-hosting-with-coolify under a different slug
+      // on purpose, and pairing by slug would silently skip it.
+      const other = getPostByKey("tr", post.translationKey);
+      if (!other) continue;
+      expect(other.date, post.translationKey).toBe(post.date);
+      expect(other.updated ?? null, post.translationKey).toBe(
+        post.updated ?? null
+      );
+    }
+  });
+
+  it("finds every listed post by its own slug and locale", () => {
+    for (const locale of routing.locales) {
+      for (const post of getPosts(locale)) {
+        expect(getPost(locale, post.slug)?.title).toBe(post.title);
+      }
+    }
+  });
+
+  it("lists no locales for a translationKey that does not exist", () => {
+    expect(getPostLocalesByKey("nothing")).toEqual([]);
+  });
+
+  it("finds a post by translationKey and locale even when the slug differs per locale", () => {
+    // self-hosting-with-coolify is the translationKey; the Turkish file
+    // publishes under coolify-ile-kendi-sunucumda, a different slug.
+    expect(getPostLocalesByKey("self-hosting-with-coolify").sort()).toEqual([
+      "en",
+      "tr",
     ]);
-
-    const enPosts = getPosts("en");
-    expect(enPosts.map((post) => post.slug)).toEqual([
-      "self-hosting-with-coolify",
-      "capt-sinavina-hazirlik",
-      "ccna-dan-web-guvenligine",
-    ]);
+    expect(getPostByKey("tr", "capt-sinavina-hazirlik")?.title).toBeTruthy();
+    expect(getPostByKey("en", "capt-sinavina-hazirlik")?.slug).toBe(
+      "capt-preparation-in-a-docker-lab"
+    );
   });
 
-  it("lists en and tr as the locales for the bilingual posts", () => {
-    expect(getPostLocales("self-hosting-with-coolify")).toEqual(["en", "tr"]);
-    expect(getPostLocales("capt-sinavina-hazirlik")).toEqual(["en", "tr"]);
-    expect(getPostLocales("ccna-dan-web-guvenligine")).toEqual(["en", "tr"]);
+  it("maps a translationKey to each locale's own slug", () => {
+    expect(postSlugsByKey("self-hosting-with-coolify")).toEqual({
+      tr: "coolify-ile-kendi-sunucumda",
+      en: "self-hosting-with-coolify",
+    });
+    // A slug that never changed is still reported for both locales.
+    expect(postSlugsByKey("capt-sinavina-hazirlik")).toEqual({
+      tr: "capt-sinavina-hazirlik",
+      en: "capt-preparation-in-a-docker-lab",
+    });
   });
 
-  it("lists no locales for a slug that does not exist", () => {
-    expect(getPostLocales("nothing")).toEqual([]);
+  it("carries the slug and a reading time of at least a minute", () => {
+    for (const post of getPosts("tr")) {
+      const card = toPostCardData(post);
+      expect(card.slug).toBe(post.slug);
+      expect(card).not.toHaveProperty("href");
+      expect(card.readingTime).toBeGreaterThanOrEqual(1);
+      expect(card.date).toBe(post.date);
+      expect(card.date).toMatch(/^\d{4}-\d{2}-\d{2}/);
+    }
   });
 
-  it("finds english translations for every published post slug", () => {
-    expect(getPost("en", "capt-sinavina-hazirlik")?.locale).toBe("en");
-    expect(getPost("en", "ccna-dan-web-guvenligine")?.locale).toBe("en");
+  it("rounds the reading time through one helper", () => {
+    // The list card and the post header both display it; two roundings are
+    // one edit away from the two disagreeing about the same post.
+    expect(readingMinutes({ metadata: { readingTime: 0.2 } })).toBe(1);
+    expect(readingMinutes({ metadata: { readingTime: 4.4 } })).toBe(4);
+    expect(readingMinutes({ metadata: { readingTime: 4.5 } })).toBe(5);
+
+    for (const post of getPosts("en")) {
+      expect(toPostCardData(post).readingTime).toBe(readingMinutes(post));
+    }
   });
 
-  it("builds a locale neutral href and reading time in the card dto", () => {
-    const post = getPost("tr", "self-hosting-with-coolify")!;
-    const card = toPostCardData(post);
-    expect(card.href).toBe("/blog/self-hosting-with-coolify");
-    expect(card.readingTime).toBeGreaterThanOrEqual(1);
-    expect(card.date.startsWith("2026-08-20")).toBe(true);
+  it("publishes no draft in the test environment", () => {
+    for (const locale of routing.locales) {
+      expect(getPosts(locale).every((post) => !post.draft)).toBe(true);
+      expect(getProjects(locale).every((project) => !project.draft)).toBe(true);
+    }
   });
 });
 
-describe("untranslated paths", () => {
-  it("has nothing untranslated for en because every project and post is bilingual", () => {
-    expect(getUntranslatedPaths("en")).toEqual([]);
+// A synthetic collection, because the real content is fully bilingual and
+// carries no draft: the draft filter and the single locale branch have no
+// real input to run against, and both are exactly the code whose failure
+// would leak an unpublished page into the sitemap or link a hreflang tag at a
+// 404.
+const FIXTURE_POST = {
+  title: "Fixture",
+  slug: "fixture",
+  translationKey: "fixture",
+  legacySlugs: [],
+  date: "2026-01-01",
+  summary: "Fixture summary.",
+  tags: [],
+  draft: false,
+  path: "blog/en/fixture.mdx",
+  code: "",
+  metadata: { readingTime: 1, wordCount: 100 },
+  locale: "en",
+};
+
+const FIXTURE_PROJECT = {
+  title: "Fixture",
+  slug: "fixture",
+  translationKey: "fixture",
+  legacySlugs: [],
+  summary: "Fixture summary.",
+  role: "Role",
+  stack: ["TypeScript"],
+  year: 2026,
+  links: {},
+  outcome: "Outcome.",
+  featured: false,
+  draft: false,
+  order: 100,
+  path: "projects/en/fixture.mdx",
+  code: "",
+  locale: "en",
+};
+
+async function contentWith(
+  fixture: {
+    posts?: Array<Record<string, unknown>>;
+    projects?: Array<Record<string, unknown>>;
+  },
+  nodeEnv: string
+) {
+  vi.resetModules();
+  vi.stubEnv("NODE_ENV", nodeEnv);
+  vi.doMock("#site/content", () => ({
+    posts: fixture.posts ?? [],
+    projects: fixture.projects ?? [],
+  }));
+  return import("@/lib/content");
+}
+
+afterEach(() => {
+  vi.doUnmock("#site/content");
+  vi.unstubAllEnvs();
+  vi.resetModules();
+});
+
+describe("draft filter", () => {
+  const posts = [
+    { ...FIXTURE_POST, slug: "published", translationKey: "published" },
+    {
+      ...FIXTURE_POST,
+      slug: "unpublished",
+      translationKey: "unpublished",
+      draft: true,
+    },
+  ];
+  const projects = [
+    { ...FIXTURE_PROJECT, slug: "published", translationKey: "published" },
+    {
+      ...FIXTURE_PROJECT,
+      slug: "unpublished",
+      translationKey: "unpublished",
+      draft: true,
+      order: 101,
+    },
+  ];
+
+  it("hides a draft post and a draft project in production", async () => {
+    const content = await contentWith({ posts, projects }, "production");
+
+    expect(content.getPostSlugs("en")).toEqual(["published"]);
+    expect(content.getPost("en", "unpublished")).toBeUndefined();
+    expect(content.getProjectSlugs("en")).toEqual(["published"]);
+    expect(content.getProject("en", "unpublished")).toBeUndefined();
   });
 
-  it("has nothing untranslated for tr because every project is bilingual", () => {
-    expect(getUntranslatedPaths("tr")).toEqual([]);
+  it("keeps drafts visible in development so they can be reviewed", async () => {
+    const content = await contentWith({ posts, projects }, "development");
+
+    expect(content.getPostSlugs("en").sort()).toEqual([
+      "published",
+      "unpublished",
+    ]);
+    expect(content.getProjectSlugs("en").sort()).toEqual([
+      "published",
+      "unpublished",
+    ]);
+  });
+
+  it("keeps a draft out of the locale list a hreflang tag is built from", async () => {
+    const content = await contentWith({ posts, projects }, "production");
+
+    expect(content.getPostLocalesByKey("unpublished")).toEqual([]);
+    expect(content.getProjectLocalesByKey("unpublished")).toEqual([]);
+  });
+});
+
+describe("content translated into one locale only", () => {
+  const posts = [
+    { ...FIXTURE_POST, slug: "en-only", translationKey: "en-only" },
+  ];
+  const projects = [
+    {
+      ...FIXTURE_PROJECT,
+      slug: "tr-only",
+      translationKey: "tr-only",
+      path: "projects/tr/tr-only.mdx",
+      locale: "tr",
+    },
+  ];
+
+  it("reports the single locale, not both", async () => {
+    const content = await contentWith({ posts, projects }, "production");
+
+    expect(content.getPostLocalesByKey("en-only")).toEqual(["en"]);
+    expect(content.getProjectLocalesByKey("tr-only")).toEqual(["tr"]);
+  });
+
+  it("does not leak the other locale into the hreflang set", async () => {
+    const content = await contentWith({ posts, projects }, "production");
+    const { buildLanguageAlternates, contentUrlsByKey } =
+      await import("@/lib/seo/alternates");
+
+    const languages = buildLanguageAlternates(
+      contentUrlsByKey("post", content.postSlugsByKey("en-only"))
+    );
+    expect(Object.keys(languages).sort()).toEqual(["en", "x-default"]);
+  });
+});
+
+// The home page used to render getProjects(locale) in full, so the "Selected
+// work" section was a copy of the projects page. The selection rule now lives
+// in the content layer instead of inside the page component, because this is
+// the part that has to keep working: a synthetic collection can show both the
+// featured branch and the fallback, which the real content (two featured
+// projects, always) cannot.
+describe("home page project selection", () => {
+  const featuredProject = {
+    ...FIXTURE_PROJECT,
+    slug: "featured",
+    featured: true,
+    order: 1,
+  };
+  const plain = (slug: string, order: number) => ({
+    ...FIXTURE_PROJECT,
+    slug,
+    order,
+  });
+
+  it("shows only the featured projects when frontmatter marks any", async () => {
+    const content = await contentWith(
+      {
+        projects: [
+          featuredProject,
+          plain("second", 2),
+          plain("third", 3),
+          plain("fourth", 4),
+        ],
+      },
+      "production"
+    );
+
+    expect(content.getHomeProjects("en").map((p) => p.slug)).toEqual([
+      "featured",
+    ]);
+  });
+
+  it("falls back to the first few by list order when nothing is featured", async () => {
+    const content = await contentWith(
+      {
+        projects: [
+          plain("first", 1),
+          plain("second", 2),
+          plain("third", 3),
+          plain("fourth", 4),
+        ],
+      },
+      "production"
+    );
+
+    expect(content.getHomeProjects("en").map((p) => p.slug)).toEqual([
+      "first",
+      "second",
+      "third",
+    ]);
+    expect(content.HOME_PROJECT_FALLBACK_COUNT).toBe(3);
+  });
+
+  it("returns nothing for an empty collection, so the page can show its empty state", async () => {
+    const content = await contentWith({ projects: [] }, "production");
+
+    expect(content.getHomeProjects("en")).toEqual([]);
+    expect(content.getHomeProjects("tr")).toEqual([]);
+  });
+
+  it("never shows a draft and never shows the whole projects page", () => {
+    for (const locale of routing.locales) {
+      const home = getHomeProjects(locale);
+      const all = getProjects(locale);
+      expect(home.length).toBeGreaterThan(0);
+      expect(home.length).toBeLessThanOrEqual(all.length);
+      for (const project of home) {
+        expect(project.draft).toBe(false);
+        expect(all.some((candidate) => candidate.slug === project.slug)).toBe(
+          true
+        );
+      }
+    }
   });
 });

@@ -57,7 +57,12 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: docker
-    directory: /
+    # Root Dockerfile only. Observability (Uptime Kuma, the central Umami on
+    # dravcore.com) is installed from Coolify's service catalog and managed in
+    # the panel (2026-08-30 decision), so there is no compose file here for
+    # Dependabot to watch; image versions are bumped in the panel.
+    directories:
+      - /
     schedule:
       interval: weekly
       day: monday

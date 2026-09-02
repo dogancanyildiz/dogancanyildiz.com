@@ -1,13 +1,17 @@
 # Faz Planları
 
-Durum: Tarihsel kayıt · Karar: 2026-08-27 · Güncelleme: 2026-08-27 · Kapsam: dogancanyildiz.com
+Durum: Tarihsel kayıt · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
 
-Bu klasör, `docs/`'taki karar dokümanlarından türetilen faz başına uygulama
-planlarını tutar (writing-plans formatı). Her `2026-08-27-faz-N-*.md` dosyası
-ilgili faz başlamadan önce yazıldı ve faz yürütülürken adım adım izlendi;
-gerçekte ne yapıldığı, sapmalar ve teslim durumu için bu dosyalar değil
-`docs/plans/handoffs/faz-N.md` (devir notu) ve `docs/00-ozet-ve-karar.md` /
-`docs/10-yol-haritasi.md`'deki "Uygulama durumu" bölümleri tek doğru kaynaktır.
+Bu klasör, `docs/`'taki karar dokümanlarından türetilen uygulama planlarını
+tutar (writing-plans formatı): faz başına bir `2026-08-27-faz-N-*.md`, artı
+faz numarasına bağlı olmayan tekil işlerin planları. Her plan işi başlamadan
+önce yazıldı ve yürütülürken adım adım izlendi; gerçekte ne yapıldığı,
+sapmalar ve teslim durumu için bu dosyalar değil `docs/plans/handoffs/`
+altındaki devir notu ve `docs/00-ozet-ve-karar.md` /
+`docs/10-yol-haritasi.md`'deki "Uygulama durumu" bölümleri tek doğru
+kaynaktır. Tek istisna 2026-09-02 planı: sahibinin kararları ve gerçekleşen
+sapmalar o dosyanın kendi başına eklendi, yani plan hem tarihsel kayıt hem
+de o işin URL matrisi referansı.
 
 ## Domain varsayımı notu (2026-08-27)
 
@@ -27,6 +31,19 @@ kararıyla yapıldı; bkz. `docs/00-ozet-ve-karar.md`, `docs/06-devops-ve-deploy
 Bir plan dosyasını okurken domain örneklerine güvenmeyin, güncel karar için
 her zaman `docs/` altındaki numaralı karar dokümanlarına bakın.
 
+**Ek not (2026-08-28):** 28 Ağustos denetimi `dogancanyildiz.sh` alan adının
+hiç kayıtlı olmadığını gösterdi (DNS'te zone yok). Faz 5 planı 90 yerde `.sh`
+hostname'i kullanıyor (`status.dogancanyildiz.sh`, `analytics.dogancanyildiz.sh`);
+uygulama `.com` ile yapıldı; 2026-08-30'da gözlemlenebilirlik Coolify servis
+kataloğuna taşındı ve `infra/` klasörü tamamen kaldırıldı (izleme Uptime Kuma,
+ölçüm merkezi Umami `umami.dravcore.com`).
+`.sh` için karar sahibinde: ya alan adı kaydedilip Cloudflare'a eklenir ve
+`docs/deploy/cloudflare-kurulum.md` bölüm "Zone: dogancanyildiz.sh" uygulanır,
+ya da `.sh` kapsam dışı ilan edilir ve README, launch-checklist, cloudflare-kurulum,
+traefik-ve-origin'deki 301 satırları kaldırılır. Karar gelene kadar `.sh -> .com`
+301'i "canlıya alınmadı, alan adı kayıtsız" olarak okunmalı (bkz.
+`docs/plans/handoffs/denetim-kapanisi-2026-08-28.md`).
+
 ## Dosyalar
 
 | Dosya | Faz | Durum |
@@ -35,8 +52,9 @@ her zaman `docs/` altındaki numaralı karar dokümanlarına bakın.
 | [2026-08-27-faz-1-deploy-hatti.md](2026-08-27-faz-1-deploy-hatti.md) | 1. Deploy hattı | Uygulandı, PR #3 merged; panel adımları sahibinde |
 | [2026-08-27-faz-2-i18n-app-lang.md](2026-08-27-faz-2-i18n-app-lang.md) | 2. i18n yeniden mimarisi | Uygulandı, PR #4 merged |
 | [2026-08-27-faz-3-tasarim-sistemi.md](2026-08-27-faz-3-tasarim-sistemi.md) | 3. Tasarım sistemi | Uygulandı, PR #5 merged |
-| [2026-08-27-faz-4-icerik-ve-yayin.md](2026-08-27-faz-4-icerik-ve-yayin.md) | 4. İçerik ve yayın | Uygulandı, PR #6 açık, merge kararı sahibinde |
-| [2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md](2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md) | 5. Altyapı vitrini ve ölçüm | Başlamadı |
+| [2026-08-27-faz-4-icerik-ve-yayin.md](2026-08-27-faz-4-icerik-ve-yayin.md) | 4. İçerik ve yayın | Uygulandı, PR #6 merged (2026-08-27) |
+| [2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md](2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md) | 5. Altyapı vitrini ve ölçüm | Kod tarafı uygulandı, PR #31 merged (2026-08-28, v0.3.1); Coolify/Cloudflare panel adımları `handoffs/faz-5-manual-checklist.md`'de sahibinde |
+| [2026-09-02-yerel-yollar-ve-ceviri-slug.md](2026-09-02-yerel-yollar-ve-ceviri-slug.md) | Faz dışı iş: yerelleştirilmiş yollar ve çeviri başına slug | Uygulandı, dal `feature/brand-assets` (2026-09-02, 10 commit, taban `7a73af6` - `3a58bee`); sahibinin kararları ve sapmalar dosyanın başındaki iki bölümde, devir notu `handoffs/yerel-yollar-2026-09-02.md` |
 
 ## İlgili dokümanlar
 

@@ -28,6 +28,20 @@ describe("dependency and code scanning", () => {
     expect(content).toMatch(/dependency-name: velite\s*$/m);
   });
 
+  it("scans the root Dockerfile and carries no stale infra compose entries", () => {
+    // Observability moved to Coolify's service catalog on 2026-08-30, so the
+    // repo has no compose file under infra/ any more. A dependabot directory
+    // pointing at a folder without a Dockerfile or compose file fails the
+    // whole update run, so this locks the docker section to the root.
+    const content = read(".github/dependabot.yml");
+    const dockerSection = content.slice(
+      content.indexOf("package-ecosystem: docker")
+    );
+    expect(dockerSection).toMatch(/directories:\s*\n\s*- \//);
+    expect(dockerSection).not.toContain("/infra/");
+    expect(existsSync(join(process.cwd(), "infra"))).toBe(false);
+  });
+
   it("runs codeql on pull requests, pushes and a weekly schedule", () => {
     const content = read(".github/workflows/codeql.yml");
     expect(content).toMatch(/pull_request:\s*\n\s*branches: \[dev, main\]/);
@@ -37,6 +51,16 @@ describe("dependency and code scanning", () => {
     expect(content).toContain("security-events: write");
     expect(content).toContain("name: CodeQL analysis");
   });
+
+  it("pins every codeql workflow action to a commit sha", () => {
+    const content = read(".github/workflows/codeql.yml");
+    const uses = [...content.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
+    expect(uses.length).toBeGreaterThan(0);
+    for (const use of uses) {
+      expect(use, use).toMatch(/@[0-9a-f]{40}$/);
+    }
+    expect(content).toMatch(/@[0-9a-f]{40} # v\d/);
+  });
 });
 
 describe("security contact", () => {
@@ -44,7 +68,7 @@ describe("security contact", () => {
     const content = read("public/.well-known/security.txt");
     expect(content).toContain("Contact: mailto:me@dogancanyildiz.com");
     expect(content).toContain(
-      "Canonical: https://dogancanyildiz.com/.well-known/security.txt"
+      "Canonical: https://www.dogancanyildiz.com/.well-known/security.txt"
     );
     const expires = content.match(/^Expires: (.+)$/m)?.[1];
     expect(expires).toBeDefined();

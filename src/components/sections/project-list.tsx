@@ -1,16 +1,22 @@
-"use client";
-
-import * as m from "motion/react-m";
-import { useReducedMotion } from "motion/react";
 import { ArrowUpRight, ExternalLink } from "lucide-react";
-import { GithubIcon } from "@/components/ui/brand-icon";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { GithubIcon } from "@/components/ui/brand-icon";
 import { Link } from "@/i18n/navigation";
-import { ContentEntryBody, ContentEntryIndex } from "@/components/ui/content-entry";
+import {
+  ContentEntryBody,
+  ContentEntryIndex,
+} from "@/components/ui/content-entry";
 import { SkillTag } from "@/components/ui/skill-tag";
 import type { ProjectCardData } from "@/lib/content";
-import { fadeUp, MOTION_ITEM_CLASS } from "@/lib/motion";
+
+/**
+ * The pill typography alone is about 19px tall. min-h-6 lifts these badge links
+ * to the 24x24 CSS px floor WCAG 2.2 SC 2.5.8 asks for without stretching them
+ * to the 44px .tap-target used for standalone controls.
+ */
+const BADGE_LINK_CLASS =
+  "tag-pill inline-flex min-h-6 items-center gap-1.5 normal-case tracking-normal transition-colors hover:border-primary/40 hover:text-primary";
 
 interface ProjectListProps {
   projects: ProjectCardData[];
@@ -18,25 +24,25 @@ interface ProjectListProps {
   headingLevel?: "h2" | "h3";
 }
 
-export function ProjectList({
+/**
+ * Server rendered on purpose: the card body pulls a simple-icons path per stack
+ * entry through SkillTag, and none of it belongs in the browser bundle. Card
+ * links opt out of prefetching, a listing page can hold a dozen of them and
+ * each one would pull a full RSC payload on scroll.
+ */
+export async function ProjectList({
   projects,
   headingLevel = "h2",
 }: ProjectListProps) {
   const Heading = headingLevel;
-  const t = useTranslations("projects");
-  const reduced = useReducedMotion() ?? false;
-  const variants = fadeUp(reduced);
+  const t = await getTranslations("projects");
 
   return (
     <ul className="content-stack">
       {projects.map((project, index) => (
-        <m.li
+        <li
           key={project.slug}
-          variants={variants}
-          initial="hidden"
-          animate="show"
-          custom={index}
-          className={`content-entry group list-row ${MOTION_ITEM_CLASS} ${
+          className={`content-entry group ${
             project.cover ? "lg:grid-cols-[3.5rem_minmax(0,1fr)_7rem]" : ""
           }`}
         >
@@ -45,22 +51,25 @@ export function ProjectList({
           <ContentEntryBody>
             <div className="flex flex-wrap items-center gap-2">
               <span className="tag-pill">{project.year}</span>
-              <span className="tag-pill max-w-full truncate">{project.role}</span>
+              <span className="tag-pill max-w-full truncate">
+                {project.role}
+              </span>
             </div>
 
             <div className="flex items-start gap-3">
               <Heading className="min-w-0 flex-1 text-lg font-semibold leading-snug tracking-tight sm:text-xl">
                 <Link
-                  href={project.href}
+                  href={{
+                    pathname: "/projects/[slug]",
+                    params: { slug: project.slug },
+                  }}
+                  prefetch={false}
                   className="after:absolute after:inset-0 text-foreground no-underline transition-colors group-hover:text-primary"
                 >
                   {project.title}
                 </Link>
               </Heading>
-              <ArrowUpRight
-                className="entry-arrow mt-1"
-                aria-hidden="true"
-              />
+              <ArrowUpRight className="entry-arrow mt-1" aria-hidden="true" />
             </div>
 
             <p className="outcome-accent">
@@ -92,7 +101,7 @@ export function ProjectList({
                     href={project.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="tag-pill inline-flex items-center gap-1.5 normal-case tracking-normal transition-colors hover:border-primary/40 hover:text-primary"
+                    className={BADGE_LINK_CLASS}
                   >
                     <ExternalLink className="size-3" aria-hidden="true" />
                     {t("viewLive")}
@@ -103,7 +112,7 @@ export function ProjectList({
                     href={project.repoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="tag-pill inline-flex items-center gap-1.5 normal-case tracking-normal transition-colors hover:border-primary/40 hover:text-primary"
+                    className={BADGE_LINK_CLASS}
                   >
                     <GithubIcon className="size-3" aria-hidden="true" />
                     {t("viewSource")}
@@ -126,7 +135,7 @@ export function ProjectList({
               />
             </div>
           ) : null}
-        </m.li>
+        </li>
       ))}
     </ul>
   );

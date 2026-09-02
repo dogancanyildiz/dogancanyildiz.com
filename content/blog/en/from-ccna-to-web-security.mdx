@@ -1,0 +1,29 @@
+---
+title: What CCNA changed about how I expose an application
+slug: from-ccna-to-web-security
+translationKey: ccna-dan-web-guvenligine
+legacySlugs:
+  - ccna-dan-web-guvenligine
+date: 2026-06-10
+summary: The most expensive example was a rate limiter keyed off the wrong header.
+tags:
+  - network
+  - security
+  - ccna
+---
+
+## What network training changed
+
+The most lasting lesson from completing the CCNA track was that a packet does not travel on its own. Knowing which interface a request leaves from, which rule lets it through and where it stops also pushed me to ask the same question at the application layer: how did this request get here, and who was allowed to reach it?
+
+## What that looks like in practice
+
+That perspective shows up most in deployment decisions. Which port a service exposes, which headers a reverse proxy forwards and where the real client address is read are choices that look independent of application code but directly define security. A rate limiter keyed off the wrong header, for example, puts every visitor in one bucket and silently disables the protection.
+
+## Why subnetting still matters
+
+Subnetting looks like a paper exercise until you need to write a rule that applies to the right address range. When I add a source address restriction, getting the range wrong by one bit makes the rule either useless or far too broad.
+
+## Seeing the boundary
+
+Knowing the network side did not make me a better security specialist by itself. What it gave me is more concrete: I can now see where the application ends and the system begins, and as a developer that boundary is what I lean on most.

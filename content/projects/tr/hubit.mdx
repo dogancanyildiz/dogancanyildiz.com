@@ -1,25 +1,27 @@
 ---
 title: Hubit
 slug: hubit
-summary: Three.js ile geliştirilen, sıradan donanımda da akıcı kalacak şekilde ayarlanmış etkileşimli web tabanlı 3B görselleştirmeler.
-role: Frontend Mühendisi ve Arayüz Tasarımcısı
+translationKey: hubit
+summary: Hubit'in web üzerindeki etkileşimli 3B katmanı. Sahneyi Three.js ile yazdım ve çevresindeki arayüzü tasarladım; her 3B kontrolün düz bir karşılığı var, kamera da yalnızca kullanıcı isteyince hareket ediyor.
+role: Frontend geliştirici ve arayüz tasarımcısı
 stack:
   - JavaScript
   - Three.js
 year: 2025
 links:
+  live: https://divizyon.github.io/t0-hubit/
   repo: https://github.com/dogancanyildiz/t0-hubit
-outcome: Render süreci, 3B sahnenin sıradan donanımda da akıcı biçimde etkileşimli kalması için optimize edildi.
-order: 4
+outcome: "Sahne orta seviye bir dizüstünde de dönüyor: kare maliyetini o donanımda ölçtüm."
+order: 5
 ---
 
 ## Ne yaptım
 
-Divizyon'da Hubit'in etkileşimli 3B katmanını Three.js ile geliştirdim ve etrafındaki arayüzü tasarladım. İş ikiye ayrıldı: sahnenin bir demo gibi değil bir kullanıcı arayüzü gibi okunmasını sağlamak ve bunu yaparken akıcı kalmasını sağlamak.
+Divizyon'da Hubit'in etkileşimli 3B katmanını Three.js ile geliştirdim ve etrafındaki arayüzü tasarladım. İş ikiye ayrıldı: sahneyi demo havasından çıkarıp bir kullanıcı arayüzü gibi okunur hale getirmek ve bu sırada akıcılığı korumak.
 
 ## Neden böyle kurgulandı
 
-Bir 3B görünüm, ancak düz bir düzenin gösteremeyeceği bir şeyi gösterdiğinde yerini hak eder. Bu kısıt tasarımı belirledi: her kontrolün düz bir karşılığı vardı ve kamera kullanıcının istemediği bir biçimde hiç hareket etmedi, çünkü kendi kendine hareket eden bir sahne insanların güvenmeyi bıraktığı bir sahnedir.
+Bir 3B görünüm, ancak düz bir düzenin gösteremeyeceği bir şeyi gösterdiğinde yerini hak eder. Bu kısıt tasarımı belirledi: her kontrolün düz bir karşılığı vardı ve kamera kullanıcının istemediği bir biçimde hiç hareket etmedi, çünkü sahne kendi kendine hareket etmeye başladığında insanlar ona güvenmeyi bırakıyor.
 
 ## Ne öğrendim
 

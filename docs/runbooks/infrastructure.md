@@ -1,68 +1,99 @@
 # Altyapı runbook'u
 
-Faz 5 ile canlıya alınan yan servisler, ortam değişkenleri ve doğrulama komutları.
+Gözlemlenebilirlik ve yan servisler. **Karar (2026-08-30):** bu servisler
+Coolify servis kataloğundan (tek tık) kurulur ve tamamen panelde yönetilir;
+depo compose veya izleyici yapılandırması taşımaz. İzleme Uptime Kuma'da,
+ziyaret ölçümü sahibinin merkezi Umami kurulumunda (`umami.dravcore.com`,
+dravcore.com sahibinin altyapı domain'idir, sunucu yine kendisinindir).
+**Karar (2026-09-02):** kanonik host www; apex edge'de (Cloudflare) www'ye 301
+ile yönlenir, bu yüzden aşağıdaki adresler `www.dogancanyildiz.com` üzerinden
+verilmiştir.
 
-## Coolify kaynakları
+## Servisler
 
-| Kaynak | Tip | Kaynak dizini | Domain |
-|---|---|---|---|
-| portfolio | Dockerfile (git tabanlı) | `/` | https://dogancanyildiz.com |
-| gatus | Docker Compose (git tabanlı) | `/infra/gatus` | https://status.dogancanyildiz.com |
-| umami | Docker Compose (git tabanlı) | `/infra/umami` | https://analytics.dogancanyildiz.com |
+| Servis | Nerede | Ne yapar |
+|---|---|---|
+| portfolio | Coolify, Dockerfile (git tabanlı) | https://www.dogancanyildiz.com |
+| Uptime Kuma | Coolify servis kataloğu, panelde yönetilir | `https://www.dogancanyildiz.com/api/health` monitörü, bildirim kanalları, public status sayfası |
+| Umami (merkezi) | `umami.dravcore.com` (ayrı Coolify kaynağı, bu repo dışında) | Bu site orada bir website kaydı; tracker script'i oradan yüklenir |
+
+Kuma'nın public status sayfası hangi domain'de yayınlanırsa `NEXT_PUBLIC_STATUS_URL`
+o adresi gösterir; Systems paneli yalnızca link verir, Kuma'nın API'sinden veri
+çekmez (dokümante değil, sürümle kırılır; `docs/05` karar kaydı).
 
 ## portfolio uygulamasının ortam değişkenleri
 
 | Değişken | Katman | Değer / kaynak |
 |---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | Build | `https://dogancanyildiz.com` |
+| `NEXT_PUBLIC_SITE_URL` | Build | `https://www.dogancanyildiz.com` |
 | `NEXT_PUBLIC_BUILD_SHA` | Build | `${SOURCE_COMMIT}` veya CI `github.sha` |
 | `NEXT_PUBLIC_BUILD_DATE` | Build | deploy zamanı (ISO) |
-| `UMAMI_SCRIPT_URL` | Build | `https://analytics.dogancanyildiz.com` |
-| `UMAMI_WEBSITE_ID` | Build | Umami panelindeki website UUID'si |
-| `GATUS_URL` | Runtime | `https://status.dogancanyildiz.com` |
-| `RESEND_API_KEY` | Runtime | Resend API anahtarı |
+| `NEXT_PUBLIC_STATUS_URL` | Build | Kuma public status sayfasının tam adresi; boşsa Systems'taki link satırı gizlenir, yalnızca https kabul edilir |
+| `UMAMI_SCRIPT_URL` | Build | `https://umami.dravcore.com` (`src/lib/analytics.ts` `UMAMI_ORIGIN` ile aynı olmak zorunda, aksi halde production build durur) |
+| `UMAMI_WEBSITE_ID` | Build | Merkezi Umami panelindeki bu siteye ait website UUID'si |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | Runtime | Mailcow submission (587); uygulama parolası, `docs/deploy/mailcow-smtp.md` |
 | `CONTACT_EMAIL` | Runtime | `me@dogancanyildiz.com` |
 | `FROM_EMAIL` | Runtime | doğrulanmış gönderici adresi |
+| `TRUST_CF_CONNECTING_IP` | Runtime | `false`; origin Cloudflare'a kilitlenince `true` |
+| `CSP_REPORT_ONLY` | Build, geçici | `1` yalnızca tek bir ölçüm deploy'u için; sıkı report-only CSP'yi yayınlar, sonra kaldırılır |
 
-`GATUS_URL` asla Build Variable olarak işaretlenmez; sunucu tarafında okunur ve client bundle'a girmez.
+Posta değişkenlerinden biri eksikse container açılışta JSON hata satırı basar ve
+`/api/health` `"status":"degraded"` döner (HTTP 200). Tracker script'i consent
+onayından sonra enjekte edilir ve `data-domains="www.dogancanyildiz.com"` taşır:
+aynı merkezi Umami'ye ekli diğer siteler veya preview kopyaları bu website
+kaydına veri yazamaz.
 
 ## Sızıntı kuralı
 
-`src/lib/status.ts` yalnızca `name`, `up`, `uptime24h`, `lastCheck` alanlarını döndürür. Bu listeye alan eklemek bir güvenlik kararıdır; hostname, port, IP, iç servis adresi ve Gatus URL'i hiçbir koşulda client'a gitmez. Değişiklik önerilirse `docs/09-guvenlik.md` bölüm 3'teki tablo checklist olarak kullanılır.
+Systems paneli ve public status sayfası hiçbir zaman iç hostname, konteyner
+adı, özel IP veya iç port göstermez. Panel yalnızca build sabitlerini basar;
+Kuma status sayfasında yalnızca genel URL'lere giden monitörler yayınlanır.
+Bir alan eklemek güvenlik kararıdır, `docs/09-guvenlik.md` bölüm 3'teki tablo
+checklist olarak kullanılır.
 
 ## Doğrulama komutları
 
 ```bash
-# Gatus canlı ve iki endpoint izliyor
-curl -s https://status.dogancanyildiz.com/api/v1/endpoints/statuses | jq -r '.results[].key' | sort
+# Health canlı ve gövde doğru
+curl -s https://www.dogancanyildiz.com/api/health
 
-# Umami canlı
-curl -s -o /dev/null -w '%{http_code}\n' https://analytics.dogancanyildiz.com/api/heartbeat
-curl -s -o /dev/null -w '%{http_code}\n' https://analytics.dogancanyildiz.com/script.js
+# Systems panelindeki status linki ve Umami origin'i
+curl -s https://www.dogancanyildiz.com/ | grep -o 'href="https://[^"]*"' | grep -i status
+curl -sI https://www.dogancanyildiz.com/ | tr -d '\r' | grep -i '^content-security-policy:' | grep -c 'umami.dravcore.com'
 
-# CSP Umami origin'ini içeriyor
-curl -sI https://dogancanyildiz.com/ | tr -d '\r' | grep -i '^content-security-policy:'
+# Ana sayfada topoloji sızıntısı yok
+curl -s https://www.dogancanyildiz.com/ | grep -Eic ':8080|:3001|iç-servis|127\.0\.0\.1'
 
-# Ana sayfada topology sızıntısı yok
-curl -s https://dogancanyildiz.com/ | grep -Eic 'status\.dogancanyildiz|:8080|public_site|GATUS_URL'
-
-# Gatus config'te alerting yok
-grep -c alerting infra/gatus/config/gatus.yaml || echo 0
+# Consent onayı sonrası tracker (tarayıcıda): script src umami.dravcore.com/script.js,
+# data-domains="www.dogancanyildiz.com"
 ```
 
-Beklenen: Gatus anahtarları `public_site` ve `public_umami`; Umami curl'ları `200`; CSP satırında `analytics.dogancanyildiz.com` hem `script-src` hem `connect-src` içinde; grep `0`; alerting sayacı `0`.
+Beklenen: health gövdesi `{"status":"ok","checks":{"content":true,"mail":true},...}`;
+status linki `NEXT_PUBLIC_STATUS_URL` değerini gösteriyor; CSP sayacı `1`;
+topoloji grep'i `0`.
 
 ## Bakım ritmi
 
-- **Dependabot**: `npm`, `github-actions` ve `docker` ecosystem'leri `dev` dalına PR açar. Patch ve minor'ları CI yeşil geçtikten sonra merge et; `next` major ve `velite` ignore kurallarına dokunma.
-- **CodeQL**: PR, push ve haftalık schedule üzerinde çalışır (`codeql.yml`).
-- **Next.js güvenlik yayınları**: `vercel/next.js` Releases ve GitHub Dependabot security alerts açık tutulur.
-- **Gatus / Umami volume'ları**: Coolify backup veya sunucu snapshot ritmine ekle; sqlite (`gatus-data`) ve Postgres (`umami-db-data`) veri kaybına karşı korunmalı.
+- **Uptime Kuma ve Umami güncellemeleri**: Coolify panelinden, bilinçli olarak
+  (repo veya Dependabot takip etmez; imaj sürümü panelde sabit tutulur).
+- **Dependabot**: `npm` ve `github-actions` ecosystem'leri `dev` dalına PR açar;
+  docker yalnızca kök Dockerfile'ı izler.
+- **CodeQL**: PR, push ve haftalık schedule (`codeql.yml`).
+- **Kuma verisi**: Coolify backup veya sunucu snapshot ritmine ekle.
+- **Harici prob**: Kuma izlediği sunucuda çalıştığı için sunucu tümden düşerse
+  uyarı gönderemez; kontrol dışı bir yerden ikinci bir prob (ör. UptimeRobot,
+  `https://www.dogancanyildiz.com/api/health`) bu körlüğü kapatır.
 
 ## İçerik kadansı ve Astro yeniden değerlendirmesi
 
-Blog için aylık bir yazı ritmi hedefleniyor. İlk üç ayın sonunda `docs/00-ozet-ve-karar.md` tripwire'ındaki Astro yeniden değerlendirme sorusu tekrar okunur: içerik üretim maliyeti, build süresi ve bakım yükü bu tarihte not edilir.
+Blog için aylık bir yazı ritmi hedefleniyor. İlk üç ayın sonunda
+`docs/00-ozet-ve-karar.md` tripwire'ındaki Astro yeniden değerlendirme sorusu
+tekrar okunur: içerik üretim maliyeti, build süresi ve bakım yükü not edilir.
 
 ## Widget davranışı
 
-Ana sayfadaki Systems bölümü yalnızca `public_site` endpoint'ini gösterir. `GATUS_URL` boş veya Gatus erişilemez olduğunda sayfa 200 döner ve nötr "Status unavailable" / "Durum bilgisi şu an alınamıyor" metni görünür.
+Ana sayfadaki Systems bölümü üçüncü taraf veri çekmez: son yayın tarihi
+(`timeZoneName: "short"` ile), commit SHA'sı, stack satırı ve
+`NEXT_PUBLIC_STATUS_URL` doluysa public status sayfasına bir link gösterir.
+Build değişkenleri boşsa ilgili alanlar nötr "veri yok" satırına düşer; sayfa
+tamamen statiktir, revalidate yoktur.

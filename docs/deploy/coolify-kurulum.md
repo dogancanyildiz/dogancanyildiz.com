@@ -22,8 +22,10 @@ Hedef Coolify sürümü: v4.3.1. Bu adımlar Coolify panelinde el ile yürütül
 
 **Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; tarihsel kurulum tersini tarif ediyordu.
 
-- [ ] Domains: `https://dogancanyildiz.com`
-- [ ] "Redirect" ayarı (www -> non-www): Coolify'ın dahili www yönlendirmesi **kullanılmaz**. `www.dogancanyildiz.com -> dogancanyildiz.com` apex yönlendirmesi de dahil olmak üzere tüm domain yönlendirmesi Cloudflare Redirect Rules'ta tek yerden tanımlanır, bkz. `docs/deploy/cloudflare-kurulum.md`.
+**Karar (2026-09-02):** kanonik host www. Apex, edge'de (Cloudflare) `www.dogancanyildiz.com`'a 301 ile yönlendiği için origin'e normalde hiç düşmez; yine de Coolify uygulamasına iki domain de tanımlanır, apex yedek olarak kalır (Cloudflare önünde bir kesinti veya yanlış yapılandırma durumunda origin apex isteğini de yanıtlayabilsin diye).
+
+- [ ] Domains: `https://www.dogancanyildiz.com` ve `https://dogancanyildiz.com` (Traefik ikisi için de sertifika üretir ve router tanımlar).
+- [ ] "Redirect" ayarı (www -> non-www): Coolify'ın dahili www yönlendirmesi **kullanılmaz**. `dogancanyildiz.com -> www.dogancanyildiz.com` yönlendirmesi dahil tüm domain yönlendirmesi Cloudflare Redirect Rules'ta tek yerden tanımlanır, bkz. `docs/deploy/cloudflare-kurulum.md`.
 
 ## 4. Env değişkenleri
 
@@ -31,22 +33,24 @@ Coolify'da her değişkenin yanındaki "Build Variable?" kutusu, o değişkenin 
 
 | Değişken | Build Variable? | Değer | Gerekçe |
 |---|---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | **Evet** | `https://dogancanyildiz.com` | `next build` bunu client bundle'a inline ediyor ve Dockerfile'daki `ARG NEXT_PUBLIC_SITE_URL` varsayılansız (commit `fc470e0`). Build Variable işaretlenmezse build sessizce `undefined` bırakmaz, `resolveSiteUrl` hatasıyla Coolify build logunda durur (`/robots.txt` prerender adımı). |
-| `RESEND_API_KEY` | Hayır (Runtime) | Resend panelinden alınan `re_...` anahtarı | Sır. Build variable image katmanlarına ve build loglarına sızabilir. |
+| `NEXT_PUBLIC_SITE_URL` | **Evet** | `https://www.dogancanyildiz.com` | `next build` bunu client bundle'a inline ediyor ve Dockerfile'daki `ARG NEXT_PUBLIC_SITE_URL` varsayılansız (commit `fc470e0`). Build Variable işaretlenmezse build sessizce `undefined` bırakmaz, `resolveSiteUrl` hatasıyla Coolify build logunda durur (`/robots.txt` prerender adımı). |
+| `SMTP_HOST` + `SMTP_PORT` + `SMTP_USER` + `SMTP_PASSWORD` | Hayır (Runtime) | Mailcow submission bilgileri, uygulama parolası (`docs/deploy/mailcow-smtp.md`) | Sır. Build variable image katmanlarına ve build loglarına sızabilir. |
 | `CONTACT_EMAIL` | Hayır (Runtime) | `me@dogancanyildiz.com` | Yalnızca sunucu tarafındaki contact route okuyor. |
-| `FROM_EMAIL` | Hayır (Runtime) | `contact@dogancanyildiz.com` | Aynı gerekçe. Resend'de doğrulanmış domain olmalı, bkz. `docs/deploy/resend-domain.md`. |
+| `FROM_EMAIL` | Hayır (Runtime) | `contact@dogancanyildiz.com` | Aynı gerekçe. Mailcow'da tanımlı, DKIM imzalı adres olmalı, bkz. `docs/deploy/mailcow-smtp.md`. |
 | `TRUST_CF_CONNECTING_IP` | Hayır (Runtime) | Task 9 tamamlanana kadar `false`, sonra `true` | Faz 0'ın `trustsCloudflareHeaders()` kapısı. Traefik `forwardedHeaders.trustedIPs` set edilmeden ve origin yalnızca Cloudflare adreslerine kısıtlanmadan `true` yapılırsa rate limit anahtarı istemcinin uydurduğu başlıktan türer ve limit tamamen atlanabilir. Bkz. `docs/deploy/traefik-ve-origin.md` bölüm 2 ve 5. |
-| `GATUS_URL` | Hayır (Runtime) | Faz 5'te doldurulur | İç adres, client'a hiçbir koşulda gitmez. |
 
-- [ ] Doğrulama: deploy sonrası Coolify build logunda `re_` ile başlayan hiçbir string yok.
-- [ ] Doğrulama: canlı sayfanın HTML kaynağında `https://dogancanyildiz.com` geçiyor (`NEXT_PUBLIC_SITE_URL` gerçekten gömülmüş).
+- [ ] Doğrulama: deploy sonrası Coolify build logunda `SMTP_PASSWORD` değeri geçmiyor (Runtime sırlar build'e hiç girmemeli, Build Variable işaretli tek değerler `NEXT_PUBLIC_*` ve `UMAMI_*`).
+- [ ] Doğrulama: canlı sayfanın HTML kaynağında `https://www.dogancanyildiz.com` geçiyor (`NEXT_PUBLIC_SITE_URL` gerçekten gömülmüş).
 - [ ] Doğrulama: `TRUST_CF_CONNECTING_IP` yalnızca Task 9 bittikten sonra `true` yapıldı; PR preview ortamlarında `false` kalıyor (preview'lar Cloudflare'ın arkasında değil).
+- [ ] Build değişkenleri `NEXT_PUBLIC_BUILD_SHA` (Coolify `SOURCE_COMMIT`) ve `NEXT_PUBLIC_BUILD_DATE` (deploy zamanı, ISO) set; boşsa Systems paneli "son yayın" alanını gizler ve footer yıl basmaz. Faz 5 değişkenleri (`NEXT_PUBLIC_STATUS_URL`, `UMAMI_SCRIPT_URL` ve `UMAMI_WEBSITE_ID`, üçü de Build) `docs/runbooks/infrastructure.md`'de. `CSP_REPORT_ONLY=1` yalnızca tek bir ölçüm deploy'u için Build değişkeni olarak eklenir ve sonra kaldırılır.
+- [ ] Doğrulama: container açılış logunda `SMTP_*`, `CONTACT_EMAIL`, `FROM_EMAIL` için hata satırı yok ve `curl -s https://www.dogancanyildiz.com/api/health` gövdesinde `"status":"ok"` (eksik mail değişkeni `"degraded"` üretir, HTTP yine 200).
 
 ## 5. Auto deploy ve Preview Deployments
 
 - [ ] Advanced -> "Auto Deploy" açık. `main`'e push, GitHub App webhook'u üzerinden yeniden deploy tetikler.
 - [ ] Advanced -> "Preview Deployments" açık.
 - [ ] Preview URL şablonu: `http://{{pr_id}}.preview.dogancanyildiz.com`
+  - **Preview için ayrı `NEXT_PUBLIC_SITE_URL` (karar, 2026-08-28):** `/api/contact` `Origin` başlığını `NEXT_PUBLIC_SITE_URL` ile birebir karşılaştırır (F-042); production değerini taşıyan bir preview'da form 403 alır. Coolify'da preview deployment'lar için Build değişkeni preview host'una (`http://<pr>.preview.dogancanyildiz.com`) çevrilir; canonical/hreflang/sitemap/RSS de preview'a çözülür, bu beklenen davranıştır (faz-2 ve faz-4 checklist'lerindeki çelişki bu kararla kapandı).
   - Şema bilerek `http`. Cloudflare ücretsiz planı wildcard DNS kaydını proxy'leyemiyor, dolayısıyla `*.preview` kaydı gri bulut kalıyor; gri bulutta Let's Encrypt HTTP-01 doğrulaması origin'e doğrudan ulaşmak zorunda kalır ve origin yalnızca Cloudflare IP'lerine açık olduğu için başarısız olur. Preview'lar TLS'siz ve yalnızca allowlist'teki admin IP'sinden erişilebilir kalır, bkz. `docs/deploy/traefik-ve-origin.md`.
 - [ ] Doğrulama: test PR'ı açıldığında Coolify PR'a preview URL'i içeren bir yorum bırakıyor.
 
@@ -75,10 +79,10 @@ Beklenen:
 
 ```
 healthy
-200 {"status":"ok","uptime":<saniye>,"timestamp":"2026-..."}
+200 {"status":"ok","checks":{"content":true,"mail":true},"timestamp":"2026-..."}
 ```
 
-Sözleşme yalnızca HTTP `200` ve gövdedeki `status` alanının `ok` olmasıdır. `uptime` ve `timestamp` her çağrıda değişir (`src/app/api/health/route.ts`), gövdenin birebir eşleşmesi beklenmez; Coolify health check'i de yalnızca status koduna bakar.
+Sözleşme yalnızca HTTP `200` ve gövdedeki `status` alanının `ok` olmasıdır. `timestamp` her çağrıda değişir, `checks.mail` posta değişkenleri (SMTP_*, CONTACT_EMAIL, FROM_EMAIL) eksikse `false` olur ve `status` `degraded`e düşer (HTTP yine 200; `src/app/api/health/route.ts`, 2026-08-28), gövdenin birebir eşleşmesi beklenmez; Coolify health check'i yalnızca status koduna bakar, Uptime Kuma keyword monitörü gövdedeki `"status":"ok"` metniyle `degraded` durumunu alarm olarak görür.
 
 `unhealthy` görülürse rolling update yeni deploy'ları geri alır. O durumda Coolify UI'da health check geçici olarak kapatılır, sorun `#7500` referansıyla not edilir ve production'a health check bağlı halde geçilmez.
 
@@ -99,4 +103,4 @@ Dördü birden sağlanmalı:
 
 ## 9. GitHub branch protection
 
-- [ ] GitHub -> Settings -> Branches -> `main` için "Require status checks to pass": `lint, typecheck, test, build` ve `hadolint and image build` işaretlenir. Bu iki check `.github/workflows/ci.yml` içindeki `checks` ve `docker` job'larının görünen adlarıdır.
+- [ ] GitHub -> Settings -> Branches -> `main` için "Require status checks to pass": `Quality checks`, `Docker image` ve `CodeQL analysis` işaretlenir (adlar 2026-08-28'de böyle; `.github/workflows/ci.yml` ve `codeql.yml` job adları). `enforce_admins` da açılmalı, aksi halde bir admin CI'ı bypass edip doğrudan push edebilir.

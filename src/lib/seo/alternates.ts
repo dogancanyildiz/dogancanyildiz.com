@@ -1,31 +1,107 @@
 import type { Metadata } from "next";
+import { contentHref, pathnameForLocale } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
-import type { Locale } from "@/lib/content";
+import type { ContentKind, Locale } from "@/lib/content";
 import { siteConfig } from "@/lib/site-config";
-import {
-  OG_IMAGE_CONTENT_TYPE,
-  OG_IMAGE_PATH,
-  OG_IMAGE_SIZE,
-} from "@/lib/seo/og-image";
+import { OG_IMAGE_CONTENT_TYPE, OG_IMAGE_SIZE } from "@/lib/seo/og-image";
 
 // Phase 0's env layer is the single site-url gate. Re-exported here so SEO
 // callers read it from one module.
 export { siteUrl };
 
 /**
- * Locale prefixed pathname. The default locale (en) stays on the root because
- * routing uses localePrefix "as-needed".
+ * Leading locale segment of an already public path. The lookahead keeps a slug
+ * that merely starts with those letters (`/entrypoint`, `/trace-logs`) intact.
+ */
+const LEADING_LOCALE = new RegExp(`^/(?:${routing.locales.join("|")})(?=/|$)`);
+
+/**
+ * Public pathname for one locale. Goes through next-intl getPathname so a
+ * localized slug (`/hakkimda`) and a locale prefix (`/en/about`) cannot
+ * drift from the routing config. Unknown paths (OG images, a concrete
+ * `/blog/slug`) still get the as-needed prefix.
+ *
+ * A leading locale segment is stripped before the lookup. Callers hand over
+ * internal pathnames, but some of them start from a path that is already
+ * public (a language switcher target, a pathname read off the request), and
+ * that used to come back doubled: localePath("en", "/en") returned "/en/en",
+ * and localePath("tr", "/tr") returned "/tr", which is not the Turkish
+ * canonical but a URL the proxy 308s away from.
  */
 export function localePath(locale: Locale, path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  const trimmed = normalized === "/" ? "" : normalized.replace(/\/+$/, "");
-  const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
-  return `${prefix}${trimmed}` || "/";
+  const trimmed = normalized === "/" ? "/" : normalized.replace(/\/+$/, "");
+  const unprefixed = trimmed.replace(LEADING_LOCALE, "") || "/";
+  return pathnameForLocale(locale, unprefixed);
 }
 
 export function absoluteUrl(locale: Locale, path: string): string {
   return `${siteUrl()}${localePath(locale, path)}`;
+}
+
+/**
+ * Absolute url of one content detail page, in one locale.
+ *
+ * Goes through contentHref rather than absoluteUrl/localePath: those two only
+ * localize a `pathnames` key or a fixed path, and a concrete content path
+ * (`/blog/some-slug`) is neither. contentHref is the one function that turns
+ * a kind and a slug into the right localized template match.
+ */
+export function contentUrl(
+  locale: Locale,
+  kind: ContentKind,
+  slug: string
+): string {
+  return `${siteUrl()}${contentHref(locale, kind, slug)}`;
+}
+
+/**
+ * Dial-per-locale absolute urls for one content key, given that key's
+ * per-locale slugs. A locale absent from `slugs` (no translation) is absent
+ * here too, which is what keeps an untranslated content entry out of both
+ * the sitemap's alternates and the page's own hreflang set: the two read
+ * this same function so they can never advertise a different language set
+ * for the same content.
+ */
+export function contentUrlsByKey(
+  kind: ContentKind,
+  slugs: Partial<Record<Locale, string>>
+): Partial<Record<Locale, string>> {
+  const urls: Partial<Record<Locale, string>> = {};
+  for (const locale of routing.locales) {
+    const slug = slugs[locale];
+    if (slug) urls[locale] = contentUrl(locale, kind, slug);
+  }
+  return urls;
+}
+
+/**
+ * Absolute url of one static (non content) page, for every routed locale.
+ * The static-page counterpart of contentUrlsByKey: this one path is
+ * available in every locale by construction, so there is no partial map to
+ * build.
+ */
+export function staticLanguageUrls(path: string): Record<Locale, string> {
+  const urls = {} as Record<Locale, string>;
+  for (const locale of routing.locales) {
+    urls[locale] = absoluteUrl(locale, path);
+  }
+  return urls;
+}
+
+/**
+ * Title of one locale's rss feed, for the channel element and for the
+ * `<link rel="alternate">` that offers it.
+ *
+ * The two feeds carry the same author, so the bare name left a subscriber with
+ * two identical entries. That matters more than usual here: the unprefixed
+ * /feed.xml used to be the English feed and is now the Turkish one, and a
+ * reader shows this title rather than the URL. `sectionTitle` is the localized
+ * blog title, which is what makes the two read differently.
+ */
+export function feedTitle(sectionTitle: string): string {
+  return `${siteConfig.person.name} · ${sectionTitle}`;
 }
 
 /**
@@ -46,7 +122,8 @@ const OG_LOCALES = { en: "en_US", tr: "tr_TR" } as const;
  */
 export function buildOpenGraph(
   locale: Locale,
-  path: string,
+  /** This page's own absolute url and the absolute url of the card it publishes. */
+  target: { url: string; imageUrl: string },
   content: {
     title: string;
     description: string;
@@ -54,24 +131,41 @@ export function buildOpenGraph(
     imageAlt: string;
     type?: "website" | "article";
     publishedTime?: string;
+    modifiedTime?: string;
+    authors?: string[];
+    tags?: string[];
   }
 ): NonNullable<Metadata["openGraph"]> {
+  // article:author, article:modified_time and article:tag only mean anything
+  // on an article, and Next emits whatever it is handed, so an article-only
+  // field on a website object would produce a meta tag no consumer reads.
+  const isArticle = content.type === "article";
+
   return {
     type: content.type ?? "website",
     siteName: content.siteName,
     title: content.title,
     description: content.description,
-    url: absoluteUrl(locale, path),
+    url: target.url,
     locale: OG_LOCALES[locale],
     alternateLocale: routing.locales
       .filter((candidate) => candidate !== locale)
       .map((candidate) => OG_LOCALES[candidate]),
-    ...(content.publishedTime ? { publishedTime: content.publishedTime } : {}),
+    ...(isArticle && content.publishedTime
+      ? { publishedTime: content.publishedTime }
+      : {}),
+    ...(isArticle && content.modifiedTime
+      ? { modifiedTime: content.modifiedTime }
+      : {}),
+    ...(isArticle && content.authors?.length
+      ? { authors: content.authors }
+      : {}),
+    ...(isArticle && content.tags?.length ? { tags: content.tags } : {}),
     // Named explicitly because the openGraph object replaces the inherited
     // one, image included. See src/lib/seo/og-image.ts.
     images: [
       {
-        url: absoluteUrl(locale, OG_IMAGE_PATH),
+        url: target.imageUrl,
         type: OG_IMAGE_CONTENT_TYPE,
         width: OG_IMAGE_SIZE.width,
         height: OG_IMAGE_SIZE.height,
@@ -82,33 +176,57 @@ export function buildOpenGraph(
 }
 
 /**
+ * hreflang map from a per-locale url map: every locale that actually has a
+ * url, plus x-default.
+ *
+ * A locale absent from `urlsByLocale` is left out completely, which is the
+ * part that matters: advertising a hreflang link to a page that 404s is worse
+ * than advertising none. x-default prefers the default locale (Turkish), then
+ * falls back to whichever locale is available.
+ *
+ * Takes urls rather than one path plus a locale list, because a path is no
+ * longer enough to reconstruct the other locale's url: a Turkish detail page
+ * and its English translation can each have their own slug, so the caller
+ * has to hand over the two already-resolved urls (contentUrlsByKey /
+ * staticLanguageUrls) rather than one path this function would have to
+ * guess a second locale's shape from.
+ *
+ * Shared with src/app/sitemap.ts, which has to publish the same set: the
+ * sitemap and the page head disagreeing about which languages exist is a
+ * conflict a crawler resolves by trusting neither.
+ */
+export function buildLanguageAlternates(
+  urlsByLocale: Partial<Record<Locale, string>>
+): Record<string, string> {
+  const languages: Record<string, string> = { ...urlsByLocale };
+  const fallback =
+    urlsByLocale[routing.defaultLocale] ?? Object.values(urlsByLocale)[0];
+  if (fallback) languages["x-default"] = fallback;
+  return languages;
+}
+
+/**
  * canonical + hreflang set for one page. Every locale points at itself as well
  * (self referencing tag), otherwise Google discards the whole cluster.
- * Locales without translated content are left out completely. x-default
- * prefers english, then falls back to whichever locale is available, then to
- * the current locale.
+ * Locales without translated content are left out completely (they are
+ * simply absent from `urlsByLocale`). x-default prefers the default locale,
+ * then falls back to whichever locale is available.
  */
 export function buildAlternates(
   currentLocale: Locale,
-  path: string,
-  availableLocales: Locale[]
+  /** This page's own absolute url, already resolved by the caller. */
+  canonical: string,
+  urlsByLocale: Partial<Record<Locale, string>>,
+  /** Localized feed title; the bare name when a caller has no translator. */
+  rssTitle: string = siteConfig.person.name
 ): {
   canonical: string;
   languages: Record<string, string>;
   types: { "application/rss+xml": { url: string; title: string }[] };
 } {
-  const languages: Record<string, string> = {};
-  for (const locale of availableLocales) {
-    languages[locale] = absoluteUrl(locale, path);
-  }
-  const fallbackLocale: Locale = availableLocales.includes("en")
-    ? "en"
-    : (availableLocales[0] ?? currentLocale);
-  languages["x-default"] = absoluteUrl(fallbackLocale, path);
-
   return {
-    canonical: absoluteUrl(currentLocale, path),
-    languages,
+    canonical,
+    languages: buildLanguageAlternates(urlsByLocale),
     // Next replaces a child segment's alternates wholesale, so a types entry
     // declared only on the layout never reaches pages that set their own
     // alternates. Returning it here means every page that calls
@@ -118,7 +236,7 @@ export function buildAlternates(
       "application/rss+xml": [
         {
           url: absoluteUrl(currentLocale, "/feed.xml"),
-          title: siteConfig.person.name,
+          title: rssTitle,
         },
       ],
     },

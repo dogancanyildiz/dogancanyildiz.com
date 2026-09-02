@@ -1,26 +1,29 @@
 # dogancanyildiz.com
 
-Personal portfolio of Doğan Can Yıldız, a full stack web developer and DevOps
-engineer. The site is a Next.js App Router application that is self hosted on a
-Coolify managed server behind Traefik and Cloudflare, without Vercel.
+Doğan Can YILDIZ'ın kişisel portfolyosu: tam yığın web geliştiricisi ve DevOps
+uzmanı. Site, Next.js App Router uygulaması; Vercel olmadan, Coolify yönetimli
+bir sunucuda Traefik ve Cloudflare arkasında self-host ediliyor.
 
-## Stack
+## Yığın
 
-| Layer     | Choice                                                              |
-| --------- | ------------------------------------------------------------------- |
-| Framework | Next.js 16.3.3, App Router, `output: 'standalone'`                  |
-| UI        | React 19.2, Tailwind CSS 4, shadcn/ui, motion 13                    |
-| Email     | Resend, through `/api/contact`                                      |
-| Runtime   | Node 24, single container                                           |
-| Hosting   | Docker image built by Coolify, Traefik in front, Cloudflare proxied |
+| Katman     | Seçim                                                            |
+| ---------- | ---------------------------------------------------------------- |
+| Çatı       | Next.js 16.3.3, App Router, `output: 'standalone'`               |
+| Arayüz     | React 19.2, Tailwind CSS 4, shadcn/ui, JS animasyon katmanı yok  |
+| E-posta    | Kendi Mailcow sunucum, SMTP ile `/api/contact` üzerinden         |
+| Çalışma    | Node 24, tek konteyner                                           |
+| Barındırma | Coolify'ın ürettiği Docker imajı, önde Traefik, Cloudflare proxy |
 
-## Requirements
+## Gereksinimler
 
-- Node 24 (`.nvmrc` pins it, `nvm use` picks it up)
-- npm 11.16.0, the lockfile is committed and must be regenerated with the same
-  major version
+- Node 24 (`.nvmrc` sabitler, `nvm use` alır)
+- npm 11.16.0; kilit dosyası commit'li, aynı major ile yeniden üretilmeli
+- `AGENTS.md` ve `CLAUDE.md` bilinçli olarak gitignore'da: `next dev` her
+  açılışta yeniden yazar. Taze bir klon bunları ilk `npm run dev` ile geri
+  alır; o ana kadar proje yönergeleri `docs/` altındadır (başlangıç:
+  `docs/00-ozet-ve-karar.md`).
 
-## Local setup
+## Yerel kurulum
 
 ```bash
 nvm use
@@ -29,215 +32,280 @@ cp .env.example .env.local
 npm run dev
 ```
 
-`NEXT_PUBLIC_SITE_URL` has no fallback. `npm run build` throws when it is
-missing, because a silent fallback would put a wrong host into `robots.txt` and
-`sitemap.xml`.
+`NEXT_PUBLIC_SITE_URL`'in yedek değeri yok. Yoksa `npm run build` patlar;
+sessiz bir yedek `robots.txt` ve `sitemap.xml`'e yanlış host yazardı.
 
-## Scripts
+## Betikler
 
-| Script                  | What it does                                                                                                           |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`           | Development server on http://localhost:3000, velite runs alongside it in watch mode                                    |
-| `npm run build`         | Production build, writes `.next/standalone`                                                                            |
-| `npm run build:content` | Runs velite once in strict mode, validates every content file against its schema                                       |
-| `npm run start`         | Serves the production build                                                                                            |
-| `npm run lint`          | ESLint with the Next.js config                                                                                         |
-| `npm run typecheck`     | `tsc --noEmit`                                                                                                         |
-| `npm test`              | vitest, node environment, `src/**/*.test.ts` and `tests/**/*.test.ts`                                                  |
-| `npm run format`        | Prettier in check mode                                                                                                 |
-| `npm run format:write`  | Prettier in write mode                                                                                                 |
-| `npm run verify:routes` | Reads `.next/prerender-manifest.json` after a build: every content route prerendered in both locales, `/api/*` dynamic |
-| `npm run verify:links`  | HEAD/GET audit of project live demo URLs and certificate verify links (requires `npm run build:content` first)         |
-| `npm run release:check` | Dry run of `scripts/release-version.mjs`: prints the version the next merge to `main` would cut, writes nothing        |
-| `npm run vendor:fonts`  | Copies the woff2 and woff font files from the @fontsource packages into src/fonts and public/fonts/og                  |
+| Betik                   | Ne yapar                                                                                                                                                                                  |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`           | http://localhost:3000 geliştirme sunucusu, velite yanında izleme kipinde çalışır                                                                                                          |
+| `npm run build`         | Üretim derlemesi, `.next/standalone` yazar                                                                                                                                                |
+| `npm run build:content` | Velite'i sıkı kipte bir kez çalıştırır, her içerik dosyasını şemasına karşı doğrular                                                                                                      |
+| `npm run build:app`     | Yalnızca `next build`; velite çıktısı taze olan ağaç için (CI bunu `build:content`'ten sonra kullanır)                                                                                    |
+| `npm run start`         | Üretim derlemesini sunar                                                                                                                                                                  |
+| `npm run lint`          | Next.js yapılandırmasıyla ESLint, tip-duyarlı kurallar açık, uyarı sıfır                                                                                                                  |
+| `npm run typecheck`     | `tsc --noEmit`                                                                                                                                                                            |
+| `npm test`              | vitest: `*.test.ts` için node, `*.test.tsx` için jsdom + Testing Library; CI `--coverage` ekler                                                                                           |
+| `npm run format`        | Prettier kontrol kipi                                                                                                                                                                     |
+| `npm run format:write`  | Prettier yazma kipi                                                                                                                                                                       |
+| `npm run verify:routes` | Derlemeden sonra `.next/prerender-manifest.json`: her içerik rotası iki dilde prerender, `/api/*` dynamic                                                                                 |
+| `npm run verify:links`  | Proje canlı demo URL'leri ve sertifika doğrulama linklerinin HEAD/GET denetimi (`npm run build:content` önce); merge kapısı değil, `.github/workflows/links.yml` haftalık ve isteğe bağlı |
+| `npm run verify:docs`   | `docs/` ve deploy checklist'leri üzerinde yapısal kontroller (`scripts/verify-docs.mjs`), CI'da çalışır                                                                                   |
+| `npm run release:check` | `scripts/release-version.mjs` kuru koşu: `main`'e bir sonraki merge'in keseceği sürümü basar, hiçbir şey yazmaz                                                                           |
+| `npm run vendor:fonts`  | @fontsource paketlerindeki woff2 ve woff dosyalarını `src/fonts` ve `public/fonts/og`'ye kopyalar                                                                                         |
 
-## Environment variables
+## Ortam değişkenleri
 
-Every variable is documented in `.env.example`. The split between Coolify build
-and runtime variables is not cosmetic. Marking the build variable as runtime
-only fails the build outright, and marking a secret as a build variable leaks it
-into image layers and build logs.
+Her değişken `.env.example`'da belgelidir. Coolify'da build ile runtime
+ayrımı kozmetik değil. Build değişkenini yalnızca runtime işaretlemek
+derlemeyi doğrudan düşürür; bir sırrı build değişkeni yapmak imaj
+katmanlarına ve derleme loglarına sızdırır.
 
-| Variable                 | Coolify layer | Required          | Notes                                                                                                                                                                                                                    |
-| ------------------------ | ------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_SITE_URL`   | Build         | Yes               | Inlined into the client bundle by `next build`. The Dockerfile `ARG` has no default, so a build without this argument fails in `resolveSiteUrl` while prerendering `/robots.txt` instead of shipping an undefined value. |
-| `RESEND_API_KEY`         | Runtime       | Yes in production | Build variables can leak into image layers and build logs.                                                                                                                                                               |
-| `CONTACT_EMAIL`          | Runtime       | Yes in production | Inbox that receives form messages.                                                                                                                                                                                       |
-| `FROM_EMAIL`             | Runtime       | Yes in production | Must live on a domain verified in Resend.                                                                                                                                                                                |
-| `TRUST_CF_CONNECTING_IP` | Runtime       | No                | Set to `true` only after the origin is reachable from Cloudflare alone and Traefik trusts the Cloudflare ranges. `trustedIPs` by itself does not protect `CF-Connecting-IP`.                                             |
+| Değişken                                    | Coolify katmanı | Zorunlu       | Not                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------- | --------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`                      | Build           | Evet          | `next build` client bundle'a gömer. Dockerfile `ARG`'ının varsayılanı yok; bu argümansız derleme `/robots.txt` prerender'ında `resolveSiteUrl`'de düşer, tanımsız bir değer göndermez.                                                                                                                |
+| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` | Runtime         | Üretimde evet | Mailcow submission (587, STARTTLS zorunlu; 465 implicit TLS). Uygulama parolası kullanılır; Build işaretlenirse imaj katmanına sızar. `SMTP_PORT` opsiyonel, varsayılan 587.                                                                                                                          |
+| `CONTACT_EMAIL`                             | Runtime         | Üretimde evet | Form mesajlarının gittiği kutu.                                                                                                                                                                                                                                                                       |
+| `FROM_EMAIL`                                | Runtime         | Üretimde evet | Mailcow'da tanımlı, DKIM imzalı gönderici adres.                                                                                                                                                                                                                                                      |
+| `TRUST_CF_CONNECTING_IP`                    | Runtime         | Hayır         | Yalnızca origin yalnızca Cloudflare'dan erişilebilir ve Traefik Cloudflare aralıklarına güvendikten sonra `true`. `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.                                                                                                                              |
+| `NEXT_PUBLIC_BUILD_SHA`                     | Build           | Hayır         | Systems panelindeki commit SHA; Coolify `SOURCE_COMMIT` veya CI `github.sha`. Boşsa alan gizlenir.                                                                                                                                                                                                    |
+| `NEXT_PUBLIC_BUILD_DATE`                    | Build           | Hayır         | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa ikisi de gizlenir.                                                                                                                                                                                                                        |
+| `NEXT_PUBLIC_STATUS_URL`                    | Build           | Hayır         | Systems panelinin link verdiği public status sayfası (Uptime Kuma). Yalnızca https kabul edilir; boşsa satır gizlenir.                                                                                                                                                                                |
+| `UMAMI_SCRIPT_URL`                          | Build           | Hayır         | Merkezi self-host Umami origin'i (`https://umami.dravcore.com`). CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                                                                                                                                      |
+| `UMAMI_WEBSITE_ID`                          | Build           | Hayır         | Umami website UUID. Tag yalnızca iki Umami değeri de setken üretilir ve script'i ConsentProvider ancak ziyaretçi onay verdikten sonra enjekte eder (PR #35); onay yoksa hiçbir şey yüklenmez. Basılır. Tercih `/privacy`'deki kontrolden geri alınabilir (2026-09-02); geri alınca script kaldırılır. |
+| `CSP_REPORT_ONLY`                           | Build           | Hayır         | Tek bir ölçüm deploy'u için `1`: sıkı report-only CSP'yi yayınlar, `/api/csp-report` bütçesini yükseltir. Pencere bitince kaldır.                                                                                                                                                                     |
 
-## Internationalization
+## Uluslararasılaştırma
 
-- English is served from the root (`/`, `/about`), Turkish from `/tr` (`/tr`, `/tr/about`).
-- Locale routing lives in `src/i18n/routing.ts`; `src/proxy.ts` applies it. Automatic
-  Accept-Language redirects and the locale cookie are disabled: the URL is the only signal.
-- Messages live in `messages/en.json` and `messages/tr.json`. Both files must carry the
-  exact same key set.
-- Every page and layout under `src/app/[lang]/` must call `setRequestLocale(lang)`. A page
-  that forgets it silently drops out of static rendering; `npm run verify:routes` catches it.
-- Route Handlers do not receive the `[lang]` param. `/api/contact` reads `locale` from the
-  request body instead.
+- Türkçe kökte ve Türkçe (`/`, `/hakkimda`, `/iletisim`, `/projeler`,
+  `/projeler/<slug>`, `/yazilar`, `/yazilar/<slug>`), İngilizce `/en` altında
+  (`/en`, `/en/about`, `/en/contact`, `/en/projects/<slug>`, `/en/blog/<slug>`).
+  Bölüm ve detay yolları `src/i18n/routing.ts`'teki `pathnames` haritasında
+  dil başına ayrı şablon: her çeviri kendi dilindeki slug'ı taşır
+  (`translationKey` eşler, `slug` değil).
+- Dil yönlendirmesi `src/i18n/routing.ts`; `src/proxy.ts` uygular. Accept-Language
+  otomatik yönlendirmesi ve locale cookie kapalı: tek sinyal URL.
+- Eski prefix'siz adreslerin hedefi slug'ın dilinden gelir: bölüm yolları ve
+  İngilizce slug'lı detaylar (`/about`, `/projects`, `/contact`, `/privacy`,
+  `/blog`, `/blog/self-hosting-with-coolify`, `/projects/<slug>`) `/en/...`'e
+  308; Türkçe slug'lı detaylar (`/blog/capt-sinavina-hazirlik`,
+  `/blog/ccna-dan-web-guvenligine`) `/yazilar/<aynı-slug>`'a 308. Slug'ı
+  değişen `/projeler/<eski-slug>` adresleri yeni TR slug'a, `/en` prefix'li
+  eski slug'lar yeni EN slug'a gider. Fazla `/tr/...` adresleri prefix'siz
+  Türkçe kanoniğe gider. Tam tablo: `src/i18n/legacy-paths.ts`, gerekçe:
+  `docs/04-i18n.md`.
+- Mesajlar `messages/en.json` ve `messages/tr.json`. İki dosya aynı anahtar
+  kümesini taşımak zorunda.
+- `src/app/[lang]/` altındaki her sayfa ve layout `setRequestLocale(lang)`
+  çağırmalı. Unutan sayfa sessizce statik üretimden düşer;
+  `npm run verify:routes` yakalar.
+- Route Handler `[lang]` parametresi almaz. `/api/contact` locale'i formun
+  gönderdiği `X-Locale` başlığından, sonra `Referer` yolundan (`/en/...`
+  İngilizce, geri kalanı Türkçe), sonra `Accept-Language`'den (q ağırlıklı)
+  okur; rate limiter'dan önce, böylece her hata gövdesi çevrilmiş gelir.
 
-## Security posture
+## Güvenlik duruşu
 
-- Security headers and a Content Security Policy are set in `next.config.ts`
-  through `headers()`. HSTS is deliberately absent from the app, Traefik owns it
-  so there is a single source of truth.
-- `poweredByHeader` is off.
-- `images.remotePatterns` is intentionally undefined. Leaving it undefined keeps
-  `next/image` on local files only and closes the AVIF decoding surface that the
-  August 2026 Next.js advisory describes. Adding a remote host reopens it and
-  needs a deliberate review.
-- `/api/contact` checks `Content-Length`, rate limits per visitor IP, validates
-  the body server side including the honeypot field, and returns a generic error
-  on every failure. Details go to the server log only.
-- Dependency and code scanning: Dependabot (`.github/dependabot.yml`, weekly
-  grouped PRs against `dev`, security updates on demand) and CodeQL
-  (`.github/workflows/codeql.yml`, javascript-typescript, on every PR and
-  weekly). Both report to the repository Security tab.
-- Found a vulnerability? See [SECURITY.md](./SECURITY.md) or
-  `/.well-known/security.txt` on the live site.
+- Güvenlik başlıkları ve Content Security Policy `next.config.ts` içinde
+  `headers()` ile set: `X-Content-Type-Options`, `Referrer-Policy`, geniş
+  `Permissions-Policy`, `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy`
+  ve `Cross-Origin-Resource-Policy: same-origin`, üretimde
+  `Strict-Transport-Security` (`max-age=31536000; includeSubDomains`, preload
+  yok). HSTS Traefik middleware canlı olunca oraya taşınır, uygulama satırı
+  o zaman kalkar ki tek katman göndersin.
+  `tests/deploy/security-headers.test.ts` kümeyi kilitler.
+- Zorunlu CSP `script-src 'unsafe-inline'` tutar çünkü App Router RSC
+  payload'ını inline script ile stream eder; nonce her rotayı dinamik
+  üretime iter. İhlaller `/api/csp-report`'a gider; sıkı report-only politika
+  derleme zamanında `CSP_REPORT_ONLY=1` ile ölçüm penceresi için yayınlanabilir.
+- `/cv/*` `X-Robots-Tag: noindex, nofollow` ve bir günlük cache ile sunulur,
+  `/fonts/*` bir günlük cache (`immutable` yok, dosya adları hash'li değil).
+- `poweredByHeader` kapalı.
+- `images.remotePatterns` bilinçli olarak tanımsız. Tanımsız bırakmak
+  `next/image`'i yalnızca yerel dosyada tutar ve Ağustos 2026 Next.js
+  uyarısındaki AVIF çözümleme yüzeyini kapatır. Uzak bir host eklemek bunu
+  yeniden açar, ayrı bir inceleme ister.
+- `/api/contact` `Content-Type: application/json` ister (aksi 415) ve
+  `Origin`'in `NEXT_PUBLIC_SITE_URL` ile eşit olmasını ister (aksi 403, preview
+  host kendi değerine ihtiyaç duyar); ziyaretçi IP'sine göre rate limit, paylaşılan
+  "unknown" anahtarı için ayrı daha gevşek kova, gövdeyi `Content-Length` ve
+  stream sırasında sınırlar (413), honeypot ve ad/e-postadaki CR/LF dahil her
+  alanı sunucu tarafında doğrular; `X-Request-Id`, `X-RateLimit-Limit`,
+  `X-RateLimit-Remaining` ve 429'da `Retry-After` döner. Hatalar çevrilir;
+  400 gövdesi bozulan alanı adlandırır. SMTP gönderimi 10 saniye zaman aşımı
+  (504) ve `Reply-To` taşır; SMTP tarafında tekilleştirme penceresi olmadığından
+  kaybedilen yarış sonrası tekrar deneme ikinci kopya üretebilir (alıcı sahibin
+  kendi kutusu, kabul edildi). Loglar satır başına bir JSON
+  nesnesi, mesaj gövdesi ve ziyaretçi adresi asla içlerinde yok.
+- `/api/health` `{ status: "ok" | "degraded", checks: { content, mail }, timestamp }`
+  döner, HTTP her iki durumda da 200; bir mail değişkeni eksikse `status`
+  `degraded` olur, Uptime Kuma keyword monitörü buna alarm verir. `src/instrumentation.ts`
+  o durumda açılışta yüksek sesli bir hata satırı da basar.
+- Bağımlılık ve kod taraması: Dependabot (`.github/dependabot.yml`, haftalık
+  gruplu PR'lar `dev`'e, güvenlik güncellemeleri isteğe bağlı) ve CodeQL
+  (`.github/workflows/codeql.yml`, javascript-typescript, her PR ve haftalık).
+  İkisi de depo Security sekmesine raporlar.
+- Açık mı buldun? [SECURITY.md](./SECURITY.md) veya canlı sitedeki
+  `/.well-known/security.txt`.
 
-## Deployment
+## Dağıtım
 
-The application is deployed by Coolify from this git repository:
+Uygulamayı Coolify bu git deposundan yayınlar:
 
-1. Coolify is connected through the GitHub App and uses the Dockerfile build
-   pack. Pushing to `main` triggers a build and a deploy, pull requests get a
-   preview deployment.
-2. The image runs `node server.js` from `.next/standalone` as a non root user.
-3. The container health check points at `/api/health`.
-4. Traefik terminates TLS, adds HSTS and compression, and trusts the Cloudflare
-   ranges through `forwardedHeaders.trustedIPs`.
-5. Cloudflare runs in proxied mode with SSL set to Full (strict). The redirect
-   from `dogancanyildiz.sh` to `dogancanyildiz.com` is a single hop Cloudflare
-   Redirect Rule that keeps the path.
+1. Coolify GitHub App ile bağlıdır, Dockerfile build pack kullanır. `main`'e
+   push derleme ve yayın tetikler, pull request'ler preview alır.
+2. İmaj `.next/standalone` içinden `node server.js`'i root olmayan kullanıcıyla çalıştırır.
+3. Konteyner sağlık kontrolü `/api/health`.
+4. Traefik TLS sonlandırır, HSTS ve sıkıştırma ekler, Cloudflare aralıklarına
+   `forwardedHeaders.trustedIPs` ile güvenir.
+5. Cloudflare proxied kipte, SSL Full (strict). Kanonik host www (karar
+   2026-09-02): `dogancanyildiz.sh` → `www.dogancanyildiz.com` yönlendirmesi
+   yolu koruyan tek atlamalı Cloudflare Redirect Rule olarak planlı; `.sh`
+   henüz kayıtlı değil, kural canlı değil (`docs/plans/README.md`). Apex
+   (`dogancanyildiz.com`) da ayrı bir Redirect Rule ile aynı www adresine
+   yönlenir.
 
-The `Dockerfile`, `.dockerignore` and the GitHub Actions gate live in this
-repository, see the Deploy section below for the local verification commands and
-for the panel side checklists.
+`Dockerfile`, `.dockerignore` ve GitHub Actions kapısı bu depoda. CI
+bağımlılık incelemesi, lint, typecheck, coverage'lı test, `verify:docs`,
+derleme, `verify:routes`, prettier ve üretim `audit` çalıştırır; sonra
+Dockerfile'ı lint eder, önbellekli Buildx ile imajı üretir ve konteynerin
+dışından `/api/health`'i bir kez yoklar. Her action commit SHA'sına
+pin'li, `release.yml` o CI koşusu başarılı olana kadar bekler. GitHub
+Actions imaj basmaz; Coolify sunucuda üretir.
 
-## Repository layout
+### Yerel doğrulama
 
-```
-src/app        App Router routes, api handlers, metadata routes
-src/components UI, layout and section components
-src/lib        Framework free helpers, each one unit tested
-docs           Architecture decisions and the phased roadmap
-docs/plans     Executable implementation plans, one per phase
-```
-
-## Documentation
-
-Architecture decisions live in `docs/`. Start with
-`docs/00-ozet-ve-karar.md` for the summary and `docs/10-yol-haritasi.md` for the
-phase order.
-
-## Branching and releases
-
-```
-feature/*  --PR-->  dev  --PR-->  main  --push-->  release workflow
-```
-
-- `feature/*` branches off `dev`. `dev` is the integration branch, `main` is
-  the released state and only moves through a pull request from `dev`.
-- `.github/workflows/ci.yml` runs on pull requests to and pushes on both `dev`
-  and `main`. Its two jobs, `Quality checks` and `Docker image`, plus the
-  `CodeQL analysis` job from `codeql.yml`, are the required checks in branch
-  protection, so their names must not change.
-- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
-  They are the only input the version comes from.
-
-Every merge into `main` runs `.github/workflows/release.yml`, which:
-
-1. derives the next version from the commits since the last `v*` tag,
-2. pushes an annotated tag and publishes a GitHub Release with grouped notes,
-3. opens a `chore(release): sync version vX.Y.Z` pull request against `dev`
-   that carries `package.json`, `package-lock.json` and `CHANGELOG.md` forward.
-
-| Commit type                                           | Version bump |
-| ----------------------------------------------------- | ------------ |
-| `feat`                                                | minor        |
-| `fix`, `perf`, `refactor`                             | patch        |
-| `!:` in the subject or `BREAKING CHANGE:` in the body | major        |
-| `chore`, `docs`, `ci`, `test`, `style`, `build`       | none         |
-
-A batch that only carries release neutral commits finishes without a tag.
-`npm run release:check` prints the decision locally without writing anything.
-
-The project is pre release at `0.x`. `1.0.0` is cut by hand, by running the
-release workflow through `workflow_dispatch` with `version: 1.0.0`; after that
-the table above governs on its own. `CHANGELOG.md` follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and is written by the
-release workflow. The full flow, including the branch protection settings and
-the Coolify staging option, is in `docs/06-devops-ve-deploy.md`.
-
-## Deploy
-
-Production runs on a self hosted Coolify instance behind Cloudflare and
-Traefik. The image is built on the server from the Dockerfile in this repo,
-GitHub Actions only gates pull requests and does not push any image.
-
-Local verification of the production image:
+Üretim imajının yerel doğrulaması:
 
 ```bash
 docker compose up --build -d
-curl -s http://127.0.0.1:3000/api/health   # {"status":"ok", ...}
+curl -s http://127.0.0.1:3000/api/health   # {"status":"ok","checks":{"content":true,"mail":false},...}
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3000/   # 200
 docker compose down
 ```
 
-Lint the Dockerfile the same way CI does:
+SMTP ve posta değişkenleri yoksa `mail` yerelde `false`; compose dosyası yalnızca
+`NEXT_PUBLIC_SITE_URL` ister.
+
+Dockerfile'ı CI ile aynı şekilde lint et:
 
 ```bash
 docker run --rm -i hadolint/hadolint:v2.15.1-alpine hadolint --failure-threshold warning - < Dockerfile
 ```
 
-The parts that live in a control panel rather than in this repo are written
-down as step by step checklists:
+### Panel checklist'leri
 
-- `docs/deploy/coolify-kurulum.md` - GitHub App, build pack, env layers, health check
-- `docs/deploy/cloudflare-kurulum.md` - DNS, TLS, redirect, cache, rate limiting
-- `docs/deploy/traefik-ve-origin.md` - trusted proxy headers, HSTS, origin lockdown
-- `docs/deploy/resend-domain.md` - SPF, DKIM, DMARC for the sender domain
+Kontrol panelinde, bu depoda olmayan adımlar adım adım checklist:
 
-## Adding content
+- `docs/deploy/coolify-kurulum.md`: GitHub App, build pack, env katmanları, sağlık kontrolü
+- `docs/deploy/cloudflare-kurulum.md`: DNS, TLS, yönlendirme, cache, rate limiting
+- `docs/deploy/traefik-ve-origin.md`: güvenilir proxy başlıkları, HSTS, origin kilidi
+- `docs/deploy/mailcow-smtp.md`: Mailcow SMTP kutusu, uygulama parolası, env ve uçtan uca test
+- `docs/runbooks/infrastructure.md`: Uptime Kuma, merkezi Umami ve ortam değişkenleri
 
-Projects and blog posts are MDX files under `content/`, compiled by Velite at
-build time and dev time against the schemas in `velite.config.ts`.
+## Depo düzeni
 
-- Project: `content/projects/<locale>/<slug>.mdx`. Required front matter:
-  `title`, `slug`, `summary`, `role`, `stack` (a non empty list), `year`,
-  `outcome`. `links.live`, `links.repo`, `cover`, `featured` and `order` are
-  optional. List `stack` in learning order when it is a web stack (HTML, CSS,
-  JavaScript, TypeScript, framework) or pipeline order for DevOps (Git, CI,
-  containers, OS, routing).
-- Blog post: `content/blog/<locale>/<slug>.mdx`. Required front matter:
-  `title`, `slug`, `date`, `summary`. `tags`, `cover` and `draft` are
-  optional.
-- `<locale>` is derived from the folder name and can only be `en` or `tr`,
-  there is no `locale` field to set by hand.
-- The same piece of content must use the SAME `slug` value in both locale
-  folders, the hreflang pair between the English and Turkish page is built
-  from that match. If a piece of content has not been translated yet, do not
-  create a placeholder file for the other locale: an untranslated slug never
-  appears in that locale's routes, sitemap or hreflang alternates, there is
-  no fallback page.
-- A cover image is optional. Place it under `content/images/` and reference
-  it with a relative path from the frontmatter, for example
-  `cover: ../../images/<slug>-cover.png`. Content with no `cover` field is
-  published without a cover, it does not fall back to a CSS gradient or a
-  stock image.
-- Front matter values are YAML: a value containing `": "` (a colon followed
-  by a space), such as a title with a subtitle, must be wrapped in quotes or
-  the parser misreads it as a nested key.
+```
+src/app        App Router rotaları, api handler'ları, metadata rotaları
+src/components UI, yerleşim ve bölüm bileşenleri
+src/lib        Çatıdan bağımsız yardımcılar, her biri birim testli
+docs           Mimari kararlar ve fazlı yol haritası
+docs/plans     Faz başına yürütülebilir uygulama planları
+```
 
-`npm run dev` runs Velite in watch mode alongside the Next.js dev server, so
-content changes are picked up without a restart. `npm run build:content`
-runs Velite once in strict mode and is the fastest way to check that new
-front matter matches the schema before running the full build.
+## Belgelendirme
 
-## License
+Mimari kararlar `docs/` altında. Özet için `docs/00-ozet-ve-karar.md`,
+faz sırası için `docs/10-yol-haritasi.md`.
 
-The code is MIT licensed. The written content, the CV, the images and the
-personal branding are not, see [LICENSE](./LICENSE) for the exact split.
+## Dallama ve sürümler
+
+```
+feature/*  --PR-->  dev  --PR-->  main  --push-->  release workflow
+```
+
+- `feature/*` `dev`'den açılır. `dev` entegrasyon dalı, `main` yayınlanmış
+  durumdur ve yalnızca `dev`'den pull request ile ilerler.
+- `.github/workflows/ci.yml` hem `dev` hem `main` üzerindeki PR ve
+  push'larda çalışır. İki işi (`Quality checks` ve `Docker image`) ile
+  `codeql.yml`'deki `CodeQL analysis`, branch protection'daki zorunlu
+  kontrollerdir; adları değişmemeli.
+- Commit mesajları [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+  izler. Sürüm yalnızca bundan türetilir.
+
+`main`'e her merge `.github/workflows/release.yml` çalıştırır:
+
+1. son `v*` etiketinden beri commit'lerden sonraki sürümü türetir,
+2. açıklamalı etiket basar ve gruplanmış notlarla GitHub Release yayınlar,
+3. `package.json`, `package-lock.json` ve `CHANGELOG.md`'yi taşıyan
+   `chore(release): sync version vX.Y.Z` pull request'ini `dev`'e açar.
+
+| Commit tipi                                     | Sürüm artışı |
+| ----------------------------------------------- | ------------ |
+| `feat`                                          | minor        |
+| `fix`, `perf`, `refactor`                       | patch        |
+| konuda `!:` veya gövdede `BREAKING CHANGE:`     | major        |
+| `chore`, `docs`, `ci`, `test`, `style`, `build` | yok          |
+
+Yalnızca sürüm-nötr commit taşıyan bir batch etiketsiz biter.
+`npm run release:check` kararı yerelde basar, hiçbir şey yazmaz.
+
+Proje `0.x` ön sürümünde. `1.0.0` elle kesilir: `workflow_dispatch` ile
+`version: 1.0.0`; ondan sonra yukarıdaki tablo kendi başına işler.
+`CHANGELOG.md` [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+izler, release workflow yazar. Branch protection ayarları ve Coolify
+staging seçeneği dahil tam akış `docs/06-devops-ve-deploy.md`'de.
+
+## İçerik ekleme
+
+Projeler ve blog yazıları `content/` altında MDX; Velite derleme ve
+geliştirme zamanında `velite.config.ts` şemalarına karşı derler.
+
+- Proje: `content/projects/<locale>/<slug>.mdx`. Zorunlu ön madde:
+  `title`, `slug`, `translationKey`, `summary`, `role`, `stack` (boş olmayan
+  liste), `year`, `outcome`. `links.live`, `links.repo` (ikisi de `https://`),
+  `cover`, `coverAlt`, `featured`, `order`, `updated`, `draft` ve
+  `legacySlugs` isteğe bağlı; `updated` sitemap `lastmod`'unu besler, ana
+  sayfa `featured` projeleri gösterir yoksa ilk üçüne düşer. `stack`'i web
+  yığınındaysa öğrenme sırasıyla (HTML, CSS, JavaScript, TypeScript, çatı)
+  veya DevOps'ta boru hattı sırasıyla (Git, CI, konteyner, OS, yönlendirme)
+  yaz.
+- Blog yazısı: `content/blog/<locale>/<slug>.mdx`. Zorunlu ön madde:
+  `title`, `slug`, `translationKey`, `date`, `summary`. `tags`, `cover`,
+  `coverAlt`, `updated`, `draft` ve `legacySlugs` isteğe bağlı; `updated`
+  BlogPosting şemasında `dateModified` ve sitemap `lastmod` olur.
+- `<locale>` klasör adından türetilir, yalnızca `en` veya `tr`; elde
+  `locale` alanı yok.
+- İki dil dosyası AYNI `translationKey` değerini taşımalı; dil değiştirici,
+  sitemap, hreflang, feed ve JSON-LD çeviri eşlemesini bundan kurar, `slug`
+  değil. `slug` her dilde **farklı olabilir ve olmalıdır** (marka adı taşıyan
+  projeler istisna: iki dilde aynı slug kalır, çünkü isim zaten değişmez).
+  Çeviri yoksa diğer dil için yer tutucu dosya açma: çevrilmemiş
+  `translationKey` o dilin rotalarına, sitemap'ine veya hreflang
+  alternatiflerine hiç girmez, yedek sayfa yok.
+- `slug` ve `translationKey` deseni ASCII: `^[a-z0-9]+(?:-[a-z0-9]+)*$`
+  (`velite.config.ts`, `SLUG_PATTERN`). Türkçe'ye özgü `ı`, `ş`, `ğ`, `ç`,
+  `ö`, `ü` reddedilir; ASCII karşılığını yaz (`"yayında"` değil
+  `"yayinda"`), aksi halde `npm run build:content` düşer.
+- Bir dosyanın bu dilde daha önce başka bir slug'la yayınlandığı biliniyorsa
+  o eski slug'ı `legacySlugs` dizisine ekle ve `src/i18n/legacy-paths.ts`'e
+  eski adresten yeni kanoniğe 308 satırı yaz; `tests/i18n/legacy-paths.test.ts`
+  ikisinin tutarlılığını kilitler.
+- Kapak görseli isteğe bağlı. `content/images/` altına koy, ön maddeden
+  göreli yol ver, örneğin `cover: ../../images/<slug>-cover.png`. `cover`
+  alanı olmayan içerik kapaksız yayınlanır; CSS gradyanı veya stok görsele
+  düşmez.
+- Ön madde değerleri YAML: `": "` (iki nokta + boşluk) içeren bir değer,
+  örneğin alt başlıklı bir başlık, tırnak içinde olmalı yoksa ayrıştırıcı
+  iç içe anahtar sanır.
+
+`npm run dev` Velite'i Next.js geliştirme sunucusu yanında izleme kipinde
+çalıştırır, içerik değişiklikleri yeniden başlatmadan alınır.
+`npm run build:content` Velite'i sıkı kipte bir kez çalıştırır; yeni ön
+maddenin şemaya uyduğunu tam derlemeden önce kontrol etmenin en hızlı yolu.
+
+## Lisans
+
+Kod MIT. Yazılı içerik, CV, görseller ve kişisel marka değil; tam ayrım
+için [LICENSE](./LICENSE).

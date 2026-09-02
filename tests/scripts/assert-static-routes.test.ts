@@ -2,6 +2,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import * as prettier from "prettier";
 import { describe, expect, it } from "vitest";
+import { pathnames, routing } from "@/i18n/routing";
+// The script exports its route derivation and only runs the check when node
+// invokes it directly, so importing it here does not read a build manifest.
+import {
+  LOCALE_PAGES,
+  readLocales,
+  requiredRoutes,
+} from "../../scripts/assert-static-routes.mjs";
 
 const scriptPath = join(process.cwd(), "scripts/assert-static-routes.mjs");
 const script = () => readFileSync(scriptPath, "utf8");
@@ -25,8 +33,16 @@ describe("scripts/assert-static-routes.mjs", () => {
     expect(content).toContain("readFile");
   });
 
-  it("requires both locales for every top level content route", () => {
-    const content = script();
+  it("reads its locale list out of the routing config", async () => {
+    // The list used to be hand written here, so adding a locale to
+    // routing.ts left this check verifying half the site while still
+    // reporting a pass.
+    expect(await readLocales()).toEqual([...routing.locales]);
+  });
+
+  it("requires every locale for every top level content route", async () => {
+    const required = requiredRoutes(await readLocales());
+
     for (const route of [
       "/en",
       "/tr",
@@ -38,11 +54,74 @@ describe("scripts/assert-static-routes.mjs", () => {
       "/tr/blog",
       "/en/contact",
       "/tr/contact",
+      "/en/privacy",
+      "/tr/privacy",
+      "/en/coming-soon",
+      "/tr/coming-soon",
+      "/en/updating",
+      "/tr/updating",
       "/en/feed.xml",
       "/tr/feed.xml",
     ]) {
-      expect(content).toContain(`"${route}"`);
+      expect(required).toContain(route);
     }
+  });
+
+  it("grows the required list with the locale list", () => {
+    expect(requiredRoutes(["en", "tr", "de"])).toContain("/de/about");
+    expect(requiredRoutes(["en"])).not.toContain("/tr/about");
+  });
+
+  it("requires the root level static metadata routes", () => {
+    const required = requiredRoutes(["en"]);
+    for (const route of [
+      "/robots.txt",
+      "/sitemap.xml",
+      "/favicon.ico",
+      "/icon.png",
+      "/apple-icon.png",
+    ]) {
+      expect(required).toContain(route);
+    }
+    // The extensionless names were the generated next/og routes. They are
+    // gone, and a stale entry here would pass silently while nothing checked
+    // the files that replaced them.
+    for (const route of ["/icon", "/apple-icon"]) {
+      expect(required).not.toContain(route);
+    }
+  });
+
+  it("covers every public page of the routing config", async () => {
+    // A page added to routing.ts and forgotten here would never be checked
+    // for being prerendered in both locales.
+    const dynamic = [
+      "/projects/[slug]",
+      "/blog/[slug]",
+      "/projects/[slug]/opengraph-image/[id]",
+      "/blog/[slug]/opengraph-image/[id]",
+    ];
+    const expected = Object.keys(pathnames)
+      .filter((pathname) => !dynamic.includes(pathname))
+      .map((pathname) => (pathname === "/" ? "" : pathname))
+      .sort();
+
+    expect([...LOCALE_PAGES].sort()).toEqual(expected);
+  });
+
+  it("documents why opengraph-image is not in the required list", () => {
+    expect(script()).toContain("opengraph-image is intentionally excluded");
+  });
+
+  it("says LOCALE_PAGES holds internal routes, not localized URLs", () => {
+    // The prerender manifest is keyed by the internal route (/tr/blog),
+    // because next-intl rewrites /yazilar onto it. Writing the localized
+    // path here would break the gate silently: nothing would match and the
+    // check would report a missing route that is in fact prerendered.
+    const content = script();
+    expect(content).toContain("These are INTERNAL route paths");
+    expect(content).toContain("/yazilar");
+    expect(LOCALE_PAGES).toContain("/blog");
+    expect(LOCALE_PAGES).not.toContain("/yazilar");
   });
 
   it("fails the check when api routes are prerendered", () => {

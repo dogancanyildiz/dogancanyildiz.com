@@ -21,8 +21,10 @@ const personJsonLd = () =>
 const auditScript = () =>
   readFileSync(join(process.cwd(), "scripts/audit-live-links.mjs"), "utf8");
 
-const ciWorkflow = () =>
-  readFileSync(join(process.cwd(), ".github/workflows/ci.yml"), "utf8");
+// verify:links runs on its own schedule (.github/workflows/links.yml), not
+// inside ci.yml: a third party outage should not block every merge.
+const linksWorkflow = () =>
+  readFileSync(join(process.cwd(), ".github/workflows/links.yml"), "utf8");
 
 describe("trust signals", () => {
   it("keeps the visible brand name aligned with Person schema name", () => {
@@ -41,12 +43,16 @@ describe("trust signals", () => {
       expect(source).toContain(field);
     }
     expect(source).toContain("profileImagePath()");
+    expect(source).toContain("sameAs: [...siteConfig.person.sameAs]");
+    expect(source).not.toContain("telephone");
+    expect(source).not.toContain("WHATSAPP_NUMBER");
+    expect(source).not.toContain("905543828000");
   });
 
-  it("ships a live link audit script wired into CI", () => {
+  it("ships a live link audit script wired into automation", () => {
     expect(auditScript()).toContain("projects.json");
     expect(auditScript()).toContain("verifyUrl");
-    expect(ciWorkflow()).toContain("npm run verify:links");
+    expect(linksWorkflow()).toContain("npm run verify:links");
   });
 
   it("exposes optional build metadata for the footer", () => {
@@ -64,6 +70,6 @@ describe("trust maintenance docs", () => {
     );
     expect(doc).toContain("verify:links");
     expect(doc).toContain("Search Console");
-    expect(doc).toContain("three months");
+    expect(doc).toContain("üç ay");
   });
 });

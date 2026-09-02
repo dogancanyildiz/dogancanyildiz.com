@@ -75,9 +75,17 @@ describe("header", () => {
     expect(source).toContain("aria-current=");
   });
 
-  it("shows the DCY monogram instead of a hard coded Portfolio eyebrow", () => {
+  it("shows the full name instead of a hard coded Portfolio eyebrow", () => {
     expect(source).not.toContain(">Portfolio<");
-    expect(source).toContain('tBrand("monogram")');
+    expect(source).toContain('tBrand("name")');
+    expect(source).not.toContain('tBrand("monogram")');
+  });
+
+  it("renders GitHub and LinkedIn next to the name, from lib/site", () => {
+    expect(source).toContain('from "./social-links"');
+    expect(source).toContain("<SocialLinks");
+    expect(source).toContain('t("footer.github")');
+    expect(source).toContain('t("footer.linkedin")');
   });
 
   it("uses the shared route list on every page", () => {
@@ -100,7 +108,29 @@ describe("footer", () => {
 
   it("exposes the public email in the footer", () => {
     expect(source).toContain("CONTACT_EMAIL_PUBLIC");
-    expect(source).toContain('href={`mailto:${CONTACT_EMAIL_PUBLIC}`}');
+    expect(source).toContain("href={`mailto:${CONTACT_EMAIL_PUBLIC}`}");
+  });
+
+  // This invariant was dropped when the layout assertions above replaced it.
+  // It is the only thing standing between the footer and a hand pasted
+  // profile url, which would silently drift away from the sameAs array the
+  // Person JSON-LD publishes from the same module.
+  it("takes every external destination from lib/site, never a literal", () => {
+    expect(source).toContain('from "@/lib/site"');
+    expect(source).toContain("href={SOCIAL.github}");
+    expect(source).toContain("href={SOCIAL.linkedin}");
+    expect(source).toContain(
+      'href={whatsappHref(tContact("whatsappPrefill"))}'
+    );
+    expect(source).toContain("href={`mailto:${CONTACT_EMAIL_PUBLIC}`}");
+
+    const literalUrls = [...source.matchAll(/"(https?:\/\/[^"]*)"/g)].map(
+      (match) => match[1]
+    );
+    expect(literalUrls, "hardcoded url in the footer").toEqual([]);
+    // A literal mailto: would be a second address to keep in sync; the
+    // template literal above reads "mailto:${" and never matches this.
+    expect(source).not.toMatch(/mailto:[a-z0-9]/i);
   });
 
   it("has no leftover template contact details", () => {
@@ -109,11 +139,91 @@ describe("footer", () => {
     expect(source).not.toContain("twitter.com");
   });
 
-  it("sources contact details and social links from lib/site, not hard coded strings", () => {
-    expect(source).toContain('from "@/lib/site"');
-    expect(source).toContain("CONTACT_EMAIL_PUBLIC");
-    expect(source).toContain("SOCIAL");
-    expect(source).not.toContain("github.com/");
+  it("pairs the elsewhere labels with the same icon treatment as email", () => {
+    expect(source).toContain("GithubIcon");
+    expect(source).toContain("LinkedinIcon");
+    expect(source).toContain("WhatsAppIcon");
+    expect(source).toContain("<Rss");
+    expect(source).toContain("gap-2");
+  });
+
+  it("is a server component: no client directive, no siteUrl in the bundle", () => {
+    expect(source).not.toContain('"use client"');
+    expect(source).not.toContain("siteUrl");
+    expect(source).not.toContain("/api/health");
+    expect(source).toContain('from "next-intl/server"');
+  });
+
+  it("links feed.xml through localePath instead of a hardcoded prefix", () => {
+    expect(source).not.toContain('href="/feed.xml"');
+    expect(source).toContain('localePath(locale, "/feed.xml")');
+  });
+});
+
+describe("mobile menu panel", () => {
+  it("stays aligned under the h-16 header and keeps one full-width treatment at every mobile width", () => {
+    const source = read("src/components/layout/mobile-menu.tsx");
+    expect(source).toContain("top-16");
+    expect(source).not.toContain("sm:inset-x-4");
+    expect(source).not.toContain("sm:rounded-none");
+  });
+
+  it("keeps the overlay below the header instead of dimming it", () => {
+    const source = read("src/components/layout/mobile-menu.tsx");
+    expect(source).not.toMatch(/Dialog\.Overlay className="fixed inset-0\b/);
+    expect(source).toMatch(/Dialog\.Overlay className="fixed inset-x-0 top-16/);
+  });
+});
+
+describe("header height", () => {
+  it("gives the header row enough height that its controls are not flush against the edges", () => {
+    expect(read("src/components/layout/header.tsx")).toMatch(
+      /className="page-shell flex h-16\b/
+    );
+  });
+});
+
+describe("skill category list", () => {
+  it("groups skills in a div, not a section, so each group stops being its own landmark", () => {
+    const source = read("src/components/sections/skill-group-grid.tsx");
+    expect(source).not.toMatch(/<section\b/);
+    expect(source).toContain("<div");
+  });
+
+  it("no longer ships the unused SkillGroupGrid deprecated alias", () => {
+    expect(read("src/components/sections/skill-group-grid.tsx")).not.toContain(
+      "SkillGroupGrid"
+    );
+  });
+});
+
+describe("page header titleId", () => {
+  it("lets a caller point a landmark's aria-labelledby at the rendered heading", () => {
+    const pageHeader = read("src/components/ui/page-header.tsx");
+    expect(pageHeader).toContain("titleId?: string");
+    expect(pageHeader).toContain("<Tag id={titleId}");
+  });
+
+  it("no longer ships the unused label/labelIndex/display props or the deprecated alias", () => {
+    const pageHeader = read("src/components/ui/page-header.tsx");
+    expect(pageHeader).not.toContain("labelIndex");
+    expect(pageHeader).not.toContain("display?:");
+    expect(pageHeader).not.toContain("SectionHeading");
+    expect(exists("src/components/ui/section-label.tsx")).toBe(false);
+  });
+
+  it("wires the experience section's landmark name to the rendered heading, not the job title", () => {
+    const summary = read("src/components/sections/experience-summary.tsx");
+    expect(summary).toContain('titleId="home-experience-heading"');
+    // The job title h3 used to carry this id itself; PageHeader's own
+    // heading owns it now, so the h3 goes back to being a plain heading.
+    expect(summary).not.toMatch(/<h3\s+id=/);
+  });
+});
+
+describe("dead code removal", () => {
+  it("drops hasProfileImage now that only profileImagePath is used", () => {
+    expect(read("src/lib/profile-image.ts")).not.toContain("hasProfileImage");
   });
 });
 
@@ -133,11 +243,26 @@ describe("new message keys", () => {
     }
   });
 
-  it("turns brand into an object with name, monogram and role in both catalogs", () => {
+  it("turns brand into an object with name, role and tagline in both catalogs", () => {
+    // monogram left with the text "DCY": the mark is an SVG now
+    // (src/components/brand/brand-mark.tsx), so the string had no reader.
     for (const locale of ["en", "tr"]) {
       const keys = messageKeys(locale, "brand");
-      expect(keys, locale).toEqual(["monogram", "name", "role"]);
+      expect(keys, locale).toEqual(["name", "role", "tagline"]);
     }
+  });
+
+  it("keeps the header tagline identical in both catalogs", () => {
+    // "Full Stack · DevOps" is brand copy, not prose: the same string sits in
+    // both files on purpose so the lockup reads the same in either language.
+    const en = JSON.parse(read("messages/en.json")) as {
+      brand: { tagline: string };
+    };
+    const tr = JSON.parse(read("messages/tr.json")) as {
+      brand: { tagline: string };
+    };
+    expect(en.brand.tagline).toBe("Full Stack · DevOps");
+    expect(tr.brand.tagline).toBe(en.brand.tagline);
   });
 
   it("adds the root level a11y labels to both catalogs", () => {

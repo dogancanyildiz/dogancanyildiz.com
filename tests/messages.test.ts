@@ -23,6 +23,37 @@ function flattenKeys(value: Json, prefix: string): string[] {
   );
 }
 
+// Collects every leaf value (string, number or boolean) keyed by its dotted
+// path, the same shape flattenKeys walks but keeping the value instead of
+// discarding it.
+function flattenLeaves(
+  value: Json,
+  prefix: string,
+  out: Map<string, Json>
+): void {
+  if (Array.isArray(value) || typeof value !== "object" || value === null) {
+    out.set(prefix, value);
+    return;
+  }
+  for (const [key, child] of Object.entries(value)) {
+    flattenLeaves(child as Json, prefix ? `${prefix}.${key}` : key, out);
+  }
+}
+
+// Matches the ICU argument name in both a plain placeholder ({name}) and a
+// select/plural/number one ({count, plural, ...}): the name always sits
+// right after the opening brace.
+const ICU_PLACEHOLDER_PATTERN = /\{\s*(\w+)/g;
+
+function placeholdersIn(value: unknown): Set<string> {
+  if (typeof value !== "string") return new Set();
+  return new Set(
+    [...value.matchAll(ICU_PLACEHOLDER_PATTERN)].flatMap(
+      (match) => match[1] ?? []
+    )
+  );
+}
+
 function listSourceFiles(dir: string): string[] {
   const entries = readdirSync(dir);
   return entries.flatMap((entry) => {
@@ -45,9 +76,18 @@ function listSourceFiles(dir: string): string[] {
 const STRING_LITERAL_PATTERN =
   /'([^'\\]*(?:\\.[^'\\]*)*)'|"([^"\\]*(?:\\.[^"\\]*)*)"/g;
 
+// Block comments and whole-line comments come out first. An apostrophe in a
+// comment (a contraction in a JSDoc sentence) used to open a "string" that
+// swallowed every real literal up to the next apostrophe, so keys that were
+// plainly in use came back as unconsumed. Trailing comments stay, because a
+// line comment regex cannot tell `// note` from `"https://..."` inside a
+// literal on the same line.
+const stripComments = (source: string) =>
+  source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
 function stringLiteralsIn(source: string): Set<string> {
   const literals = new Set<string>();
-  for (const match of source.matchAll(STRING_LITERAL_PATTERN)) {
+  for (const match of stripComments(source).matchAll(STRING_LITERAL_PATTERN)) {
     literals.add(match[1] ?? match[2] ?? "");
   }
   return literals;
@@ -69,6 +109,11 @@ const en = readJson("messages/en.json");
 const tr = readJson("messages/tr.json");
 const enKeys = flattenKeys(en, "").sort();
 const trKeys = flattenKeys(tr, "").sort();
+
+const enLeaves = new Map<string, Json>();
+flattenLeaves(en, "", enLeaves);
+const trLeaves = new Map<string, Json>();
+flattenLeaves(tr, "", trLeaves);
 
 const sourceFiles = listSourceFiles(repoPath("src"));
 const literalsByFile = new Map(
@@ -95,5 +140,25 @@ describe("message catalogs", () => {
   it("consumes every en key somewhere under src", () => {
     const unused = unconsumedKeys(enKeys);
     expect(unused, `unconsumed keys: ${unused.join(", ")}`).toEqual([]);
+  });
+
+  it("uses the same ICU placeholders in en and tr for every shared key", () => {
+    const sharedKeys = enKeys.filter((key) => trLeaves.has(key));
+    const mismatches = sharedKeys
+      .map((key) => {
+        const enPlaceholders = [...placeholdersIn(enLeaves.get(key))].sort();
+        const trPlaceholders = [...placeholdersIn(trLeaves.get(key))].sort();
+        const same =
+          enPlaceholders.length === trPlaceholders.length &&
+          enPlaceholders.every(
+            (placeholder, index) => placeholder === trPlaceholders[index]
+          );
+        return same
+          ? null
+          : `${key}: en=[${enPlaceholders.join(", ")}] tr=[${trPlaceholders.join(", ")}]`;
+      })
+      .filter((line): line is string => line !== null);
+
+    expect(mismatches, mismatches.join("\n")).toEqual([]);
   });
 });

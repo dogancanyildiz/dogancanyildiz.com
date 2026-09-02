@@ -1,13 +1,18 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import {
-  getPostLocales,
   getPosts,
-  getProjectLocales,
   getProjects,
-  type Locale,
+  postSlugsByKey,
+  projectSlugsByKey,
 } from "@/lib/content";
-import { absoluteUrl } from "@/lib/seo/alternates";
+import {
+  absoluteUrl,
+  buildLanguageAlternates,
+  contentUrl,
+  contentUrlsByKey,
+  staticLanguageUrls,
+} from "@/lib/seo/alternates";
 
 const STATIC_PAGES: Array<{
   path: string;
@@ -19,67 +24,64 @@ const STATIC_PAGES: Array<{
   { path: "/projects", priority: 0.9, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.9, changeFrequency: "weekly" },
   { path: "/contact", priority: 0.6, changeFrequency: "yearly" },
+  { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
 ];
 
-function languagesFor(
-  path: string,
-  locales: readonly Locale[]
-): Record<string, string> {
-  const languages: Record<string, string> = {};
-  for (const locale of locales) {
-    languages[locale] = absoluteUrl(locale, path);
-  }
-  const fallbackLocale: Locale = locales.includes("en")
-    ? "en"
-    : (locales[0] ?? routing.defaultLocale);
-  languages["x-default"] = absoluteUrl(fallbackLocale, path);
-  return languages;
-}
-
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
   const entries: MetadataRoute.Sitemap = [];
 
+  // No lastModified on the static pages. It used to be the build timestamp,
+  // which told a crawler that all ten of them changed on every deploy, even a
+  // deploy that only bumped a dependency. An omitted lastmod is a fact; a
+  // wrong one costs trust in the whole file.
   for (const page of STATIC_PAGES) {
     for (const locale of routing.locales) {
       entries.push({
         url: absoluteUrl(locale, page.path),
-        lastModified: now,
         changeFrequency: page.changeFrequency,
         priority: page.priority,
-        alternates: { languages: languagesFor(page.path, routing.locales) },
+        alternates: {
+          languages: buildLanguageAlternates(staticLanguageUrls(page.path)),
+        },
       });
     }
   }
 
   for (const locale of routing.locales) {
     for (const project of getProjects(locale)) {
-      const path = `/projects/${project.slug}`;
       // getProjects(locale) already returns only projects that exist for this
-      // locale, so no skip step is needed here. The alternates set still has
-      // to come from getProjectLocales, not routing.locales, because a
-      // project translated into only one locale must not advertise a hreflang
+      // locale, so no skip step is needed here. contentUrlsByKey reads the
+      // same per-locale slug map the page head uses (projectSlugsByKey), so a
+      // project translated into only one locale cannot advertise a hreflang
       // link that 404s.
       entries.push({
-        url: absoluteUrl(locale, path),
-        lastModified: now,
+        url: contentUrl(locale, "project", project.slug),
+        // Content date, not build time. A project without an `updated` field
+        // in frontmatter has no known revision date, so it carries none.
+        ...(project.updated ? { lastModified: new Date(project.updated) } : {}),
         changeFrequency: "monthly",
         priority: 0.7,
         alternates: {
-          languages: languagesFor(path, getProjectLocales(project.slug)),
+          languages: buildLanguageAlternates(
+            contentUrlsByKey(
+              "project",
+              projectSlugsByKey(project.translationKey)
+            )
+          ),
         },
       });
     }
 
     for (const post of getPosts(locale)) {
-      const path = `/blog/${post.slug}`;
       entries.push({
-        url: absoluteUrl(locale, path),
-        lastModified: new Date(post.date),
+        url: contentUrl(locale, "post", post.slug),
+        lastModified: new Date(post.updated ?? post.date),
         changeFrequency: "yearly",
         priority: 0.6,
         alternates: {
-          languages: languagesFor(path, getPostLocales(post.slug)),
+          languages: buildLanguageAlternates(
+            contentUrlsByKey("post", postSlugsByKey(post.translationKey))
+          ),
         },
       });
     }

@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo/alternates";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import { resolveLocale } from "@/lib/route-params";
 import { Hero } from "@/components/sections/hero";
 import { PostList } from "@/components/sections/post-list";
 import { ProjectList } from "@/components/sections/project-list";
@@ -12,25 +11,19 @@ import { ExperienceSummary } from "@/components/sections/experience-summary";
 import { Systems } from "@/components/sections/systems";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
+import { WebSiteJsonLd } from "@/components/seo/website-jsonld";
 import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
 import { Link } from "@/i18n/navigation";
 import { skills } from "@/content/profile";
-import { hasCv } from "@/lib/cv";
 import { featuredSkillGroups } from "@/lib/skills";
 import { profileImagePath } from "@/lib/profile-image";
 import {
+  getHomeProjects,
   getPosts,
-  getProjects,
   toPostCardData,
   toProjectCardData,
-  type Locale,
 } from "@/lib/content";
-
-// GATUS_URL is a runtime variable, so the Gatus fetch does not run during the
-// Docker build. Without this the route would be frozen as fully static and the
-// systems panel would never leave its "status unavailable" state.
-export const revalidate = 60;
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
@@ -41,22 +34,20 @@ export async function generateMetadata({
 }: {
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
-  const { lang } = await params;
-  if (!hasLocale(routing.locales, lang)) notFound();
+  const locale = await resolveLocale(params);
+  const t = await getTranslations({ locale, namespace: "metadata" });
 
-  const t = await getTranslations({ locale: lang, namespace: "metadata" });
-
-  return {
-    title: { absolute: t("defaultTitle") },
-    description: t("defaultDescription"),
-    openGraph: buildOpenGraph(lang, "/", {
+  // absoluteTitle because defaultTitle already carries the name and the role;
+  // it must not pick up the layout's "%s | name" template on top of that.
+  return buildPageMetadata(
+    locale,
+    { kind: "static", path: "/" },
+    {
       title: t("defaultTitle"),
       description: t("defaultDescription"),
-      siteName: t("defaultTitle"),
-      imageAlt: t("ogAlt"),
-    }),
-    alternates: buildAlternates(lang, "/", [...routing.locales]),
-  };
+      absoluteTitle: true,
+    }
+  );
 }
 
 export default async function HomePage({
@@ -64,19 +55,24 @@ export default async function HomePage({
 }: {
   params: Promise<{ lang: string }>;
 }) {
-  const { lang } = await params;
-  if (!hasLocale(routing.locales, lang)) notFound();
-  setRequestLocale(lang);
+  const locale = await resolveLocale(params);
+  setRequestLocale(locale);
 
-  const locale = lang as Locale;
   const tHome = await getTranslations({ locale, namespace: "home" });
-  const projects = getProjects(locale).map(toProjectCardData);
+  const tMeta = await getTranslations({ locale, namespace: "metadata" });
+  const tProjects = await getTranslations({ locale, namespace: "projects" });
+  const projects = getHomeProjects(locale).map(toProjectCardData);
   const latestPosts = getPosts(locale).slice(0, 3).map(toPostCardData);
 
   return (
     <>
-      <PersonJsonLd locale={lang} />
-      <Hero showCv={hasCv()} profileImageSrc={profileImagePath()} />
+      <PersonJsonLd locale={locale} />
+      <WebSiteJsonLd
+        locale={locale}
+        name={tMeta("siteName")}
+        description={tMeta("defaultDescription")}
+      />
+      <Hero profileImageSrc={profileImagePath()} />
       <PageSection innerClassName="space-y-12">
         <div className="space-y-8">
           <PageHeader
@@ -91,12 +87,14 @@ export default async function HomePage({
               </Link>
             }
           />
-          <ProjectList projects={projects} headingLevel="h3" />
+          {projects.length > 0 ? (
+            <ProjectList projects={projects} headingLevel="h3" />
+          ) : (
+            <p className="section-copy">{tProjects("empty")}</p>
+          )}
         </div>
 
         <ExperienceSummary locale={locale} />
-
-        <Systems />
 
         <SkillsStrip groups={featuredSkillGroups(skills[locale])} />
 
@@ -117,6 +115,12 @@ export default async function HomePage({
             <PostList posts={latestPosts} headingLevel="h3" />
           </div>
         ) : null}
+
+        {/* Last before the call to action on purpose: the live panel is proof
+            for a reader who already got through the work and the writing, and
+            in the middle of the page it cost a screen of funnel to an audience
+            of one engineer. */}
+        <Systems />
 
         <ContactCta />
       </PageSection>

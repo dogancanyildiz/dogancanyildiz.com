@@ -87,7 +87,7 @@ Beklenen: `ClientHost` kendi genel adresinizi gösteriyor. `104.x`, `172.6x.x` g
 for i in $(seq 1 6); do
   curl -s -D "/tmp/cl-h.$i" -o "/tmp/cl-b.$i" -w "$i: %{http_code}\n" -X POST \
     -H 'content-type: application/json' -d '{}' \
-    https://dogancanyildiz.com/api/contact
+    https://www.dogancanyildiz.com/api/contact
   sleep 6
 done
 cat /tmp/cl-b.6; grep -i '^retry-after' /tmp/cl-h.6
@@ -149,14 +149,14 @@ http:
     redirect-to-com:
       redirectRegex:
         regex: "^https://(www\\.)?dogancanyildiz\\.sh/(.*)"
-        replacement: "https://dogancanyildiz.com/${2}"
+        replacement: "https://www.dogancanyildiz.com/${2}"
         permanent: true
 ```
 
-**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; middleware adı ve regex yönü sahibinin son kararına göre güncellendi (tarihsel kurulum tersini tarif ediyordu).
+**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; middleware adı ve regex yönü sahibinin son kararına göre güncellendi (tarihsel kurulum tersini tarif ediyordu). **Karar (2026-09-02):** kanonik host www; bu yedek regex'in hedefi de apex yerine doğrudan www'ye gider, Cloudflare Redirect Rules'taki canlı `sh to com` kuralıyla aynı hedefi taşır.
 
 - [ ] Dosya kaydedilir, proxy yeniden başlatılır.
-- [ ] `${2}` ikinci yakalama grubudur, `(www\.)?` birinci grubu tüketir. Hedef doğrudan `https://dogancanyildiz.com/` köküne gider, `/en`'e değil; zincirli yönlendirme yasağı burada da geçerli.
+- [ ] `${2}` ikinci yakalama grubudur, `(www\.)?` birinci grubu tüketir. Hedef doğrudan `https://www.dogancanyildiz.com/` köküne gider, `/en`'e değil; zincirli yönlendirme yasağı burada da geçerli.
 
 ## 4. Uygulamaya middleware etiketleri
 
@@ -183,8 +183,8 @@ Doğrulama:
 docker inspect "$(docker ps --format '{{.Names}}' | grep -i portfolio | head -1)" \
   --format '{{json .Config.Labels}}' | tr ',' '\n' | grep -i middlewares
 
-curl -sI https://dogancanyildiz.com/ | grep -i -E '^(strict-transport-security|content-encoding|x-powered-by)'
-curl -sI -H 'accept-encoding: br' https://dogancanyildiz.com/ | grep -i '^content-encoding'
+curl -sI https://www.dogancanyildiz.com/ | grep -i -E '^(strict-transport-security|content-encoding|x-powered-by)'
+curl -sI -H 'accept-encoding: br' https://www.dogancanyildiz.com/ | grep -i '^content-encoding'
 ```
 
 Beklenen: middlewares etiketi `https-0-<uuid>` ve `http-0-<uuid>` router adlarını taşıyor; `strict-transport-security: max-age=31536000; includeSubDomains` var, `x-powered-by` hiç yok, `content-encoding` `br` veya `zstd`. HSTS başlığı yoksa ilk şüpheli router adıdır: yanlış ada yazılan etiket hata vermez, sessizce hiçbir şey yapmaz.

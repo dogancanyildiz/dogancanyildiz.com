@@ -20,14 +20,26 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Set up Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version-file: ".nvmrc"
           cache: "npm"
+      # --ignore-scripts skips every dependency's install lifecycle script.
+      # Only five packages in this tree actually carry one (see the same
+      # comment in Dockerfile), all native addons that resolve their prebuilt
+      # binary through a platform specific optionalDependency instead; the
+      # scripts exist as a from-source fallback. npm rebuild reruns just
+      # those five. Note that the sharp in that set is velite's nested copy,
+      # not the root sharp@0.35, which carries no install script.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts && npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher
+      - name: Review dependency changes
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
       # Velite output is gitignored, so the content has to be compiled before
       # typecheck and test can resolve the #site/content alias.
       - name: Compile content
@@ -37,9 +49,14 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
       - name: Test
-        run: npm run test
+        run: npm run test -- --coverage
+      - name: Verify docs
+        run: npm run verify:docs
+      # build:app is "next build" alone: build:content already compiled the
+      # content above, and the full "build" script (velite && next build)
+      # would run velite's MDX pipeline a second time for nothing.
       - name: Build
-        run: npm run build
+        run: npm run build:app
         env:
           # Build time only. The value never has to be a secret, it is inlined
           # into the client bundle anyway.
@@ -48,8 +65,21 @@ jobs:
           NEXT_PUBLIC_BUILD_DATE: ${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}
       - name: Verify static routes
         run: npm run verify:routes
-      - name: Verify live links
-        run: npm run verify:links
+      # Placed after every gate that gives a PR author real feedback: a step
+      # here failing stops later steps from running, and the two below are
+      # each expected to be red until a change lands outside this cluster
+      # (see the comments on each step), so they must never be what hides a
+      # genuine lint/typecheck/test/build failure from the log.
+      - name: Format
+        run: npm run format
+      # High severity vulnerabilities in a runtime dependency ship straight to
+      # production; a devDependency only ever runs on a developer's or CI's
+      # own machine. --omit=dev keeps the gate on the risk that matters here.
+      # velite (and its sharp <0.35.0 chain, GHSA-f88m-g3jw-g9cj) lives in
+      # devDependencies since 2026-08-28, so the production graph audits clean
+      # and this step is a real gate: a new high finding fails the check.
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
 
   docker:
     name: Docker image
@@ -57,10 +87,59 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Lint the Dockerfile
-        run: docker run --rm -i hadolint/hadolint:v2.15.1-alpine hadolint --failure-threshold warning - < Dockerfile
+        run: docker run --rm -i hadolint/hadolint@sha256:a1d49ae1a4e83c1dbad26b8c1ad7588c8bd1e04f4866b34ad3cac50335198552 hadolint --failure-threshold warning - < Dockerfile
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
       - name: Build the production image
-        # No registry login and no push on purpose. Coolify builds and keeps
-        # the image on the server, this job is only a gate.
-        run: docker build --build-arg NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.com -t portfolio-ci:${{ github.sha }} .
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          # No registry login and no push on purpose. Coolify builds and
+          # keeps the image on the server, this job is only a gate.
+          push: false
+          load: true
+          tags: portfolio-ci:${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=https://dogancanyildiz.com
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Start the smoke container
+        run: docker run -d --name portfolio-smoke -p 3131:3000 portfolio-ci:${{ github.sha }}
+      # Checked before the polling loop below on purpose: that loop's
+      # `docker inspect --format '{{.State.Health.Status}}'` only has a
+      # `.State.Health` field to read once a HEALTHCHECK is actually
+      # configured. Without this step first, a HEALTHCHECK-less image fails
+      # the loop with Go's opaque "map has no entry for key Health" template
+      # error instead of the clear message below.
+      - name: Assert the image ships a healthcheck
+        run: |
+          set -euo pipefail
+          config=$(docker inspect --format '{{json .Config.Healthcheck}}' portfolio-smoke)
+          if [ "$config" = "null" ]; then
+            echo "image has no HEALTHCHECK configured" >&2
+            exit 1
+          fi
+      - name: Wait for the container to report healthy
+        run: |
+          set -euo pipefail
+          status="starting"
+          for _ in $(seq 1 30); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' portfolio-smoke)
+            echo "health status: $status"
+            if [ "$status" = "healthy" ] || [ "$status" = "unhealthy" ]; then
+              break
+            fi
+            sleep 2
+          done
+          if [ "$status" != "healthy" ]; then
+            echo "container did not report healthy in time" >&2
+            docker logs portfolio-smoke
+            exit 1
+          fi
+      - name: Probe the health endpoint from outside the container
+        run: curl -fsS http://127.0.0.1:3131/api/health
+      - name: Stop and remove the smoke container
+        if: always()
+        run: docker rm -f portfolio-smoke || true

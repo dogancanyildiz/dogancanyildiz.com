@@ -6,10 +6,10 @@ import type { AppLocale } from "@/i18n/routing";
  */
 export const siteConfig = {
   person: {
-    name: "Doğan Can Yıldız",
+    name: "Doğan Can YILDIZ",
     jobTitle: {
-      en: "Full-Stack Web Developer and DevOps Engineer",
-      tr: "Full-Stack Web Geliştirici ve DevOps Mühendisi",
+      en: "Full Stack Web Developer and DevOps Specialist",
+      tr: "Full Stack Web Geliştirici ve DevOps Uzmanı",
     } satisfies Record<AppLocale, string>,
     location: {
       city: "Konya",

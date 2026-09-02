@@ -1,25 +1,27 @@
 ---
 title: Hubit
 slug: hubit
-summary: Interactive 3D visualizations on the web, built with Three.js and tuned for smooth interaction on ordinary hardware.
-role: Frontend Engineer and UI Designer
+translationKey: hubit
+summary: The interactive 3D layer of Hubit on the web. I wrote the scene with Three.js and designed the interface around it, so every control in the 3D view has a flat equivalent and the camera moves only when the user asks it to.
+role: Frontend developer and UI designer
 stack:
   - JavaScript
   - Three.js
 year: 2025
 links:
+  live: https://divizyon.github.io/t0-hubit/
   repo: https://github.com/dogancanyildiz/t0-hubit
-outcome: Rendering was optimized so the 3D scene stays smooth to interact with on ordinary hardware.
-order: 4
+outcome: "The scene runs on a mid range laptop too: that is the hardware I measured frame cost on."
+order: 5
 ---
 
 ## What I did
 
-At Divizyon I built the interactive 3D layer of Hubit with Three.js and designed the interface around it. The work split into two halves: getting the scene to read clearly as a user interface rather than a demo, and getting it to stay responsive while it does.
+At Divizyon I built the interactive 3D layer of Hubit with Three.js and designed the interface around it. The work split into two halves: pulling the scene out of demo territory so it reads as a user interface, and keeping it responsive along the way.
 
 ## Why it was built this way
 
-A 3D view earns its place only when it shows something a flat layout cannot. That constraint drove the design: every control had a plain counterpart, and the camera never moved in a way the user did not ask for, because a scene that moves on its own is a scene people stop trusting.
+A 3D view earns its place only when it shows something a flat layout cannot. That constraint drove the design: every control had a plain counterpart, and the camera never moved in a way the user did not ask for, because once a scene starts moving on its own, people stop trusting it.
 
 ## What I learned
 

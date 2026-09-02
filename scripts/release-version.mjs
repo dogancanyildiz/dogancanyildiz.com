@@ -155,12 +155,12 @@ export function renderNotes({ commits, tag, previousTag, repoUrl }) {
     blocks.push(`### ${title}\n\n${list.map(formatCommitLine).join("\n")}`);
   }
   if (blocks.length === 0) {
-    blocks.push("No commits since the previous release.");
+    blocks.push("Önceki sürümden bu yana commit yok.");
   }
   const url = compareUrl({ repoUrl, previousTag, tag });
   if (url) {
     const label = previousTag ? `${previousTag}...${tag}` : tag;
-    blocks.push(`**Full changelog**: [${label}](${url})`);
+    blocks.push(`**Tam değişiklik listesi**: [${label}](${url})`);
   }
   return `${blocks.join("\n\n")}\n`;
 }
@@ -223,22 +223,49 @@ function git(args) {
   }).trim();
 }
 
+// Picks the highest released version by semver, not by branch reachability.
+// A tag lives on main the moment the release workflow pushes it; a checkout
+// of dev can be behind that push for as long as the sync pull request sits
+// unmerged, so filtering with `--merged HEAD` used to hide the newest tag on
+// every branch except main.
+export function pickHighestTag(tags) {
+  let best = null;
+  let bestParts = null;
+  for (const tag of tags) {
+    const match = /^v(\d+)\.(\d+)\.(\d+)$/.exec(tag);
+    if (!match) continue;
+    const parts = [Number(match[1]), Number(match[2]), Number(match[3])];
+    const isHigher =
+      !bestParts ||
+      parts[0] > bestParts[0] ||
+      (parts[0] === bestParts[0] && parts[1] > bestParts[1]) ||
+      (parts[0] === bestParts[0] &&
+        parts[1] === bestParts[1] &&
+        parts[2] > bestParts[2]);
+    if (isHigher) {
+      best = tag;
+      bestParts = parts;
+    }
+  }
+  return best;
+}
+
 function lastReleaseTag() {
   let tags = "";
   try {
-    tags = git([
-      "tag",
-      "--list",
-      "v[0-9]*.[0-9]*.[0-9]*",
-      "--sort=-v:refname",
-      "--merged",
-      "HEAD",
-    ]);
+    tags = git(["tag", "--list", "v[0-9]*.[0-9]*.[0-9]*"]);
   } catch {
     return null;
   }
-  const [first] = tags.split("\n").filter(Boolean);
-  return first ?? null;
+  return pickHighestTag(tags.split("\n").filter(Boolean));
+}
+
+function currentBranch() {
+  try {
+    return git(["rev-parse", "--abbrev-ref", "HEAD"]);
+  } catch {
+    return null;
+  }
 }
 
 function commitsSince(tag) {
@@ -381,6 +408,18 @@ function main(argv) {
     }
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
     return;
+  }
+
+  if (!options.previousTag) {
+    const branch = currentBranch();
+    if (branch && branch !== "main" && branch !== "HEAD") {
+      console.error(
+        `Warning: running on branch "${branch}", not main. The previous ` +
+          `tag is the newest release across the whole repository, so the ` +
+          `commit range below may include commits that already shipped on ` +
+          `main and have not reached this branch yet.`
+      );
+    }
   }
 
   const previousTag = options.previousTag ?? lastReleaseTag();

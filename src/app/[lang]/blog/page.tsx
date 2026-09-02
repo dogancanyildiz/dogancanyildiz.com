@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { PostList } from "@/components/sections/post-list";
 import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
 import { routing } from "@/i18n/routing";
-import { getPosts, toPostCardData, type Locale } from "@/lib/content";
+import { getPosts, toPostCardData } from "@/lib/content";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import { resolveLocale } from "@/lib/route-params";
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
@@ -19,16 +18,17 @@ export async function generateMetadata({
 }: {
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
-  const { lang } = await params;
-  if (!hasLocale(routing.locales, lang)) notFound();
+  const locale = await resolveLocale(params);
+  const t = await getTranslations({ locale, namespace: "blog" });
 
-  const t = await getTranslations({ locale: lang, namespace: "blog" });
-
-  return buildPageMetadata(lang, "/blog", {
-    title: t("title"),
-    description: t("description"),
-    availableLocales: [...routing.locales],
-  });
+  return buildPageMetadata(
+    locale,
+    { kind: "static", path: "/blog" },
+    {
+      title: t("title"),
+      description: t("description"),
+    }
+  );
 }
 
 export default async function BlogPage({
@@ -36,19 +36,15 @@ export default async function BlogPage({
 }: {
   params: Promise<{ lang: string }>;
 }) {
-  const { lang } = await params;
-  setRequestLocale(lang);
+  const locale = await resolveLocale(params);
+  setRequestLocale(locale);
 
-  const t = await getTranslations({ locale: lang, namespace: "blog" });
-  const posts = getPosts(lang as Locale).map(toPostCardData);
+  const t = await getTranslations({ locale, namespace: "blog" });
+  const posts = getPosts(locale).map(toPostCardData);
 
   return (
     <PageSection>
-      <PageHeader
-        as="h1"
-        title={t("title")}
-        description={t("description")}
-      />
+      <PageHeader as="h1" title={t("title")} description={t("description")} />
       {posts.length > 0 ? (
         <PostList posts={posts} />
       ) : (

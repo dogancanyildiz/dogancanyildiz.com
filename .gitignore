@@ -48,20 +48,16 @@ Thumbs.db
 .vercel
 .netlify
 
-# ─── Claude Code ─────────────────────────────────────────────────────────────
-.claude/worktrees/
-.claude/settings.local.json
-
 # ─── Local-only files (content drafts, CV, private notes) ────────────────────
 .local/
-
-# ─── Audit ───────────────────────────────────────────────────────────────────
-audit/
 
 # ─── Nodeterm canvas state ───────────────────────────────────────────────────
 .nodeterm/
 
 # ─── AI Tools ────────────────────────────────────────────────────────────────
+# The whole .claude/ tree stays local (worktrees, settings.local.json, workflow
+# scripts). The orchestration scripts were untracked on 2026-08-28 after the
+# repository went public; a copy lives in .local/claude-backup/.
 .claude/
 .cursor/
 .cursorrules
@@ -73,8 +69,10 @@ CLAUDE.md
 # ─── Velite content pipeline output ──────────────────────────────────────────
 /.velite/
 /public/static/
-tests/fixtures/.velite-valid/
 tests/fixtures/.velite-invalid/
+tests/fixtures/.velite-invalid-links/
+tests/fixtures/.velite-schema-fields/
+tests/fixtures/.velite-duplicate-key/
 # velite compiles a config file into <config dir>/node_modules/, so the test
 # fixture configs under tests/fixtures leave this behind
 tests/fixtures/node_modules/
