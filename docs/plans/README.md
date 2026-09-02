@@ -54,7 +54,7 @@ traefik-ve-origin'deki 301 satırları kaldırılır. Karar gelene kadar `.sh ->
 | [2026-08-27-faz-3-tasarim-sistemi.md](2026-08-27-faz-3-tasarim-sistemi.md) | 3. Tasarım sistemi | Uygulandı, PR #5 merged |
 | [2026-08-27-faz-4-icerik-ve-yayin.md](2026-08-27-faz-4-icerik-ve-yayin.md) | 4. İçerik ve yayın | Uygulandı, PR #6 merged (2026-08-27) |
 | [2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md](2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md) | 5. Altyapı vitrini ve ölçüm | Kod tarafı uygulandı, PR #31 merged (2026-08-28, v0.3.1); Coolify/Cloudflare panel adımları `handoffs/faz-5-manual-checklist.md`'de sahibinde |
-| [2026-09-02-yerel-yollar-ve-ceviri-slug.md](2026-09-02-yerel-yollar-ve-ceviri-slug.md) | Faz dışı iş: yerelleştirilmiş yollar ve çeviri başına slug | Uygulandı, dal `feature/brand-assets` (2026-09-02, 6 commit); sahibinin kararları ve sapmalar dosyanın başındaki iki bölümde, devir notu `handoffs/yerel-yollar-2026-09-02.md` |
+| [2026-09-02-yerel-yollar-ve-ceviri-slug.md](2026-09-02-yerel-yollar-ve-ceviri-slug.md) | Faz dışı iş: yerelleştirilmiş yollar ve çeviri başına slug | Uygulandı, dal `feature/brand-assets` (2026-09-02, 10 commit, taban `7a73af6` - `3a58bee`); sahibinin kararları ve sapmalar dosyanın başındaki iki bölümde, devir notu `handoffs/yerel-yollar-2026-09-02.md` |
 
 ## İlgili dokümanlar
 

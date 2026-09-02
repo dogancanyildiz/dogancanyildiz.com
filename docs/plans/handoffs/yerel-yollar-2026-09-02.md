@@ -1,6 +1,6 @@
 # Devir notu: yerelleştirilmiş yollar ve çeviri başına slug (2026-09-02)
 
-Durum: Uygulandı, dal `feature/brand-assets` · Taban: `d5cb0b5` · Son kod commit'i: `2b9b568`
+Durum: Uygulandı, dal `feature/brand-assets` · Taban: `7a73af6` · Son kod commit'i: `3a58bee`
 (düzeltme turu 2026-09-02, aşağıdaki "Düzeltme turu" bölümü)
 Plan: [../2026-09-02-yerel-yollar-ve-ceviri-slug.md](../2026-09-02-yerel-yollar-ve-ceviri-slug.md)
 (sahibinin kararları ve sapmalar plan dosyasının başındaki iki bölümde)
@@ -25,16 +25,16 @@ tekrarlanmamasını sağlıyor, tarih bileşeni kalıcı sabit.
 
 | Commit | Konu |
 | --- | --- |
-| `19ba820` | `feat(content): key every translation by translationKey and localize the Turkish slugs` |
-| `ec207ee` | `feat(i18n): serve the Turkish blog and project paths in Turkish and 308 every old address` |
-| `7155d18` | `feat(seo): build canonical, hreflang, sitemap and feed urls from per locale slugs` |
-| `18559ec` | `refactor(i18n): point the language switcher at per locale translation targets` |
-| `5e215ca` | `docs: record the localized path scheme and close the V-5 acceptance` |
-| `92205f4` | `fix(docs): describe the per slug language redirect rule the code applies` |
-| `ec197c9` | `fix(i18n): answer the old Coolify slug under the new Turkish blog path` |
-| bu not | `docs(plans): archive the localized path plan with the owner decisions and the result` |
+| `313bbf2` | `feat(content): key every translation by translationKey and localize the Turkish slugs` |
+| `98b3f3e` | `feat(i18n): serve the Turkish blog and project paths in Turkish and 308 every old address` |
+| `cd65d1c` | `feat(seo): build canonical, hreflang, sitemap and feed urls from per locale slugs` |
+| `7aea3f6` | `refactor(i18n): point the language switcher at per locale translation targets` |
+| `c97e62d` | `docs: record the localized path scheme and close the V-5 acceptance` |
+| `99b6c3d` | `fix(docs): describe the per slug language redirect rule the code applies` |
+| `e6b6066` | `fix(i18n): answer the old Coolify slug under the new Turkish blog path` |
+| `a61457f` | `docs(plans): archive the localized path plan with the owner decisions and the result` |
 
-İlk beşi task uygulayıcılarının, `92205f4` Task 5 incelemesinin bıraktığı iki
+İlk beşi task uygulayıcılarının, `99b6c3d` Task 5 incelemesinin bıraktığı iki
 bloklayan bulgunun düzeltmesi, son ikisi entegrasyon turunun.
 
 ### Slug değişiklikleri
@@ -50,7 +50,7 @@ bloklayan bulgunun düzeltmesi, son ikisi entegrasyon turunun.
 
 ## Doğrulananlar
 
-### Kapılar (`ec197c9` üzerinde, hepsi yeşil)
+### Kapılar (`e6b6066` üzerinde, hepsi yeşil)
 
 | Komut | Çıktı |
 | --- | --- |
@@ -205,9 +205,9 @@ yüzden canlı yol değil, emniyet ağı. Tek atlamaya indirmek
 `skipTrailingSlashRedirect: true` demek, yani sitedeki her eğik çizgiyi
 proxy'nin üstlenmesi; site hiçbir yerde eğik çizgili adres yayınlamadığı için
 bu kabul edildi, gerekçe `src/i18n/legacy-paths.ts` yorumuna yazıldı
-(`ec197c9`). Google 308 zincirini takip eder, sinyal kaybı yok.
+(`e6b6066`). Google 308 zincirini takip eder, sinyal kaybı yok.
 
-### 2. `/yazilar/self-hosting-with-coolify` eklendi (`ec197c9`)
+### 2. `/yazilar/self-hosting-with-coolify` eklendi (`e6b6066`)
 
 Planın "404 kalmalı" bloğu bu adresin 308 vermesini bekliyordu ama satır
 öneksiz tabloda yoktu, yalnızca `/tr` tablosundaydı; adres 404 veriyordu.
@@ -222,7 +222,7 @@ eklendi.
 
 Bağımsız inceleme iki bloklayan bulgu bıraktı, ikisi de kapatıldı.
 
-### 1. OG kart adresleri kırıktı (`2b9b568`)
+### 1. OG kart adresleri kırıktı (`3a58bee`)
 
 Beş yayınlanmış kart adresi 404 veriyordu: `/blog/self-hosting-with-coolify`,
 `/projects/gpa-calculator`, `/projects/ticket-purchasing-system` kartları ile
@@ -268,12 +268,12 @@ satırlarının içerik tipi `image/png`. Örnek:
 /yazilar/coolify-ile-kendi-sunucumda/opengraph-image/default          200 image/png
 ```
 
-### 2. "308 tablosu (tam liste)" eksikti (`5711c51`)
+### 2. "308 tablosu (tam liste)" eksikti (`93121ad`)
 
 `docs/04-i18n.md`'nin kendini tam liste ilan eden bölümü `LEGACY_UNPREFIXED`'i
 iki tabloya bölüp 17 satırın 16'sını yazıyordu. Eksik satır
 `/yazilar/self-hosting-with-coolify`; kod doğruydu, satır entegrasyon
-commit'i `ec197c9` ile eklenmişti, doküman ondan önce yazılmıştı. B tablosuna
+commit'i `e6b6066` ile eklenmişti, doküman ondan önce yazılmıştı. B tablosuna
 eklendi, A ve B toplamının 17 olduğu ve son üç satırın neden orada olduğu
 tabloya not düşüldü.
 

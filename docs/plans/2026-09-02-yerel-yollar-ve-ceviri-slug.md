@@ -1,6 +1,6 @@
 # Yerelleştirilmiş yollar ve çeviri başına slug Implementation Plan
 
-> Durum: Revizyon 2 (2026-09-02), **uygulandı** (dal `feature/brand-assets`, 6 commit, taban `d5cb0b5`).
+> Durum: Revizyon 2 (2026-09-02), **uygulandı** (dal `feature/brand-assets`, 6 commit, taban `7a73af6`).
 > Plan gövdesi yazıldığı haliyle duruyor; sahibinin kararları ve gerçekleşen sapmalar için aşağıdaki
 > "Kararlar" ve "Uygulama sonucu" bölümleri önceliklidir.
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -68,18 +68,18 @@ tarihsel kayıt olarak, yazıldığı haliyle duruyor.
 
 ## Uygulama sonucu (2026-09-02)
 
-Dal `feature/brand-assets`, taban `d5cb0b5`. Altı commit, tek yazar, push
+Dal `feature/brand-assets`, taban `7a73af6`. Altı commit, tek yazar, push
 yok. Doğrulama komutları ve curl matrisi çıktısı için devir notu:
 [handoffs/yerel-yollar-2026-09-02.md](handoffs/yerel-yollar-2026-09-02.md).
 
 | Task | Commit | Konu |
 |---|---|---|
-| 1 | `19ba820` | `feat(content): key every translation by translationKey and localize the Turkish slugs` |
-| 2 | `ec207ee` | `feat(i18n): serve the Turkish blog and project paths in Turkish and 308 every old address` |
-| 3 | `7155d18` | `feat(seo): build canonical, hreflang, sitemap and feed urls from per locale slugs` |
-| 4 | `18559ec` | `refactor(i18n): point the language switcher at per locale translation targets` |
-| 5 | `5e215ca` | `docs: record the localized path scheme and close the V-5 acceptance` |
-| 5 (inceleme düzeltmesi) | `92205f4` | `fix(docs): describe the per slug language redirect rule the code applies` |
+| 1 | `313bbf2` | `feat(content): key every translation by translationKey and localize the Turkish slugs` |
+| 2 | `98b3f3e` | `feat(i18n): serve the Turkish blog and project paths in Turkish and 308 every old address` |
+| 3 | `cd65d1c` | `feat(seo): build canonical, hreflang, sitemap and feed urls from per locale slugs` |
+| 4 | `7aea3f6` | `refactor(i18n): point the language switcher at per locale translation targets` |
+| 5 | `c97e62d` | `docs: record the localized path scheme and close the V-5 acceptance` |
+| 5 (inceleme düzeltmesi) | `99b6c3d` | `fix(docs): describe the per slug language redirect rule the code applies` |
 
 ### Plandan sapmalar
 
@@ -189,7 +189,7 @@ seferinde gerçek dosya kazandı.
   olarak düzeltildi ve feed guid kararı tarihli madde olarak yazıldı;
   `docs/05-backend-icerik-ve-servisler.md`'ye `translationKey`/`legacySlugs`
   alanlarını ve altıncı projeyi anlatan tarihli alt bölüm eklendi.
-- Task 5'in bağımsız incelemesi iki bloklayan bulgu çıkardı ve `92205f4` ile
+- Task 5'in bağımsız incelemesi iki bloklayan bulgu çıkardı ve `99b6c3d` ile
   kapandı: dört dokümanda uygulanan 308 kuralının tersi ("öneksiz eski
   adreslerin tamamı `/en`'e gider") yazıyordu, ve URL matrisi repoda var
   olmayan bir plan dosyasına havale edilmişti. Bu plan dosyasının repoya

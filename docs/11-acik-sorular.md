@@ -28,12 +28,12 @@ Açık soru sayısı: **0/11.**
 
 11 sorunun tamamı 2026-08-27'de cevaplandı; Faz 0, Faz 1, Faz 2 ve Faz 3 artık main'de (PR #2-#5), hiçbir açık soru tarafından bloklanmadılar. Faz 5 de açık soru tarafından bloklanmıyor, henüz başlamadı. Soru 5'in (domain'in son hali) cevabı da netleşti, yalnızca canlıya alınması bekliyor:
 
-- **Faz 1 sonu / yayın öncesi domain yönlendirmesi**: dogancanyildiz.com ana domain kararı kesinleşti (e-posta zaten kesinleşmişti). **Karar değişikliği (2026-08-27):** bu maddenin tarihsel metni "dogancanyildiz.sh ana domain kararı öneri olarak uygulanabilir ... .com -> .sh 301" idi; sahibinin son kararıyla yön tersine döndü, `dogancanyildiz.sh -> dogancanyildiz.com` 301'inin canlıya alınması bekleniyor.
+- **Faz 1 sonu / yayın öncesi domain yönlendirmesi**: dogancanyildiz.com ana domain kararı kesinleşti (e-posta zaten kesinleşmişti). **Karar değişikliği (2026-08-27):** bu maddenin tarihsel metni "dogancanyildiz.sh ana domain kararı öneri olarak uygulanabilir ... .com -> .sh 301" idi; sahibinin son kararıyla yön tersine döndü, `dogancanyildiz.sh -> www.dogancanyildiz.com` 301'inin canlıya alınması bekleniyor.
 
 Faz 4 (İçerik ve yayın) artık kod tarafıyla uygulandı (dal `feature/faz-4-icerik-ve-yayin`, PR #6, açık ve CI yeşil); sertifika doğrulama linkleri 2026-09-02'de teslim alındı, kalan bağımlılık yalnızca sahibinin teslim edeceği somut veri:
 
 - Konuşmalar verisi (`speaking.en`/`speaking.tr` dizileri, aynı dosya, şu an boş),
-- Proje ekran görüntüleri (`content/images/`, şu an boş, `covers=0`).
+- Proje ekran görüntüleri (`content/images/`, kısmen teslim edildi: Köklü Hukuk kapağı geldi, kalan beş proje kapaksız).
 
 CV PDF dosyası zaten teslim edildi ve `public/cv/dogancanyildiz-cv.pdf` yoluna kondu (PR #6 dalında commit'li, Download CV butonu bu yola bağlı); içerik onayı (telefon/adres) hâlâ sahibinde. Kalan üçü içerik kararı değil, teslimat konusu; karar zaten netleşti (`verifyUrl` alanı var, Konuşmalar bloğu kodlandı, projeler public), yalnızca dosya/link elde teslim edilene kadar ilgili alan boş/kapaksız/render edilmez kalıyor.
 
@@ -44,12 +44,12 @@ Soru 1-4'ün kod/şema tarafı Faz 4'te (PR #6) uygulandı; kalan yalnızca sahi
 - **CV (soru 1): teslim edildi ve sitede.** `public/cv/dogancanyildiz-cv.pdf` commit'li (PR #6 dalında), Download CV butonu bu yola bağlı (`src/lib/cv.ts` `hasCv()`). İçerik onayı (telefon/adres) hâlâ sahibinde.
 - **Sertifika doğrulama linkleri (soru 2): teslim edildi ve sitede (2026-09-02).** `src/content/profile.ts` tek bir kayıt listesi tutuyor; on üç kaydın on ikisinde `verifyUrl` dolu, aynı on ikisinde `issued` (ISO gün) ve yerel rozet görseli var, CAPT ayrıca `credentialId` taşıyor. Link ve tarih doğrulaması modül yüklenirken çalışıyor (`withCheckedCertificates`), rozet dosyasının varlığı ve boyutu `tests/profile.test.ts` ile kilitli.
 - **Konuşmalar verisi (soru 3): bekleniyor, alan opsiyonel.** `speaking.en`/`speaking.tr` dizileri boş, About sayfası blok boşken hiç render etmiyor; `tests/profile.test.ts` yer tutucu metni (`[Etkinlik adı]` vb.) yasaklıyor. Etkinlik/konu/tarih geldiğinde `{ event, topic, date }` eklemek yeterli.
-- **Proje ekran görüntüleri (soru 4): bekleniyor.** `content/images/` boş, `covers=0`; kapaksız yayın kuralı geçerli, görsel gelince `content/images/<slug>-cover.png` + ilgili MDX'in frontmatter'ına `cover:` alanı eklemek yeterli.
+- **Proje ekran görüntüleri (soru 4): kısmen teslim edildi.** Köklü Hukuk kapağı geldi (`content/images/koklu-hukuk-cover.jpg`, `cover` + `coverAlt` iki dilde MDX'te), kalan beş proje hâlâ kapaksız; kapaksız yayın kuralı onlar için geçerli, görsel gelince `content/images/<slug>-cover.jpg` + ilgili MDX'in frontmatter'ına `cover:` alanı eklemek yeterli.
 - **Metin onayı: bekleniyor.** Üç TR blog yazısı, bir EN çeviri ve beş case study (EN+TR) plan metninden yazıldı; olgular (yıllar, teknoloji yığını) herkese açık repolarla doğrulandı ama birinci şahıs deneyim cümleleri sahibinin onayını bekliyor (bkz. `docs/plans/handoffs/faz-4.md` "Açık kalanlar", `faz-4-manual-checklist.md` bölüm 3). Wikonya canlı site adı ve ticket projesi repo linki de bu onayın kapsamında.
 
 ## Tripwire'lar ve Riskler
 
-- **Soru 5 (domain) cevaplandı, ama canlıya alınmadı**: `dogancanyildiz.sh -> dogancanyildiz.com` 301'i henüz production'a alınmadı; bu Faz 1'in tamamlanmasını bloklamıyor, yalnızca domain yönlendirmesinin panelde uygulanmasını bekletiyor. E-posta zaten kesinleştiği için Resend/SPF/DKIM/DMARC kurulumu bu belirsizlikten etkilenmez.
+- **Soru 5 (domain) cevaplandı, ama canlıya alınmadı**: `dogancanyildiz.sh -> www.dogancanyildiz.com` 301'i henüz production'a alınmadı; bu Faz 1'in tamamlanmasını bloklamıyor, yalnızca domain yönlendirmesinin panelde uygulanmasını bekletiyor. E-posta zaten kesinleştiği için Resend/SPF/DKIM/DMARC kurulumu bu belirsizlikten etkilenmez.
 - **Soru 4 (proje görselleri) teslim edilmezse**: case study'ler kapaksız yayınlanır; iddia kanıta bağlanamadığı için ikna gücü düşer. Projelerin kendisi (public gösterim, linkler) zaten cevaplandığı için bu yalnızca görsel eksikliği riski, içerik onayı riski değil.
 - **Soru 2 (sertifika linkleri): risk kapandı (2026-09-02).** Linkler teslim edildi. Kural yeni kayıtlar için duruyor: doğrulama linki gelmeyen sertifikanın `verifyUrl` alanı boş kalır, satır listeden çıkmaz. Global AI Hub kaydı bugün bu durumda, doğrulanabilirlik kazanmıyor ama sitede eksik görünmüyor.
 - **Soru 1 (CV PDF dosyası)**: risk kapandı, dosya teslim edildi ve `public/cv/dogancanyildiz-cv.pdf` yoluna kondu (PR #6). Kalan yalnızca içerik onayı: dosyada telefon numarası veya ev adresi varsa yeni bir sürüm konulmalı (eski sürüm git tarihçesinde kalır).

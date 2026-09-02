@@ -27,8 +27,8 @@ Cloudflare 526 verdiği için bölüm 3-5'in canlı URL isteyen maddelerinin hi�
 ## 2. İçerik
 
 - [x] En az 4 proje ve 3 blog yazısı yayında (6 proje x 2 locale, 6 yazı: 3 EN, 3 TR)
-- [x] Kapaksız yayınlanan projelerde CSS gradyan veya stok görsel yok (`content/images/`
-      boş, `covers=0`)
+- [x] Kapaksız yayınlanan projelerde CSS gradyan veya stok görsel yok (tek kapak
+      `content/images/koklu-hukuk-cover.jpg`, kalan beş proje kapaksız)
 - [x] Sertifika satırları listede, `verifyUrl` gelmeyenlerde link yok ama satır duruyor
 - [x] Konuşmalar bloğu ya gerçek veriyle dolu ya da hiç render edilmiyor (`speaking` dizileri
       boş, blok render edilmiyor)
