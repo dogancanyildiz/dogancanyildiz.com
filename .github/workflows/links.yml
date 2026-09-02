@@ -31,8 +31,13 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "npm"
+      # Same hardening as ci.yml and the Dockerfile deps stage: --ignore-scripts
+      # skips every dependency's install lifecycle script, then npm rebuild
+      # reruns it for just the native addons that carry one. This job runs
+      # unattended on a schedule, so it is the last place that should be
+      # installing with scripts enabled.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts && npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher
       - name: Compile content
         run: npm run build:content
       - name: Verify live links
