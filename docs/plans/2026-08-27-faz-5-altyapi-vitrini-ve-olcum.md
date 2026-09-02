@@ -1693,7 +1693,7 @@ başına hiçbir PR açmaz. Kurulum bu fazın maddesidir.
 
 1. https://github.com/apps/renovate adresine git, **Configure**.
 2. Hesap olarak `dogancanyildiz`, kapsam olarak **Only select repositories** ->
-   `dogancanyildiz/portfolio` seç, **Install**.
+   `dogancanyildiz/dogancanyildiz.com` seç, **Install**.
 3. Renovate ilk çalıştığında "Configure Renovate" adında bir onboarding PR'ı açar.
    Repoda zaten `renovate.json` olduğu için bu PR yalnızca Dependency Dashboard
    issue'sunu kurar; PR'ı merge et.
@@ -1702,7 +1702,7 @@ Doğrulama:
 
 ```bash
 cd /Users/dogancanyildiz/Dev/DCYLDZ/portfolio
-gh api repos/dogancanyildiz/portfolio/installation --jq '.app_slug'
+gh api repos/dogancanyildiz/dogancanyildiz.com/installation --jq '.app_slug'
 gh issue list --state open --json number,title --jq '.[] | select(.title | test("Dependency Dashboard")) | "\(.number) \(.title)"'
 ```
 
@@ -1743,7 +1743,7 @@ iki kanal ayrıca açılır:
 
 1. GitHub bildirimleri: `vercel/next.js` deposunda **Watch -> Custom -> Releases**
    ve **Security alerts** işaretlenir.
-2. Repo tarafında Dependabot güvenlik uyarıları: GitHub -> `dogancanyildiz/portfolio`
+2. Repo tarafında Dependabot güvenlik uyarıları: GitHub -> `dogancanyildiz/dogancanyildiz.com`
    -> Settings -> Code security -> **Dependabot alerts** ve **Dependabot security
    updates** açılır. Renovate sürüm PR'larını, Dependabot yalnızca güvenlik
    yamalarını açar; ikisi çakışmaz çünkü Dependabot yalnızca advisory varken devreye girer.
@@ -1752,8 +1752,8 @@ Doğrulama:
 
 ```bash
 cd /Users/dogancanyildiz/Dev/DCYLDZ/portfolio
-gh api repos/dogancanyildiz/portfolio/vulnerability-alerts -i --silent 2>&1 | head -1
-gh api repos/dogancanyildiz/portfolio/subscription --jq '.subscribed'
+gh api repos/dogancanyildiz/dogancanyildiz.com/vulnerability-alerts -i --silent 2>&1 | head -1
+gh api repos/dogancanyildiz/dogancanyildiz.com/subscription --jq '.subscribed'
 ```
 
 Expected: birinci komut `HTTP/2.0 204` (uyarılar açık; kapalıysa `404`),
