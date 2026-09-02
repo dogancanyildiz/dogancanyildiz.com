@@ -64,27 +64,145 @@ export function isHttpsUrl(value: string): value is HttpsUrl {
   }
 }
 
-export interface CertificateEntry {
-  name: string;
-  issuer: string;
-  detail?: string;
-  verifyUrl?: HttpsUrl;
+/**
+ * Issuing organizations, in the order the About page prints their headings.
+ * The group is what the reader sees first, so it is part of the data rather
+ * than a sort key derived from the issuer string at render time.
+ */
+export type CertificateGroupId =
+  | "hackviser"
+  | "cisco-networking-academy"
+  | "ibm-skillsbuild"
+  | "global-ai-hub";
+
+/**
+ * An ISO calendar date. The template literal stops a prose date ("June 2025")
+ * at compile time; isIsoDate below catches what the type cannot, such as
+ * 2026-13-45, which satisfies the template but is not a day.
+ */
+export type IsoDate = `${number}-${number}-${number}`;
+
+export function isIsoDate(value: string): value is IsoDate {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+  // Date.parse would accept 2026-02-30 and roll it into March, so compare the
+  // parsed day back against the digits that were written.
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return (
+    !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === value
+  );
 }
 
-/** Fails the build when a certificate carries a link the About page must not render. */
-export function withCheckedVerifyUrls(
+/** Local artwork for one credential. Remote badge CDNs are blocked by the CSP. */
+export interface CertificateBadge {
+  /** Path under public/, always inside the badges folder. */
+  src: `/images/badges/${string}`;
+  /** Intrinsic pixel size, which next/image needs to reserve the box. */
+  width: number;
+  height: number;
+  /**
+   * "badge" is the square emblem an issuer mints; "certificate" is a landscape
+   * document scan. The About page gives them the same height but only the
+   * square one a square slot.
+   */
+  kind: "badge" | "certificate";
+}
+
+export interface CertificateEntry {
+  /** Official name as the issuer writes it. Identical in both locales. */
+  name: string;
+  issuer: string;
+  /**
+   * Free text under the name. Nothing sets it any more: the one entry that
+   * did, a "CCNA complete track" line listing three courses, became the three
+   * badges those courses actually issue. The field goes when the About page
+   * stops reading it.
+   */
+  detail?: string;
+  group: CertificateGroupId;
+  issued?: IsoDate;
+  credentialId?: string;
+  verifyUrl?: HttpsUrl;
+  badge?: CertificateBadge;
+  /**
+   * True for an event attendance badge rather than an assessed credential.
+   * The owner's decision is to keep these after the assessed ones inside
+   * their group, whatever their date.
+   */
+  participation?: true;
+  /** schema.org credentialCategory for the Person node's hasCredential list. */
+  credentialCategory: "certificate" | "badge";
+}
+
+const BADGE_DIRECTORY = "/images/badges/";
+
+/**
+ * Fails the build when a certificate carries a link the About page must not
+ * render, a date no formatter can read, or artwork from outside the folder
+ * the CSP allows. Every one of these reaches an attribute in the page, so the
+ * check belongs at module load rather than in a test that a content only
+ * change might not run.
+ */
+export function withCheckedCertificates(
   entries: Record<Locale, CertificateEntry[]>
 ): Record<Locale, CertificateEntry[]> {
   for (const [locale, list] of Object.entries(entries)) {
     for (const entry of list) {
+      const where = `certificates.${locale}: "${entry.name}"`;
       if (entry.verifyUrl !== undefined && !isHttpsUrl(entry.verifyUrl)) {
         throw new Error(
-          `certificates.${locale}: "${entry.name}" has a verifyUrl that is not https: ${entry.verifyUrl}`
+          `${where} has a verifyUrl that is not https: ${entry.verifyUrl}`
         );
+      }
+      if (entry.issued !== undefined && !isIsoDate(entry.issued)) {
+        throw new Error(
+          `${where} has an issued date that is not an ISO calendar day: ${entry.issued}`
+        );
+      }
+      if (entry.badge !== undefined) {
+        if (!entry.badge.src.startsWith(BADGE_DIRECTORY)) {
+          throw new Error(
+            `${where} has badge artwork outside ${BADGE_DIRECTORY}: ${entry.badge.src}`
+          );
+        }
+        if (entry.badge.width <= 0 || entry.badge.height <= 0) {
+          throw new Error(
+            `${where} has badge artwork without an intrinsic size: ${entry.badge.width}x${entry.badge.height}`
+          );
+        }
       }
     }
   }
   return entries;
+}
+
+export interface CertificateGroup {
+  id: CertificateGroupId;
+  /** Heading text, the issuer as this site names it. */
+  issuer: string;
+  entries: CertificateEntry[];
+}
+
+/**
+ * Splits the flat list into the headings the About page prints, in the order
+ * the entries were written. Grouping by walking the list instead of bucketing
+ * by id keeps the authored order the single source of truth: an entry filed
+ * out of place shows up as a repeated heading, which
+ * tests/profile.test.ts fails on rather than quietly reordering it.
+ */
+export function certificateGroupsFor(locale: Locale): CertificateGroup[] {
+  const groups: CertificateGroup[] = [];
+  for (const entry of certificates[locale]) {
+    const current = groups.at(-1);
+    if (current?.id === entry.group) {
+      current.entries.push(entry);
+      continue;
+    }
+    groups.push({ id: entry.group, issuer: entry.issuer, entries: [entry] });
+  }
+  return groups;
 }
 
 export interface EducationEntry {
@@ -446,39 +564,215 @@ export const speaking: Record<Locale, SpeakingEntry[]> = {
   tr: [],
 };
 
-// verifyUrl fields are filled in once the site owner provides verification
-// links. Until then the field stays undefined; the entry itself is never
-// dropped from the list.
+/**
+ * One list, both locales.
+ *
+ * A credential name is issued in English and is not translated: "CCNA:
+ * Introduction to Networks" is the name printed on the record a visitor
+ * verifies, and a Turkish paraphrase would not match it. The issuers are named
+ * as this site names them, which is why the Cisco badges say "Cisco Networking
+ * Academy" where Credly's payload says only "Cisco". Everything else on the
+ * row (date, credential id, link) is data, so a second copy per locale would
+ * only be a second place to get it wrong.
+ *
+ * Order is the display order: groups in the sequence the About page prints
+ * them, newest first inside a group, attendance badges after the assessed
+ * ones. Dates and links come from the issuers' own records (Credly badge
+ * pages, the Hackviser verification page), read on 2026-09-02.
+ */
+const certificateRecords: CertificateEntry[] = [
+  {
+    name: "Certified Associate Penetration Tester (CAPT)",
+    issuer: "Hackviser",
+    group: "hackviser",
+    issued: "2025-06-01",
+    credentialId: "HV-CAPT-02TKGO4Q",
+    verifyUrl: "https://hackviser.com/verify?id=HV-CAPT-02TKGO4Q",
+    // Hackviser mints no badge emblem for this exam, so the artwork is the
+    // certificate itself and the About page gives it a landscape slot.
+    badge: {
+      src: "/images/badges/capt-certificate.jpg",
+      width: 800,
+      height: 515,
+      kind: "certificate",
+    },
+    credentialCategory: "certificate",
+  },
+  {
+    name: "CyberOps Associate",
+    issuer: "Cisco Networking Academy",
+    group: "cisco-networking-academy",
+    issued: "2026-06-02",
+    verifyUrl: "https://www.credly.com/badges/46e201d4-af31-4d46-aa0a-3d5b17c14711",
+    badge: {
+      src: "/images/badges/cyberops-associate.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  {
+    name: "Linux Unhatched",
+    issuer: "Cisco Networking Academy",
+    group: "cisco-networking-academy",
+    issued: "2026-02-18",
+    verifyUrl: "https://www.credly.com/badges/dc6d5e37-48f0-47f0-9444-35621594b850",
+    badge: {
+      src: "/images/badges/linux-unhatched.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  {
+    name: "Network Technician Career Path",
+    issuer: "Cisco Networking Academy",
+    group: "cisco-networking-academy",
+    issued: "2026-02-14",
+    verifyUrl: "https://www.credly.com/badges/65b70ad1-7c9a-4c13-9396-d7fe3a5ce600",
+    badge: {
+      src: "/images/badges/network-technician-career-path.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  {
+    name: "Introduction to Cybersecurity",
+    issuer: "Cisco Networking Academy",
+    group: "cisco-networking-academy",
+    issued: "2026-02-02",
+    verifyUrl: "https://www.credly.com/badges/aa7bea00-159e-47f2-b47f-90a07d09b551",
+    badge: {
+      src: "/images/badges/introduction-to-cybersecurity.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  // The three CCNA courses used to be one "complete track" line. They are
+  // three separately issued badges with three verification links, and a
+  // visitor can only check what is named.
+  {
+    name: "CCNA: Enterprise Networking, Security, and Automation",
+    issuer: "Cisco Networking Academy",
+    group: "cisco-networking-academy",
+    issued: "2024-07-28",
+    verifyUrl: "https://www.credly.com/badges/f4dd0693-ae37-42fc-8a6e-4315a1faeadb",
+    badge: {
+      src: "/images/badges/ccna-enterprise-networking-security-and-automation.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  {
+    name: "CCNA: Switching, Routing, and Wireless Essentials",
+    issuer: "Cisco Networking Academy",
+    group: "cisco-networking-academy",
+    issued: "2024-07-22",
+    verifyUrl: "https://www.credly.com/badges/8a51a779-c77a-4a8e-a596-8888429ac666",
+    badge: {
+      src: "/images/badges/ccna-switching-routing-and-wireless-essentials.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  {
+    name: "CCNA: Introduction to Networks",
+    issuer: "Cisco Networking Academy",
+    group: "cisco-networking-academy",
+    issued: "2024-07-20",
+    verifyUrl: "https://www.credly.com/badges/a8cf90df-9b5e-4b7a-aa80-ac17e77d8d78",
+    badge: {
+      src: "/images/badges/ccna-introduction-to-networks.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  {
+    name: "Cisco Networking Academy Learn-A-Thon 2026",
+    issuer: "Cisco Networking Academy",
+    group: "cisco-networking-academy",
+    issued: "2026-04-29",
+    verifyUrl: "https://www.credly.com/badges/b670b2f8-b9ad-4b79-bc66-82e4884393de",
+    badge: {
+      src: "/images/badges/cisco-networking-academy-learn-a-thon-2026.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    // An event badge, not a course result: it sits under the assessed Cisco
+    // credentials even though its date is newer than most of them.
+    participation: true,
+    credentialCategory: "badge",
+  },
+  {
+    name: "Cybersecurity Fundamentals",
+    issuer: "IBM SkillsBuild",
+    group: "ibm-skillsbuild",
+    issued: "2024-05-27",
+    verifyUrl: "https://www.credly.com/badges/56b3b1f4-3f60-405f-84f2-4fb86e808882",
+    badge: {
+      src: "/images/badges/cybersecurity-fundamentals.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  {
+    name: "Explore Emerging Tech",
+    issuer: "IBM SkillsBuild",
+    group: "ibm-skillsbuild",
+    issued: "2024-05-16",
+    verifyUrl: "https://www.credly.com/badges/955c0a41-a526-4623-b7fb-045b7106be94",
+    badge: {
+      src: "/images/badges/explore-emerging-tech.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  {
+    name: "Working in a Digital World: Professional Skills",
+    issuer: "IBM SkillsBuild",
+    group: "ibm-skillsbuild",
+    issued: "2024-05-16",
+    verifyUrl: "https://www.credly.com/badges/c8ece69e-2314-43f8-9261-45abed5ce485",
+    badge: {
+      src: "/images/badges/working-in-a-digital-world-professional-skills.png",
+      width: 340,
+      height: 340,
+      kind: "badge",
+    },
+    credentialCategory: "badge",
+  },
+  {
+    // No badge artwork and no working verification page: the owner's copies of
+    // both are gone. The entry stays, with nothing invented to fill the gaps,
+    // and the page prints no "unverifiable" apology next to it.
+    name: "Version Control Systems and Portfolio",
+    issuer: "Global AI Hub",
+    group: "global-ai-hub",
+    credentialCategory: "certificate",
+  },
+];
+
 export const certificates: Record<Locale, CertificateEntry[]> =
-  withCheckedVerifyUrls({
-    en: [
-      { name: "Certified Associate Penetration Tester (CAPT)", issuer: "Hackviser" },
-      {
-        name: "CCNA complete track",
-        issuer: "Cisco Networking Academy",
-        detail:
-          "Introduction to Networks · Switching, Routing and Wireless Essentials · Enterprise Networking, Security and Automation",
-      },
-      { name: "CyberOps Associate", issuer: "Cisco Networking Academy" },
-      { name: "Network Technician Career Path", issuer: "Cisco Networking Academy" },
-      { name: "Linux Unhatched", issuer: "Cisco Networking Academy" },
-      { name: "Introduction to Cybersecurity", issuer: "Cisco Networking Academy" },
-      { name: "Version Control Systems and Portfolio", issuer: "Global AI Hub" },
-    ],
-    tr: [
-      { name: "Certified Associate Penetration Tester (CAPT)", issuer: "Hackviser" },
-      {
-        name: "CCNA tam hattı",
-        issuer: "Cisco Networking Academy",
-        detail:
-          "Introduction to Networks · Switching, Routing and Wireless Essentials · Enterprise Networking, Security and Automation",
-      },
-      { name: "CyberOps Associate", issuer: "Cisco Networking Academy" },
-      { name: "Network Technician Career Path", issuer: "Cisco Networking Academy" },
-      { name: "Linux Unhatched", issuer: "Cisco Networking Academy" },
-      { name: "Introduction to Cybersecurity", issuer: "Cisco Networking Academy" },
-      { name: "Version Control Systems and Portfolio", issuer: "Global AI Hub" },
-    ],
+  withCheckedCertificates({
+    en: [...certificateRecords],
+    tr: [...certificateRecords],
   });
 
 export const education: Record<Locale, EducationEntry[]> = {
