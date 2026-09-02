@@ -242,10 +242,30 @@ export function certificateGroupsFor(locale: Locale): CertificateGroup[] {
   return groups;
 }
 
+/**
+ * A school's own emblem, shown at the head of its education row.
+ *
+ * Rasters carry their real pixel size. The two SVG marks have no pixel size to
+ * carry, so the box is their viewBox ratio normalized to a height of 200: it
+ * is the aspect ratio next/image needs and nothing else, and writing the
+ * viewBox numbers straight in would put 119.51 in a width attribute.
+ *
+ * See public/images/schools/README.md for where each file comes from and under
+ * what terms.
+ */
+export interface SchoolLogo {
+  /** Path under public/, always inside the schools folder. */
+  src: `/images/schools/${string}`;
+  width: number;
+  height: number;
+}
+
 export interface EducationEntry {
   program: string;
   school: string;
   period: string;
+  /** Absent where the institution publishes no usable mark. */
+  logo?: SchoolLogo;
 }
 
 export const skills: Record<Locale, SkillGroup[]> = {
@@ -870,21 +890,41 @@ export const education: Record<Locale, EducationEntry[]> = {
       program: "Mathematics and Computer Science",
       school: "Necmettin Erbakan University",
       period: "09/2025 - 06/2028",
+      logo: {
+        src: "/images/schools/necmettin-erbakan-universitesi.png",
+        width: 300,
+        height: 300,
+      },
     },
     {
       program: "Computer Programming, associate degree",
       school: "Konya Technical University",
       period: "09/2023 - 06/2025",
+      logo: {
+        src: "/images/schools/konya-teknik-universitesi.svg",
+        width: 200,
+        height: 200,
+      },
     },
     {
       program: "Web Design and Coding",
       school: "Anadolu University",
       period: "09/2023 - 06/2025",
+      logo: {
+        src: "/images/schools/anadolu-universitesi.svg",
+        width: 861,
+        height: 200,
+      },
     },
     {
       program: "Electronics and Communications Engineering",
       school: "National Defence University, Turkish Military Academy",
       period: "10/2017 - 06/2021",
+      logo: {
+        src: "/images/schools/kara-harp-okulu.png",
+        width: 146,
+        height: 185,
+      },
     },
   ],
   tr: [
@@ -892,21 +932,41 @@ export const education: Record<Locale, EducationEntry[]> = {
       program: "Matematik ve Bilgisayar Bilimleri",
       school: "Necmettin Erbakan Üniversitesi",
       period: "09/2025 - 06/2028",
+      logo: {
+        src: "/images/schools/necmettin-erbakan-universitesi.png",
+        width: 300,
+        height: 300,
+      },
     },
     {
       program: "Bilgisayar Programcılığı, ön lisans",
       school: "Konya Teknik Üniversitesi",
       period: "09/2023 - 06/2025",
+      logo: {
+        src: "/images/schools/konya-teknik-universitesi.svg",
+        width: 200,
+        height: 200,
+      },
     },
     {
       program: "Web Tasarımı ve Kodlama",
       school: "Anadolu Üniversitesi",
       period: "09/2023 - 06/2025",
+      logo: {
+        src: "/images/schools/anadolu-universitesi.svg",
+        width: 861,
+        height: 200,
+      },
     },
     {
       program: "Elektronik ve Haberleşme Mühendisliği",
       school: "Milli Savunma Üniversitesi, Kara Harp Okulu",
       period: "10/2017 - 06/2021",
+      logo: {
+        src: "/images/schools/kara-harp-okulu.png",
+        width: 146,
+        height: 185,
+      },
     },
   ],
 };

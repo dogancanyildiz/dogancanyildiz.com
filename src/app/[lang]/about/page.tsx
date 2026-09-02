@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Download } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
@@ -237,12 +238,32 @@ export default async function AboutPage({ params }: AboutPageProps) {
             {schools.map((entry) => (
               <li
                 key={`${entry.school}-${entry.period}`}
-                className="space-y-1 py-4 first:pt-0"
+                className="flex items-start gap-4 py-4 first:pt-0"
               >
-                <p className="text-sm leading-relaxed">{entry.program}</p>
-                <p className="meta-label">
-                  {entry.school} · {entry.period}
-                </p>
+                {/* The slot keeps its width whether or not the school has a
+                    mark, so the programme names stay aligned down the list.
+                    24 wide rather than square: two of the four marks are
+                    wordmarks, and 40px of height on those is 170px of width. */}
+                <div className="flex h-10 w-24 shrink-0 items-center justify-center">
+                  {entry.logo ? (
+                    <Image
+                      src={entry.logo.src}
+                      // Decorative: the school is written out in the line
+                      // beside it, and an alt here would say it twice.
+                      alt=""
+                      width={entry.logo.width}
+                      height={entry.logo.height}
+                      sizes="40px"
+                      className="h-10 w-auto max-w-full object-contain"
+                    />
+                  ) : null}
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-sm leading-relaxed">{entry.program}</p>
+                  <p className="meta-label">
+                    {entry.school} · {entry.period}
+                  </p>
+                </div>
               </li>
             ))}
           </ul>
