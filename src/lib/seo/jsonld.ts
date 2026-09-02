@@ -1,9 +1,9 @@
 import { certificates } from "@/content/profile";
+import { ogImageHref } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import type { Locale, Post, Project } from "@/lib/content";
-import { absoluteUrl } from "@/lib/seo/alternates";
-import { ogImagePathFor } from "@/lib/seo/og-image";
+import { absoluteUrl, contentUrl } from "@/lib/seo/alternates";
 import { siteConfig } from "@/lib/site-config";
 
 /**
@@ -138,7 +138,7 @@ export function buildWebSite(
  * repeated inline: one human wrote and published it. dateModified falls back
  * to the publish date, so an untouched post never advertises a revision it
  * never had. image is the absolute url of the post's own OG card, through the
- * same ogImagePathFor the page's openGraph uses: the two describing different
+ * same ogImageHref the page's openGraph uses: the two describing different
  * pictures of the same page is exactly the contradiction a consumer cannot
  * resolve.
  */
@@ -158,10 +158,10 @@ export function buildBlogPosting(
     inLanguage: locale,
     keywords: post.tags.join(", "),
     wordCount: post.metadata.wordCount,
-    image: absoluteUrl(locale, ogImagePathFor(`/blog/${post.slug}`)),
+    image: `${siteUrl()}${ogImageHref(locale, "post", post.slug)}`,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": absoluteUrl(locale, `/blog/${post.slug}`),
+      "@id": contentUrl(locale, "post", post.slug),
     },
     author,
     publisher: author,
@@ -182,8 +182,8 @@ export function buildProjectCreativeWork(
     dateCreated: String(project.year),
     ...(project.updated ? { dateModified: project.updated } : {}),
     keywords: project.stack.join(", "),
-    url: absoluteUrl(locale, `/projects/${project.slug}`),
-    image: absoluteUrl(locale, ogImagePathFor(`/projects/${project.slug}`)),
+    url: contentUrl(locale, "project", project.slug),
+    image: `${siteUrl()}${ogImageHref(locale, "project", project.slug)}`,
     creator: personRef(),
   };
 }

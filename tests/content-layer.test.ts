@@ -454,11 +454,11 @@ describe("content translated into one locale only", () => {
 
   it("does not leak the other locale into the hreflang set", async () => {
     const content = await contentWith({ posts, projects }, "production");
-    const { buildLanguageAlternates } = await import("@/lib/seo/alternates");
+    const { buildLanguageAlternates, contentUrlsByKey } =
+      await import("@/lib/seo/alternates");
 
     const languages = buildLanguageAlternates(
-      "/blog/en-only",
-      content.getPostLocalesByKey("en-only")
+      contentUrlsByKey("post", content.postSlugsByKey("en-only"))
     );
     expect(Object.keys(languages).sort()).toEqual(["en", "x-default"]);
   });

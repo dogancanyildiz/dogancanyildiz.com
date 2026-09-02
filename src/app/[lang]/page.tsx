@@ -39,12 +39,15 @@ export async function generateMetadata({
 
   // absoluteTitle because defaultTitle already carries the name and the role;
   // it must not pick up the layout's "%s | name" template on top of that.
-  return buildPageMetadata(locale, "/", {
-    title: t("defaultTitle"),
-    description: t("defaultDescription"),
-    availableLocales: [...routing.locales],
-    absoluteTitle: true,
-  });
+  return buildPageMetadata(
+    locale,
+    { kind: "static", path: "/" },
+    {
+      title: t("defaultTitle"),
+      description: t("defaultDescription"),
+      absoluteTitle: true,
+    }
+  );
 }
 
 export default async function HomePage({

@@ -12,17 +12,16 @@ import { mdxComponents } from "@/components/content/mdx-components";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
 import { ShareCard } from "@/components/sections/share-card";
-import { Link } from "@/i18n/navigation";
+import { contentHref, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import {
   getPost,
-  getPostLocalesByKey,
   getPostSlugs,
+  postSlugsByKey,
   readingMinutes,
 } from "@/lib/content";
 import { buildBlogPosting, buildBreadcrumbList } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
-import { ogImagePathFor } from "@/lib/seo/og-image";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocaleAndSlug } from "@/lib/route-params";
 
@@ -46,22 +45,26 @@ export async function generateMetadata({
 
   const tMeta = await getTranslations({ locale, namespace: "metadata" });
 
-  return buildPageMetadata(locale, `/blog/${slug}`, {
-    title: post.title,
-    description: post.summary,
-    availableLocales: getPostLocalesByKey(post.translationKey),
-    type: "article",
-    publishedTime: post.date,
-    modifiedTime: post.updated ?? post.date,
-    authors: [siteConfig.person.name],
-    tags: post.tags,
-    // This page has an opengraph-image.tsx of its own; without naming it the
-    // openGraph object here would keep pointing at the identity card.
-    imagePath: ogImagePathFor(`/blog/${slug}`),
-    // That card leads with the post title, so the identity alt would be
-    // describing an image nobody is served here.
-    imageAlt: tMeta("ogAltPage", { title: post.title }),
-  });
+  return buildPageMetadata(
+    locale,
+    {
+      kind: "content",
+      content: "post",
+      slugs: postSlugsByKey(post.translationKey),
+    },
+    {
+      title: post.title,
+      description: post.summary,
+      type: "article",
+      publishedTime: post.date,
+      modifiedTime: post.updated ?? post.date,
+      authors: [siteConfig.person.name],
+      tags: post.tags,
+      // That card leads with the post title, so the identity alt would be
+      // describing an image nobody is served here.
+      imageAlt: tMeta("ogAltPage", { title: post.title }),
+    }
+  );
 }
 
 export default async function PostPage({ params }: PostPageProps) {
@@ -78,7 +81,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
   const breadcrumb = buildBreadcrumbList(locale, [
     { name: t("title"), path: "/blog" },
-    { name: post.title, path: `/blog/${slug}` },
+    { name: post.title, path: contentHref(locale, "post", slug) },
   ]);
 
   return (
@@ -123,7 +126,7 @@ export default async function PostPage({ params }: PostPageProps) {
         <MDXContent code={post.code} components={mdxComponents} />
       </div>
 
-      <ShareCard locale={locale} path={`/blog/${slug}`} title={post.title} />
+      <ShareCard locale={locale} kind="post" slug={slug} title={post.title} />
 
       <ContactCta />
     </PageSection>

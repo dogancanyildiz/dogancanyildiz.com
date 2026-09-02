@@ -1,11 +1,12 @@
 import Image from "next/image";
 import { Mail } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { ogImageHref } from "@/i18n/navigation";
 import { LinkedinIcon, WhatsAppIcon, XIcon } from "@/components/ui/brand-icon";
 import { CopyLinkButton } from "@/components/sections/copy-link-button";
-import type { Locale } from "@/lib/content";
-import { absoluteUrl, localePath } from "@/lib/seo/alternates";
-import { OG_IMAGE_SIZE, ogImagePathFor } from "@/lib/seo/og-image";
+import type { ContentKind, Locale } from "@/lib/content";
+import { contentUrl } from "@/lib/seo/alternates";
+import { OG_IMAGE_SIZE } from "@/lib/seo/og-image";
 
 /**
  * Same shape as the footer's text links (see footerTextLinkClass in
@@ -19,8 +20,10 @@ const shareLinkClass =
 
 interface ShareCardProps {
   locale: Locale;
-  /** Locale relative path of the page being shared, e.g. /blog/a-slug. */
-  path: string;
+  /** Which content section the page being shared belongs to. */
+  kind: ContentKind;
+  /** That content's slug in this locale. */
+  slug: string;
   /** The page's own title; goes into the prefilled share text. */
   title: string;
 }
@@ -34,17 +37,17 @@ interface ShareCardProps {
  * the page on. It is the page's real card, served from the same metadata image
  * route the crawlers read, not a mockup that can drift from it.
  */
-export async function ShareCard({ locale, path, title }: ShareCardProps) {
+export async function ShareCard({ locale, kind, slug, title }: ShareCardProps) {
   const [t, tMeta] = await Promise.all([
     getTranslations("share"),
     getTranslations("metadata"),
   ]);
 
-  const url = absoluteUrl(locale, path);
-  // Locale relative, because the image sits under the page's own segment and
-  // the browser is already on that locale; localePath applies the as-needed
-  // prefix the metadata image route was generated with.
-  const cardSrc = localePath(locale, ogImagePathFor(path));
+  const url = contentUrl(locale, kind, slug);
+  // Already locale prefixed: ogImageHref goes through the same localized
+  // template the page itself renders at, so this is the exact path the
+  // metadata image route was generated with.
+  const cardSrc = ogImageHref(locale, kind, slug);
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
 

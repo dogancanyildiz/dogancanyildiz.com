@@ -101,15 +101,17 @@ describe("empty states", () => {
 
 describe("share block placement", () => {
   it.each([
-    ["blog post", BLOG_DETAIL, "/blog/${slug}"],
-    ["project", PROJECT_DETAIL, "/projects/${slug}"],
-  ])("closes the %s article on the share block", (_name, file, path) => {
+    ["blog post", BLOG_DETAIL, "post"],
+    ["project", PROJECT_DETAIL, "project"],
+  ])("closes the %s article on the share block", (_name, file, kind) => {
     const source = read(file);
 
     expect(source).toContain("<ShareCard");
     // The card belongs to the page the reader just finished, so it is handed
-    // the page's own path rather than falling back to the identity image.
-    expect(source).toContain(`path={\`${path}\`}`);
+    // this content's own kind and slug rather than falling back to the
+    // identity image.
+    expect(source).toContain(`kind="${kind}"`);
+    expect(source).toContain("slug={slug}");
   });
 
   it.each([

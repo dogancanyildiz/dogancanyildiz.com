@@ -12,19 +12,14 @@ import { ShareCard } from "@/components/sections/share-card";
 import { Button } from "@/components/ui/button";
 import { GithubIcon } from "@/components/ui/brand-icon";
 import { SkillTag } from "@/components/ui/skill-tag";
-import { Link } from "@/i18n/navigation";
+import { contentHref, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import {
-  getProject,
-  getProjectLocalesByKey,
-  getProjectSlugs,
-} from "@/lib/content";
+import { getProject, getProjectSlugs, projectSlugsByKey } from "@/lib/content";
 import {
   buildBreadcrumbList,
   buildProjectCreativeWork,
 } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
-import { ogImagePathFor } from "@/lib/seo/og-image";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocaleAndSlug } from "@/lib/route-params";
 
@@ -48,21 +43,25 @@ export async function generateMetadata({
 
   const tMeta = await getTranslations({ locale, namespace: "metadata" });
 
-  return buildPageMetadata(locale, `/projects/${slug}`, {
-    title: project.title,
-    description: project.summary,
-    availableLocales: getProjectLocalesByKey(project.translationKey),
-    type: "article",
-    ...(project.updated ? { modifiedTime: project.updated } : {}),
-    authors: [siteConfig.person.name],
-    tags: project.stack,
-    // This page has an opengraph-image.tsx of its own; without naming it the
-    // openGraph object here would keep pointing at the identity card.
-    imagePath: ogImagePathFor(`/projects/${slug}`),
-    // Same reason as the blog card: the alt has to name the title the image
-    // actually shows.
-    imageAlt: tMeta("ogAltPage", { title: project.title }),
-  });
+  return buildPageMetadata(
+    locale,
+    {
+      kind: "content",
+      content: "project",
+      slugs: projectSlugsByKey(project.translationKey),
+    },
+    {
+      title: project.title,
+      description: project.summary,
+      type: "article",
+      ...(project.updated ? { modifiedTime: project.updated } : {}),
+      authors: [siteConfig.person.name],
+      tags: project.stack,
+      // Same reason as the blog card: the alt has to name the title the
+      // image actually shows.
+      imageAlt: tMeta("ogAltPage", { title: project.title }),
+    }
+  );
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
@@ -78,7 +77,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const breadcrumb = buildBreadcrumbList(locale, [
     { name: t("title"), path: "/projects" },
-    { name: project.title, path: `/projects/${slug}` },
+    { name: project.title, path: contentHref(locale, "project", slug) },
   ]);
 
   return (
@@ -178,7 +177,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <ShareCard
         locale={locale}
-        path={`/projects/${slug}`}
+        kind="project"
+        slug={slug}
         title={project.title}
       />
 

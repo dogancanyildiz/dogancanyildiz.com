@@ -30,11 +30,14 @@ export async function generateMetadata({
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "privacy" });
 
-  return buildPageMetadata(locale, "/privacy", {
-    title: t("title"),
-    description: t("description"),
-    availableLocales: [...routing.locales],
-  });
+  return buildPageMetadata(
+    locale,
+    { kind: "static", path: "/privacy" },
+    {
+      title: t("title"),
+      description: t("description"),
+    }
+  );
 }
 
 export default async function PrivacyPage({ params }: PrivacyPageProps) {

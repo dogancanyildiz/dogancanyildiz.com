@@ -247,6 +247,9 @@ describe("page openGraph metadata", () => {
   it.each(CASES)(
     "$page.name in $locale keeps the og image of its own locale",
     async ({ locale, page }) => {
+      const { ogImageHref } = await import("@/i18n/navigation");
+      const { absoluteUrl, siteUrl } = await import("@/lib/seo/alternates");
+      const { OG_IMAGE_PATH } = await import("@/lib/seo/og-image");
       const metadata = await metadataFor(page, locale);
       const images = (
         metadata.openGraph as {
@@ -262,12 +265,19 @@ describe("page openGraph metadata", () => {
       const [ogImage] = images;
       if (!ogImage) throw new Error(`${page.name} published no og image`);
 
+      // A content page's own slug is no longer guaranteed to match across
+      // locales, so its card path can only be rebuilt through ogImageHref
+      // (the same function the page itself calls), not by string pasting
+      // page.path onto a prefix.
       const ownCard = /^(projects|blog)\//.test(page.name);
-      const segment = ownCard ? page.path : "";
-      const prefix = locale === "en" ? "/en" : "";
-      expect(ogImage.url).toBe(
-        `https://dogancanyildiz.com${prefix}${segment}/opengraph-image/default`
-      );
+      const expectedUrl = ownCard
+        ? `${siteUrl()}${ogImageHref(
+            locale,
+            page.name.startsWith("blog/") ? "post" : "project",
+            page.path.split("/").pop() ?? ""
+          )}`
+        : absoluteUrl(locale, OG_IMAGE_PATH);
+      expect(ogImage.url).toBe(expectedUrl);
       expect(ogImage.width).toBe(1200);
       expect(ogImage.alt).toBeTruthy();
     }
@@ -276,16 +286,19 @@ describe("page openGraph metadata", () => {
   it.each([
     {
       section: "blog",
+      kind: "post" as const,
       route: () => import("@/app/[lang]/blog/[slug]/opengraph-image"),
     },
     {
       section: "projects",
+      kind: "project" as const,
       route: () => import("@/app/[lang]/projects/[slug]/opengraph-image"),
     },
   ])(
     "$section detail pages have a card at the path their metadata names",
-    async ({ section, route: load }) => {
-      const { ogImagePathFor } = await import("@/lib/seo/og-image");
+    async ({ section, kind, route: load }) => {
+      const { contentHref, ogImageHref } = await import("@/i18n/navigation");
+      const { OG_IMAGE_PATH } = await import("@/lib/seo/og-image");
       const route = await load();
 
       // Every slug the page prerenders has to have an image param too,
@@ -303,9 +316,14 @@ describe("page openGraph metadata", () => {
             );
       expect([...slugs].sort()).toEqual([...expected].sort());
 
-      expect(ogImagePathFor(`/${section}/some-slug`)).toBe(
-        `/${section}/some-slug/opengraph-image/default`
-      );
+      // The join heuristic ogImagePathFor used to hand-implement is now
+      // getPathname's own localized template; this pins that the two still
+      // agree, for every routed locale, once the content path is localized.
+      for (const locale of routing.locales) {
+        expect(ogImageHref(locale, kind, "some-slug")).toBe(
+          `${contentHref(locale, kind, "some-slug")}${OG_IMAGE_PATH}`
+        );
+      }
 
       const slug =
         section === "blog" ? getPostSlugs("tr")[0] : getProjectSlugs("tr")[0];

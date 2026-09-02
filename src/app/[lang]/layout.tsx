@@ -11,7 +11,8 @@ import { fontVariables } from "@/fonts";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import { getUntranslatedPaths } from "@/lib/content";
-import { buildOpenGraph } from "@/lib/seo/alternates";
+import { absoluteUrl, buildOpenGraph } from "@/lib/seo/alternates";
+import { OG_IMAGE_PATH } from "@/lib/seo/og-image";
 import { ThemeProvider } from "@/components/theme-provider";
 import { layoutUmamiTag } from "@/components/umami-script";
 import { ConsentProvider } from "@/components/consent/consent-provider";
@@ -121,12 +122,19 @@ export async function generateMetadata({
     description: t("defaultDescription"),
     // Only the home page keeps this object. Every other segment overrides it
     // with its own, otherwise it would inherit the home page url and title.
-    openGraph: buildOpenGraph(lang, "/", {
-      title: t("defaultTitle"),
-      description: t("defaultDescription"),
-      siteName: t("siteName"),
-      imageAlt: t("ogAlt"),
-    }),
+    openGraph: buildOpenGraph(
+      lang,
+      {
+        url: absoluteUrl(lang, "/"),
+        imageUrl: absoluteUrl(lang, OG_IMAGE_PATH),
+      },
+      {
+        title: t("defaultTitle"),
+        description: t("defaultDescription"),
+        siteName: t("siteName"),
+        imageAlt: t("ogAlt"),
+      }
+    ),
   };
 }
 

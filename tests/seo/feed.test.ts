@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ogImageHref } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getPosts } from "@/lib/content";
-import { absoluteUrl } from "@/lib/seo/alternates";
-import { ogImagePathFor } from "@/lib/seo/og-image";
+import { siteUrl } from "@/lib/seo/alternates";
 import { escapeXml } from "@/lib/seo/xml";
 
 // next-intl/server resolves to its client build outside a Next request, so
@@ -117,7 +117,7 @@ describe("rss feed route", () => {
     }
   );
 
-  it("points every link and guid at the url of its own locale", async () => {
+  it("points every link at the url of its own locale", async () => {
     const { body } = await feedFor("tr");
     const links = textInside(body, "link");
 
@@ -127,6 +127,34 @@ describe("rss feed route", () => {
       expect(link.startsWith("https://dogancanyildiz.com/en/")).toBe(false);
     }
     expect(textInside(body, "language")).toEqual(["tr"]);
+  });
+
+  it.each([...routing.locales])(
+    "gives every %s item a non permalink, translationKey based guid",
+    async (locale) => {
+      const { body } = await feedFor(locale);
+      const guids = [...body.matchAll(/<guid ([^>]*?)>([^<]*)<\/guid>/g)];
+
+      expect(guids).toHaveLength(getPosts(locale).length);
+      for (const [index, [, attributes, guid]] of guids.entries()) {
+        const post = getPosts(locale)[index];
+        expect(attributes).toContain('isPermaLink="false"');
+        // A key based tag URI (RFC 4151), not the post's own url: a slug or a
+        // section path can change again, and this is the identifier that
+        // survives that.
+        expect(guid).toBe(
+          `tag:dogancanyildiz.com,2026:post/${locale}/${post?.translationKey}`
+        );
+      }
+    }
+  );
+
+  it("keeps the guid's date component fixed at 2026", async () => {
+    // This literal is a contract, not a date field: bumping it would
+    // redeliver the entire archive to every subscriber a second time.
+    const { body } = await feedFor("tr");
+
+    expect(body).toContain("tag:dogancanyildiz.com,2026:post/tr/");
   });
 
   it("names the language of the feed in its channel title", async () => {
@@ -181,7 +209,7 @@ describe("rss feed route", () => {
       for (const [index, attributes] of cards.entries()) {
         const post = getPosts(locale)[index];
         expect(attributes).toContain(
-          `url="${absoluteUrl(locale, ogImagePathFor(`/blog/${post?.slug}`))}"`
+          `url="${siteUrl()}${ogImageHref(locale, "post", post?.slug ?? "")}"`
         );
         expect(attributes).toContain('type="image/png"');
         expect(attributes).toContain('medium="image"');

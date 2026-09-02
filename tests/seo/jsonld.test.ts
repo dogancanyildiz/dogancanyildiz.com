@@ -92,6 +92,9 @@ describe("blog posting schema", () => {
       const posts = getPosts(locale);
       expect(posts.length).toBeGreaterThan(0);
 
+      const { ogImageHref } = await import("@/i18n/navigation");
+      const { contentUrl } = await import("@/lib/seo/alternates");
+
       for (const post of posts) {
         const data = buildBlogPosting(locale, post);
 
@@ -101,11 +104,15 @@ describe("blog posting schema", () => {
         expect(data.publisher).toEqual(data.author);
         // The post's own card, not the identity one: the page's og:image
         // points here too, and a consumer handed two different images for the
-        // same page has no way to pick.
-        const prefix = locale === "en" ? "/en" : "";
+        // same page has no way to pick. Locale localized, since a Turkish
+        // post now lives under /yazilar rather than /blog.
         expect(data.image).toBe(
-          `https://dogancanyildiz.com${prefix}/blog/${post.slug}/opengraph-image/default`
+          `https://dogancanyildiz.com${ogImageHref(locale, "post", post.slug)}`
         );
+        expect(data.mainEntityOfPage).toEqual({
+          "@type": "WebPage",
+          "@id": contentUrl(locale, "post", post.slug),
+        });
         expect(data.inLanguage).toBe(locale);
         expect(data.datePublished).toBe(post.date);
         expect(data.dateModified).toBe(post.updated ?? post.date);

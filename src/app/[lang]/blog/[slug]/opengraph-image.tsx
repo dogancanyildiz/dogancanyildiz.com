@@ -54,7 +54,7 @@ export async function generateImageMetadata({
  * The card a shared post gets: the same layout as the identity image, with
  * the post title in the middle band and the prompt reading like the file was
  * catted. src/app/[lang]/blog/[slug]/page.tsx has to point openGraph at this
- * path (see ogImagePathFor), otherwise the post advertises the generic card.
+ * path (see ogImageHref), otherwise the post advertises the generic card.
  */
 export default async function PostOGImage({ params }: { params: ImageParams }) {
   const { locale, slug } = await resolveParams(params);

@@ -37,31 +37,37 @@ vi.mock("next-intl/server", () => ({
 }));
 
 const { ShareCard } = await import("@/components/sections/share-card");
+const { contentUrl } = await import("@/lib/seo/alternates");
+const { ogImageHref } = await import("@/i18n/navigation");
 
 const TITLE = 'Tom & Jerry\'s "quotes" <tags>';
 
 async function renderCard(
   locale: "en" | "tr",
-  path: string,
+  kind: "post" | "project",
+  slug: string,
   title: string = TITLE
 ) {
   activeLocale = locale;
   return render(
     await resolveServerTree(
-      <ShareCard locale={locale} path={path} title={title} />
+      <ShareCard locale={locale} kind={kind} slug={slug} title={title} />
     )
   );
 }
 
 describe("share card", () => {
   it("shows the page's own card, not the site identity one", async () => {
-    const { container } = await renderCard("tr", "/blog/a-slug");
+    const { container } = await renderCard("tr", "post", "a-slug");
     const image = container.querySelector("img");
 
     // The metadata image route of this very page. A card built from the
     // identity image would be a picture of something the page never publishes.
     expect(image?.getAttribute("src")).toBe(
-      "/blog/a-slug/opengraph-image/default"
+      ogImageHref("tr", "post", "a-slug")
+    );
+    expect(image?.getAttribute("src")).toBe(
+      "/yazilar/a-slug/opengraph-image/default"
     );
     expect(image?.getAttribute("width")).toBe("1200");
     expect(image?.getAttribute("height")).toBe("630");
@@ -72,7 +78,7 @@ describe("share card", () => {
   });
 
   it("prefixes the card path in the non default locale", async () => {
-    const { container } = await renderCard("en", "/projects/hubit");
+    const { container } = await renderCard("en", "project", "hubit");
 
     expect(container.querySelector("img")?.getAttribute("src")).toBe(
       "/en/projects/hubit/opengraph-image/default"
@@ -80,7 +86,7 @@ describe("share card", () => {
   });
 
   it("keeps the picture at the ratio the card is drawn at", async () => {
-    const { container } = await renderCard("tr", "/blog/a-slug");
+    const { container } = await renderCard("tr", "post", "a-slug");
     const className = container.querySelector("img")?.className ?? "";
 
     // Without h-auto the intrinsic height attribute survives the w-full
@@ -92,7 +98,7 @@ describe("share card", () => {
   });
 
   it("describes the image with the same alt the card is published with", async () => {
-    await renderCard("en", "/blog/a-slug", "A post title");
+    await renderCard("en", "post", "a-slug", "A post title");
 
     expect(
       screen.getByAltText(
@@ -105,7 +111,7 @@ describe("share card", () => {
     ["en", en],
     ["tr", tr],
   ] as const)("labels the block in %s", async (locale, messages) => {
-    await renderCard(locale, "/blog/a-slug");
+    await renderCard(locale, "post", "a-slug");
 
     expect(
       screen.getByRole("heading", { name: messages.share.title })
@@ -117,9 +123,9 @@ describe("share card", () => {
   });
 
   it("encodes the title and the absolute url into every share target", async () => {
-    await renderCard("tr", "/blog/a-slug");
+    await renderCard("tr", "post", "a-slug");
 
-    const url = "https://dogancanyildiz.com/blog/a-slug";
+    const url = contentUrl("tr", "post", "a-slug");
     const encodedUrl = encodeURIComponent(url);
     const encodedTitle = encodeURIComponent(TITLE);
 
@@ -158,7 +164,7 @@ describe("share card", () => {
   });
 
   it("sends the whatsapp link to the share sheet, not to the owner's number", async () => {
-    await renderCard("tr", "/blog/a-slug");
+    await renderCard("tr", "post", "a-slug");
 
     // whatsappHref in src/lib/site.ts opens a chat with the owner; this is a
     // reader passing the page on, not messaging him.
@@ -170,7 +176,7 @@ describe("share card", () => {
   });
 
   it("opens the web targets in a new tab without leaking the opener, and mailto in place", async () => {
-    const { container } = await renderCard("en", "/blog/a-slug");
+    const { container } = await renderCard("en", "post", "a-slug");
     const links = [...container.querySelectorAll("a")];
 
     expect(links).toHaveLength(4);
@@ -192,7 +198,7 @@ describe("share card", () => {
   });
 
   it("gives every share control a 44px target", async () => {
-    const { container } = await renderCard("en", "/blog/a-slug");
+    const { container } = await renderCard("en", "post", "a-slug");
 
     for (const element of container.querySelectorAll("a, button")) {
       expect(element.className, element.textContent ?? "").toContain(
@@ -202,7 +208,7 @@ describe("share card", () => {
   });
 
   it("prints the url as selectable text next to the copy button", async () => {
-    await renderCard("en", "/projects/hubit");
+    await renderCard("en", "project", "hubit");
 
     // The fallback when the clipboard is unavailable or refuses.
     expect(

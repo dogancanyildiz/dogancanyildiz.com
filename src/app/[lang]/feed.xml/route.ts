@@ -1,13 +1,15 @@
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { ogImageHref } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getPosts, type Locale } from "@/lib/content";
-import { absoluteUrl, feedTitle } from "@/lib/seo/alternates";
 import {
-  OG_IMAGE_CONTENT_TYPE,
-  OG_IMAGE_SIZE,
-  ogImagePathFor,
-} from "@/lib/seo/og-image";
+  absoluteUrl,
+  contentUrl,
+  feedTitle,
+  siteUrl,
+} from "@/lib/seo/alternates";
+import { OG_IMAGE_CONTENT_TYPE, OG_IMAGE_SIZE } from "@/lib/seo/og-image";
 import { escapeXml } from "@/lib/seo/xml";
 
 export const dynamic = "force-static";
@@ -35,7 +37,7 @@ export async function GET(
 
   const items = posts
     .map((post) => {
-      const url = absoluteUrl(locale, `/blog/${post.slug}`);
+      const url = contentUrl(locale, "post", post.slug);
       // Each post draws its own card (src/app/[lang]/blog/[slug]/opengraph-image.tsx),
       // so a reader that renders images has one per entry instead of falling
       // back to the site identity card, or to nothing.
@@ -45,12 +47,24 @@ export async function GET(
       // metadata image route, so the feed would have to fetch every PNG at
       // build time only to fill in a number no reader needs. media:content
       // leaves length optional and carries the dimensions instead.
-      const cardUrl = absoluteUrl(locale, ogImagePathFor(`/blog/${post.slug}`));
+      const cardUrl = `${siteUrl()}${ogImageHref(locale, "post", post.slug)}`;
+      // isPermaLink="false" plus a translationKey based tag URI (RFC 4151),
+      // not the post's own url: this release renames both the Turkish
+      // section path and, for two posts, the slug itself, so every guid
+      // already changes once here regardless of which identifier is chosen.
+      // A key based tag URI is the one choice that does not have to change
+      // again the next time a slug or a section path does.
+      //
+      // The "2026" is a fixed part of the contract, not a date field:
+      // changing it would redeliver the entire archive to every subscriber a
+      // second time. Never bump it. tests/seo/feed.test.ts pins the literal
+      // string.
+      const guid = `tag:dogancanyildiz.com,2026:post/${locale}/${post.translationKey}`;
       return [
         "    <item>",
         `      <title>${escapeXml(post.title)}</title>`,
         `      <link>${escapeXml(url)}</link>`,
-        `      <guid isPermaLink="true">${escapeXml(url)}</guid>`,
+        `      <guid isPermaLink="false">${escapeXml(guid)}</guid>`,
         `      <pubDate>${new Date(post.date).toUTCString()}</pubDate>`,
         `      <description>${escapeXml(post.summary)}</description>`,
         `      <media:content url="${escapeXml(cardUrl)}" type="${OG_IMAGE_CONTENT_TYPE}" medium="image" width="${OG_IMAGE_SIZE.width}" height="${OG_IMAGE_SIZE.height}" />`,

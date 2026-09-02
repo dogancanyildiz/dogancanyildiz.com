@@ -44,24 +44,22 @@ describe("sitemap", () => {
     }
   });
 
-  it("lists every project in both locales because all of them are translated", async () => {
+  it("lists every project at its own locale's localized url", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const { getProjects } = await import("@/lib/content");
+    const { contentUrl } = await import("@/lib/seo/alternates");
     const urls = sitemap().map((entry) => entry.url);
 
     // Each locale's own slug: a project's slug is no longer guaranteed to be
     // the same in both locales (not-ortalamasi-hesaplayici and
-    // bilet-satin-alma-sistemi are Turkish renames), so the two loops read
-    // from that locale's own list rather than reusing one slug for both urls.
+    // bilet-satin-alma-sistemi are Turkish renames), and the Turkish section
+    // itself is now /projeler rather than /projects, so both loops read from
+    // that locale's own list and go through contentUrl to get its own shape.
     for (const project of getProjects("en")) {
-      expect(urls).toContain(
-        `https://dogancanyildiz.com/en/projects/${project.slug}`
-      );
+      expect(urls).toContain(contentUrl("en", "project", project.slug));
     }
     for (const project of getProjects("tr")) {
-      expect(urls).toContain(
-        `https://dogancanyildiz.com/projects/${project.slug}`
-      );
+      expect(urls).toContain(contentUrl("tr", "project", project.slug));
     }
   });
 
@@ -70,43 +68,43 @@ describe("sitemap", () => {
     const urls = sitemap().map((entry) => entry.url);
     const enUrl =
       "https://dogancanyildiz.com/en/blog/capt-preparation-in-a-docker-lab";
-    const trUrl = "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik";
+    const trUrl = "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik";
 
     expect(urls).toContain(enUrl);
     expect(urls).toContain(trUrl);
   });
 
-  it("puts both languages on a bilingual post entry", async () => {
+  it("puts both languages, each at its own slug, on a bilingual post entry", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const entries = sitemap();
     const entry = entries.find(
       (item) =>
-        item.url === "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
+        item.url === "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik"
     );
 
     expect(entry).toBeDefined();
-    // The Turkish slug for this post did not change, so its own path is
-    // still what the (not yet locale-aware) alternate builder reuses for the
-    // English link too; this is the same known gap noted below, not a fix
-    // for it. The real English slug is now capt-preparation-in-a-docker-lab.
+    // Each locale's alternate now comes from that locale's own slug
+    // (contentUrlsByKey), not from reusing this entry's own path: the
+    // Turkish slug never changed, but the English one is a different word.
     expect(entry?.alternates?.languages?.en).toBe(
-      "https://dogancanyildiz.com/en/blog/capt-sinavina-hazirlik"
+      "https://dogancanyildiz.com/en/blog/capt-preparation-in-a-docker-lab"
     );
     expect(entry?.alternates?.languages?.tr).toBe(
-      "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
+      "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik"
     );
     expect(entry?.alternates?.languages?.["x-default"]).toBe(
-      "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
+      "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik"
     );
   });
 
-  it("lists the bilingual post at both locale urls with both languages in its alternates", async () => {
+  it("lists the bilingual post at both locale urls with both languages, each at its own slug", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const entries = sitemap();
     const urls = entries.map((entry) => entry.url);
     const enUrl =
       "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify";
-    const trUrl = "https://dogancanyildiz.com/blog/coolify-ile-kendi-sunucumda";
+    const trUrl =
+      "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda";
 
     expect(urls).toContain(enUrl);
     expect(urls).toContain(trUrl);
@@ -114,20 +112,14 @@ describe("sitemap", () => {
     const enEntry = entries.find((item) => item.url === enUrl);
     const trEntry = entries.find((item) => item.url === trUrl);
 
-    // Each entry's own url is locale-correct (built from that locale's own
-    // slug), but the cross-locale alternate here still reuses that same
-    // entry's path for the other locale too, which is only right when both
-    // locales share one slug. Fixing this to build each alternate from the
-    // *other* locale's own slug is src/lib/seo/alternates.ts's contentUrl,
-    // planned for the SEO surfaces task; asserting the current shape here
-    // pins the known gap instead of hiding it.
+    // Each entry's own url is locale-correct, and now so is the cross-locale
+    // alternate: it is built from the *other* locale's own slug
+    // (contentUrlsByKey), not from reusing this entry's own path. This used
+    // to be a known gap (both locales fell back to whichever slug the
+    // current entry carried); contentUrl/contentUrlsByKey close it.
     expect(enEntry?.alternates?.languages?.en).toBe(enUrl);
-    expect(enEntry?.alternates?.languages?.tr).toBe(
-      "https://dogancanyildiz.com/blog/self-hosting-with-coolify"
-    );
-    expect(trEntry?.alternates?.languages?.en).toBe(
-      "https://dogancanyildiz.com/en/blog/coolify-ile-kendi-sunucumda"
-    );
+    expect(enEntry?.alternates?.languages?.tr).toBe(trUrl);
+    expect(trEntry?.alternates?.languages?.en).toBe(enUrl);
     expect(trEntry?.alternates?.languages?.tr).toBe(trUrl);
   });
 
@@ -137,7 +129,7 @@ describe("sitemap", () => {
     const entries = sitemap();
     const entry = entries.find(
       (item) =>
-        item.url === "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
+        item.url === "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik"
     );
     const post = getPost("tr", "capt-sinavina-hazirlik");
 
@@ -150,8 +142,11 @@ describe("sitemap", () => {
     const { getPost, getProject } = await import("@/lib/content");
     const entries = sitemap();
 
+    // English sections stay under /en/blog and /en/projects; the Turkish
+    // sections are now /yazilar and /projeler, so the pattern has to accept
+    // either shape and map it back to a kind and a locale.
     const pattern =
-      /^https:\/\/dogancanyildiz\.com(\/en)?\/(blog|projects)\/([a-z0-9-]+)$/;
+      /^https:\/\/dogancanyildiz\.com(?:(\/en)\/(blog|projects)|\/(yazilar|projeler))\/([a-z0-9-]+)$/;
 
     let matchedAny = false;
     for (const entry of entries) {
@@ -159,11 +154,13 @@ describe("sitemap", () => {
       if (!match) continue;
       matchedAny = true;
 
-      const [, enPrefix, section, slug] = match;
+      const [, enPrefix, enSection, trSection, slug] = match;
       if (!slug) throw new Error(`no slug captured from ${entry.url}`);
       const locale = enPrefix ? "en" : "tr";
+      const section = enPrefix ? enSection : trSection;
+      const isPost = section === "blog" || section === "yazilar";
 
-      if (section === "blog") {
+      if (isPost) {
         expect(getPost(locale, slug), entry.url).toBeDefined();
       } else {
         expect(getProject(locale, slug), entry.url).toBeDefined();
@@ -184,6 +181,32 @@ describe("sitemap", () => {
     const sitemap = (await import("@/app/sitemap")).default;
 
     expect(JSON.stringify(sitemap())).not.toContain("example.com");
+  });
+
+  // 2026-09-02 decision: a sixth project (koklu-hukuk, a brand name, same
+  // slug in both locales) plus the localized Turkish sections give
+  // 6 static x 2 + 6 projects x 2 + 3 posts x 2 = 30. A wrong count here is
+  // the cheapest place to catch a miscounted STATIC_PAGES entry or a project
+  // silently dropped from one locale.
+  it("lists exactly 30 urls: 6 static, 6 projects and 3 posts, each in both locales", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const { getPosts, getProjects } = await import("@/lib/content");
+
+    expect(getProjects("tr")).toHaveLength(6);
+    expect(getProjects("en")).toHaveLength(6);
+    expect(getPosts("tr")).toHaveLength(3);
+    expect(getPosts("en")).toHaveLength(3);
+    expect(sitemap()).toHaveLength(30);
+  });
+
+  it("gives the brand-named sixth project the same slug in both locales", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const urls = sitemap().map((entry) => entry.url);
+
+    expect(urls).toContain("https://dogancanyildiz.com/projeler/koklu-hukuk");
+    expect(urls).toContain(
+      "https://dogancanyildiz.com/en/projects/koklu-hukuk"
+    );
   });
 });
 
@@ -247,25 +270,32 @@ describe("sitemap serialisation", () => {
 describe("hreflang alternates for partly translated content", () => {
   it("does not advertise a locale the content was never translated into", async () => {
     const { buildLanguageAlternates } = await import("@/lib/seo/alternates");
-    const languages = buildLanguageAlternates("/blog/only-in-turkish", ["tr"]);
+    const languages = buildLanguageAlternates({
+      tr: "https://dogancanyildiz.com/yazilar/only-in-turkish",
+    });
 
     expect(languages).toEqual({
-      tr: "https://dogancanyildiz.com/blog/only-in-turkish",
-      "x-default": "https://dogancanyildiz.com/blog/only-in-turkish",
+      tr: "https://dogancanyildiz.com/yazilar/only-in-turkish",
+      "x-default": "https://dogancanyildiz.com/yazilar/only-in-turkish",
     });
     expect(languages.en).toBeUndefined();
   });
 
   it("prefers the default locale for x-default when both locales exist", async () => {
     const { buildLanguageAlternates } = await import("@/lib/seo/alternates");
-    const languages = buildLanguageAlternates("/projects/both", ["en", "tr"]);
+    const languages = buildLanguageAlternates({
+      en: "https://dogancanyildiz.com/en/projects/both",
+      tr: "https://dogancanyildiz.com/projeler/both",
+    });
 
     expect(languages["x-default"]).toBe(languages.tr);
   });
 
   it("falls back to the only available locale for x-default", async () => {
     const { buildLanguageAlternates } = await import("@/lib/seo/alternates");
-    const languages = buildLanguageAlternates("/projects/tr-only", ["tr"]);
+    const languages = buildLanguageAlternates({
+      tr: "https://dogancanyildiz.com/projeler/tr-only",
+    });
 
     expect(languages["x-default"]).toBe(languages.tr);
   });
@@ -273,10 +303,13 @@ describe("hreflang alternates for partly translated content", () => {
   it("is the same helper the page head uses, so the two can never disagree", async () => {
     const { buildAlternates, buildLanguageAlternates } =
       await import("@/lib/seo/alternates");
+    const urlsByLocale = {
+      tr: "https://dogancanyildiz.com/yazilar/x",
+    };
 
-    expect(buildAlternates("tr", "/blog/x", ["tr"]).languages).toEqual(
-      buildLanguageAlternates("/blog/x", ["tr"], "tr")
-    );
+    expect(
+      buildAlternates("tr", urlsByLocale.tr, urlsByLocale).languages
+    ).toEqual(buildLanguageAlternates(urlsByLocale));
   });
 });
 
