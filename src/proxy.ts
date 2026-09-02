@@ -1,9 +1,6 @@
 import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
-import {
-  LEGACY_EN_PAGE_REDIRECTS,
-  unprefixedTurkishPath,
-} from "@/i18n/legacy-en-paths";
+import { legacyRedirectTarget } from "@/i18n/legacy-en-paths";
 import { routing } from "@/i18n/routing";
 import { isLocalizedRoutePath } from "@/lib/locale-from-pathname";
 
@@ -23,13 +20,16 @@ export default function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
 
-  const legacyEnglish = LEGACY_EN_PAGE_REDIRECTS[pathname];
-  const legacyTurkish = unprefixedTurkishPath(pathname);
-  const permanentTarget = legacyEnglish ?? legacyTurkish;
-  if (permanentTarget && permanentTarget !== pathname) {
+  const permanentTarget = legacyRedirectTarget(pathname);
+  if (permanentTarget) {
     // Permanent: these URLs used to be the public pages. 308 keeps the
     // method; Google treats it as a ranking-passing move the same way as 301.
-    const url = request.nextUrl.clone();
+    //
+    // A plain URL, not nextUrl.clone(): NextURL records the trailing slash of
+    // the incoming path and re-applies it when it formats the pathname, so
+    // assigning "/en/about" to a clone of "/about/" still emits
+    // "/en/about/", which is a second redirect the site does not serve.
+    const url = new URL(request.url);
     url.pathname = permanentTarget;
     return NextResponse.redirect(url, 308);
   }
