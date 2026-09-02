@@ -5,13 +5,14 @@ CSP `img-src 'self' data:` olduğu için hotlink yoktur, her dosya repoda durur.
 
 ## Kaynak ve kullanım
 
-Credly rozet görselleri (11 PNG, 340x340, RGBA): rozeti kazanan kişi kendi
+Credly rozet görselleri (11 PNG, 600x600, RGBA): rozeti kazanan kişi kendi
 rozetini gösterebilir. Görseller Credly'nin herkese açık rozet kayıtlarından
-indirildi (2026-09-02), 340x340 boyutunda alındı ve sharp ile kayıpsız yeniden
-kodlandı (`compressionLevel: 9`, `effort: 10`; hiçbirinde renk sayısı 256'nın
-altında olmadığı için palet kullanılmadı, çıkan dosya piksel piksel kaynakla
-aynı). `cybersecurity-fundamentals.png` kaynakta 600x600 geldiği için lanczos3
-ile 340x340'a indirildi, diğerleri boyut değiştirmedi.
+indirildi (2026-09-02), 600x600 boyutunda alındı ve sharp ile kayıpsız yeniden
+kodlandı (`compressionLevel: 9`, `effort: 10`; üç dosyada renk sayısı 256'nın
+altında kaldığı için palet kullanıldı, hepsinde çıkan dosya piksel piksel
+kaynakla aynı). Ölçek değiştirilmedi: 600x600 hem satırdaki 64px slot için hem
+de tıklandığında açılan büyük önizleme için yeterli çözünürlüktür, küçük görsel
+next/image optimizer'ından `sizes="64px"` ile iner.
 
 | Dosya | Rozet | Credly kaydı |
 | --- | --- | --- |
@@ -27,17 +28,18 @@ ile 340x340'a indirildi, diğerleri boyut değiştirmedi.
 | `explore-emerging-tech.png` | Explore Emerging Tech | https://www.credly.com/badges/955c0a41-a526-4623-b7fb-045b7106be94 |
 | `working-in-a-digital-world-professional-skills.png` | Working in a Digital World: Professional Skills | https://www.credly.com/badges/c8ece69e-2314-43f8-9261-45abed5ce485 |
 
-`capt-certificate.jpg` (800x515, JPEG) sitenin sahibinin kendi Hackviser
+`capt-certificate.jpg` (1600x1031, JPEG) sitenin sahibinin kendi Hackviser
 sertifikasının görselidir; Hackviser bu sınav için ayrı bir rozet görseli
 vermiyor, doğrulama https://hackviser.com/verify?id=HV-CAPT-02TKGO4Q
-adresinden yapılır. Dosya kaynağından olduğu gibi kopyalandı.
+adresinden yapılır. Dosya kaynağından bayt bayt kopyalandı: JPEG'i sharp ile
+yeniden kodlamak aynı kayıplı codec'in ikinci kuşağı olurdu.
 
 Rozetlerin marka ve logo hakları verenlere (Cisco, IBM) aittir; burada yalnızca
 kazanılan kimlik bilgisini göstermek için kullanılırlar.
 
 ## Yeni rozet eklerken
 
-1. Görseli 340x340 PNG olarak bu klasöre koy.
+1. Görseli 600x600 PNG olarak bu klasöre koy.
 2. `src/content/profile.ts` içindeki `certificateRecords` listesine kaydı ekle
    (`badge.src`, `width`, `height`, `issued`, `verifyUrl`).
 3. `npm test` çalıştır: `tests/profile.test.ts` dosyanın varlığını ve PNG

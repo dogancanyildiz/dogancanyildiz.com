@@ -108,8 +108,8 @@ describe("certificate list", () => {
       'img[alt="CyberOps Associate badge"]'
     );
 
-    expect(image?.getAttribute("width")).toBe("340");
-    expect(image?.getAttribute("height")).toBe("340");
+    expect(image?.getAttribute("width")).toBe("600");
+    expect(image?.getAttribute("height")).toBe("600");
     // A border would draw a box around artwork that is not a box.
     expect(image?.className).not.toContain("border");
     expect(image?.className).toContain("object-contain");

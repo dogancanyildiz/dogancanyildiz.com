@@ -585,8 +585,8 @@ const certificateRecords: CertificateEntry[] = [
     // certificate itself and the About page gives it a landscape slot.
     badge: {
       src: "/images/badges/capt-certificate.jpg",
-      width: 800,
-      height: 515,
+      width: 1600,
+      height: 1031,
       kind: "certificate",
     },
     credentialCategory: "certificate",
@@ -599,8 +599,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/46e201d4-af31-4d46-aa0a-3d5b17c14711",
     badge: {
       src: "/images/badges/cyberops-associate.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
@@ -613,8 +613,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/dc6d5e37-48f0-47f0-9444-35621594b850",
     badge: {
       src: "/images/badges/linux-unhatched.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
@@ -627,8 +627,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/65b70ad1-7c9a-4c13-9396-d7fe3a5ce600",
     badge: {
       src: "/images/badges/network-technician-career-path.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
@@ -641,8 +641,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/aa7bea00-159e-47f2-b47f-90a07d09b551",
     badge: {
       src: "/images/badges/introduction-to-cybersecurity.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
@@ -658,8 +658,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/f4dd0693-ae37-42fc-8a6e-4315a1faeadb",
     badge: {
       src: "/images/badges/ccna-enterprise-networking-security-and-automation.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
@@ -672,8 +672,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/8a51a779-c77a-4a8e-a596-8888429ac666",
     badge: {
       src: "/images/badges/ccna-switching-routing-and-wireless-essentials.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
@@ -686,8 +686,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/a8cf90df-9b5e-4b7a-aa80-ac17e77d8d78",
     badge: {
       src: "/images/badges/ccna-introduction-to-networks.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
@@ -700,8 +700,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/b670b2f8-b9ad-4b79-bc66-82e4884393de",
     badge: {
       src: "/images/badges/cisco-networking-academy-learn-a-thon-2026.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     // An event badge, not a course result: it sits under the assessed Cisco
@@ -717,8 +717,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/56b3b1f4-3f60-405f-84f2-4fb86e808882",
     badge: {
       src: "/images/badges/cybersecurity-fundamentals.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
@@ -731,8 +731,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/955c0a41-a526-4623-b7fb-045b7106be94",
     badge: {
       src: "/images/badges/explore-emerging-tech.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
@@ -745,8 +745,8 @@ const certificateRecords: CertificateEntry[] = [
     verifyUrl: "https://www.credly.com/badges/c8ece69e-2314-43f8-9261-45abed5ce485",
     badge: {
       src: "/images/badges/working-in-a-digital-world-professional-skills.png",
-      width: 340,
-      height: 340,
+      width: 600,
+      height: 600,
       kind: "badge",
     },
     credentialCategory: "badge",
