@@ -1,5 +1,5 @@
 # Tasarım Yönü, UI/UX ve Frontend
-Durum: Uygulandı (Faz 3, PR #5; içerik Faz 4, PR #6; UI/güven güncellemesi PR #11; 2026-08-28 denetim kapanışı: kontrast, token sözleşmesi, landmark/odak, hareket kararı; 2026-09-02 3. tur: hedef boyutu sweep'i, consent geri alma kontrolü; 2026-09-02 marka varlıkları: işaret bileşeni, statik ikonlar, yeni OG düzeni), kalan: sahibinin görsel onayları ve tarayıcı turu · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı (Faz 3, PR #5; içerik Faz 4, PR #6; UI/güven güncellemesi PR #11; 2026-08-28 denetim kapanışı: kontrast, token sözleşmesi, landmark/odak, hareket kararı; 2026-09-02 3. tur: hedef boyutu sweep'i, consent geri alma kontrolü; 2026-09-02 marka varlıkları: işaret bileşeni, statik ikonlar, yeni OG düzeni; 2026-09-02 paylaş bloğu: kart yazı ve proje sayfalarının sonunda), kalan: sahibinin görsel onayları ve tarayıcı turu · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -120,6 +120,16 @@ Dal `feature/audit-followups`; 31 Ağustos incelemesinin hedef boyutu ve consent
 - **Consent geri alınabilir oldu.** `/privacy`'de yeni `ConsentControls` istemci bileşeni (durum cümlesi `role="status"` bölgesinde + tek geri alma/izin verme düğmesi); banner artık `role="dialog"` değil `role="region"` (odak çalma, `aria-modal`, Escape yok, kararla uyumlu). "Şimdi değil" -> "Reddet" oldu (ret kalıcı davranışıyla artık metin de uyumlu). `privacy.formBody` `topic` alanından bahsediyor, yeni `privacy.whatsappTitle`/`whatsappBody` WhatsApp mesajının Meta üzerinden gittiğini söylüyor.
 - **Mobil menü odak tuzağı artık test ediliyor**, form konu (`topic`) alanı gönderim sırasında kilitleniyor (diğer alanlarla tutarlı).
 - **Hâlâ açık (bilinçli, sahibinde):** consent banner'ın `position: fixed` alt bant olması, cevaplanmadan önce odaklı bir footer linkini gizleyebilir (SC 2.4.11, düşük risk); dış linklerde (footer/header/contact WhatsApp) yeni sekmede açıldığına dair görünür/duyurulan bir işaret yok (WCAG 3.2.5, AAA, isteğe bağlı).
+
+## Uygulama durumu (2026-09-02, paylaş bloğu)
+
+Dal `feature/brand-assets`; sahibinin isteği üzerine sayfa kartı sitede de bir yer aldı.
+
+- **Yeri.** Yazı ve proje detay sayfalarında, prose bittikten sonra ve `ContactCta`'dan önce (`src/components/sections/share-card.tsx`). Sıra bilinçli: blok okunan parçaya ait, siteye değil, ve iletişim çağrısı sayfayı kapatan son ses olarak kalıyor. Yerleşim `tests/pages/content-page-contracts.test.ts` ile kilitli.
+- **Dili.** Kart ve rozet yok; üstte `border-border` hairline, `meta-label` başlık ("Paylaş" / "Share") ve tek cümlelik açıklama, ContactCta'nın açtığı kalıbın aynısı. Kartın kendisi en fazla 35rem (560px), `rounded-md` ve ince çerçeve; `w-full` + `h-auto` birlikte, çünkü yalnızca genişliği ezmek 1200x630 oranını bozuyor.
+- **Bağlantılar.** X, LinkedIn, WhatsApp, e-posta: düz metin + mevcut marka işareti, `tap-target` (44px), footer metin bağlantılarıyla aynı biçim. Yeni `XIcon` `src/components/ui/brand-icon.tsx` desenine eklendi. WhatsApp adresi numarasız `wa.me` paylaşım sayfası; `src/lib/site.ts`'teki `whatsappHref` sahibiyle sohbet açar, o bu blokta "paylaş"ı "bana yaz"a çevirirdi.
+- **Kopyala düğmesi.** Tek istemci parçası (`copy-link-button.tsx`); metin 2 saniye "Kopyalandı"ya dönüyor ve `role="status" aria-live="polite"` bölgesinde duyuruluyor, çünkü bir kontrolün adının değişmesi kendi başına duyuru değil. Pano yoksa (güvensiz origin) veya yazma reddedilirse aynı yoldan "Kopyalanamadı, adresi seçip kopyalayın" geliyor; kurtarma yolu mesaj değil, düğmenin yanında zaten duran mono URL, bu yüzden hata da başarıyla aynı süre sonra siliniyor. Etiketlerin hepsi sunucu bileşeninden prop olarak geliyor: `share` namespace'i istemci kataloğuna girseydi iki rotada var olan bir düğme için dokuz dize kabuğun her sayfasına yüklenirdi.
+- **Emülasyon turu.** `next start` (3162) üzerinde 1280 açık tema ve 375 koyu tema, `/blog/ccna-dan-web-guvenligine` ve `/en/projects/hubit`: kart 560x295 ve 343x181 (1200:630 korunuyor), bağlantılar geniş ekranda tek satır, 375'te iki satıra sarıyor, `document.scrollWidth` 320/375/1280'de görünüm genişliğine eşit (yatay taşma yok).
 
 ## Riskler ve tripwire'lar
 
