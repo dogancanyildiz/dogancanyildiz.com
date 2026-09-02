@@ -27,6 +27,23 @@ describe("sitemap", () => {
     expect(urls).not.toContain("https://dogancanyildiz.com/en/updating");
   });
 
+  it("writes the same url the page publishes as its canonical", async () => {
+    // The audit noted the root as a place the two could disagree on a
+    // trailing slash (F-154). They cannot: both go through absoluteUrl, and
+    // this pins that. A crawler that sees a sitemap loc and a canonical
+    // differing by one character treats them as two urls.
+    const sitemap = (await import("@/app/sitemap")).default;
+    const { absoluteUrl } = await import("@/lib/seo/alternates");
+    const { routing } = await import("@/i18n/routing");
+    const urls = sitemap().map((entry) => entry.url);
+
+    for (const locale of routing.locales) {
+      for (const path of ["/", "/about", "/projects", "/blog"]) {
+        expect(urls, `${locale} ${path}`).toContain(absoluteUrl(locale, path));
+      }
+    }
+  });
+
   it("lists every project in both locales because all of them are translated", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const { getProjects } = await import("@/lib/content");

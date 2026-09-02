@@ -110,6 +110,35 @@ describe("project content layer", () => {
     }
   });
 
+  it("keeps the non prose fields of a translated project identical", () => {
+    // Only the prose differs between the two files of one project. If the
+    // Turkish file says featured: true and the English one does not, the two
+    // home pages advertise different work, and an ordering or year that drifts
+    // makes the same project look like two different ones to a reader who
+    // switches language mid visit. Nothing in the schema enforces this, so a
+    // single forgotten line in one of the two files is all it takes.
+    for (const project of getProjects("en")) {
+      const other = getProject("tr", project.slug);
+      if (!other) continue;
+      expect(
+        {
+          featured: other.featured,
+          order: other.order,
+          year: other.year,
+          draft: other.draft,
+          links: other.links,
+        },
+        project.slug
+      ).toEqual({
+        featured: project.featured,
+        order: project.order,
+        year: project.year,
+        draft: project.draft,
+        links: project.links,
+      });
+    }
+  });
+
   it("only publishes https outbound links", () => {
     for (const locale of routing.locales) {
       for (const project of getProjects(locale)) {
@@ -134,6 +163,18 @@ describe("post content layer", () => {
       expect(dates).toEqual([...dates].sort().reverse());
     }
   );
+
+  it("keeps the publish date of a translated post identical", () => {
+    // Two dates for one post means the two locales disagree about when it was
+    // published, in the list order, in the sitemap lastmod and in the
+    // BlogPosting datePublished.
+    for (const post of getPosts("en")) {
+      const other = getPost("tr", post.slug);
+      if (!other) continue;
+      expect(other.date, post.slug).toBe(post.date);
+      expect(other.updated ?? null, post.slug).toBe(post.updated ?? null);
+    }
+  });
 
   it("finds every listed post by its own slug and locale", () => {
     for (const locale of routing.locales) {
