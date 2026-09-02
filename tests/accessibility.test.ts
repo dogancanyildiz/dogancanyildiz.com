@@ -476,7 +476,12 @@ describe("brand link", () => {
     const source = read("src/components/layout/header.tsx");
     expect(source).not.toContain('aria-label={tBrand("name")}');
     expect(source).toContain('{tBrand("name")}');
-    expect(source).not.toContain("sr-only");
+    // A bare sr-only would hide the name everywhere. The only allowed form is
+    // the max-width variant: below 420px the row cannot hold the mark, the
+    // name and the 44px controls, so the mark stands alone there and the name
+    // stays in the accessible name; from 420px up it is visible again.
+    expect(source).not.toMatch(/["\s]sr-only/);
+    expect(source).toContain("max-[419px]:sr-only");
   });
 
   it("puts the logo mark inside the same link without labelling it", () => {
