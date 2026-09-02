@@ -15,15 +15,29 @@ import {
 export { siteUrl };
 
 /**
+ * Leading locale segment of an already public path. The lookahead keeps a slug
+ * that merely starts with those letters (`/entrypoint`, `/trace-logs`) intact.
+ */
+const LEADING_LOCALE = new RegExp(`^/(?:${routing.locales.join("|")})(?=/|$)`);
+
+/**
  * Public pathname for one locale. Goes through next-intl getPathname so a
  * localized slug (`/hakkimda`) and a locale prefix (`/en/about`) cannot
  * drift from the routing config. Unknown paths (OG images, a concrete
  * `/blog/slug`) still get the as-needed prefix.
+ *
+ * A leading locale segment is stripped before the lookup. Callers hand over
+ * internal pathnames, but some of them start from a path that is already
+ * public (a language switcher target, a pathname read off the request), and
+ * that used to come back doubled: localePath("en", "/en") returned "/en/en",
+ * and localePath("tr", "/tr") returned "/tr", which is not the Turkish
+ * canonical but a URL the proxy 308s away from.
  */
 export function localePath(locale: string, path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   const trimmed = normalized === "/" ? "/" : normalized.replace(/\/+$/, "");
-  return pathnameForLocale(locale, trimmed);
+  const unprefixed = trimmed.replace(LEADING_LOCALE, "") || "/";
+  return pathnameForLocale(locale, unprefixed);
 }
 
 export function absoluteUrl(locale: Locale, path: string): string {
