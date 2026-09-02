@@ -43,14 +43,25 @@ const WOFF2 = [
 // woff copy of Geist still carries fvar and gvar, and satori's parser walks
 // the glyf table with the static outline layout, which throws "Cannot read
 // properties of undefined" and turns the OG route into a 500. fontTools pins the weight axis to a single value and drops
-// fvar/gvar, so these static instances are what the route actually loads. Two
-// weights because the card mixes 400 body text with a 600 headline, and satori
-// picks a face by exact name + weight + style.
+// fvar/gvar, so these static instances are what the route actually loads.
+//
+// One file per weight the card asks for, because satori matches a face by
+// exact name + weight + style and synthesises nothing: Geist Sans 400 for the
+// small copy and 700 for the name, Geist Mono 400 for the terminal prompt and
+// 500 for the role line. Each of them twice, once per subset, because the
+// latin file carries no g-breve and no dotted capital I and the card prints
+// both.
 const OG_STATIC_FROM_WOFF2 = [
   ["geist-latin.woff2", "geist-latin-400.ttf", 400],
   ["geist-latin.woff2", "geist-latin-600.ttf", 600],
+  ["geist-latin.woff2", "geist-latin-700.ttf", 700],
   ["geist-latin-ext.woff2", "geist-latin-ext-400.ttf", 400],
   ["geist-latin-ext.woff2", "geist-latin-ext-600.ttf", 600],
+  ["geist-latin-ext.woff2", "geist-latin-ext-700.ttf", 700],
+  ["geist-mono-latin.woff2", "geist-mono-latin-400.ttf", 400],
+  ["geist-mono-latin.woff2", "geist-mono-latin-500.ttf", 500],
+  ["geist-mono-latin-ext.woff2", "geist-mono-latin-ext-400.ttf", 400],
+  ["geist-mono-latin-ext.woff2", "geist-mono-latin-ext-500.ttf", 500],
 ];
 
 const LICENSES = [
