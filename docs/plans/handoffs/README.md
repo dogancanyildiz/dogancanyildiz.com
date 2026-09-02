@@ -23,6 +23,7 @@ Bu dizin, portfolio modernizasyon projesinin her fazından sonra teslim edilen d
 | faz-5-manual-checklist.md | 5 | Cloudflare DNS, Coolify Gatus/Umami kaynakları, Umami paneli, env ve canlı doğrulama | Panel adımları tamamlanacak (kod PR #31 ile merged) |
 | denetim-kapanisi-2026-08-28.md | denetim | 28 Ağustos denetim raporundaki açık bulguların kapanış devir notu: kümeler, kararlar, sahibine kalanlar | Yazıldı, PR #34 (dev) açık |
 | denetim-takip-2026-09-02.md | denetim (3. tur) | 31 Ağustos incelemesinin (V-) maddelerinin takip devir notu: 5 küme, kararlar, yeni bulgular (T-56 typecheck regresyonu dahil), sahibine kalanlar | Yazıldı, dal `feature/audit-followups` |
+| yerel-yollar-2026-09-02.md | faz dışı iş | Devir notu: Türkçe bölüm ve detay yollarının yerelleştirilmesi, çeviri başına slug, 308 tabloları, curl matrisi sonuçları, sahibinin Search Console adımları | Yazıldı, dal `feature/brand-assets` |
 
 ## Okuma sırası
 
