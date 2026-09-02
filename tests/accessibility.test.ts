@@ -70,6 +70,9 @@ vi.mock("next-intl/server", async () => {
 const { Header } = await import("@/components/layout/header");
 const { Footer } = await import("@/components/layout/footer");
 const { MobileMenu } = await import("@/components/layout/mobile-menu");
+const { ContactPageContent } =
+  await import("@/components/sections/contact-page-content");
+const { default: LocaleError } = await import("@/app/[lang]/error");
 
 const read = (relative: string) =>
   readFileSync(join(process.cwd(), relative), "utf8");
@@ -124,8 +127,9 @@ describe("focus ring survives on form controls", () => {
 // Tailwind's spacing scale is 0.25rem a step and the root font size is the
 // browser default 16px, so `min-h-11` resolves to 44 CSS px.
 const SPACING_STEP_PX = 4;
-/** WCAG 2.2 SC 2.5.8 asks 24; F-062 set 44 as the project's own floor. */
+/** WCAG 2.2 SC 2.5.8 asks 24; F-062 set 44 for the site's own chrome. */
 const TARGET_FLOOR_PX = 44;
+const MINIMUM_FLOOR_PX = 24;
 
 /**
  * The smallest height, in CSS px, a class list guarantees at the base
@@ -227,6 +231,44 @@ describe("target size", () => {
       expect(height, `mobile menu ${label}`).toBeGreaterThanOrEqual(
         TARGET_FLOOR_PX
       );
+    }
+  });
+
+  it("gives the error boundary's two ways out at least 44 CSS px", () => {
+    // The boundary logs the original error from an effect; that console call
+    // is the point of the component, not noise this test needs to see.
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { container } = renderWithIntl(
+      createElement(LocaleError, {
+        error: new Error("render failed"),
+        retry: () => {},
+      })
+    );
+    const targets = measuredTargets(container);
+    expect(targets).toHaveLength(2);
+    for (const { label, height } of targets) {
+      expect(height, `error page ${label}`).toBeGreaterThanOrEqual(
+        TARGET_FLOOR_PX
+      );
+    }
+  });
+
+  it("keeps the contact detail links above the 24px floor of SC 2.5.8", () => {
+    // These two are not chrome controls, so they take the same 24px floor the
+    // project card badges do rather than the 44px one. Neither sits inside a
+    // sentence, so the inline exception to SC 2.5.8 does not cover them:
+    // text-sm alone leaves a 20px line box.
+    const { container } = renderWithIntl(createElement(ContactPageContent));
+    for (const selector of [
+      'a[href^="mailto:"]',
+      'a[href^="https://wa.me/"]',
+    ]) {
+      const link = container.querySelector<HTMLElement>(selector);
+      expect(link, `${selector} is missing`).not.toBeNull();
+      expect(
+        guaranteedHeightPx(link?.className ?? ""),
+        selector
+      ).toBeGreaterThanOrEqual(MINIMUM_FLOOR_PX);
     }
   });
 });
