@@ -17,10 +17,8 @@ const VENDORED_WOFF2 = [
 // satori reads neither woff2 nor a variable font.
 const VENDORED_OG_TTF = [
   "public/fonts/og/geist-latin-400.ttf",
-  "public/fonts/og/geist-latin-600.ttf",
   "public/fonts/og/geist-latin-700.ttf",
   "public/fonts/og/geist-latin-ext-400.ttf",
-  "public/fonts/og/geist-latin-ext-600.ttf",
   "public/fonts/og/geist-latin-ext-700.ttf",
   "public/fonts/og/geist-mono-latin-400.ttf",
   "public/fonts/og/geist-mono-latin-500.ttf",

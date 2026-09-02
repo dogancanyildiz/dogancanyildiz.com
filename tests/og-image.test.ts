@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { truncateOgTitle } from "@/lib/seo/og-layout";
 
 const read = (relative: string) =>
   readFileSync(join(process.cwd(), relative), "utf8");
@@ -21,8 +22,8 @@ function tableTags(buffer: Buffer): string[] {
   return tags;
 }
 
-describe("opengraph image", () => {
-  const source = read("src/app/[lang]/opengraph-image.tsx");
+describe("og card layout", () => {
+  const source = read("src/lib/seo/og-layout.tsx");
 
   it("draws the real identity from site-config, not the template copy", () => {
     expect(source).toContain("siteConfig");
@@ -31,6 +32,97 @@ describe("opengraph image", () => {
     expect(source).not.toContain("Building clean, fast");
     expect(source).not.toContain("Portfolio</p>");
   });
+
+  it("uses the neutral palette from the design doc", () => {
+    expect(source).toContain("#0a0c0f");
+    expect(source).toContain("#4fcc8d");
+    expect(source).not.toContain("#09090b");
+    expect(source).not.toContain("#27272a");
+  });
+
+  it("loads both subsets of both families so Turkish glyphs render", () => {
+    for (const file of [
+      "geist-latin-400.ttf",
+      "geist-latin-700.ttf",
+      "geist-latin-ext-400.ttf",
+      "geist-latin-ext-700.ttf",
+      "geist-mono-latin-400.ttf",
+      "geist-mono-latin-500.ttf",
+      "geist-mono-latin-ext-400.ttf",
+      "geist-mono-latin-ext-500.ttf",
+    ]) {
+      expect(source, file).toContain(file);
+    }
+    expect(source).not.toContain(".woff2");
+  });
+
+  it("loads static instances, because satori cannot parse a variable font", () => {
+    // A face with fvar/gvar makes satori's glyf reader throw, which turns the
+    // whole route into a 500 and breaks every og:image on the site.
+    expect(source).not.toMatch(/geist-latin(-ext)?\.woff\b/);
+    for (const relative of [
+      "public/fonts/og/geist-latin-400.ttf",
+      "public/fonts/og/geist-latin-700.ttf",
+      "public/fonts/og/geist-latin-ext-400.ttf",
+      "public/fonts/og/geist-latin-ext-700.ttf",
+      "public/fonts/og/geist-mono-latin-400.ttf",
+      "public/fonts/og/geist-mono-latin-500.ttf",
+      "public/fonts/og/geist-mono-latin-ext-400.ttf",
+      "public/fonts/og/geist-mono-latin-ext-500.ttf",
+    ]) {
+      const file = join(process.cwd(), relative);
+      expect(existsSync(file), `${relative} is missing`).toBe(true);
+      const tables = tableTags(readFileSync(file));
+      expect(
+        tables,
+        `${relative} still carries a variation table`
+      ).not.toContain("fvar");
+      expect(tables).not.toContain("gvar");
+      expect(tables).toContain("glyf");
+    }
+  });
+
+  it("registers each subset under its own family name", () => {
+    // satori keys its font table by name + weight + style. Two font entries
+    // sharing all three collapse into one (only one subset is ever
+    // consulted), which drops Turkish glyphs like g-breve to a fallback face
+    // even though the file has them. Giving the extended subset a distinct
+    // name, and chaining it in the fontFamily fallback list below, is what
+    // makes satori actually try both files per character.
+    expect(source.match(/name: "Geist Sans"/g) ?? []).toHaveLength(2);
+    expect(source.match(/name: "Geist Sans Ext"/g) ?? []).toHaveLength(2);
+    expect(source.match(/name: "Geist Mono"/g) ?? []).toHaveLength(2);
+    expect(source.match(/name: "Geist Mono Ext"/g) ?? []).toHaveLength(2);
+    for (const weight of [400, 500, 700]) {
+      expect(source, String(weight)).toContain(`weight: ${weight} as const`);
+    }
+  });
+
+  it("chains both family names so per-character fallback reaches the ext subset", () => {
+    expect(source).toContain('const SANS = "Geist Sans, Geist Sans Ext"');
+    expect(source).toContain('const MONO = "Geist Mono, Geist Mono Ext"');
+  });
+
+  it("shortens a long title on a word boundary instead of letting satori clip it", () => {
+    const long =
+      "Bir CCNA sertifikasindan web guvenligine uzanan uzun yolun tam hikayesi";
+    const short = truncateOgTitle(long);
+    expect(short.length).toBeLessThanOrEqual(68);
+    expect(short.endsWith("…")).toBe(true);
+    // Cut on a space, so the last word is never sliced in half.
+    expect(long).toContain(short.slice(0, -1).trimEnd());
+    expect(truncateOgTitle("Cargo Pilot")).toBe("Cargo Pilot");
+  });
+
+  it("keeps a single word longer than the limit from overflowing", () => {
+    const short = truncateOgTitle("a".repeat(120));
+    expect(short.length).toBe(68);
+    expect(short.endsWith("…")).toBe(true);
+  });
+});
+
+describe("opengraph image", () => {
+  const source = read("src/app/[lang]/opengraph-image.tsx");
 
   it("keeps the alt text locale-driven instead of a fixed export", () => {
     expect(source).not.toMatch(/export const alt =/);
@@ -52,68 +144,14 @@ describe("opengraph image", () => {
     expect(source).toContain("@/lib/seo/og-image");
   });
 
-  it("uses the neutral palette from the design doc", () => {
-    expect(source).toContain("#0a0c0f");
-    expect(source).toContain("#4fcc8d");
-    expect(source).not.toContain("#09090b");
-    expect(source).not.toContain("#27272a");
-  });
-
-  it("loads both Geist Sans subsets so Turkish glyphs render", () => {
-    expect(source).toContain("geist-latin-400.ttf");
-    expect(source).toContain("geist-latin-600.ttf");
-    expect(source).toContain("geist-latin-ext-400.ttf");
-    expect(source).toContain("geist-latin-ext-600.ttf");
-    expect(source).not.toContain(".woff2");
-  });
-
-  it("loads static instances, because satori cannot parse a variable font", () => {
-    // A face with fvar/gvar makes satori's glyf reader throw, which turns the
-    // whole route into a 500 and breaks every og:image on the site.
-    expect(source).not.toMatch(/geist-latin(-ext)?\.woff\b/);
-    for (const relative of [
-      "public/fonts/og/geist-latin-400.ttf",
-      "public/fonts/og/geist-latin-600.ttf",
-      "public/fonts/og/geist-latin-ext-400.ttf",
-      "public/fonts/og/geist-latin-ext-600.ttf",
-    ]) {
-      const file = join(process.cwd(), relative);
-      expect(existsSync(file), `${relative} is missing`).toBe(true);
-      const tables = tableTags(readFileSync(file));
-      expect(
-        tables,
-        `${relative} still carries a variation table`
-      ).not.toContain("fvar");
-      expect(tables).not.toContain("gvar");
-      expect(tables).toContain("glyf");
-    }
-  });
-
-  it("registers the latin-ext subset under its own family name", () => {
-    // satori keys its font table by name + weight + style. Two font entries
-    // sharing all three collapse into one (only one subset is ever
-    // consulted), which drops Turkish glyphs like g-breve to a fallback face
-    // even though the file has them. Giving the extended subset a distinct
-    // name, and chaining it in the fontFamily fallback list below, is what
-    // makes satori actually try both files per character.
-    expect(source).toContain('name: "Geist Sans Ext"');
-    // One entry per weight for each of the two family names.
-    expect(source.match(/name:\s*"Geist Sans"/g) ?? []).toHaveLength(2);
-    expect(source.match(/name:\s*"Geist Sans Ext"/g) ?? []).toHaveLength(2);
-    expect(source).toContain("weight: 400");
-    expect(source).toContain("weight: 600");
-  });
-
-  it("chains both font family names so per-character fallback can reach the ext subset", () => {
-    expect(source).toContain('fontFamily: "Geist Sans, Geist Sans Ext"');
+  it("draws the shared card with the identity prompt and no title", () => {
+    expect(source).toContain("@/lib/seo/og-layout");
+    expect(source).toContain('prompt="~/dogancanyildiz $ whoami"');
+    expect(source).not.toContain("title=");
   });
 
   it("stays off the edge runtime", () => {
     expect(source).not.toContain('runtime = "edge"');
-  });
-
-  it("uses the readable text badge for the DCY mark", () => {
-    expect(source).toContain("BrandMarkText");
   });
 });
 

@@ -46,17 +46,15 @@ const WOFF2 = [
 // fvar/gvar, so these static instances are what the route actually loads.
 //
 // One file per weight the card asks for, because satori matches a face by
-// exact name + weight + style and synthesises nothing: Geist Sans 400 for the
-// small copy and 700 for the name, Geist Mono 400 for the terminal prompt and
-// 500 for the role line. Each of them twice, once per subset, because the
-// latin file carries no g-breve and no dotted capital I and the card prints
-// both.
+// exact name + weight + style and synthesises nothing: Geist Sans 400 is the
+// weight a node inherits when it names none and 700 draws the name, the page
+// title and the watermark, Geist Mono 400 draws the terminal prompt and 500
+// the role line. Each of them twice, once per subset, because the latin file
+// carries no g-breve and no dotted capital I and the card prints both.
 const OG_STATIC_FROM_WOFF2 = [
   ["geist-latin.woff2", "geist-latin-400.ttf", 400],
-  ["geist-latin.woff2", "geist-latin-600.ttf", 600],
   ["geist-latin.woff2", "geist-latin-700.ttf", 700],
   ["geist-latin-ext.woff2", "geist-latin-ext-400.ttf", 400],
-  ["geist-latin-ext.woff2", "geist-latin-ext-600.ttf", 600],
   ["geist-latin-ext.woff2", "geist-latin-ext-700.ttf", 700],
   ["geist-mono-latin.woff2", "geist-mono-latin-400.ttf", 400],
   ["geist-mono-latin.woff2", "geist-mono-latin-500.ttf", 500],
