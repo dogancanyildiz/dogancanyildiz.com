@@ -47,7 +47,10 @@ export async function Hero({ profileImageSrc }: HeroProps) {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <span className="eyebrow">{t("hero.location")}</span>
             <span className="inline-flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-muted-foreground">
-              <span className="size-1.5 rounded-full bg-status-up" />
+              <span
+                aria-hidden="true"
+                className="status-pulse size-1.5 rounded-full bg-status-up"
+              />
               {t("hero.availableForWork")}
             </span>
           </div>

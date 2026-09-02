@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { getPostSlugs, getProjectSlugs } from "@/lib/content";
+import {
+  getPost,
+  getPostSlugs,
+  getProject,
+  getProjectSlugs,
+} from "@/lib/content";
 
 // next/font/local is a build time only export: outside the Next compiler
 // (webpack or SWC) it resolves to an empty module, so calling it throws
@@ -26,7 +31,7 @@ vi.mock("next-intl/server", () => ({
     namespace?: string;
   }) => {
     const messages = (await import(`../../messages/${locale}.json`)).default;
-    return (key: string) => {
+    return (key: string, values?: Record<string, string>) => {
       const path = namespace ? `${namespace}.${key}` : key;
       const value = path
         .split(".")
@@ -37,7 +42,13 @@ vi.mock("next-intl/server", () => ({
       if (typeof value !== "string") {
         throw new Error(`missing message key: ${locale}.${path}`);
       }
-      return value;
+      // Plain ICU placeholders only, which is all the metadata namespace
+      // uses. Without this the og image alt would come back with a literal
+      // "{title}" in it and an assertion on the real title could not tell the
+      // difference.
+      return value.replace(/\{\s*(\w+)\s*\}/g, (match, name: string) =>
+        values && name in values ? String(values[name]) : match
+      );
     };
   },
   // Not exercised by any assertion in this file yet, but future blog pages
@@ -107,16 +118,25 @@ const PAGES: PageCase[] = [
     path: "/updating",
     load: () => import("@/app/[lang]/updating/page"),
   },
-  ...getProjectSlugs("en").map((slug) => ({
-    name: `projects/${slug}`,
-    path: `/projects/${slug}`,
-    extraParams: { slug },
-    load: () => import("@/app/[lang]/projects/[slug]/page"),
-  })),
-  // The locale is baked into the case name because a bilingual post (like
-  // self-hosting-with-coolify) produces one PAGES entry per locale that
-  // otherwise share the same `blog/<slug>` name, which would collapse into
-  // duplicate it.each test titles.
+  // The locale is baked into the case name and each case is scoped to its
+  // own locale, because a project's slug is no longer guaranteed to be the
+  // same in both locales (not-ortalamasi-hesaplayici and
+  // bilet-satin-alma-sistemi are Turkish renames of gpa-calculator and
+  // ticket-purchasing-system). Sharing one PAGES entry across both locales,
+  // as this used to, would call generateMetadata with the English slug under
+  // the Turkish locale and hit notFound() for exactly those two projects.
+  ...routing.locales.flatMap((locale) =>
+    getProjectSlugs(locale).map((slug) => ({
+      name: `projects/${slug} [${locale}]`,
+      path: `/projects/${slug}`,
+      extraParams: { slug },
+      locales: [locale],
+      load: () => import("@/app/[lang]/projects/[slug]/page"),
+    }))
+  ),
+  // Same reason: a bilingual post (like self-hosting-with-coolify) produces
+  // one PAGES entry per locale that otherwise share the same `blog/<slug>`
+  // name, which would collapse into duplicate it.each test titles.
   ...routing.locales.flatMap((locale) =>
     getPostSlugs(locale).map((slug) => ({
       name: `blog/${slug} [${locale}]`,
@@ -227,6 +247,9 @@ describe("page openGraph metadata", () => {
   it.each(CASES)(
     "$page.name in $locale keeps the og image of its own locale",
     async ({ locale, page }) => {
+      const { ogImageHref } = await import("@/i18n/navigation");
+      const { absoluteUrl, siteUrl } = await import("@/lib/seo/alternates");
+      const { OG_IMAGE_PATH } = await import("@/lib/seo/og-image");
       const metadata = await metadataFor(page, locale);
       const images = (
         metadata.openGraph as {
@@ -234,19 +257,101 @@ describe("page openGraph metadata", () => {
         }
       ).images;
 
-      // The opengraph-image.tsx file convention only reaches the [lang]
-      // segment. A page that returns its own openGraph drops the inherited
-      // image unless it names it again.
+      // Next merges metadata shallowly and replaces openGraph wholesale, so a
+      // page that returns its own object drops the inherited image unless it
+      // names one. Detail pages name their own card, everything else falls
+      // back to the identity image on the [lang] segment.
       expect(images).toHaveLength(1);
       const [ogImage] = images;
       if (!ogImage) throw new Error(`${page.name} published no og image`);
-      expect(ogImage.url).toBe(
-        locale === "en"
-          ? "https://dogancanyildiz.com/en/opengraph-image/default"
-          : "https://dogancanyildiz.com/opengraph-image/default"
-      );
+
+      // A content page's own slug is no longer guaranteed to match across
+      // locales, so its card path can only be rebuilt through ogImageHref
+      // (the same function the page itself calls), not by string pasting
+      // page.path onto a prefix.
+      const ownCard = /^(projects|blog)\//.test(page.name);
+      const expectedUrl = ownCard
+        ? `${siteUrl()}${ogImageHref(
+            locale,
+            page.name.startsWith("blog/") ? "post" : "project",
+            page.path.split("/").pop() ?? ""
+          )}`
+        : absoluteUrl(locale, OG_IMAGE_PATH);
+      expect(ogImage.url).toBe(expectedUrl);
       expect(ogImage.width).toBe(1200);
       expect(ogImage.alt).toBeTruthy();
+    }
+  );
+
+  it.each([
+    {
+      section: "blog",
+      kind: "post" as const,
+      route: () => import("@/app/[lang]/blog/[slug]/opengraph-image"),
+    },
+    {
+      section: "projects",
+      kind: "project" as const,
+      route: () => import("@/app/[lang]/projects/[slug]/opengraph-image"),
+    },
+  ])(
+    "$section detail pages have a card at the path their metadata names",
+    async ({ section, kind, route: load }) => {
+      const { contentHref, ogImageHref } = await import("@/i18n/navigation");
+      const { OG_IMAGE_PATH } = await import("@/lib/seo/og-image");
+      const route = await load();
+
+      // Every slug the page prerenders has to have an image param too,
+      // otherwise the url in og:image resolves to nothing.
+      const slugs = new Set(
+        route.generateStaticParams().map(({ lang, slug }) => `${lang}/${slug}`)
+      );
+      const expected =
+        section === "blog"
+          ? routing.locales.flatMap((locale) =>
+              getPostSlugs(locale).map((slug) => `${locale}/${slug}`)
+            )
+          : routing.locales.flatMap((locale) =>
+              getProjectSlugs(locale).map((slug) => `${locale}/${slug}`)
+            );
+      expect([...slugs].sort()).toEqual([...expected].sort());
+
+      // The join heuristic ogImagePathFor used to hand-implement is now
+      // getPathname's own localized template; this pins that the two still
+      // agree, for every routed locale, once the content path is localized.
+      for (const locale of routing.locales) {
+        expect(ogImageHref(locale, kind, "some-slug")).toBe(
+          `${contentHref(locale, kind, "some-slug")}${OG_IMAGE_PATH}`
+        );
+      }
+
+      const slug =
+        section === "blog" ? getPostSlugs("tr")[0] : getProjectSlugs("tr")[0];
+      if (!slug) throw new Error(`the tr ${section} collection is empty`);
+      const title =
+        section === "blog"
+          ? getPost("tr", slug)?.title
+          : getProject("tr", slug)?.title;
+
+      const [image] = await route.generateImageMetadata({
+        params: Promise.resolve({ lang: "tr", slug }),
+      });
+      if (!image) throw new Error(`${section} card published no image id`);
+      expect(image.id).toBe("default");
+      // The card leads with the page title, so the alt has to name it rather
+      // than repeat the identity line that belongs to the [lang] image.
+      expect(image.alt).toContain(title);
+
+      // The enumeration call arrives without a slug and still has to answer
+      // with something, which is where the identity alt is the right text.
+      const [fallback] = await route.generateImageMetadata({
+        params: Promise.resolve({
+          lang: "__metadata_id__",
+          slug: "__metadata_id__",
+        }),
+      });
+      expect(fallback?.alt).toBeTruthy();
+      expect(fallback?.alt).not.toContain(title);
     }
   );
 
@@ -328,7 +433,7 @@ describe("page openGraph metadata", () => {
 
   it("marks the post detail page openGraph type as article with its published time", async () => {
     const postPage = PAGES.find(
-      (page) => page.name === "blog/self-hosting-with-coolify [tr]"
+      (page) => page.name === "blog/coolify-ile-kendi-sunucumda [tr]"
     );
     if (!postPage) throw new Error("no post detail page case found");
     const locale = postPage.locales?.[0] ?? "en";

@@ -243,11 +243,26 @@ describe("new message keys", () => {
     }
   });
 
-  it("turns brand into an object with name, monogram and role in both catalogs", () => {
+  it("turns brand into an object with name, role and tagline in both catalogs", () => {
+    // monogram left with the text "DCY": the mark is an SVG now
+    // (src/components/brand/brand-mark.tsx), so the string had no reader.
     for (const locale of ["en", "tr"]) {
       const keys = messageKeys(locale, "brand");
-      expect(keys, locale).toEqual(["monogram", "name", "role"]);
+      expect(keys, locale).toEqual(["name", "role", "tagline"]);
     }
+  });
+
+  it("keeps the header tagline identical in both catalogs", () => {
+    // "Full Stack · DevOps" is brand copy, not prose: the same string sits in
+    // both files on purpose so the lockup reads the same in either language.
+    const en = JSON.parse(read("messages/en.json")) as {
+      brand: { tagline: string };
+    };
+    const tr = JSON.parse(read("messages/tr.json")) as {
+      brand: { tagline: string };
+    };
+    expect(en.brand.tagline).toBe("Full Stack · DevOps");
+    expect(tr.brand.tagline).toBe(en.brand.tagline);
   });
 
   it("adds the root level a11y labels to both catalogs", () => {

@@ -1,8 +1,12 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { certificates } from "@/content/profile";
 import { routing } from "@/i18n/routing";
 import {
   buildBlogPosting,
   buildBreadcrumbList,
+  buildCredentials,
   buildProjectCreativeWork,
   buildWebSite,
   identityUrl,
@@ -69,7 +73,7 @@ describe("buildBreadcrumbList", () => {
         "@type": "ListItem",
         position: 1,
         name: "Yazılar",
-        item: "https://dogancanyildiz.com/blog",
+        item: "https://dogancanyildiz.com/yazilar",
       },
       {
         "@type": "ListItem",
@@ -88,6 +92,9 @@ describe("blog posting schema", () => {
       const posts = getPosts(locale);
       expect(posts.length).toBeGreaterThan(0);
 
+      const { ogImageHref } = await import("@/i18n/navigation");
+      const { contentUrl } = await import("@/lib/seo/alternates");
+
       for (const post of posts) {
         const data = buildBlogPosting(locale, post);
 
@@ -95,11 +102,17 @@ describe("blog posting schema", () => {
         expect(data.author).toEqual(personRef());
         // One human wrote and published it: the same node, not two.
         expect(data.publisher).toEqual(data.author);
+        // The post's own card, not the identity one: the page's og:image
+        // points here too, and a consumer handed two different images for the
+        // same page has no way to pick. Locale localized, since a Turkish
+        // post now lives under /yazilar rather than /blog.
         expect(data.image).toBe(
-          locale === "en"
-            ? "https://dogancanyildiz.com/en/opengraph-image/default"
-            : "https://dogancanyildiz.com/opengraph-image/default"
+          `https://dogancanyildiz.com${ogImageHref(locale, "post", post.slug)}`
         );
+        expect(data.mainEntityOfPage).toEqual({
+          "@type": "WebPage",
+          "@id": contentUrl(locale, "post", post.slug),
+        });
         expect(data.inLanguage).toBe(locale);
         expect(data.datePublished).toBe(post.date);
         expect(data.dateModified).toBe(post.updated ?? post.date);
@@ -135,9 +148,69 @@ describe("project schema", () => {
       expect(data.url).toBe(
         `https://dogancanyildiz.com/en/projects/${project.slug}`
       );
+      // Same card the page advertises as og:image.
+      expect(data.image).toBe(
+        `https://dogancanyildiz.com/en/projects/${project.slug}/opengraph-image/default`
+      );
       // No updated field means no dateModified at all, rather than a repeat
       // of the creation year.
       expect("dateModified" in data).toBe(Boolean(project.updated));
     }
+  });
+});
+
+describe("buildCredentials", () => {
+  it("describes every certificate the About page lists", () => {
+    for (const locale of routing.locales) {
+      const credentials = buildCredentials(locale);
+
+      expect(credentials).toHaveLength(certificates[locale].length);
+      for (const [index, node] of credentials.entries()) {
+        const entry = certificates[locale][index];
+        expect(node["@type"]).toBe("EducationalOccupationalCredential");
+        expect(node.name).toBe(entry?.name);
+        expect(node.recognizedBy).toEqual({
+          "@type": "Organization",
+          name: entry?.issuer,
+        });
+        expect(["certificate", "badge"]).toContain(node.credentialCategory);
+      }
+    }
+  });
+
+  it("carries a url only where the issuer publishes one to check", () => {
+    for (const node of buildCredentials("en")) {
+      if (!("url" in node)) continue;
+      expect(node.url).toMatch(/^https:\/\//);
+    }
+    // The Global AI Hub record has neither a working verification page nor a
+    // date. A url pointing back at this site's own About section would claim
+    // a check that does not exist.
+    const orphan = buildCredentials("en").find(
+      (node) => node.name === "Version Control Systems and Portfolio"
+    );
+    expect(orphan).toBeDefined();
+    expect("url" in (orphan ?? {})).toBe(false);
+    expect("dateCreated" in (orphan ?? {})).toBe(false);
+  });
+
+  it("dates a credential with the day printed on it", () => {
+    const capt = buildCredentials("tr").find((node) =>
+      String(node.name).includes("CAPT")
+    );
+
+    expect(capt?.dateCreated).toBe("2025-06-01");
+    expect(capt?.url).toBe("https://hackviser.com/verify?id=HV-CAPT-02TKGO4Q");
+    expect(capt?.credentialCategory).toBe("certificate");
+  });
+
+  it("hangs the list off the Person node, not off each page", () => {
+    const source = readFileSync(
+      join(process.cwd(), "src/components/seo/person-jsonld.tsx"),
+      "utf8"
+    );
+
+    expect(source).toContain("hasCredential");
+    expect(source).toContain("buildCredentials(locale)");
   });
 });

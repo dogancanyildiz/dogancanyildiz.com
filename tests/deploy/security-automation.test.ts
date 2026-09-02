@@ -68,7 +68,7 @@ describe("security contact", () => {
     const content = read("public/.well-known/security.txt");
     expect(content).toContain("Contact: mailto:me@dogancanyildiz.com");
     expect(content).toContain(
-      "Canonical: https://dogancanyildiz.com/.well-known/security.txt"
+      "Canonical: https://www.dogancanyildiz.com/.well-known/security.txt"
     );
     const expires = content.match(/^Expires: (.+)$/m)?.[1];
     expect(expires).toBeDefined();

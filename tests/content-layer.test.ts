@@ -3,13 +3,15 @@ import { routing } from "@/i18n/routing";
 import {
   getHomeProjects,
   getPost,
-  getPostLocales,
+  getPostByKey,
+  getPostLocalesByKey,
   getPosts,
   getProject,
-  getProjectLocales,
+  getProjectByKey,
+  getProjectLocalesByKey,
   getProjectSlugs,
   getProjects,
-  getUntranslatedPaths,
+  postSlugsByKey,
   readingMinutes,
   toPostCardData,
   toProjectCardData,
@@ -70,20 +72,23 @@ describe("project content layer", () => {
     expect(getProject("en", "does-not-exist")).toBeUndefined();
   });
 
-  it("lists no locales for a slug that does not exist", () => {
-    expect(getProjectLocales("does-not-exist")).toEqual([]);
+  it("lists no locales for a translationKey that does not exist", () => {
+    expect(getProjectLocalesByKey("does-not-exist")).toEqual([]);
   });
 
-  it("lists exactly the locales a slug is actually present in", () => {
-    for (const slug of getProjectSlugs("en")) {
-      const locales = getProjectLocales(slug);
+  it("lists exactly the locales a translationKey is actually present in", () => {
+    // Looped by translationKey, not slug: a project is free to publish under
+    // a different slug per locale, and the two Turkish renames in this
+    // content set (gpa-calculator, ticket-purchasing-system) do exactly that.
+    for (const project of getProjects("en")) {
+      const locales = getProjectLocalesByKey(project.translationKey);
       expect(locales.length).toBeGreaterThan(0);
       for (const locale of locales) {
-        expect(getProject(locale, slug)).toBeDefined();
+        expect(getProjectByKey(locale, project.translationKey)).toBeDefined();
       }
       for (const locale of routing.locales) {
         if (locales.includes(locale)) continue;
-        expect(getProject(locale, slug)).toBeUndefined();
+        expect(getProjectByKey(locale, project.translationKey)).toBeUndefined();
       }
     }
   });
@@ -117,8 +122,18 @@ describe("project content layer", () => {
     // makes the same project look like two different ones to a reader who
     // switches language mid visit. Nothing in the schema enforces this, so a
     // single forgotten line in one of the two files is all it takes.
+    //
+    // cover is in the comparison for the same reason: the alt text is prose
+    // and belongs to its language, but the image itself is the same
+    // screenshot, and one locale showing a cover the other does not have is
+    // the visual version of the same drift.
     for (const project of getProjects("en")) {
-      const other = getProject("tr", project.slug);
+      // Paired by translationKey, not slug: not-ortalamasi-hesaplayici and
+      // bilet-satin-alma-sistemi are the Turkish files of gpa-calculator and
+      // ticket-purchasing-system, under a different slug on purpose. Pairing
+      // by slug would silently skip exactly the two files this check exists
+      // to catch drift in.
+      const other = getProjectByKey("tr", project.translationKey);
       if (!other) continue;
       expect(
         {
@@ -127,15 +142,34 @@ describe("project content layer", () => {
           year: other.year,
           draft: other.draft,
           links: other.links,
+          cover: other.cover?.src ?? null,
         },
-        project.slug
+        project.translationKey
       ).toEqual({
         featured: project.featured,
         order: project.order,
         year: project.year,
         draft: project.draft,
         links: project.links,
+        cover: project.cover?.src ?? null,
       });
+    }
+  });
+
+  it("gives every project cover an alt text in its own locale", () => {
+    // coverAlt is optional in the schema, and an empty one is the documented
+    // way to mark a decorative image. A project cover is never decorative: it
+    // is a screenshot of the work the page is about, so a missing alt text
+    // here is a screen reader being told nothing about the only picture on
+    // the page.
+    for (const locale of routing.locales) {
+      for (const project of getProjects(locale)) {
+        if (!project.cover) continue;
+        expect(
+          project.coverAlt,
+          `${locale}/${project.slug} has a cover with no coverAlt`
+        ).toBeTruthy();
+      }
     }
   });
 
@@ -169,10 +203,15 @@ describe("post content layer", () => {
     // published, in the list order, in the sitemap lastmod and in the
     // BlogPosting datePublished.
     for (const post of getPosts("en")) {
-      const other = getPost("tr", post.slug);
+      // Paired by translationKey, not slug: coolify-ile-kendi-sunucumda is
+      // the Turkish file of self-hosting-with-coolify under a different slug
+      // on purpose, and pairing by slug would silently skip it.
+      const other = getPostByKey("tr", post.translationKey);
       if (!other) continue;
-      expect(other.date, post.slug).toBe(post.date);
-      expect(other.updated ?? null, post.slug).toBe(post.updated ?? null);
+      expect(other.date, post.translationKey).toBe(post.date);
+      expect(other.updated ?? null, post.translationKey).toBe(
+        post.updated ?? null
+      );
     }
   });
 
@@ -184,8 +223,33 @@ describe("post content layer", () => {
     }
   });
 
-  it("lists no locales for a slug that does not exist", () => {
-    expect(getPostLocales("nothing")).toEqual([]);
+  it("lists no locales for a translationKey that does not exist", () => {
+    expect(getPostLocalesByKey("nothing")).toEqual([]);
+  });
+
+  it("finds a post by translationKey and locale even when the slug differs per locale", () => {
+    // self-hosting-with-coolify is the translationKey; the Turkish file
+    // publishes under coolify-ile-kendi-sunucumda, a different slug.
+    expect(getPostLocalesByKey("self-hosting-with-coolify").sort()).toEqual([
+      "en",
+      "tr",
+    ]);
+    expect(getPostByKey("tr", "capt-sinavina-hazirlik")?.title).toBeTruthy();
+    expect(getPostByKey("en", "capt-sinavina-hazirlik")?.slug).toBe(
+      "capt-preparation-in-a-docker-lab"
+    );
+  });
+
+  it("maps a translationKey to each locale's own slug", () => {
+    expect(postSlugsByKey("self-hosting-with-coolify")).toEqual({
+      tr: "coolify-ile-kendi-sunucumda",
+      en: "self-hosting-with-coolify",
+    });
+    // A slug that never changed is still reported for both locales.
+    expect(postSlugsByKey("capt-sinavina-hazirlik")).toEqual({
+      tr: "capt-sinavina-hazirlik",
+      en: "capt-preparation-in-a-docker-lab",
+    });
   });
 
   it("carries the slug and a reading time of at least a minute", () => {
@@ -219,34 +283,6 @@ describe("post content layer", () => {
   });
 });
 
-describe("untranslated paths", () => {
-  it("names only paths that are missing in the given locale", () => {
-    for (const locale of routing.locales) {
-      for (const path of getUntranslatedPaths(locale)) {
-        const [, section, slug] = path.split("/");
-        if (!slug) {
-          throw new Error(`unexpected untranslated path: ${path}`);
-        }
-        const lookup = section === "blog" ? getPost : getProject;
-
-        expect(lookup(locale, slug), path).toBeUndefined();
-        expect(
-          routing.locales.some((candidate) => lookup(candidate, slug)),
-          path
-        ).toBe(true);
-      }
-    }
-  });
-
-  it("returns a sorted list with no duplicates", () => {
-    for (const locale of routing.locales) {
-      const paths = getUntranslatedPaths(locale);
-      expect(paths).toEqual([...paths].sort());
-      expect(new Set(paths).size).toBe(paths.length);
-    }
-  });
-});
-
 // A synthetic collection, because the real content is fully bilingual and
 // carries no draft: the draft filter and the single locale branch have no
 // real input to run against, and both are exactly the code whose failure
@@ -255,6 +291,8 @@ describe("untranslated paths", () => {
 const FIXTURE_POST = {
   title: "Fixture",
   slug: "fixture",
+  translationKey: "fixture",
+  legacySlugs: [],
   date: "2026-01-01",
   summary: "Fixture summary.",
   tags: [],
@@ -268,6 +306,8 @@ const FIXTURE_POST = {
 const FIXTURE_PROJECT = {
   title: "Fixture",
   slug: "fixture",
+  translationKey: "fixture",
+  legacySlugs: [],
   summary: "Fixture summary.",
   role: "Role",
   stack: ["TypeScript"],
@@ -306,12 +346,23 @@ afterEach(() => {
 
 describe("draft filter", () => {
   const posts = [
-    { ...FIXTURE_POST, slug: "published" },
-    { ...FIXTURE_POST, slug: "unpublished", draft: true },
+    { ...FIXTURE_POST, slug: "published", translationKey: "published" },
+    {
+      ...FIXTURE_POST,
+      slug: "unpublished",
+      translationKey: "unpublished",
+      draft: true,
+    },
   ];
   const projects = [
-    { ...FIXTURE_PROJECT, slug: "published" },
-    { ...FIXTURE_PROJECT, slug: "unpublished", draft: true, order: 101 },
+    { ...FIXTURE_PROJECT, slug: "published", translationKey: "published" },
+    {
+      ...FIXTURE_PROJECT,
+      slug: "unpublished",
+      translationKey: "unpublished",
+      draft: true,
+      order: 101,
+    },
   ];
 
   it("hides a draft post and a draft project in production", async () => {
@@ -339,17 +390,20 @@ describe("draft filter", () => {
   it("keeps a draft out of the locale list a hreflang tag is built from", async () => {
     const content = await contentWith({ posts, projects }, "production");
 
-    expect(content.getPostLocales("unpublished")).toEqual([]);
-    expect(content.getProjectLocales("unpublished")).toEqual([]);
+    expect(content.getPostLocalesByKey("unpublished")).toEqual([]);
+    expect(content.getProjectLocalesByKey("unpublished")).toEqual([]);
   });
 });
 
 describe("content translated into one locale only", () => {
-  const posts = [{ ...FIXTURE_POST, slug: "en-only" }];
+  const posts = [
+    { ...FIXTURE_POST, slug: "en-only", translationKey: "en-only" },
+  ];
   const projects = [
     {
       ...FIXTURE_PROJECT,
       slug: "tr-only",
+      translationKey: "tr-only",
       path: "projects/tr/tr-only.mdx",
       locale: "tr",
     },
@@ -358,24 +412,17 @@ describe("content translated into one locale only", () => {
   it("reports the single locale, not both", async () => {
     const content = await contentWith({ posts, projects }, "production");
 
-    expect(content.getPostLocales("en-only")).toEqual(["en"]);
-    expect(content.getProjectLocales("tr-only")).toEqual(["tr"]);
-  });
-
-  it("names the missing translation so the language switcher can avoid a 404", async () => {
-    const content = await contentWith({ posts, projects }, "production");
-
-    expect(content.getUntranslatedPaths("tr")).toEqual(["/blog/en-only"]);
-    expect(content.getUntranslatedPaths("en")).toEqual(["/projects/tr-only"]);
+    expect(content.getPostLocalesByKey("en-only")).toEqual(["en"]);
+    expect(content.getProjectLocalesByKey("tr-only")).toEqual(["tr"]);
   });
 
   it("does not leak the other locale into the hreflang set", async () => {
     const content = await contentWith({ posts, projects }, "production");
-    const { buildLanguageAlternates } = await import("@/lib/seo/alternates");
+    const { buildLanguageAlternates, contentUrlsByKey } =
+      await import("@/lib/seo/alternates");
 
     const languages = buildLanguageAlternates(
-      "/blog/en-only",
-      content.getPostLocales("en-only")
+      contentUrlsByKey("post", content.postSlugsByKey("en-only"))
     );
     expect(Object.keys(languages).sort()).toEqual(["en", "x-default"]);
   });

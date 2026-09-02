@@ -5,13 +5,16 @@ Coolify servis kataloğundan (tek tık) kurulur ve tamamen panelde yönetilir;
 depo compose veya izleyici yapılandırması taşımaz. İzleme Uptime Kuma'da,
 ziyaret ölçümü sahibinin merkezi Umami kurulumunda (`umami.dravcore.com`,
 dravcore.com sahibinin altyapı domain'idir, sunucu yine kendisinindir).
+**Karar (2026-09-02):** kanonik host www; apex edge'de (Cloudflare) www'ye 301
+ile yönlenir, bu yüzden aşağıdaki adresler `www.dogancanyildiz.com` üzerinden
+verilmiştir.
 
 ## Servisler
 
 | Servis | Nerede | Ne yapar |
 |---|---|---|
-| portfolio | Coolify, Dockerfile (git tabanlı) | https://dogancanyildiz.com |
-| Uptime Kuma | Coolify servis kataloğu, panelde yönetilir | `https://dogancanyildiz.com/api/health` monitörü, bildirim kanalları, public status sayfası |
+| portfolio | Coolify, Dockerfile (git tabanlı) | https://www.dogancanyildiz.com |
+| Uptime Kuma | Coolify servis kataloğu, panelde yönetilir | `https://www.dogancanyildiz.com/api/health` monitörü, bildirim kanalları, public status sayfası |
 | Umami (merkezi) | `umami.dravcore.com` (ayrı Coolify kaynağı, bu repo dışında) | Bu site orada bir website kaydı; tracker script'i oradan yüklenir |
 
 Kuma'nın public status sayfası hangi domain'de yayınlanırsa `NEXT_PUBLIC_STATUS_URL`
@@ -22,7 +25,7 @@ o adresi gösterir; Systems paneli yalnızca link verir, Kuma'nın API'sinden ve
 
 | Değişken | Katman | Değer / kaynak |
 |---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | Build | `https://dogancanyildiz.com` |
+| `NEXT_PUBLIC_SITE_URL` | Build | `https://www.dogancanyildiz.com` |
 | `NEXT_PUBLIC_BUILD_SHA` | Build | `${SOURCE_COMMIT}` veya CI `github.sha` |
 | `NEXT_PUBLIC_BUILD_DATE` | Build | deploy zamanı (ISO) |
 | `NEXT_PUBLIC_STATUS_URL` | Build | Kuma public status sayfasının tam adresi; boşsa Systems'taki link satırı gizlenir, yalnızca https kabul edilir |
@@ -36,7 +39,7 @@ o adresi gösterir; Systems paneli yalnızca link verir, Kuma'nın API'sinden ve
 
 Posta değişkenlerinden biri eksikse container açılışta JSON hata satırı basar ve
 `/api/health` `"status":"degraded"` döner (HTTP 200). Tracker script'i consent
-onayından sonra enjekte edilir ve `data-domains="dogancanyildiz.com"` taşır:
+onayından sonra enjekte edilir ve `data-domains="www.dogancanyildiz.com"` taşır:
 aynı merkezi Umami'ye ekli diğer siteler veya preview kopyaları bu website
 kaydına veri yazamaz.
 
@@ -52,17 +55,17 @@ checklist olarak kullanılır.
 
 ```bash
 # Health canlı ve gövde doğru
-curl -s https://dogancanyildiz.com/api/health
+curl -s https://www.dogancanyildiz.com/api/health
 
 # Systems panelindeki status linki ve Umami origin'i
-curl -s https://dogancanyildiz.com/ | grep -o 'href="https://[^"]*"' | grep -i status
-curl -sI https://dogancanyildiz.com/ | tr -d '\r' | grep -i '^content-security-policy:' | grep -c 'umami.dravcore.com'
+curl -s https://www.dogancanyildiz.com/ | grep -o 'href="https://[^"]*"' | grep -i status
+curl -sI https://www.dogancanyildiz.com/ | tr -d '\r' | grep -i '^content-security-policy:' | grep -c 'umami.dravcore.com'
 
 # Ana sayfada topoloji sızıntısı yok
-curl -s https://dogancanyildiz.com/ | grep -Eic ':8080|:3001|iç-servis|127\.0\.0\.1'
+curl -s https://www.dogancanyildiz.com/ | grep -Eic ':8080|:3001|iç-servis|127\.0\.0\.1'
 
 # Consent onayı sonrası tracker (tarayıcıda): script src umami.dravcore.com/script.js,
-# data-domains="dogancanyildiz.com"
+# data-domains="www.dogancanyildiz.com"
 ```
 
 Beklenen: health gövdesi `{"status":"ok","checks":{"content":true,"mail":true},...}`;
@@ -79,7 +82,7 @@ topoloji grep'i `0`.
 - **Kuma verisi**: Coolify backup veya sunucu snapshot ritmine ekle.
 - **Harici prob**: Kuma izlediği sunucuda çalıştığı için sunucu tümden düşerse
   uyarı gönderemez; kontrol dışı bir yerden ikinci bir prob (ör. UptimeRobot,
-  `https://dogancanyildiz.com/api/health`) bu körlüğü kapatır.
+  `https://www.dogancanyildiz.com/api/health`) bu körlüğü kapatır.
 
 ## İçerik kadansı ve Astro yeniden değerlendirmesi
 

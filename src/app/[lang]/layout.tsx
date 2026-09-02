@@ -10,8 +10,9 @@ import "../globals.css";
 import { fontVariables } from "@/fonts";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
-import { getUntranslatedPaths } from "@/lib/content";
-import { buildOpenGraph } from "@/lib/seo/alternates";
+import { buildTranslationMap } from "@/lib/content";
+import { absoluteUrl, buildOpenGraph } from "@/lib/seo/alternates";
+import { OG_IMAGE_PATH } from "@/lib/seo/og-image";
 import { ThemeProvider } from "@/components/theme-provider";
 import { layoutUmamiTag } from "@/components/umami-script";
 import { ConsentProvider } from "@/components/consent/consent-provider";
@@ -121,12 +122,19 @@ export async function generateMetadata({
     description: t("defaultDescription"),
     // Only the home page keeps this object. Every other segment overrides it
     // with its own, otherwise it would inherit the home page url and title.
-    openGraph: buildOpenGraph(lang, "/", {
-      title: t("defaultTitle"),
-      description: t("defaultDescription"),
-      siteName: t("siteName"),
-      imageAlt: t("ogAlt"),
-    }),
+    openGraph: buildOpenGraph(
+      lang,
+      {
+        url: absoluteUrl(lang, "/"),
+        imageUrl: absoluteUrl(lang, OG_IMAGE_PATH),
+      },
+      {
+        title: t("defaultTitle"),
+        description: t("defaultDescription"),
+        siteName: t("siteName"),
+        imageAlt: t("ogAlt"),
+      }
+    ),
   };
 }
 
@@ -146,17 +154,14 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   );
   const analyticsTag = layoutUmamiTag();
 
-  // Computed for the locales the language switcher can navigate to, so it
-  // knows for each target whether the current path is translated there. See
-  // src/i18n/switch-target.ts. The current locale is skipped: the page being
-  // rendered exists in the locale it is rendered in, so its own list can
-  // never contain the current path, and the switcher already falls back to
-  // an empty list for a locale the map does not carry.
-  const untranslated: Record<string, string[]> = Object.fromEntries(
-    routing.locales
-      .filter((locale) => locale !== lang)
-      .map((locale) => [locale, getUntranslatedPaths(locale)])
-  );
+  // Every content page's path in every locale that has it, keyed by this
+  // locale's slug. The switcher is a client component in the header and the
+  // page is a sibling child of this layout, so it cannot ask the page where
+  // its translation lives; the layout resolves the targets instead. Missing
+  // translations are simply absent, and the switcher falls back to the
+  // section root for them. tests/perf/client-payload.test.ts holds the size
+  // budget this puts on every page's RSC payload.
+  const translations = buildTranslationMap(lang);
 
   return (
     <html lang={lang} className={fontVariables} suppressHydrationWarning>
@@ -172,7 +177,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
               <a href="#main" className="skip-link">
                 {t("skipToContent")}
               </a>
-              <Header untranslated={untranslated} />
+              <Header translations={translations} />
               <main
                 id="main"
                 tabIndex={-1}

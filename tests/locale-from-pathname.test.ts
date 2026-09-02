@@ -43,9 +43,11 @@ describe("isLocalizedRoutePath", () => {
     expect(isLocalizedRoutePath("/_vercel/insights")).toBe(false);
   });
 
-  it("leaves the app root metadata routes alone", () => {
-    expect(isLocalizedRoutePath("/icon")).toBe(false);
-    expect(isLocalizedRoutePath("/apple-icon")).toBe(false);
+  it("leaves the app root metadata files alone", () => {
+    // These are static files under src/app now, not generated routes, so the
+    // dot rule below is what excludes them and no exception list is needed.
+    expect(isLocalizedRoutePath("/icon.png")).toBe(false);
+    expect(isLocalizedRoutePath("/apple-icon.png")).toBe(false);
   });
 
   it("leaves files alone", () => {

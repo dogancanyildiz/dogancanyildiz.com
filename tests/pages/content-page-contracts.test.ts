@@ -15,6 +15,7 @@ const PROJECT_DETAIL = "src/app/[lang]/projects/[slug]/page.tsx";
 const BLOG_DETAIL = "src/app/[lang]/blog/[slug]/page.tsx";
 const PROJECTS_INDEX = "src/app/[lang]/projects/page.tsx";
 const HOME = "src/app/[lang]/page.tsx";
+const CERTIFICATE_LIST = "src/components/sections/certificate-list.tsx";
 
 /**
  * Accessibility decisions revert silently. Alt text that describes the page
@@ -90,8 +91,45 @@ describe("empty states", () => {
     // which reads as a broken page rather than as an empty one.
     expect(read(PROJECTS_INDEX)).toContain('t("empty")');
     expect(read(HOME)).toContain('tProjects("empty")');
-    expect(read(ABOUT).match(/t\("emptyList"\)/g) ?? []).toHaveLength(4);
+    // Three sections still live in the page (experience, community,
+    // education); the certificate section moved into its own component and
+    // took its empty state with it.
+    expect(read(ABOUT).match(/t\("emptyList"\)/g) ?? []).toHaveLength(3);
+    expect(read(CERTIFICATE_LIST)).toContain('t("emptyList")');
   });
+});
+
+describe("share block placement", () => {
+  it.each([
+    ["blog post", BLOG_DETAIL, "post"],
+    ["project", PROJECT_DETAIL, "project"],
+  ])("closes the %s article on the share block", (_name, file, kind) => {
+    const source = read(file);
+
+    expect(source).toContain("<ShareCard");
+    // The card belongs to the page the reader just finished, so it is handed
+    // this content's own kind and slug rather than falling back to the
+    // identity image.
+    expect(source).toContain(`kind="${kind}"`);
+    expect(source).toContain("slug={slug}");
+  });
+
+  it.each([
+    ["blog post", BLOG_DETAIL],
+    ["project", PROJECT_DETAIL],
+  ])(
+    "puts it after the %s prose and before the contact call",
+    (_name, file) => {
+      const source = read(file);
+      const prose = source.indexOf("prose-content");
+      const share = source.indexOf("<ShareCard");
+      const cta = source.indexOf("<ContactCta");
+
+      expect(prose).toBeGreaterThan(-1);
+      expect(share).toBeGreaterThan(prose);
+      expect(cta).toBeGreaterThan(share);
+    }
+  );
 });
 
 describe("mdx element overrides", () => {

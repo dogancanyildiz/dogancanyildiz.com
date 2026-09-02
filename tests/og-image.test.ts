@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { truncateOgTitle } from "@/lib/seo/og-layout";
 
 const read = (relative: string) =>
   readFileSync(join(process.cwd(), relative), "utf8");
@@ -21,8 +22,8 @@ function tableTags(buffer: Buffer): string[] {
   return tags;
 }
 
-describe("opengraph image", () => {
-  const source = read("src/app/[lang]/opengraph-image.tsx");
+describe("og card layout", () => {
+  const source = read("src/lib/seo/og-layout.tsx");
 
   it("draws the real identity from site-config, not the template copy", () => {
     expect(source).toContain("siteConfig");
@@ -31,6 +32,97 @@ describe("opengraph image", () => {
     expect(source).not.toContain("Building clean, fast");
     expect(source).not.toContain("Portfolio</p>");
   });
+
+  it("uses the neutral palette from the design doc", () => {
+    expect(source).toContain("#0a0c0f");
+    expect(source).toContain("#4fcc8d");
+    expect(source).not.toContain("#09090b");
+    expect(source).not.toContain("#27272a");
+  });
+
+  it("loads both subsets of both families so Turkish glyphs render", () => {
+    for (const file of [
+      "geist-latin-400.ttf",
+      "geist-latin-700.ttf",
+      "geist-latin-ext-400.ttf",
+      "geist-latin-ext-700.ttf",
+      "geist-mono-latin-400.ttf",
+      "geist-mono-latin-500.ttf",
+      "geist-mono-latin-ext-400.ttf",
+      "geist-mono-latin-ext-500.ttf",
+    ]) {
+      expect(source, file).toContain(file);
+    }
+    expect(source).not.toContain(".woff2");
+  });
+
+  it("loads static instances, because satori cannot parse a variable font", () => {
+    // A face with fvar/gvar makes satori's glyf reader throw, which turns the
+    // whole route into a 500 and breaks every og:image on the site.
+    expect(source).not.toMatch(/geist-latin(-ext)?\.woff\b/);
+    for (const relative of [
+      "public/fonts/og/geist-latin-400.ttf",
+      "public/fonts/og/geist-latin-700.ttf",
+      "public/fonts/og/geist-latin-ext-400.ttf",
+      "public/fonts/og/geist-latin-ext-700.ttf",
+      "public/fonts/og/geist-mono-latin-400.ttf",
+      "public/fonts/og/geist-mono-latin-500.ttf",
+      "public/fonts/og/geist-mono-latin-ext-400.ttf",
+      "public/fonts/og/geist-mono-latin-ext-500.ttf",
+    ]) {
+      const file = join(process.cwd(), relative);
+      expect(existsSync(file), `${relative} is missing`).toBe(true);
+      const tables = tableTags(readFileSync(file));
+      expect(
+        tables,
+        `${relative} still carries a variation table`
+      ).not.toContain("fvar");
+      expect(tables).not.toContain("gvar");
+      expect(tables).toContain("glyf");
+    }
+  });
+
+  it("registers each subset under its own family name", () => {
+    // satori keys its font table by name + weight + style. Two font entries
+    // sharing all three collapse into one (only one subset is ever
+    // consulted), which drops Turkish glyphs like g-breve to a fallback face
+    // even though the file has them. Giving the extended subset a distinct
+    // name, and chaining it in the fontFamily fallback list below, is what
+    // makes satori actually try both files per character.
+    expect(source.match(/name: "Geist Sans"/g) ?? []).toHaveLength(2);
+    expect(source.match(/name: "Geist Sans Ext"/g) ?? []).toHaveLength(2);
+    expect(source.match(/name: "Geist Mono"/g) ?? []).toHaveLength(2);
+    expect(source.match(/name: "Geist Mono Ext"/g) ?? []).toHaveLength(2);
+    for (const weight of [400, 500, 700]) {
+      expect(source, String(weight)).toContain(`weight: ${weight} as const`);
+    }
+  });
+
+  it("chains both family names so per-character fallback reaches the ext subset", () => {
+    expect(source).toContain('const SANS = "Geist Sans, Geist Sans Ext"');
+    expect(source).toContain('const MONO = "Geist Mono, Geist Mono Ext"');
+  });
+
+  it("shortens a long title on a word boundary instead of letting satori clip it", () => {
+    const long =
+      "Bir CCNA sertifikasindan web guvenligine uzanan uzun yolun tam hikayesi";
+    const short = truncateOgTitle(long);
+    expect(short.length).toBeLessThanOrEqual(68);
+    expect(short.endsWith("…")).toBe(true);
+    // Cut on a space, so the last word is never sliced in half.
+    expect(long).toContain(short.slice(0, -1).trimEnd());
+    expect(truncateOgTitle("Cargo Pilot")).toBe("Cargo Pilot");
+  });
+
+  it("keeps a single word longer than the limit from overflowing", () => {
+    const short = truncateOgTitle("a".repeat(120));
+    expect(short.length).toBe(68);
+    expect(short.endsWith("…")).toBe(true);
+  });
+});
+
+describe("opengraph image", () => {
+  const source = read("src/app/[lang]/opengraph-image.tsx");
 
   it("keeps the alt text locale-driven instead of a fixed export", () => {
     expect(source).not.toMatch(/export const alt =/);
@@ -52,68 +144,14 @@ describe("opengraph image", () => {
     expect(source).toContain("@/lib/seo/og-image");
   });
 
-  it("uses the neutral palette from the design doc", () => {
-    expect(source).toContain("#0a0c0f");
-    expect(source).toContain("#4fcc8d");
-    expect(source).not.toContain("#09090b");
-    expect(source).not.toContain("#27272a");
-  });
-
-  it("loads both Geist Sans subsets so Turkish glyphs render", () => {
-    expect(source).toContain("geist-latin-400.ttf");
-    expect(source).toContain("geist-latin-600.ttf");
-    expect(source).toContain("geist-latin-ext-400.ttf");
-    expect(source).toContain("geist-latin-ext-600.ttf");
-    expect(source).not.toContain(".woff2");
-  });
-
-  it("loads static instances, because satori cannot parse a variable font", () => {
-    // A face with fvar/gvar makes satori's glyf reader throw, which turns the
-    // whole route into a 500 and breaks every og:image on the site.
-    expect(source).not.toMatch(/geist-latin(-ext)?\.woff\b/);
-    for (const relative of [
-      "public/fonts/og/geist-latin-400.ttf",
-      "public/fonts/og/geist-latin-600.ttf",
-      "public/fonts/og/geist-latin-ext-400.ttf",
-      "public/fonts/og/geist-latin-ext-600.ttf",
-    ]) {
-      const file = join(process.cwd(), relative);
-      expect(existsSync(file), `${relative} is missing`).toBe(true);
-      const tables = tableTags(readFileSync(file));
-      expect(
-        tables,
-        `${relative} still carries a variation table`
-      ).not.toContain("fvar");
-      expect(tables).not.toContain("gvar");
-      expect(tables).toContain("glyf");
-    }
-  });
-
-  it("registers the latin-ext subset under its own family name", () => {
-    // satori keys its font table by name + weight + style. Two font entries
-    // sharing all three collapse into one (only one subset is ever
-    // consulted), which drops Turkish glyphs like g-breve to a fallback face
-    // even though the file has them. Giving the extended subset a distinct
-    // name, and chaining it in the fontFamily fallback list below, is what
-    // makes satori actually try both files per character.
-    expect(source).toContain('name: "Geist Sans Ext"');
-    // One entry per weight for each of the two family names.
-    expect(source.match(/name:\s*"Geist Sans"/g) ?? []).toHaveLength(2);
-    expect(source.match(/name:\s*"Geist Sans Ext"/g) ?? []).toHaveLength(2);
-    expect(source).toContain("weight: 400");
-    expect(source).toContain("weight: 600");
-  });
-
-  it("chains both font family names so per-character fallback can reach the ext subset", () => {
-    expect(source).toContain('fontFamily: "Geist Sans, Geist Sans Ext"');
+  it("draws the shared card with the identity prompt and no title", () => {
+    expect(source).toContain("@/lib/seo/og-layout");
+    expect(source).toContain('prompt="~/dogancanyildiz $ whoami"');
+    expect(source).not.toContain("title=");
   });
 
   it("stays off the edge runtime", () => {
     expect(source).not.toContain('runtime = "edge"');
-  });
-
-  it("uses the readable text badge for the DCY mark", () => {
-    expect(source).toContain("BrandMarkText");
   });
 });
 
@@ -151,20 +189,152 @@ describe("opengraph image render", () => {
   }, 30_000);
 });
 
-describe("icon", () => {
-  const source = read("src/app/icon.tsx");
-  const mark = read("src/lib/brand-mark.tsx");
+/**
+ * The per page cards. These routes draw the requested slug into the prompt
+ * line, so what they will and will not render for is a security property, not
+ * a routing detail: shipped without dynamicParams they answered 200 with an
+ * attacker chosen string above the owner's name, for a path whose page 404s.
+ */
+describe("per page opengraph images", () => {
+  const ROUTES = [
+    {
+      section: "blog",
+      file: "src/app/[lang]/blog/[slug]/opengraph-image.tsx",
+      load: () => import("@/app/[lang]/blog/[slug]/opengraph-image"),
+      slugs: async () => (await import("@/lib/content")).getPostSlugs("tr"),
+    },
+    {
+      section: "projects",
+      file: "src/app/[lang]/projects/[slug]/opengraph-image.tsx",
+      load: () => import("@/app/[lang]/projects/[slug]/opengraph-image"),
+      slugs: async () => (await import("@/lib/content")).getProjectSlugs("tr"),
+    },
+  ] as const;
 
-  it("renders the DCY monogram on the new palette", () => {
-    expect(source).toContain("BrandMarkImage");
-    expect(mark).toContain("BrandMarkText");
-    expect(mark).toContain(">C<");
-    expect(mark).toContain("#0a0c0f");
-    expect(mark).toContain("#4fcc8d");
-    expect(source).not.toContain('background: "black"');
+  it.each(ROUTES)(
+    "$section gates the card on the slug existing, in the handler",
+    async ({ file }) => {
+      const source = read(file);
+      expect(source).toContain("notFound()");
+      // dynamicParams = false would be the tidier gate and 404s every card,
+      // real slugs included: Next puts no concrete path for a metadata image
+      // route in the prerender manifest, so fallback: false matches nothing.
+      expect(source).not.toContain("export const dynamicParams");
+      // The lookup has to come before the fonts are read, otherwise an
+      // unknown slug still pays for a satori render.
+      expect(source.indexOf("notFound()")).toBeLessThan(
+        source.indexOf("loadOgFonts()")
+      );
+    }
+  );
+
+  it.each(ROUTES)(
+    "$section draws a png for a real slug",
+    async ({ load, slugs }) => {
+      const [slug] = await slugs();
+      if (!slug) throw new Error("the tr collection is empty");
+      const route = await load();
+
+      const response = await route.default({
+        params: Promise.resolve({ lang: "tr", slug }),
+      });
+
+      expect(response.status).toBe(200);
+      const body = Buffer.from(await response.arrayBuffer());
+      expect([...body.subarray(0, 4)]).toEqual([0x89, 0x50, 0x4e, 0x47]);
+      expect(body.length).toBeGreaterThan(1000);
+    },
+    30_000
+  );
+
+  it.each(ROUTES)(
+    "$section refuses to draw a card for a slug that does not exist",
+    async ({ load }) => {
+      const route = await load();
+
+      // notFound() throws the NEXT_HTTP_ERROR_FALLBACK;404 sentinel rather
+      // than returning, so an image is never produced for the path.
+      await expect(
+        route.default({
+          params: Promise.resolve({
+            lang: "tr",
+            slug: "CLICK HERE FREE BITCOIN now",
+          }),
+        })
+      ).rejects.toThrow(/NEXT_HTTP_ERROR_FALLBACK;404|NEXT_NOT_FOUND/);
+    },
+    30_000
+  );
+
+  it.each(ROUTES)(
+    "$section prompt names the file, and only from a slug that exists",
+    async ({ file, section }) => {
+      const source = read(file);
+      expect(source).toContain(`$ cat ${section}/`);
+      // The optional chain was what let an unknown slug through with an empty
+      // title band instead of a 404.
+      expect(source).not.toMatch(/title=\{(post|project)\?\./);
+    }
+  );
+});
+
+/**
+ * The icons are exported brand files now, not next/og routes. satori could
+ * only draw an approximation of the mark on its built-in face; these are the
+ * real artwork, so the assertions are about the files being present, the right
+ * size and free of the provenance chunk the design tool writes.
+ */
+describe("app icons", () => {
+  const iconFile = (relative: string) =>
+    readFileSync(join(process.cwd(), relative));
+
+  it("ships no generated icon routes any more", () => {
+    expect(existsSync(join(process.cwd(), "src/app/icon.tsx"))).toBe(false);
+    expect(existsSync(join(process.cwd(), "src/app/apple-icon.tsx"))).toBe(
+      false
+    );
   });
 
-  it("has no stale create-next-app favicon.ico to outrank it in the page head", () => {
-    expect(existsSync(join(process.cwd(), "src/app/favicon.ico"))).toBe(false);
+  it("ships a brand favicon.ico carrying three png entries", () => {
+    const ico = iconFile("src/app/favicon.ico");
+    // ICONDIR: reserved 0, type 1 (icon), then the image count.
+    expect(ico.readUInt16LE(0)).toBe(0);
+    expect(ico.readUInt16LE(2)).toBe(1);
+    expect(ico.readUInt16LE(4)).toBe(3);
+
+    // Each ICONDIRENTRY: width and height as single bytes, then the payload
+    // offset. Every payload is a png, which is what keeps 48x48 small.
+    const sizes = [0, 1, 2].map((index) => {
+      const entry = 6 + index * 16;
+      const offset = ico.readUInt32LE(entry + 12);
+      expect(ico.subarray(offset, offset + 8).toString("hex")).toBe(
+        "89504e470d0a1a0a"
+      );
+      return ico[entry];
+    });
+    expect(sizes).toEqual([16, 32, 48]);
+  });
+
+  it("ships icon.png at 192 and apple-icon.png at 180", () => {
+    // IHDR is the first chunk of a png: width and height at byte 16 and 20,
+    // colour type at 25 (6 = RGBA, 2 = RGB).
+    const icon = iconFile("src/app/icon.png");
+    expect(icon.readUInt32BE(16)).toBe(192);
+    expect(icon.readUInt32BE(20)).toBe(192);
+
+    const apple = iconFile("src/app/apple-icon.png");
+    expect(apple.readUInt32BE(16)).toBe(180);
+    expect(apple.readUInt32BE(20)).toBe(180);
+    // iOS composites a transparent apple-touch-icon onto white, which would
+    // put a white ring around the dark tile, so this one is flattened.
+    expect(apple[25]).toBe(2);
+  });
+
+  it("carries no content credentials chunk from the design export", () => {
+    for (const relative of ["src/app/icon.png", "src/app/apple-icon.png"]) {
+      // caBX is the C2PA JUMBF box. It is 5.7 KB of provenance metadata on a
+      // 1.6 KB image and has no business being served to every visitor.
+      expect(iconFile(relative).includes("caBX"), relative).toBe(false);
+    }
   });
 });

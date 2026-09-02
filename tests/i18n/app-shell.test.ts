@@ -91,7 +91,7 @@ describe("proxy", () => {
       "/_next/static/chunk.js",
       "/favicon.ico",
       "/cv/dogancanyildiz-cv.pdf",
-      "/icon",
+      "/icon.png",
     ]) {
       expect(matchesAny(pathname), pathname).toBe(true);
     }
@@ -121,25 +121,33 @@ describe("proxy", () => {
       "/robots.txt",
       "/sitemap.xml",
       "/cv/dogancanyildiz-cv.pdf",
-      "/icon",
+      "/icon.png",
+      "/apple-icon.png",
     ]) {
       expect(isLocalizedRoutePath(pathname), pathname).toBe(false);
     }
   });
 
-  it("skips exactly /icon and /apple-icon but not /icons", () => {
-    // /icon and /apple-icon live outside app/[lang], so a rewrite to
-    // /en/icon or /tr/icon would 404. The exclusion is anchored to those exact
-    // paths, so a future /icons route stays locale rewritten like any other.
-    expect(isLocalizedRoutePath("/icon")).toBe(false);
-    expect(isLocalizedRoutePath("/apple-icon")).toBe(false);
+  it("skips the icon files but not a page path that starts the same way", () => {
+    // The icons live outside app/[lang] as static files, so a rewrite to
+    // /en/icon.png would 404. They carry an extension, which is what the dot
+    // rule keys on, so a future /icons page stays locale rewritten.
+    expect(isLocalizedRoutePath("/icon.png")).toBe(false);
+    expect(isLocalizedRoutePath("/apple-icon.png")).toBe(false);
+    expect(isLocalizedRoutePath("/favicon.ico")).toBe(false);
     expect(isLocalizedRoutePath("/icons")).toBe(true);
   });
 
-  it("redirects the legacy favicon path to the single icon source", () => {
+  it("serves the favicon as a real file instead of redirecting it", () => {
+    // src/app/favicon.ico is the brand ICO now, so the old 308 to the
+    // generated /icon route would shadow a file that answers 200 by itself.
     const config = read("next.config.ts");
-    expect(config).toContain('source: "/favicon.ico"');
-    expect(config).toContain('destination: "/icon"');
+    // Only the favicon rule is locked out. Asserting the absence of the whole
+    // redirects() block would fail the next unrelated redirect for a reason
+    // that has nothing to do with the favicon.
+    expect(config).not.toContain('source: "/favicon.ico", destination');
+    expect(config).not.toMatch(/destination:\s*"\/icon"/);
+    expect(existsSync(join(process.cwd(), "src/app/favicon.ico"))).toBe(true);
   });
 });
 
@@ -228,7 +236,7 @@ describe("application shell", () => {
     // getPathname honours localePrefix "as-needed", so the Turkish link is
     // /hakkimda and not /tr/about. Link with an explicit locale prop always
     // forces the prefix and would 308 a default-locale URL.
-    expect(source).toContain("pathnameForLocale(locale, target)");
+    expect(source).toContain("pathnameForLocale(locale,");
     expect(source).not.toContain("locale={locale}");
     expect(source).not.toContain("setLocale");
     expect(source).not.toContain("document.cookie");
@@ -236,9 +244,11 @@ describe("application shell", () => {
 
   it("falls back to the section root for untranslated content", () => {
     const source = read("src/components/layout/language-switcher.tsx");
-    expect(source).toContain(
-      'import { switchTargetPath } from "@/i18n/switch-target"'
-    );
+    // The fallback is now the absence of an entry in the translation map,
+    // not a second list of untranslated paths: a per locale slug makes the
+    // path unusable as the lookup key.
+    expect(source).toContain("SECTION_TEMPLATE[kind]");
+    expect(source).not.toContain("@/i18n/switch-target");
   });
 
   it("moved the page bodies into reusable section components", () => {

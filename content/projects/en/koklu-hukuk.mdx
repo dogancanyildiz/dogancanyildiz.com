@@ -1,0 +1,36 @@
+---
+title: Köklü Hukuk ve Danışmanlık
+slug: koklu-hukuk
+translationKey: koklu-hukuk
+summary: The website of a law firm in Ankara, from the logo to the deployment. Two languages, ten practice areas, direct contact channels instead of a form, and no CMS or database.
+role: Design, development and deployment
+stack:
+  - Next.js
+  - TypeScript
+  - React
+  - Tailwind CSS
+  - next-intl
+  - shadcn/ui
+  - Docker
+  - Coolify
+year: 2026
+links:
+  live: https://www.kokluhukuk.com
+cover: ../../images/koklu-hukuk-cover.jpg
+coverAlt: "The Köklü Hukuk homepage: deep navy with gold accents, a phone and address bar on top, the Turkish navigation and language switcher below it, the hero headline on the left and a photo of a blindfolded Lady Justice statue on the right."
+outcome: Live since July 2024 and rebuilt from scratch in July 2026; it runs on my own server with no CMS, no database and no form backend.
+featured: true
+order: 1
+---
+
+## What I did
+
+Köklü Hukuk ve Danışmanlık is a law firm in Etimesgut, Ankara. The domain was registered in July 2024 and the site has been mine to keep current ever since, through several rounds of edits; in July 2026 I rebuilt the architecture from scratch. The logo, the interface design, the code and the deployment were all mine, and the copy and the legal texts went in with the lawyer's approval. The site runs in two languages with localized paths, so `/tr/calisma-alanlari` and `/en/practice-areas` are separate addresses. It holds ten practice area pages, an about page, a team page with the lawyer's profile, an FAQ, articles, contact, and the privacy and legal notice texts. There is no contact form: phone, email and WhatsApp links do that job, and the appointment button leads to the same channels.
+
+## Why it was built this way
+
+On a law firm site the content is known at build time and nothing changes per visitor, so I left out the CMS and the database. The copy lives in typed content files, the pages render statically, and Server Components are the default; client code exists only for the menu, the language switcher and the accordions. Choosing direct channels over a form backend was just as practical: keeping no personal data on the server removes the compliance burden up front, and a lawyer already has a written channel that works. Deployment runs on Coolify on my own server through a multi stage Dockerfile, so the cost is fixed and a push updates the site. There are no analytics cookies, only the required cookie notice.
+
+## What I learned
+
+Keeping a client site current for two years is what tells you when a rebuild is due. Individually small changes pile up until the architecture resists every new request, and patching costs more than starting over. The second lesson came from search: visibility is slow and it is measurable. As of September 2026 the firm's queries sit at the edge of the second page; with the technical layer in place, the next move is content rather than code.

@@ -44,6 +44,12 @@ vi.mock("next-intl/server", async () => {
   >;
   return {
     getLocale: async () => "en",
+    // Backed by the platform's own Intl, which is what next-intl wraps in
+    // production; the certificate list formats its issue dates through it.
+    getFormatter: async () => ({
+      dateTime: (value: Date, options?: Intl.DateTimeFormatOptions) =>
+        new Intl.DateTimeFormat("en", options).format(value),
+    }),
     getTranslations: async (arg?: string | { namespace?: string }) => {
       const namespace = typeof arg === "string" ? arg : arg?.namespace;
       return (key: string, values?: Record<string, unknown>) => {
@@ -72,6 +78,8 @@ const { Footer } = await import("@/components/layout/footer");
 const { MobileMenu } = await import("@/components/layout/mobile-menu");
 const { ContactPageContent } =
   await import("@/components/sections/contact-page-content");
+const { CertificateList } =
+  await import("@/components/sections/certificate-list");
 const { default: LocaleError } = await import("@/app/[lang]/error");
 
 const read = (relative: string) =>
@@ -195,7 +203,7 @@ describe("target size", () => {
 
   it("gives every header control at least 44 CSS px", () => {
     const { container } = renderWithIntl(
-      createElement(Header, { untranslated: { en: [], tr: [] } })
+      createElement(Header, { translations: { post: {}, project: {} } })
     );
     const targets = measuredTargets(container);
     expect(targets.length).toBeGreaterThan(5);
@@ -229,6 +237,27 @@ describe("target size", () => {
     for (const { label, height } of targets) {
       expect(height, `mobile menu ${label} has no height floor`).not.toBeNull();
       expect(height, `mobile menu ${label}`).toBeGreaterThanOrEqual(
+        TARGET_FLOOR_PX
+      );
+    }
+  });
+
+  it("gives every control in the certificate list at least 44 CSS px", async () => {
+    const { container } = render(
+      await resolveServerTree(createElement(CertificateList, { locale: "en" }))
+    );
+    // Two controls per credential with artwork (the preview trigger and its
+    // close button), plus a verify link on the row and a second inside the
+    // preview. The closed dialogs are display:none, which is why these are
+    // read off the DOM rather than through a role query.
+    const targets = measuredTargets(container);
+    expect(targets.length).toBeGreaterThan(40);
+    for (const { label, height } of targets) {
+      expect(
+        height,
+        `certificates ${label} has no height floor`
+      ).not.toBeNull();
+      expect(height, `certificates ${label}`).toBeGreaterThanOrEqual(
         TARGET_FLOOR_PX
       );
     }
@@ -472,11 +501,51 @@ describe("client message payload", () => {
 // screen reader user would notice it.
 
 describe("brand link", () => {
+  const header = read("src/components/layout/header.tsx");
+  const lockup = read("src/components/brand/brand-lockup.tsx");
+
   it("shows the brand name in the header instead of hiding it for assistive tech", () => {
-    const source = read("src/components/layout/header.tsx");
-    expect(source).not.toContain('aria-label={tBrand("name")}');
-    expect(source).toContain('{tBrand("name")}');
-    expect(source).not.toContain("sr-only");
+    expect(header).not.toContain('aria-label={tBrand("name")}');
+    expect(header).toContain('name={tBrand("name")}');
+    // One sr-only copy of the name exists for phones only, paired with
+    // min-[480px]:hidden; the visible lockup takes over from 480px up. A
+    // second sr-only, or one without the breakpoint pair, would hide the
+    // name everywhere.
+    expect(lockup.match(/sr-only/g)).toHaveLength(1);
+    expect(lockup).toContain('className="sr-only min-[480px]:hidden"');
+    expect(lockup).toContain("min-[480px]:flex");
+    expect(header).not.toContain("sr-only");
+  });
+
+  it("puts the logo mark inside the same link without labelling it", () => {
+    // The link wraps the whole lockup; inside it the mark reads first and is
+    // aria-hidden (src/components/brand/brand-mark.tsx), and so is the
+    // tagline, so the link's accessible name is the name text alone.
+    expect(header).toContain("<BrandLockup");
+    const markAt = lockup.indexOf("<BrandMark");
+    const nameAt = lockup.indexOf("{name}");
+    expect(markAt).toBeGreaterThan(-1);
+    expect(markAt).toBeLessThan(nameAt);
+    const taglineAt = lockup.indexOf("{tagline}");
+    expect(lockup.slice(taglineAt - 220, taglineAt)).toContain(
+      'aria-hidden="true"'
+    );
+  });
+
+  it("lets the name ellipsize rather than wrap when the row runs out", () => {
+    // truncate needs a min-w-0 ancestor chain to do anything: the link, the
+    // lockup root and the text column all carry it.
+    expect(header).toContain("flex min-w-0 items-center no-underline");
+    expect(lockup).toContain("flex min-w-0 items-center gap-2.5");
+    expect(lockup).toContain("flex min-w-0 flex-col");
+    expect(lockup).toMatch(/className="truncate text-\[15px\][^"]*"/);
+  });
+
+  it("reuses the lockup in the footer with a steady cursor", () => {
+    const footer = read("src/components/layout/footer.tsx");
+    expect(footer).toContain("<BrandLockup");
+    expect(footer).not.toContain('cursor="blink"');
+    expect(footer).not.toContain('tBrand("monogram")');
   });
 });
 

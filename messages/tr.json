@@ -1,8 +1,8 @@
 {
   "brand": {
     "name": "Doğan Can YILDIZ",
-    "monogram": "DCY",
-    "role": "Full-Stack Web Geliştirici ve DevOps Uzmanı"
+    "tagline": "Full Stack · DevOps",
+    "role": "Full Stack Web Geliştirici ve DevOps Uzmanı"
   },
   "nav": {
     "home": "Ana Sayfa",
@@ -25,7 +25,7 @@
     "metricProjectsLabel": "Uçtan uca teslim",
     "metricProjectsValue": "5 uygulama",
     "metricFocusLabel": "Odak",
-    "metricFocusValue": "Full-stack + DevOps",
+    "metricFocusValue": "Full Stack + DevOps",
     "viewProjects": "Projeleri gör",
     "getInTouch": "İhtiyacınızı yazın"
   },
@@ -44,7 +44,7 @@
   "footer": {
     "tagline": "Teslim ettiğim işlerin ve yazdığım yazıların kaydı.",
     "copyright": "Tasarımı da kodu da bana ait.",
-    "availability": "En hızlı yol e-posta",
+    "availability": "Yeni projelere açığım, yazın yeter.",
     "navTitle": "Sayfalar",
     "emailLabel": "E-posta",
     "elsewhereLabel": "Diğer kanallar",
@@ -58,8 +58,8 @@
   },
   "about": {
     "title": "Hakkımda",
-    "description": "Nasıl çalıştığımı ve hangi işi almadığımı yazdım. Konya, Türkiye'de full-stack geliştiriciyim.",
-    "lead": "Kasım 2024'ten beri BerrSoft'ta full-stack geliştiriciyim; uygulamayı yazma ve yayına alma işi bende.",
+    "description": "Nasıl çalıştığımı ve hangi işi almadığımı yazdım. Konya, Türkiye'de Full Stack geliştiriciyim.",
+    "lead": "Kasım 2024'ten beri BerrSoft'ta Full Stack geliştiriciyim; uygulamayı yazma ve yayına alma işi bende.",
     "body1": "Bir iş bende başlıyorsa sonuna kadar bende kalıyor: ilk mimari kararını da ben veriyorum, yayından sonra gelen hatayı da ben karşılıyorum. Karşı taraf için sonucu basit: bir şey bozulduğunda kimin bakacağını sormak gerekmiyor, arada koordinasyon katmanı yok.",
     "body2": "Ağ ve güvenlik tarafı bende karara dönüştü. Bilet satın alma uygulamasını yazdıktan sonra kendi koduma sızma testi yaptım; çıkan bulgular girdi doğrulamasını ve oturum yönetimini değiştirdi, konteyneri de root'tan çıkardı. Bir sistemin nasıl yayına çıktığı ve dışarıya neyi açtığı, kodun nasıl yazıldığı kadar belirleyici.",
     "body3": "Aldığım iş web uygulamasını yazmak ve yayına almak. Ücretli güvenlik denetimi almıyorum; yukarıdaki test bir eğitim programı kapsamındaydı. Ağ ve güvenlik, teslim ettiğim işin altındaki katman. İşin dışında iki yıl GDG Konya organizatörlüğü yaptım ve GDG Cloud Konya çekirdek ekibindeydim.",
@@ -73,9 +73,15 @@
     "speakingTitle": "Konuşmalar",
     "certificatesTitle": "Sertifikalar",
     "certificateVerify": "Doğrula",
+    "certificateVerifyLabel": "Doğrula: {name}",
+    "certificateBadgeAlt": "{name} rozeti",
+    "certificateImageAlt": "{name} sertifikası",
+    "certificateEnlarge": "Büyüt: {name}",
+    "certificatePreviewClose": "Önizlemeyi kapat",
+    "certificateCredentialId": "Sertifika kimliği {id}",
     "educationTitle": "Eğitim",
     "languagesTitle": "Diller",
-    "languages": "Ana dilim Türkçe. İngilizceyi okuyup yazıyorum: dokümantasyon, depolar ve buradaki yazılar. Konuşma tarafım okuma ve yazmanın gerisinde.",
+    "languages": "Ana dilim Türkçe. İngilizce, teknik işin günlük dili: dokümantasyon, depolar ve bu sitenin İngilizce sürümü.",
     "downloadCv": "CV'yi indir",
     "testimonialsTitle": "Referanslar",
     "subnavLabel": "Bu sayfada",
@@ -100,6 +106,17 @@
     "readingTime": "{minutes} dakikalık okuma",
     "back": "Tüm yazılar",
     "empty": "Henüz yazı yok."
+  },
+  "share": {
+    "title": "Paylaş",
+    "lead": "Bu sayfanın bağlantısı paylaşıldığında görünen kart.",
+    "x": "X'te paylaş",
+    "linkedin": "LinkedIn'de paylaş",
+    "whatsapp": "WhatsApp'ta paylaş",
+    "email": "E-posta ile gönder",
+    "copy": "Bağlantıyı kopyala",
+    "copied": "Kopyalandı",
+    "copyFailed": "Kopyalanamadı, adresi seçip kopyalayın"
   },
   "contact": {
     "title": "İletişim",
@@ -205,10 +222,11 @@
     "digestLabel": "Hata referansı"
   },
   "metadata": {
-    "defaultTitle": "Doğan Can YILDIZ | Full-Stack Web Geliştirici ve DevOps Uzmanı",
+    "defaultTitle": "Doğan Can YILDIZ | Full Stack Web Geliştirici ve DevOps Uzmanı",
     "siteName": "Doğan Can YILDIZ",
     "defaultDescription": "BerrSoft'ta beş üretim uygulamasını mimariden bakıma kadar teslim ettim. Uygulamayı yazan da çalıştığı Linux sunucuyu işleten de aynı kişi: ben. Konya, Türkiye.",
-    "ogAlt": "Doğan Can YILDIZ, Full-Stack Web Geliştirici ve DevOps Uzmanı"
+    "ogAlt": "Doğan Can YILDIZ, Full Stack Web Geliştirici ve DevOps Uzmanı",
+    "ogAltPage": "{title}. Doğan Can YILDIZ, Full Stack Web Geliştirici ve DevOps Uzmanı"
   },
   "api": {
     "invalidRequest": "Geçersiz istek. Ad, e-posta, konu ve mesaj alanları zorunlu.",

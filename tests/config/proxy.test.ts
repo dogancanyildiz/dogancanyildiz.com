@@ -41,7 +41,7 @@ describe("proxy x-pathname", () => {
   });
 
   it("writes the header on the reserved segments too", () => {
-    for (const path of ["/api/health", "/icon", "/_next/static/chunk.js"]) {
+    for (const path of ["/api/health", "/icon.png", "/_next/static/chunk.js"]) {
       const response = proxy(
         new NextRequest(`https://dogancanyildiz.com${path}`, {
           headers: { "x-pathname": "/tr/hack" },
@@ -73,6 +73,7 @@ describe("proxy x-pathname", () => {
       ["/projects", "/en/projects"],
       ["/contact", "/en/contact"],
       ["/privacy", "/en/privacy"],
+      ["/blog", "/en/blog"],
     ] as const) {
       const response = proxy(
         new NextRequest(`https://dogancanyildiz.com${from}?utm=1`)
@@ -84,6 +85,125 @@ describe("proxy x-pathname", () => {
     }
   });
 
+  it("routes the old unprefixed detail URLs by the language of their slug", () => {
+    // Owner decision (2026-09-02): an unprefixed legacy detail URL goes to
+    // the locale its slug was written in, not blindly to /en.
+    for (const [from, to] of [
+      ["/blog/self-hosting-with-coolify", "/en/blog/self-hosting-with-coolify"],
+      ["/blog/capt-sinavina-hazirlik", "/yazilar/capt-sinavina-hazirlik"],
+      ["/blog/ccna-dan-web-guvenligine", "/yazilar/ccna-dan-web-guvenligine"],
+      ["/projects/cargo-pilot", "/en/projects/cargo-pilot"],
+      ["/projects/hubit", "/en/projects/hubit"],
+      ["/projects/wikonya", "/en/projects/wikonya"],
+      ["/projects/koklu-hukuk", "/en/projects/koklu-hukuk"],
+      ["/projects/gpa-calculator", "/en/projects/gpa-calculator"],
+      [
+        "/projects/ticket-purchasing-system",
+        "/en/projects/ticket-purchasing-system",
+      ],
+    ] as const) {
+      const response = proxy(
+        new NextRequest(`https://dogancanyildiz.com${from}`)
+      );
+      expect(response.status, from).toBe(308);
+      expect(response.headers.get("location"), from).toBe(
+        `https://dogancanyildiz.com${to}`
+      );
+    }
+  });
+
+  it("moves the renamed English post slugs under the /en prefix", () => {
+    for (const [from, to] of [
+      [
+        "/en/blog/capt-sinavina-hazirlik",
+        "/en/blog/capt-preparation-in-a-docker-lab",
+      ],
+      [
+        "/en/blog/ccna-dan-web-guvenligine",
+        "/en/blog/from-ccna-to-web-security",
+      ],
+    ] as const) {
+      const response = proxy(
+        new NextRequest(`https://dogancanyildiz.com${from}`)
+      );
+      expect(response.status, from).toBe(308);
+      expect(response.headers.get("location"), from).toBe(
+        `https://dogancanyildiz.com${to}`
+      );
+    }
+  });
+
+  it("moves the renamed Turkish project slugs on the unprefixed path", () => {
+    for (const [from, to] of [
+      ["/projeler/gpa-calculator", "/projeler/not-ortalamasi-hesaplayici"],
+      [
+        "/projeler/ticket-purchasing-system",
+        "/projeler/bilet-satin-alma-sistemi",
+      ],
+    ] as const) {
+      const response = proxy(
+        new NextRequest(`https://dogancanyildiz.com${from}`)
+      );
+      expect(response.status, from).toBe(308);
+      expect(response.headers.get("location"), from).toBe(
+        `https://dogancanyildiz.com${to}`
+      );
+    }
+  });
+
+  it("never 308s a canonical URL off its own address", () => {
+    for (const path of [
+      "/",
+      "/hakkimda",
+      "/projeler",
+      "/iletisim",
+      "/gizlilik",
+      "/yazilar",
+      "/yazilar/capt-sinavina-hazirlik",
+      "/yazilar/ccna-dan-web-guvenligine",
+      "/yazilar/coolify-ile-kendi-sunucumda",
+      "/projeler/cargo-pilot",
+      "/projeler/hubit",
+      "/projeler/wikonya",
+      "/projeler/koklu-hukuk",
+      "/projeler/not-ortalamasi-hesaplayici",
+      "/projeler/bilet-satin-alma-sistemi",
+      "/en",
+      "/en/about",
+      "/en/projects",
+      "/en/contact",
+      "/en/privacy",
+      "/en/blog",
+      "/en/blog/self-hosting-with-coolify",
+      "/en/blog/capt-preparation-in-a-docker-lab",
+      "/en/blog/from-ccna-to-web-security",
+      "/en/projects/cargo-pilot",
+      "/en/projects/hubit",
+      "/en/projects/wikonya",
+      "/en/projects/koklu-hukuk",
+      "/en/projects/gpa-calculator",
+      "/en/projects/ticket-purchasing-system",
+    ]) {
+      const response = proxy(
+        new NextRequest(`https://dogancanyildiz.com${path}`)
+      );
+      expect(response.status, path).not.toBe(308);
+    }
+  });
+
+  it("does not emit next-intl's own hreflang Link header", () => {
+    // alternateLinks: false in src/i18n/routing.ts. With localized dynamic
+    // templates the header would put the current slug into the other
+    // locale's template and advertise a 404 as the alternate, contradicting
+    // the hreflang set the page builds in its <head>.
+    for (const path of ["/yazilar", "/hakkimda", "/en/blog"]) {
+      const response = proxy(
+        new NextRequest(`https://dogancanyildiz.com${path}`)
+      );
+      expect(response.headers.get("link"), path).toBeNull();
+    }
+  });
+
   it("recognises the legacy URLs with a trailing slash", () => {
     // A trailing slash used to walk straight past the lookup table: /about/
     // reached next-intl, which read it as the English slug of the Turkish
@@ -92,7 +212,7 @@ describe("proxy x-pathname", () => {
       ["/about/", "/en/about"],
       ["/projects/", "/en/projects"],
       ["/tr/about/", "/hakkimda"],
-      ["/tr/blog/capt-sinavina-hazirlik/", "/blog/capt-sinavina-hazirlik"],
+      ["/tr/blog/capt-sinavina-hazirlik/", "/yazilar/capt-sinavina-hazirlik"],
       ["/tr/", "/"],
     ] as const) {
       const response = proxy(
@@ -110,11 +230,18 @@ describe("proxy x-pathname", () => {
     expect(response.status).not.toBe(308);
   });
 
-  it("does not redirect a project detail off the Turkish canonical", () => {
+  it("sends the old unprefixed project detail to the English canonical", () => {
+    // Deliberate reversal of the pre-2026-09-02 rule. /projects/<slug> was
+    // the Turkish detail address only because the detail template was not
+    // localized; now that Turkish details live at /projeler/<tr-slug>, the
+    // unprefixed English-shaped path belongs to the English page.
     const response = proxy(
       new NextRequest("https://dogancanyildiz.com/projects/hubit")
     );
-    expect(response.status).not.toBe(308);
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "https://dogancanyildiz.com/en/projects/hubit"
+    );
   });
 
   it("sends leftover /tr prefixes to the unprefixed Turkish canonical", () => {
@@ -124,14 +251,60 @@ describe("proxy x-pathname", () => {
       ["/tr/contact", "/iletisim"],
       ["/tr/projects", "/projeler"],
       ["/tr/privacy", "/gizlilik"],
-      ["/tr/blog/capt-sinavina-hazirlik", "/blog/capt-sinavina-hazirlik"],
+      ["/tr/blog", "/yazilar"],
+      ["/tr/blog/capt-sinavina-hazirlik", "/yazilar/capt-sinavina-hazirlik"],
+      [
+        "/tr/blog/ccna-dan-web-guvenligine",
+        "/yazilar/ccna-dan-web-guvenligine",
+      ],
+      [
+        "/tr/blog/self-hosting-with-coolify",
+        "/yazilar/coolify-ile-kendi-sunucumda",
+      ],
+      [
+        "/tr/yazilar/self-hosting-with-coolify",
+        "/yazilar/coolify-ile-kendi-sunucumda",
+      ],
+      ["/tr/projects/cargo-pilot", "/projeler/cargo-pilot"],
+      ["/tr/projects/hubit", "/projeler/hubit"],
+      ["/tr/projects/wikonya", "/projeler/wikonya"],
+      ["/tr/projects/koklu-hukuk", "/projeler/koklu-hukuk"],
+      ["/tr/projects/gpa-calculator", "/projeler/not-ortalamasi-hesaplayici"],
+      [
+        "/tr/projects/ticket-purchasing-system",
+        "/projeler/bilet-satin-alma-sistemi",
+      ],
+      ["/tr/projeler/gpa-calculator", "/projeler/not-ortalamasi-hesaplayici"],
+      [
+        "/tr/projeler/ticket-purchasing-system",
+        "/projeler/bilet-satin-alma-sistemi",
+      ],
     ] as const) {
       const response = proxy(
         new NextRequest(`https://dogancanyildiz.com${from}`)
       );
       expect(response.status, from).toBe(308);
-      expect(response.headers.get("location")).toBe(
+      expect(response.headers.get("location"), from).toBe(
         `https://dogancanyildiz.com${to}`
+      );
+    }
+  });
+
+  it("keeps a /tr prefixed Turkish canonical to a single hop", () => {
+    // The /tr table must never fall through to the unprefixed one: a
+    // Turkish address stripped to /projects/gpa-calculator would land on
+    // the English page instead of its own.
+    for (const path of [
+      "/tr/yazilar/capt-sinavina-hazirlik",
+      "/tr/projeler/hubit",
+      "/tr/hakkimda",
+    ] as const) {
+      const response = proxy(
+        new NextRequest(`https://dogancanyildiz.com${path}`)
+      );
+      expect(response.status, path).toBe(308);
+      expect(response.headers.get("location"), path).toBe(
+        `https://dogancanyildiz.com${path.slice("/tr".length)}`
       );
     }
   });

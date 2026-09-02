@@ -28,7 +28,7 @@ export function resolveSiteUrl(value: string | undefined): string {
     parsed = new URL(withoutSlash);
   } catch {
     throw new Error(
-      `NEXT_PUBLIC_SITE_URL is not an absolute URL: "${trimmed}". Use scheme and host, for example https://dogancanyildiz.com.`
+      `NEXT_PUBLIC_SITE_URL is not an absolute URL: "${trimmed}". Use scheme and host, for example https://www.dogancanyildiz.com.`
     );
   }
   if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {

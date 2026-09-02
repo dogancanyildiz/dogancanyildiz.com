@@ -21,11 +21,14 @@ export async function generateMetadata({
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "blog" });
 
-  return buildPageMetadata(locale, "/blog", {
-    title: t("title"),
-    description: t("description"),
-    availableLocales: [...routing.locales],
-  });
+  return buildPageMetadata(
+    locale,
+    { kind: "static", path: "/blog" },
+    {
+      title: t("title"),
+      description: t("description"),
+    }
+  );
 }
 
 export default async function BlogPage({

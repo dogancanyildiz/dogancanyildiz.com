@@ -181,6 +181,15 @@
     html {
       scroll-behavior: auto;
     }
+    /* The header cursor blinks with a stepped keyframe; the generic clamp
+       below would run it once in 0.01ms, so it is switched off outright and
+       the block simply stays lit. */
+    .brand-cursor {
+      animation: none;
+    }
+    .status-pulse {
+      animation: none;
+    }
     *,
     *::before,
     *::after {
@@ -310,10 +319,71 @@
     @apply flex flex-wrap gap-2;
   }
 
+  /* The credential preview overlay is the platform <dialog>, so there is no
+     portal and no overlay div: showModal() puts the element in the top layer,
+     above the header and above every stacking context on the page, with no
+     z-index anywhere in this rule.
+
+     Padding is zero on purpose. The panel inside carries the inset instead, so
+     every pixel of the dialog that is not the panel is backdrop, and a click
+     there reports the dialog itself as event.target, which is what
+     credential-preview.tsx reads to close on an outside click.
+
+     632px is 600px of content plus the panel's 16px inset on both sides, so
+     the large image is served at exactly the width the sizes attribute
+     promises the browser. */
+  .credential-dialog {
+    @apply m-auto overflow-auto rounded-md border border-border bg-card p-0 text-foreground;
+    /* An explicit width, not a max-width. A dialog is width: fit-content by
+       default, and shrink-to-fit ignores the percentage width of the image
+       inside it, so the box collapsed onto the max-content of the credential
+       name underneath: 164px of panel around a 130px badge. */
+    width: min(90vw, 632px);
+    max-height: 85vh;
+  }
+
+  /* Opening fades rather than snapping. A keyframe, not a transition: a closed
+     dialog is display:none, so there is no start value to transition from, and
+     the base layer's prefers-reduced-motion block already clamps every
+     animation-duration to 0.01ms. The backdrop is deliberately left out of
+     the fade, since ::backdrop is not matched by that block's * selector and
+     would keep animating when a visitor asked for no motion. */
+  .credential-dialog[open] {
+    animation: credential-dialog-in 150ms ease-out;
+  }
+
+  .credential-dialog-panel {
+    @apply p-4;
+  }
+
+  /* ::backdrop inherits from the dialog that originates it, so one rule covers
+     both themes through the tokens. The flat scrim on the first line is the
+     fallback an engine that does not resolve var() here falls back to. */
+  .credential-dialog::backdrop {
+    background-color: rgb(0 0 0 / 0.6);
+    background-color: color-mix(in oklab, var(--background) 85%, transparent);
+    backdrop-filter: blur(4px);
+  }
+
   /* WCAG 2.2 SC 2.5.8 wants 24x24 CSS px minimum. 44px is the comfortable
      target and costs nothing in a single column layout. */
   .tap-target {
     @apply min-h-11 min-w-11;
+  }
+
+  /* The green block in the brand mark is a terminal cursor, so in the header
+     it blinks like one: roughly 530ms lit, 530ms dark, no fade. One flash per
+     second on a 16px block is far under the WCAG 2.3.1 three-per-second
+     threshold, and the reduced-motion block above keeps it steady. */
+  .brand-cursor {
+    animation: brand-cursor 1.06s step-end infinite;
+  }
+
+  /* The availability dot in the hero breathes rather than blinks: a status
+     light, not a cursor. One slow cycle every 1.6s, opacity only, and the
+     reduced-motion block keeps it steady. */
+  .status-pulse {
+    animation: status-pulse 1.6s ease-in-out infinite;
   }
 
   .skip-link {
@@ -453,5 +523,35 @@
   .content-entry:hover {
     outline: 2px solid Highlight;
     outline-offset: -2px;
+  }
+}
+
+@keyframes brand-cursor {
+  0%,
+  49.99% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes credential-dialog-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
   }
 }

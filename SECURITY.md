@@ -18,7 +18,7 @@ kapatmayı hedefliyorum. Ödül yok; istersen changelog'da kredi verilir.
 ## Kapsam
 
 - Bu depodaki uygulama kodu.
-- https://dogancanyildiz.com üzerindeki canlı site (lütfen yıkıcı olmayan
+- https://www.dogancanyildiz.com üzerindeki canlı site (lütfen yıkıcı olmayan
   test: hizmet reddi yok, iletişim uç noktasında bir avuçtan fazla otomatik
   tarama yok).
 
@@ -30,4 +30,4 @@ sunucusu); onları ilgili tedarikçiye veya sahibine bildir.
 Yalnızca `main` üzerindeki kod yayınlanır. Eski etiketler yamalanmaz.
 
 Bu politikanın makine okunur sürümü
-https://dogancanyildiz.com/.well-known/security.txt adresinde (RFC 9116).
+https://www.dogancanyildiz.com/.well-known/security.txt adresinde (RFC 9116).

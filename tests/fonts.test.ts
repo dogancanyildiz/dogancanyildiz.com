@@ -17,9 +17,13 @@ const VENDORED_WOFF2 = [
 // satori reads neither woff2 nor a variable font.
 const VENDORED_OG_TTF = [
   "public/fonts/og/geist-latin-400.ttf",
-  "public/fonts/og/geist-latin-600.ttf",
+  "public/fonts/og/geist-latin-700.ttf",
   "public/fonts/og/geist-latin-ext-400.ttf",
-  "public/fonts/og/geist-latin-ext-600.ttf",
+  "public/fonts/og/geist-latin-ext-700.ttf",
+  "public/fonts/og/geist-mono-latin-400.ttf",
+  "public/fonts/og/geist-mono-latin-500.ttf",
+  "public/fonts/og/geist-mono-latin-ext-400.ttf",
+  "public/fonts/og/geist-mono-latin-ext-500.ttf",
 ];
 
 describe("vendored fonts", () => {
@@ -43,6 +47,28 @@ describe("vendored fonts", () => {
       // No variation tables: satori cannot parse fvar/gvar outlines.
       expect(bytes.includes("fvar")).toBe(false);
       expect(bytes.includes("gvar")).toBe(false);
+    }
+  );
+
+  it.each(VENDORED_OG_TTF)(
+    "%s is pinned to the weight it is named for",
+    (relative) => {
+      // satori matches a face by exact name + weight + style, so a file whose
+      // OS/2 weight class does not match the number in its name means the route
+      // registers one weight and draws another.
+      const bytes = readFileSync(join(root, relative));
+      const named = Number(relative.match(/-(\d{3})\.ttf$/)?.[1]);
+      const tableCount = bytes.readUInt16BE(4);
+      let os2Offset: number | undefined;
+      for (let index = 0; index < tableCount; index += 1) {
+        const entry = 12 + index * 16;
+        if (bytes.subarray(entry, entry + 4).toString("latin1") === "OS/2") {
+          os2Offset = bytes.readUInt32BE(entry + 8);
+        }
+      }
+      if (os2Offset === undefined) throw new Error(`${relative} has no OS/2`);
+      // usWeightClass sits at byte 4 of the OS/2 table.
+      expect(bytes.readUInt16BE(os2Offset + 4)).toBe(named);
     }
   );
 

@@ -8,7 +8,6 @@ import {
 } from "@/components/status/status-screen";
 import type { Locale } from "@/lib/content";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
-import { routing } from "@/i18n/routing";
 
 const VARIANT_TO_NAMESPACE = {
   construction: "status.construction",
@@ -29,11 +28,14 @@ export async function statusPageMetadata(
     namespace: VARIANT_TO_NAMESPACE[variant],
   });
 
-  const metadata = await buildPageMetadata(locale, VARIANT_PATH[variant], {
-    title: t("title"),
-    description: t("description"),
-    availableLocales: [...routing.locales],
-  });
+  const metadata = await buildPageMetadata(
+    locale,
+    { kind: "static", path: VARIANT_PATH[variant] },
+    {
+      title: t("title"),
+      description: t("description"),
+    }
+  );
 
   return {
     ...metadata,

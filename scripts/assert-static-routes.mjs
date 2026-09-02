@@ -40,6 +40,12 @@ export async function readLocales() {
 
 /**
  * Pages that must be prerendered in every locale. "" is the locale root.
+ *
+ * These are INTERNAL route paths, not the public localized URLs. next-intl
+ * rewrites /yazilar onto /tr/blog, so the prerender manifest is keyed in
+ * English; writing /yazilar here would break the gate silently, because
+ * nothing would match and the check would report a route as missing while it
+ * is in fact prerendered.
  */
 export const LOCALE_PAGES = [
   "",
@@ -62,12 +68,18 @@ export const LOCALE_PAGES = [
  * paths live under prerender-manifest.json's dynamicRoutes, not the flat
  * routes map this script checks, so there is nothing stable to list here.
  * Verify it by hand: `curl -I <site>/en/opengraph-image/default`.
+ *
+ * The icons carry their extension because they are static files under src/app
+ * (favicon.ico, icon.png, apple-icon.png) rather than the extensionless
+ * next/og routes they replaced. Next still registers one static route per
+ * file, so they do show up in the flat routes map and are checked here.
  */
 export const ROOT_ROUTES = [
   "/robots.txt",
   "/sitemap.xml",
-  "/icon",
-  "/apple-icon",
+  "/favicon.ico",
+  "/icon.png",
+  "/apple-icon.png",
 ];
 
 export function requiredRoutes(locales) {

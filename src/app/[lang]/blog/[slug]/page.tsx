@@ -11,12 +11,13 @@ import { MDXContent } from "@/components/content/mdx-content";
 import { mdxComponents } from "@/components/content/mdx-components";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
-import { Link } from "@/i18n/navigation";
+import { ShareCard } from "@/components/sections/share-card";
+import { contentHref, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import {
   getPost,
-  getPostLocales,
   getPostSlugs,
+  postSlugsByKey,
   readingMinutes,
 } from "@/lib/content";
 import { buildBlogPosting, buildBreadcrumbList } from "@/lib/seo/jsonld";
@@ -42,16 +43,28 @@ export async function generateMetadata({
   const post = getPost(locale, slug);
   if (!post) notFound();
 
-  return buildPageMetadata(locale, `/blog/${slug}`, {
-    title: post.title,
-    description: post.summary,
-    availableLocales: getPostLocales(slug),
-    type: "article",
-    publishedTime: post.date,
-    modifiedTime: post.updated ?? post.date,
-    authors: [siteConfig.person.name],
-    tags: post.tags,
-  });
+  const tMeta = await getTranslations({ locale, namespace: "metadata" });
+
+  return buildPageMetadata(
+    locale,
+    {
+      kind: "content",
+      content: "post",
+      slugs: postSlugsByKey(post.translationKey),
+    },
+    {
+      title: post.title,
+      description: post.summary,
+      type: "article",
+      publishedTime: post.date,
+      modifiedTime: post.updated ?? post.date,
+      authors: [siteConfig.person.name],
+      tags: post.tags,
+      // That card leads with the post title, so the identity alt would be
+      // describing an image nobody is served here.
+      imageAlt: tMeta("ogAltPage", { title: post.title }),
+    }
+  );
 }
 
 export default async function PostPage({ params }: PostPageProps) {
@@ -68,7 +81,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
   const breadcrumb = buildBreadcrumbList(locale, [
     { name: t("title"), path: "/blog" },
-    { name: post.title, path: `/blog/${slug}` },
+    { name: post.title, path: contentHref(locale, "post", slug) },
   ]);
 
   return (
@@ -112,6 +125,8 @@ export default async function PostPage({ params }: PostPageProps) {
       <div className="prose-content">
         <MDXContent code={post.code} components={mdxComponents} />
       </div>
+
+      <ShareCard locale={locale} kind="post" slug={slug} title={post.title} />
 
       <ContactCta />
     </PageSection>

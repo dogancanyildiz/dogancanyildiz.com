@@ -22,11 +22,14 @@ export async function generateMetadata({
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "contact" });
 
-  return buildPageMetadata(locale, "/contact", {
-    title: t("title"),
-    description: t("description"),
-    availableLocales: [...routing.locales],
-  });
+  return buildPageMetadata(
+    locale,
+    { kind: "static", path: "/contact" },
+    {
+      title: t("title"),
+      description: t("description"),
+    }
+  );
 }
 
 export default async function ContactPage({

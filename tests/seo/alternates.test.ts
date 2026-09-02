@@ -2,9 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   absoluteUrl,
   buildAlternates,
+  buildLanguageAlternates,
   buildOpenGraph,
+  contentUrl,
+  contentUrlsByKey,
   localePath,
   siteUrl,
+  staticLanguageUrls,
 } from "@/lib/seo/alternates";
 import type { Locale } from "@/lib/content";
 
@@ -71,24 +75,113 @@ describe("localePath", () => {
 describe("absoluteUrl", () => {
   it("joins the site url with the locale path", () => {
     expect(siteUrl()).toBe("https://dogancanyildiz.com");
-    expect(absoluteUrl("tr", "/blog")).toBe("https://dogancanyildiz.com/blog");
+    expect(absoluteUrl("tr", "/blog")).toBe(
+      "https://dogancanyildiz.com/yazilar"
+    );
     expect(absoluteUrl("en", "/")).toBe("https://dogancanyildiz.com/en");
+  });
+});
+
+describe("contentUrl", () => {
+  it("localizes both the section and the slug per locale", () => {
+    expect(contentUrl("tr", "post", "capt-sinavina-hazirlik")).toBe(
+      "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik"
+    );
+    expect(contentUrl("en", "post", "capt-preparation-in-a-docker-lab")).toBe(
+      "https://dogancanyildiz.com/en/blog/capt-preparation-in-a-docker-lab"
+    );
+    expect(contentUrl("tr", "project", "not-ortalamasi-hesaplayici")).toBe(
+      "https://dogancanyildiz.com/projeler/not-ortalamasi-hesaplayici"
+    );
+    expect(contentUrl("en", "project", "gpa-calculator")).toBe(
+      "https://dogancanyildiz.com/en/projects/gpa-calculator"
+    );
+  });
+});
+
+describe("contentUrlsByKey", () => {
+  it("builds one absolute url per locale that actually has a slug", () => {
+    expect(
+      contentUrlsByKey("post", {
+        tr: "coolify-ile-kendi-sunucumda",
+        en: "self-hosting-with-coolify",
+      })
+    ).toEqual({
+      tr: "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda",
+      en: "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify",
+    });
+  });
+
+  it("leaves a locale absent when the content has no slug for it", () => {
+    expect(contentUrlsByKey("post", { tr: "only-in-turkish" })).toEqual({
+      tr: "https://dogancanyildiz.com/yazilar/only-in-turkish",
+    });
+  });
+});
+
+describe("staticLanguageUrls", () => {
+  it("gives every routed locale the same static path, each localized", () => {
+    expect(staticLanguageUrls("/about")).toEqual({
+      en: "https://dogancanyildiz.com/en/about",
+      tr: "https://dogancanyildiz.com/hakkimda",
+    });
+  });
+});
+
+describe("buildLanguageAlternates", () => {
+  it("builds hreflang from per locale urls, each locale keeping its own shape", () => {
+    const languages = buildLanguageAlternates({
+      tr: "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda",
+      en: "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify",
+    });
+
+    expect(languages).toEqual({
+      tr: "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda",
+      en: "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify",
+      "x-default":
+        "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda",
+    });
+  });
+
+  it("lists only its own locale when the content is not translated", () => {
+    const languages = buildLanguageAlternates({
+      tr: "https://dogancanyildiz.com/yazilar/only-in-turkish",
+    });
+
+    expect(languages).toEqual({
+      tr: "https://dogancanyildiz.com/yazilar/only-in-turkish",
+      "x-default": "https://dogancanyildiz.com/yazilar/only-in-turkish",
+    });
+    expect(languages.en).toBeUndefined();
+  });
+
+  it("falls back to the only available locale for x-default when tr is missing", () => {
+    const languages = buildLanguageAlternates({
+      en: "https://dogancanyildiz.com/en/blog/only-in-english",
+    });
+
+    expect(languages["x-default"]).toBe(languages.en);
   });
 });
 
 describe("buildAlternates", () => {
   it("lists both languages and x-default when both translations exist", () => {
-    const result = buildAlternates("tr", "/blog/self-hosting-with-coolify", [
-      "en",
+    const result = buildAlternates(
       "tr",
-    ]);
+      "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda",
+      {
+        tr: "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda",
+        en: "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify",
+      }
+    );
     expect(result.canonical).toBe(
-      "https://dogancanyildiz.com/blog/self-hosting-with-coolify"
+      "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda"
     );
     expect(result.languages).toEqual({
       en: "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify",
-      tr: "https://dogancanyildiz.com/blog/self-hosting-with-coolify",
-      "x-default": "https://dogancanyildiz.com/blog/self-hosting-with-coolify",
+      tr: "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda",
+      "x-default":
+        "https://dogancanyildiz.com/yazilar/coolify-ile-kendi-sunucumda",
     });
     expect(result.types["application/rss+xml"][0]?.url).toBe(
       "https://dogancanyildiz.com/feed.xml"
@@ -96,15 +189,17 @@ describe("buildAlternates", () => {
   });
 
   it("omits the missing translation and falls back to the only locale for x-default", () => {
-    const result = buildAlternates("tr", "/blog/capt-sinavina-hazirlik", [
+    const result = buildAlternates(
       "tr",
-    ]);
+      "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik",
+      { tr: "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik" }
+    );
     expect(result.canonical).toBe(
-      "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik"
+      "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik"
     );
     expect(result.languages).toEqual({
-      tr: "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik",
-      "x-default": "https://dogancanyildiz.com/blog/capt-sinavina-hazirlik",
+      tr: "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik",
+      "x-default": "https://dogancanyildiz.com/yazilar/capt-sinavina-hazirlik",
     });
     expect(result.languages.en).toBeUndefined();
     expect(result.types["application/rss+xml"][0]?.url).toBe(
@@ -116,18 +211,25 @@ describe("buildAlternates", () => {
 describe("buildOpenGraph", () => {
   it("builds a complete openGraph object per page", () => {
     expect(
-      buildOpenGraph("tr", "/projects/design-system", {
-        title: "Tasarim sistemi",
-        description: "Aciklama",
-        siteName: "Portfolyo",
-        imageAlt: "Kart gorseli",
-      })
+      buildOpenGraph(
+        "tr",
+        {
+          url: "https://dogancanyildiz.com/projeler/design-system",
+          imageUrl: "https://dogancanyildiz.com/opengraph-image/default",
+        },
+        {
+          title: "Tasarim sistemi",
+          description: "Aciklama",
+          siteName: "Portfolyo",
+          imageAlt: "Kart gorseli",
+        }
+      )
     ).toEqual({
       type: "website",
       siteName: "Portfolyo",
       title: "Tasarim sistemi",
       description: "Aciklama",
-      url: "https://dogancanyildiz.com/projects/design-system",
+      url: "https://dogancanyildiz.com/projeler/design-system",
       locale: "tr_TR",
       alternateLocale: ["en_US"],
       images: [
@@ -143,14 +245,22 @@ describe("buildOpenGraph", () => {
   });
 
   it("sets type and publishedTime for an article", () => {
-    const result = buildOpenGraph("en", "/blog/self-hosting-with-coolify", {
-      title: "Self hosting with Coolify",
-      description: "Aciklama",
-      siteName: "Portfolyo",
-      imageAlt: "Kart gorseli",
-      type: "article",
-      publishedTime: "2026-08-20",
-    });
+    const result = buildOpenGraph(
+      "en",
+      {
+        url: "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify",
+        imageUrl:
+          "https://dogancanyildiz.com/en/blog/self-hosting-with-coolify/opengraph-image/default",
+      },
+      {
+        title: "Self hosting with Coolify",
+        description: "Aciklama",
+        siteName: "Portfolyo",
+        imageAlt: "Kart gorseli",
+        type: "article",
+        publishedTime: "2026-08-20",
+      }
+    );
 
     const typed = result as { type: string; publishedTime: string };
     expect(typed.type).toBe("article");

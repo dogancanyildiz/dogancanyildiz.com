@@ -8,12 +8,13 @@ import { MDXContent } from "@/components/content/mdx-content";
 import { mdxComponents } from "@/components/content/mdx-components";
 import { JsonLd } from "@/components/seo/json-ld";
 import { PageSection } from "@/components/layout/page-section";
+import { ShareCard } from "@/components/sections/share-card";
 import { Button } from "@/components/ui/button";
 import { GithubIcon } from "@/components/ui/brand-icon";
 import { SkillTag } from "@/components/ui/skill-tag";
-import { Link } from "@/i18n/navigation";
+import { contentHref, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { getProject, getProjectLocales, getProjectSlugs } from "@/lib/content";
+import { getProject, getProjectSlugs, projectSlugsByKey } from "@/lib/content";
 import {
   buildBreadcrumbList,
   buildProjectCreativeWork,
@@ -40,15 +41,27 @@ export async function generateMetadata({
   const project = getProject(locale, slug);
   if (!project) notFound();
 
-  return buildPageMetadata(locale, `/projects/${slug}`, {
-    title: project.title,
-    description: project.summary,
-    availableLocales: getProjectLocales(slug),
-    type: "article",
-    ...(project.updated ? { modifiedTime: project.updated } : {}),
-    authors: [siteConfig.person.name],
-    tags: project.stack,
-  });
+  const tMeta = await getTranslations({ locale, namespace: "metadata" });
+
+  return buildPageMetadata(
+    locale,
+    {
+      kind: "content",
+      content: "project",
+      slugs: projectSlugsByKey(project.translationKey),
+    },
+    {
+      title: project.title,
+      description: project.summary,
+      type: "article",
+      ...(project.updated ? { modifiedTime: project.updated } : {}),
+      authors: [siteConfig.person.name],
+      tags: project.stack,
+      // Same reason as the blog card: the alt has to name the title the
+      // image actually shows.
+      imageAlt: tMeta("ogAltPage", { title: project.title }),
+    }
+  );
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
@@ -64,7 +77,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const breadcrumb = buildBreadcrumbList(locale, [
     { name: t("title"), path: "/projects" },
-    { name: project.title, path: `/projects/${slug}` },
+    { name: project.title, path: contentHref(locale, "project", slug) },
   ]);
 
   return (
@@ -161,6 +174,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <div className="prose-content">
         <MDXContent code={project.code} components={mdxComponents} />
       </div>
+
+      <ShareCard
+        locale={locale}
+        kind="project"
+        slug={slug}
+        title={project.title}
+      />
 
       <ContactCta scope="project" />
     </PageSection>

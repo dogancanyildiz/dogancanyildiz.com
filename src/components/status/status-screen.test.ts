@@ -22,7 +22,7 @@ describe("statusLinksFor", () => {
     expect(statusLinksFor("tr", labels)).toEqual([
       { href: "/", label: "Home", primary: true },
       { href: "/projeler", label: "Projects" },
-      { href: "/blog", label: "Blog" },
+      { href: "/yazilar", label: "Blog" },
       { href: "/iletisim", label: "Contact" },
     ]);
   });

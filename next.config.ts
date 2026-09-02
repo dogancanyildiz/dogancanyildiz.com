@@ -230,16 +230,19 @@ const nextConfig: NextConfig = {
         ],
       },
       { source: "/fonts/:path*", headers: [ONE_DAY_CACHE] },
-      { source: "/icon", headers: [ONE_DAY_CACHE] },
-      { source: "/apple-icon", headers: [ONE_DAY_CACHE] },
+      // The icons are static files under src/app (favicon.ico, icon.png,
+      // apple-icon.png), not the generated routes they replaced. Next writes
+      // "public, max-age=0, must-revalidate" into their build metadata
+      // (.next/server/app/icon.png.meta), so without these entries every tab
+      // open revalidates an image that only changes when the brand does. Next
+      // also puts a content hash in the href it writes into <head>, and that
+      // hash is what busts the cache when the artwork does change, which is
+      // why a one day max-age is safe here in a way it is not for /cv or
+      // /fonts.
+      { source: "/favicon.ico", headers: [ONE_DAY_CACHE] },
+      { source: "/icon.png", headers: [ONE_DAY_CACHE] },
+      { source: "/apple-icon.png", headers: [ONE_DAY_CACHE] },
     ];
-  },
-  async redirects() {
-    // The phase 3 icon route replaced the static favicon file, so
-    // /favicon.ico 404s unless it is redirected to the single icon source
-    // (src/app/icon.tsx). The proxy already skips paths with a dot, and Next
-    // evaluates redirects before routing, so this runs regardless.
-    return [{ source: "/favicon.ico", destination: "/icon", permanent: true }];
   },
 };
 

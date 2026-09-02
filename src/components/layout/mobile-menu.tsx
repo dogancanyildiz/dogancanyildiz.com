@@ -21,7 +21,7 @@ export function MobileMenu() {
         <Button
           variant="ghost"
           size="icon-sm"
-          className="tap-target md:hidden"
+          className="tap-target rounded-md md:hidden"
           aria-label={t("nav.openMenu")}
         >
           <Menu className="size-4" />
@@ -44,7 +44,7 @@ export function MobileMenu() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="tap-target"
+                className="tap-target rounded-md"
                 aria-label={t("nav.closeMenu")}
               >
                 <X className="size-4" />

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Download } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { SkillCategoryList } from "@/components/sections/skill-group-grid";
 import { AboutSubnav } from "@/components/sections/about-subnav";
+import { CertificateList } from "@/components/sections/certificate-list";
 import { TestimonialsBand } from "@/components/sections/testimonials-band";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import {
@@ -14,7 +16,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/layout/page-section";
 import { ContactCta } from "@/components/sections/contact-cta";
 import {
-  certificates,
   community,
   education,
   experience,
@@ -42,11 +43,14 @@ export async function generateMetadata({
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "about" });
 
-  return buildPageMetadata(locale, "/about", {
-    title: t("title"),
-    description: t("description"),
-    availableLocales: [...routing.locales],
-  });
+  return buildPageMetadata(
+    locale,
+    { kind: "static", path: "/about" },
+    {
+      title: t("title"),
+      description: t("description"),
+    }
+  );
 }
 
 export default async function AboutPage({ params }: AboutPageProps) {
@@ -57,7 +61,6 @@ export default async function AboutPage({ params }: AboutPageProps) {
   const talks = speaking[locale];
   const roles = experience[locale];
   const communityRoles = community[locale];
-  const certificateList = certificates[locale];
   const schools = education[locale];
   const showCv = hasCv();
   const profileImageSrc = profileImagePath();
@@ -222,38 +225,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
         className="space-y-5 border-t border-border pt-8 scroll-mt-32"
       >
         <h2 className="section-heading">{t("certificatesTitle")}</h2>
-        {certificateList.length > 0 ? (
-          <ul className="divide-y divide-border">
-            {certificateList.map((certificate) => (
-              <li key={certificate.name} className="space-y-1 py-4 first:pt-0">
-                <p className="text-sm leading-relaxed">
-                  {certificate.name}
-                  {certificate.verifyUrl ? (
-                    <>
-                      {" "}
-                      <a
-                        href={certificate.verifyUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary underline underline-offset-4"
-                      >
-                        {t("certificateVerify")}
-                      </a>
-                    </>
-                  ) : null}
-                </p>
-                <p className="meta-label">{certificate.issuer}</p>
-                {certificate.detail ? (
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {certificate.detail}
-                  </p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="section-copy">{t("emptyList")}</p>
-        )}
+        <CertificateList locale={locale} />
       </section>
 
       <section
@@ -266,12 +238,32 @@ export default async function AboutPage({ params }: AboutPageProps) {
             {schools.map((entry) => (
               <li
                 key={`${entry.school}-${entry.period}`}
-                className="space-y-1 py-4 first:pt-0"
+                className="flex items-start gap-4 py-4 first:pt-0"
               >
-                <p className="text-sm leading-relaxed">{entry.program}</p>
-                <p className="meta-label">
-                  {entry.school} · {entry.period}
-                </p>
+                {/* The slot keeps its width whether or not the school has a
+                    mark, so the programme names stay aligned down the list.
+                    24 wide rather than square: two of the four marks are
+                    wordmarks, and 40px of height on those is 170px of width. */}
+                <div className="flex h-10 w-24 shrink-0 items-center justify-center">
+                  {entry.logo ? (
+                    <Image
+                      src={entry.logo.src}
+                      // Decorative: the school is written out in the line
+                      // beside it, and an alt here would say it twice.
+                      alt=""
+                      width={entry.logo.width}
+                      height={entry.logo.height}
+                      sizes="40px"
+                      className="h-10 w-auto max-w-full object-contain"
+                    />
+                  ) : null}
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-sm leading-relaxed">{entry.program}</p>
+                  <p className="meta-label">
+                    {entry.school} · {entry.period}
+                  </p>
+                </div>
               </li>
             ))}
           </ul>

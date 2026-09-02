@@ -90,7 +90,7 @@ describe("global 404 home links", () => {
     const html = await renderAt("/olmayan");
     const links = anchors(html);
     expect(links.map((link) => link.href)).toEqual(
-      expect.arrayContaining(["/projeler", "/blog", "/iletisim"])
+      expect.arrayContaining(["/projeler", "/yazilar", "/iletisim"])
     );
   });
 });

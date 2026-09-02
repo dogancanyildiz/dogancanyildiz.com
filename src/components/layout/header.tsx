@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { Link, usePathname } from "@/i18n/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
@@ -10,10 +11,13 @@ import { isNavItemActive, navItems } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
-  untranslated: Record<string, string[]>;
+  // Passed straight through to the language switcher; see the comment on
+  // LanguageSwitcherProps for the shape and for why it stays a plain Record
+  // instead of importing TranslationMap from @/lib/content.
+  translations: Record<string, Record<string, Record<string, string>>>;
 }
 
-export function Header({ untranslated }: HeaderProps) {
+export function Header({ translations }: HeaderProps) {
   const pathname = usePathname();
   const t = useTranslations();
   const tBrand = useTranslations("brand");
@@ -26,13 +30,22 @@ export function Header({ untranslated }: HeaderProps) {
               brand link is a standalone control like every other one here. */}
           <Link
             href="/"
-            className="tap-target group flex min-w-0 items-center gap-2.5 no-underline"
+            className="tap-target group flex min-w-0 items-center no-underline"
           >
-            <span className="text-sm font-medium tracking-tight text-foreground">
-              {tBrand("name")}
-            </span>
+            {/* The lockup handles the phone rule itself; the link keeps the
+                name as its accessible name because mark and tagline are
+                aria-hidden inside it. */}
+            <BrandLockup
+              name={tBrand("name")}
+              tagline={tBrand("tagline")}
+              cursor="blink"
+              responsive
+            />
           </Link>
-          <div className="hidden md:block">
+          {/* lg, not md: on an iPad in portrait (768 to 834px) the nav, the
+              controls and these two icons together left the lockup no room
+              and the name ellipsized; the footer carries the same links. */}
+          <div className="hidden lg:block">
             <SocialLinks
               githubLabel={t("footer.github")}
               linkedinLabel={t("footer.linkedin")}
@@ -40,9 +53,13 @@ export function Header({ untranslated }: HeaderProps) {
           </div>
         </div>
 
-        <div className="flex min-w-0 items-center gap-3">
+        {/* shrink-0, not min-w-0: the controls are fixed-size 44px targets,
+            so letting this group shrink only pushed them past the viewport
+            edge (8px at 320px before the mark existed). The brand group on
+            the left is the side that gives way. */}
+        <div className="flex shrink-0 items-center gap-3">
           <nav aria-label={t("nav.menu")} className="hidden md:block">
-            <ul className="flex items-center gap-5">
+            <ul className="flex items-center gap-3 lg:gap-5">
               {navItems.map(({ href, key }) => {
                 const isActive = isNavItemActive(pathname, href);
                 return (
@@ -67,7 +84,7 @@ export function Header({ untranslated }: HeaderProps) {
           {/* Its own <nav aria-label="Language">, so it sits beside the
               primary nav rather than inside it to avoid nesting landmarks. */}
           <div className="flex items-center gap-1.5">
-            <LanguageSwitcher untranslated={untranslated} />
+            <LanguageSwitcher translations={translations} />
             <ThemeToggle />
             <MobileMenu />
           </div>

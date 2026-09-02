@@ -15,9 +15,31 @@ export const pathnames = {
     tr: "/projeler",
     en: "/projects",
   },
-  "/projects/[slug]": "/projects/[slug]",
-  "/blog": "/blog",
-  "/blog/[slug]": "/blog/[slug]",
+  "/projects/[slug]": {
+    tr: "/projeler/[slug]",
+    en: "/projects/[slug]",
+  },
+  // The per page OpenGraph routes have to be listed too, not as a nicety:
+  // next-intl only rewrites what this map contains. An unlisted
+  // /projeler/x/opengraph-image/default falls into the generic branch, gets
+  // rewritten to /tr/projeler/... and 404s, because the file route is
+  // /[lang]/projects/[slug]/opengraph-image/[__metadata_id__].
+  "/projects/[slug]/opengraph-image/[id]": {
+    tr: "/projeler/[slug]/opengraph-image/[id]",
+    en: "/projects/[slug]/opengraph-image/[id]",
+  },
+  "/blog": {
+    tr: "/yazilar",
+    en: "/blog",
+  },
+  "/blog/[slug]": {
+    tr: "/yazilar/[slug]",
+    en: "/blog/[slug]",
+  },
+  "/blog/[slug]/opengraph-image/[id]": {
+    tr: "/yazilar/[slug]/opengraph-image/[id]",
+    en: "/blog/[slug]/opengraph-image/[id]",
+  },
   "/contact": {
     tr: "/iletisim",
     en: "/contact",
@@ -47,6 +69,16 @@ export const routing = defineRouting({
   localePrefix: "as-needed",
   localeDetection: false,
   localeCookie: false,
+  // The only source of hreflang is the HTML <head> that buildAlternates
+  // fills. next-intl's HTTP Link: rel=alternate header builds the other
+  // locale's URL by putting the current param value into the target
+  // template, so once the detail templates are localized a Turkish slug
+  // gets announced under the English template: /en/blog/<tr-slug>, a 404,
+  // and it contradicts the set the page publishes in its head. Two
+  // conflicting hreflang sources make Google drop the whole set. It would
+  // also announce a locale for content that has no translation there, the
+  // opposite of the no-fallback policy. See docs/04-i18n.md.
+  alternateLinks: false,
   pathnames,
 });
 

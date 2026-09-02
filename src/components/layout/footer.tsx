@@ -1,4 +1,5 @@
 import { buildInfo, formatBuildSha } from "@/lib/build-info";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { Mail, Rss } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -36,14 +37,10 @@ export async function Footer() {
     <footer className="mt-auto border-t border-border">
       <div className="page-shell grid gap-10 py-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
         <div className="space-y-3">
-          <p
-            aria-hidden="true"
-            className="font-mono text-xs font-semibold tracking-[0.12em] text-muted-foreground"
-          >
-            {tBrand("monogram")}
-          </p>
-          <p className="eyebrow">{t("footer.availability")}</p>
-          <h2 className="section-heading">{tBrand("name")}</h2>
+          {/* Same lockup as the header, cursor steady: two blinking cursors
+              on one screen (sticky header plus footer) would be noise. */}
+          <BrandLockup name={tBrand("name")} tagline={tBrand("tagline")} />
+          <p className="eyebrow pt-2">{t("footer.availability")}</p>
           <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
             {t("footer.tagline")}
           </p>

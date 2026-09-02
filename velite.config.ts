@@ -7,6 +7,10 @@ import type { MdxOptions } from "velite";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+// A translationKey is a slug too: it lands in the feed guid (tag URI) and, in
+// a fixture path, in a filename, so the same character set applies.
+const TRANSLATION_KEY_PATTERN = SLUG_PATTERN;
+
 // content/projects/en/cargo-pilot.mdx -> ["projects", "en", "cargo-pilot"]
 function localeFromPath(path: string): "en" | "tr" {
   const segment = path.split("/")[1];
@@ -68,6 +72,15 @@ const projects = defineCollection({
     .object({
       title: s.string().min(1).max(120),
       slug: s.string().regex(SLUG_PATTERN),
+      // The locale independent identity of this project. Two files that
+      // describe the same project (one per locale) share this value even
+      // when their slugs differ; the sitemap, hreflang set and language
+      // switcher key off it instead of off the slug.
+      translationKey: s.string().regex(TRANSLATION_KEY_PATTERN),
+      // Slugs this file used to publish under, in this locale. Only set when
+      // a slug actually changed; feeds the legacy redirect table's tests so
+      // the history behind a 308 stays next to the content it redirects to.
+      legacySlugs: s.array(s.string().regex(SLUG_PATTERN)).default([]),
       summary: s.string().min(1).max(300),
       role: s.string().min(1).max(120),
       stack: s.array(s.string().min(1)).min(1),
@@ -104,6 +117,9 @@ const posts = defineCollection({
     .object({
       title: s.string().min(1).max(140),
       slug: s.string().regex(SLUG_PATTERN),
+      // See the matching comment on the project schema above.
+      translationKey: s.string().regex(TRANSLATION_KEY_PATTERN),
+      legacySlugs: s.array(s.string().regex(SLUG_PATTERN)).default([]),
       date: s.isodate(),
       // Set only when a published post is revised. dateModified falls back to
       // date, so an untouched post never advertises a fake revision.
@@ -155,7 +171,7 @@ export const mdx: MdxOptions = {
 // Same (locale, slug) pair is only a collision within one locale: an "en"
 // and a "tr" file sharing a slug is the expected way to link translations,
 // so only a repeat inside the same locale is an error.
-function findDuplicateLocaleSlugPairs(
+export function findDuplicateLocaleSlugPairs(
   items: Array<{ locale: string; slug: string }>
 ): string[] {
   const seen = new Map<string, number>();
@@ -166,6 +182,155 @@ function findDuplicateLocaleSlugPairs(
   return [...seen.entries()]
     .filter(([, count]) => count > 1)
     .map(([key]) => key);
+}
+
+/**
+ * Same idea as findDuplicateLocaleSlugPairs, but for translationKey: two
+ * files in the same locale claiming the same key leaves the language
+ * switcher and the sitemap unable to tell which one is the translation of
+ * what, since both would answer to the same lookup.
+ */
+export function findDuplicateLocaleKeyPairs(
+  items: Array<{ locale: string; translationKey: string }>
+): string[] {
+  const seen = new Map<string, number>();
+  for (const item of items) {
+    const key = `${item.locale}/${item.translationKey}`;
+    seen.set(key, (seen.get(key) ?? 0) + 1);
+  }
+  return [...seen.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([key]) => key);
+}
+
+/**
+ * An entry whose own legacySlugs lists its own current slug. Almost always a
+ * copy paste mistake (the slug was changed but the old value was duplicated
+ * into legacySlugs instead of moved there), and it would otherwise surface as
+ * the far less specific "shadows a live page" message from
+ * findLegacySlugConflicts, since a slug is always live against itself.
+ */
+export function findSelfReferencingLegacySlugs(
+  items: Array<{ locale: string; slug: string; legacySlugs: string[] }>
+): string[] {
+  return items
+    .filter((item) => item.legacySlugs.includes(item.slug))
+    .map((item) => `${item.locale}/${item.slug}`);
+}
+
+/**
+ * A legacySlugs entry that collides with a slug some file in the same
+ * collection and locale is publishing right now. A redirect table built from
+ * legacySlugs would send a visitor straight past that live page.
+ *
+ * Excludes the self reference case: that one gets its own, clearer message
+ * from findSelfReferencingLegacySlugs instead of this function's generic one.
+ */
+export function findLegacySlugConflicts(
+  items: Array<{ locale: string; slug: string; legacySlugs: string[] }>
+): string[] {
+  const hits = new Set<string>();
+  for (const item of items) {
+    const liveSlugsInLocale = new Set(
+      items
+        .filter((other) => other.locale === item.locale && other !== item)
+        .map((other) => other.slug)
+    );
+    for (const legacy of item.legacySlugs) {
+      if (legacy === item.slug) continue;
+      if (liveSlugsInLocale.has(legacy)) {
+        hits.add(`${item.locale}/${legacy} (from ${item.slug})`);
+      }
+    }
+  }
+  return [...hits];
+}
+
+/** The shape every prepare-time check below needs from one collection entry. */
+interface CheckableEntry {
+  locale: string;
+  slug: string;
+  translationKey: string;
+  legacySlugs: string[];
+}
+
+/**
+ * Runs every cross-entry content invariant and throws once with every
+ * violation found, rather than stopping at the first.
+ *
+ * Exported (not inlined into defineConfig below) so a fixture config can
+ * reuse the exact same rules against a fixture content root instead of
+ * against the real one; see tests/fixtures/velite.duplicate-key.config.ts.
+ */
+export function prepareContent(data: {
+  projects: CheckableEntry[];
+  posts: CheckableEntry[];
+}): void {
+  const errors: string[] = [];
+
+  const duplicateProjectSlugs = findDuplicateLocaleSlugPairs(data.projects);
+  const duplicatePostSlugs = findDuplicateLocaleSlugPairs(data.posts);
+  if (duplicateProjectSlugs.length > 0 || duplicatePostSlugs.length > 0) {
+    const parts: string[] = [];
+    if (duplicateProjectSlugs.length > 0) {
+      parts.push(`projects: ${duplicateProjectSlugs.join(", ")}`);
+    }
+    if (duplicatePostSlugs.length > 0) {
+      parts.push(`posts: ${duplicatePostSlugs.join(", ")}`);
+    }
+    errors.push(
+      `Duplicate locale/slug pairs found in content collections - ${parts.join("; ")}`
+    );
+  }
+
+  const duplicateProjectKeys = findDuplicateLocaleKeyPairs(data.projects);
+  const duplicatePostKeys = findDuplicateLocaleKeyPairs(data.posts);
+  if (duplicateProjectKeys.length > 0 || duplicatePostKeys.length > 0) {
+    const parts: string[] = [];
+    if (duplicateProjectKeys.length > 0) {
+      parts.push(`projects: ${duplicateProjectKeys.join(", ")}`);
+    }
+    if (duplicatePostKeys.length > 0) {
+      parts.push(`posts: ${duplicatePostKeys.join(", ")}`);
+    }
+    errors.push(
+      `Duplicate locale/translationKey pairs found in content collections - ${parts.join("; ")}`
+    );
+  }
+
+  const selfRefProjects = findSelfReferencingLegacySlugs(data.projects);
+  const selfRefPosts = findSelfReferencingLegacySlugs(data.posts);
+  if (selfRefProjects.length > 0 || selfRefPosts.length > 0) {
+    const parts: string[] = [];
+    if (selfRefProjects.length > 0) {
+      parts.push(`projects: ${selfRefProjects.join(", ")}`);
+    }
+    if (selfRefPosts.length > 0) {
+      parts.push(`posts: ${selfRefPosts.join(", ")}`);
+    }
+    errors.push(
+      `legacySlugs lists its own current slug (copy paste mistake, remove it) - ${parts.join("; ")}`
+    );
+  }
+
+  const conflictProjects = findLegacySlugConflicts(data.projects);
+  const conflictPosts = findLegacySlugConflicts(data.posts);
+  if (conflictProjects.length > 0 || conflictPosts.length > 0) {
+    const parts: string[] = [];
+    if (conflictProjects.length > 0) {
+      parts.push(`projects: ${conflictProjects.join(", ")}`);
+    }
+    if (conflictPosts.length > 0) {
+      parts.push(`posts: ${conflictPosts.join(", ")}`);
+    }
+    errors.push(
+      `legacySlugs shadows a live page in the same locale - ${parts.join("; ")}`
+    );
+  }
+
+  if (errors.length > 0) {
+    throw new Error(errors.join("\n"));
+  }
 }
 
 export default defineConfig({
@@ -179,20 +344,5 @@ export default defineConfig({
   },
   collections,
   mdx,
-  prepare: (data) => {
-    const duplicateProjects = findDuplicateLocaleSlugPairs(data.projects);
-    const duplicatePosts = findDuplicateLocaleSlugPairs(data.posts);
-    if (duplicateProjects.length > 0 || duplicatePosts.length > 0) {
-      const parts: string[] = [];
-      if (duplicateProjects.length > 0) {
-        parts.push(`projects: ${duplicateProjects.join(", ")}`);
-      }
-      if (duplicatePosts.length > 0) {
-        parts.push(`posts: ${duplicatePosts.join(", ")}`);
-      }
-      throw new Error(
-        `Duplicate locale/slug pairs found in content collections - ${parts.join("; ")}`
-      );
-    }
-  },
+  prepare: prepareContent,
 });
