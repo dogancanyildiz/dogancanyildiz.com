@@ -1,0 +1,35 @@
+---
+title: Köklü Hukuk ve Danışmanlık
+slug: koklu-hukuk
+summary: Ankara'daki bir hukuk bürosunun kurumsal sitesi. Logodan yayına kadar tek elden; iki dil, on çalışma alanı, form yerine doğrudan iletişim kanalları, CMS ve veritabanı yok.
+role: Tasarım, geliştirme ve yayına alma
+stack:
+  - Next.js
+  - TypeScript
+  - React
+  - Tailwind CSS
+  - next-intl
+  - shadcn/ui
+  - Docker
+  - Coolify
+year: 2026
+links:
+  live: https://www.kokluhukuk.com
+cover: ../../images/koklu-hukuk-cover.jpg
+coverAlt: "Köklü Hukuk ana sayfası: koyu lacivert zemin ve altın vurgular, üstte telefon ve adres bandı, altında Türkçe menü ile dil değiştirici, solda hero başlığı, sağda gözü bağlı adalet heykelinin fotoğrafı."
+outcome: Son üç ayda (Haziran-Ağustos 2026) Google aramasından 1.020 gösterim ve 33 tıklama, ortalama konum 11,9. Reklam yok, hepsi organik.
+featured: true
+order: 1
+---
+
+## Ne yaptım
+
+Köklü Hukuk ve Danışmanlık, Ankara Etimesgut'ta çalışan bir hukuk bürosu. Alan adı Temmuz 2024'te alındı ve site o günden beri benim elimde, farklı düzenlemelerle güncel kaldı; Temmuz 2026'da mimariyi sıfırdan yeniden kurdum. Logo tasarımı, arayüz tasarımı, kod ve yayın tek elden yürüdü, içerik ve yasal metinler avukat onayıyla girildi. Site iki dilli ve yolları da yerelleştirilmiş: `/tr/calisma-alanlari` ile `/en/practice-areas` ayrı adresler. İçerik tarafında on çalışma alanı sayfası, hakkımızda, ekip ve avukat detayı, SSS, makaleler, iletişim ve KVKK ile yasal uyarı metinleri var. İletişim formu yok; telefon, e-posta ve WhatsApp bağlantıları var, "Randevu" düğmesi de aynı kanallara gidiyor.
+
+## Neden böyle kurgulandı
+
+Bir hukuk bürosu sitesinde içerik derleme zamanında biliniyor, ziyaretçiye göre değişen veri yok. Bu yüzden CMS ve veritabanı koymadım: metinler tipli içerik dosyalarında duruyor, sayfalar statik render ediliyor ve varsayılan Server Component; istemci kodu yalnızca menü, dil değiştirici ve akordeon için var. Form arka ucu yerine doğrudan kanalları seçmemin sebebi de aynı ölçüde pratik: sunucuda kişisel veri tutmamak KVKK yükünü baştan kaldırıyor, bir avukatın zaten çalışan yazılı bir kanalı var. Yayın kendi sunucumdaki Coolify'da, çok aşamalı bir Dockerfile ile; maliyet sabit ve push edince site güncelleniyor. Analitik çerezi yok, yalnızca zorunlu çerez bandı var.
+
+## Ne öğrendim
+
+Bir müşteri sitesini iki yıl güncel tutmak, yeniden kurmanın ne zaman geldiğini gösteriyor. Tek tek küçük olan değişiklikler birikince mimari her yeni istekte biraz daha direniyor ve yamaya devam etmek sıfırdan kurmaktan pahalıya çıkıyor. İkincisi arama tarafından geldi: görünürlük yavaş ve ölçülebilir. Ortalama konum 11,9, yani ikinci sayfanın eşiği. Teknik katman yerinde olduğuna göre sıradaki adım kod değil, içerik.
