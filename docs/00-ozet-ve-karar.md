@@ -162,6 +162,7 @@ tarihsel halleri artık tekrarlanmıyor.
 | 2026-09-03 | Apex -> www yönlendirmesi Coolify'da | Traefik 307; Cloudflare'daki `apex to www` kuralı isteğe bağlı edge katmanı (#52) |
 | 2026-09-03 | İzin bandı kaldırıldı | Umami çerezsiz ve IP saklamadığı için izin beklemeden yükleniyor; `src/components/consent/` silindi (#53) |
 | 2026-09-03 | İkinci alan adı alınmayacak | Kapsam dışı; ikinci zone, `sh to com` Redirect Rule ve Traefik yedek regex'i dokümanlardan silindi |
+| 2026-09-03 | Preview Deployments kullanılmayacak | Tek geliştirici, her PR CI'dan geçiyor; `*.preview` wildcard DNS ve preview'a özel `NEXT_PUBLIC_SITE_URL` kuralı dokümanlardan silindi |
 
 ## Kapsam dışı (YAGNI)
 
@@ -172,8 +173,8 @@ Kanıtlanmış bir ihtiyaç olmadan eklenmeyen, ama yolu açık bırakılan öğ
   açık ve Cloudflare zaten bir bağımlılık olduğu için ekleme maliyeti düşük.
 - **Upstash/Redis rate limit:** tek Coolify container'ı çalıştığı sürece
   process içi sliding window yeterli.
-- **GHCR image + Coolify pull:** PR preview'ını native desteklemiyor. Gelecek
-  bir yükseltme kapısı; geçilirse git SHA tag zorunlu, floating `latest`
+- **GHCR image + Coolify pull:** git tabanlı build kadar doğrudan değil.
+  Gelecek bir yükseltme kapısı; geçilirse git SHA tag zorunlu, floating `latest`
   kullanılmaz (Coolify rollback'i yalnızca yerel imajları görüyor).
 - **Nixpacks:** üreticisi aktif geliştirmediğini ilan etti, halefi hâlâ beta.
 - **docker-compose build pack:** Coolify'da zero-downtime rolling update'i

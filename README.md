@@ -133,8 +133,8 @@ katmanlarına ve derleme loglarına sızdırır.
   uyarısındaki AVIF çözümleme yüzeyini kapatır. Uzak bir host eklemek bunu
   yeniden açar, ayrı bir inceleme ister.
 - `/api/contact` `Content-Type: application/json` ister (aksi 415) ve
-  `Origin`'in `NEXT_PUBLIC_SITE_URL` ile eşit olmasını ister (aksi 403, preview
-  host kendi değerine ihtiyaç duyar); ziyaretçi IP'sine göre rate limit, paylaşılan
+  `Origin`'in `NEXT_PUBLIC_SITE_URL` ile eşit olmasını ister (aksi
+  403); ziyaretçi IP'sine göre rate limit, paylaşılan
   "unknown" anahtarı için ayrı daha gevşek kova, gövdeyi `Content-Length` ve
   stream sırasında sınırlar (413), honeypot ve ad/e-postadaki CR/LF dahil her
   alanı sunucu tarafında doğrular; `X-Request-Id`, `X-RateLimit-Limit`,
@@ -172,7 +172,8 @@ katmanlarına ve derleme loglarına sızdırır.
 Uygulamayı Coolify bu git deposundan yayınlar:
 
 1. Coolify GitHub App ile bağlıdır, Dockerfile build pack kullanır. `main`'e
-   push derleme ve yayın tetikler, pull request'ler preview alır.
+   push derleme ve yayın tetikler. Preview Deployments kapalı (karar
+   2026-09-03): tek geliştirici, her PR CI'dan geçiyor.
 2. İmaj `.next/standalone` içinden `node server.js`'i root olmayan kullanıcıyla çalıştırır.
 3. Konteyner sağlık kontrolü `/api/health`.
 4. Traefik TLS sonlandırır, HSTS ve sıkıştırma ekler, Cloudflare aralıklarına

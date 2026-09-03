@@ -203,7 +203,7 @@ sudo ufw status numbered
 `DOCKER-USER`, Docker'ın FORWARD zincirinde kendi kurallarından **önce** işlettiği zincirdir; publish edilmiş konteyner portlarını filtrelemenin desteklenen yolu budur. Zincirin varsayılan içeriği tek bir `RETURN` kuralıdır, bu yüzden yeni kurallar `-A` ile değil `-I` ile başa eklenir; `-A` ile eklenen kural o `RETURN`'ün altında kalır ve hiç çalışmaz.
 
 ```bash
-ADMIN_IPV4="$(curl -s https://api.ipify.org)"   # preview erişimi için allowlist
+ADMIN_IPV4="$(curl -s https://api.ipify.org)"   # sahibinin IP'si, Cloudflare'ı atlayarak origin'e erişmek için
 
 # 1) Önce catch all DROP, zincirin başına
 sudo iptables  -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -j DROP
@@ -245,11 +245,4 @@ Beklenen: `curl: (28) Connection timed out` veya `curl: (7) Failed to connect`. 
 traefik.http.routers.https-0-<uuid>.middlewares=<mevcut değer>,cloudflare-only@file,security-headers@file,compress@file
 ```
 
-- [ ] Bu yol seçilirse preview router'ına `cloudflare-only` **eklenmez**, aksi halde DNS-only preview'lar hiç açılmaz.
 - [ ] Bu yol origin portlarını ağ seviyesinde kapatmaz, yalnızca HTTP katmanında `403` döner. Paket yine de Traefik'e ulaşır. `DOCKER-USER` ile birlikte kullanılabilir, yerine geçmez.
-
-## 6. Preview deployment erişimi
-
-- [ ] `*.preview.dogancanyildiz.com` Cloudflare'da DNS-only (gri bulut), bkz. `docs/deploy/cloudflare-kurulum.md` bölüm 1.
-- [ ] Preview'lar `http` üzerinden servis edilir, TLS yok: gri bulutta Let's Encrypt HTTP-01 doğrulaması origin'e doğrudan ulaşmak zorunda kalır ve bölüm 5b'deki `DOCKER-USER` DROP kuralı bunu keser.
-- [ ] Erişim yalnızca bölüm 5b'de allowlist'e alınmış `ADMIN_IPV4` adresinden mümkündür. Bu bilerek seçilmiş bir kısıt: preview'lar herkese açık değildir.

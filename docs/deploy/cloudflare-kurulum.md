@@ -14,15 +14,13 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 |---|---|---|---|
 | A | `@` | `ORIGIN_IPV4` | Proxied (turuncu bulut) |
 | CNAME | `www` | `dogancanyildiz.com` | Proxied (turuncu bulut) |
-| A | `*.preview` | `ORIGIN_IPV4` | **DNS only (gri bulut)** |
 
-- [ ] `*.preview` bilerek gri bulut: ücretsiz planda wildcard DNS kayıtları proxy'lenemez. Preview'lar bu yüzden TLS'siz `http` üzerinden ve yalnızca origin firewall'unda allowlist'e alınmış admin IP'sinden erişilebilir, bkz. `docs/deploy/traefik-ve-origin.md`.
 - [ ] Posta DNS kayıtları (MX, DKIM, SPF, DMARC) Mailcow kurulumuna aittir ve proxy'lenmez (gri bulut); 2026-08-31 kararıyla Resend kaldırıldı, gönderim `contact@dogancanyildiz.com` üzerinden Mailcow SMTP ile yapılır, bkz. `docs/deploy/mailcow-smtp.md`.
 - [ ] **Uyarı:** `me@dogancanyildiz.com` alıcı adresini taşıyan MX kayıtlarına dokunulmaz; A/CNAME kayıtlarının eklenmesi mevcut postayı etkilemez.
 - [ ] `dogancanyildiz.com -> www.dogancanyildiz.com` yönlendirmesi (kanonik host www) **2026-09-03'ten beri Coolify'ın dahili "Redirect to www" ayarıyla** yapılıyor (`docs/deploy/coolify-kurulum.md` bölüm 3). Bölüm 3b'deki Redirect Rule isteğe bağlı bir edge katmanı, eklenirse aynı yönde olduğu için çakışmaz.
 
 - [ ] **CAA kaydı** (2026-08-28 denetimi, yoktu): `CAA 0 issue "letsencrypt.org"`, `CAA 0 issue "pki.goog"`, `CAA 0 iodef "mailto:me@dogancanyildiz.com"`. Origin CA'ya geçilirse `letsencrypt.org` satırı kaldırılabilir.
-- [ ] `*.preview` kaydı yalnızca PR preview kullanılacaksa eklenir; kullanılmayacaksa bu satır ve `docs/deploy/coolify-kurulum.md` bölüm 5 kaldırılır (karar sahibinde, 2026-08-28 denetimi F-029).
+- [ ] Wildcard alt alan kaydı yok ve gerekmiyor: Preview Deployments kapalı (karar 2026-09-03), bkz. `docs/deploy/coolify-kurulum.md` bölüm 5.
 
 ## 2. SSL/TLS
 
@@ -30,7 +28,7 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 - [ ] SSL/TLS -> Edge Certificates -> "Always Use HTTPS": açık. 2026-08-28 denetimi: `http://` istekler 301 almıyordu, ayar kapalıydı. Doğrulama: `curl -sI http://dogancanyildiz.com/ | grep -i -E '^(HTTP|location)'` -> `301` ve `https://` hedef.
 - [ ] SSL/TLS -> Edge Certificates -> "Minimum TLS Version": **1.2** (2026-08-28 denetimi: edge TLS 1.0/1.1 kabul ediyordu). Doğrulama: `curl -sI --tls-max 1.1 https://dogancanyildiz.com/` başarısız olmalı.
 - [ ] Origin sertifikası Traefik'in Let's Encrypt HTTP-01 akışıyla kalır. Cloudflare proxied modda `/.well-known/acme-challenge` yolunu geçirir, "Always Use HTTPS" bu yolu engellemez. **Kesinti notu (2026-08-28):** site her HTTPS yolda 526 (Invalid SSL certificate) veriyor ve origin'de port 80 Traefik router'sız 404 dönüyor; Coolify'da uygulamanın çalıştığı ve Custom Labels'taki router satırları doğrulanmalı, kalıcı çözüm olarak Cloudflare Origin CA sertifikası (15 yıl, yalnızca Cloudflare güvenir) değerlendirilmeli.
-- [ ] HSTS Cloudflare'da **açılmaz**. Şu an uygulama (`next.config.ts`, production) `max-age=31536000; includeSubDomains` gönderiyor; Traefik'teki `security-headers` middleware'i devreye alınınca uygulama satırı kaldırılır ve tek kaynak Traefik olur, bkz. `docs/deploy/traefik-ve-origin.md`. Yayından önce yayında olan tüm alt alanların (ör. dev, preview, send, Kuma status sayfası hangi alt alandaysa o) TLS sonlandırdığı doğrulanmalı, `includeSubDomains` hepsini bir yıl https'e kilitler.
+- [ ] HSTS Cloudflare'da **açılmaz**. Şu an uygulama (`next.config.ts`, production) `max-age=31536000; includeSubDomains` gönderiyor; Traefik'teki `security-headers` middleware'i devreye alınınca uygulama satırı kaldırılır ve tek kaynak Traefik olur, bkz. `docs/deploy/traefik-ve-origin.md`. Yayında olan tüm alt alanların (ör. dev, send, Kuma status sayfası hangi alt alandaysa o) TLS sonlandırdığı doğrulanmalı, `includeSubDomains` hepsini bir yıl https'e kilitler.
 
 ## 3b. Redirect Rule: `apex to www` (dogancanyildiz.com zone'u)
 
