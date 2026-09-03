@@ -61,7 +61,7 @@ describe("vendored font wiring", () => {
   // applied, so that class has to sit on <html>, the ancestor of :root.
   // Putting it on <body> instead leaves the properties undefined at :root,
   // and every stack above silently falls through to its system fallback
-  // with no build or type error. See docs/plans/handoffs/faz-3.md.
+  // with no build or type error. See docs/03-tasarim-ui-ux.md.
   const documents = [
     "src/app/[lang]/layout.tsx",
     "src/app/global-not-found.tsx",
@@ -260,7 +260,7 @@ describe("stylesheet imports", () => {
 
   it("is scoped to src/ so class names quoted in docs and tests never compile", () => {
     // Tailwind 4.3 extracts candidates from every non-ignored file under the
-    // project root. docs/plans quotes retired classes such as the emerald
+    // project root. docs quote retired classes such as the emerald
     // shadow; scoping the scan keeps them out of the shipped CSS.
     expect(css).toMatch(/@import "tailwindcss" source\("\.\.\/"\);/);
   });

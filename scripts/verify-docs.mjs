@@ -31,9 +31,14 @@ function check(condition, message) {
 // Domain redirect direction: the owner's 2026-08-27 decision made
 // dogancanyildiz.com primary, with dogancanyildiz.sh only 301ing to it. Any
 // document describing the reverse hop is a leftover from the superseded
-// decision, except docs/plans/ (execution records written while .sh was
-// still primary, each carrying its own historical-assumption note).
+// decision, except docs/plans/ (the archive index for the execution records
+// written while .sh was still primary, carrying its own historical note).
 // ---------------------------------------------------------------------------
+
+// The two documents the domain checks below anchor on. Renaming either means
+// updating this pair, not hunting for string literals across the file.
+const SUMMARY = "docs/00-ozet-ve-karar.md";
+const OPEN_WORK = "docs/11-acik-isler.md";
 
 const HISTORICAL_TREES = ["docs/plans"];
 const HISTORICAL_MARKER = /Karar değişikliği|tarihsel/i;
@@ -63,12 +68,12 @@ function checkDomainDirection() {
     "docs/README.md not found while collecting decision documents"
   );
   check(
-    files.includes("docs/10-yol-haritasi.md"),
-    "docs/10-yol-haritasi.md not found while collecting decision documents"
+    files.includes(SUMMARY),
+    `${SUMMARY} not found while collecting decision documents`
   );
   check(
-    files.includes("docs/launch-checklist.md"),
-    "docs/launch-checklist.md not found while collecting decision documents"
+    files.includes(OPEN_WORK),
+    `${OPEN_WORK} not found while collecting decision documents`
   );
 
   for (const file of files) {
@@ -83,21 +88,21 @@ function checkDomainDirection() {
     });
   }
 
-  const checklist = readDoc("docs/launch-checklist.md");
+  const openWork = readDoc(OPEN_WORK);
   check(
     // The 2026-09-02 decision made www the canonical host: the .sh redirect's
     // final hop is now www.dogancanyildiz.com, so the www. prefix is optional
     // here on purpose, not a loosening of the direction check itself.
-    /dogancanyildiz\.sh -> (www\.)?dogancanyildiz\.com/.test(checklist),
-    "docs/launch-checklist.md does not state the .sh -> .com redirect"
+    /dogancanyildiz\.sh -> (www\.)?dogancanyildiz\.com/.test(openWork),
+    `${OPEN_WORK} does not state the .sh -> .com redirect`
   );
 
   const indexRow = readDoc("docs/README.md")
     .split("\n")
-    .find((line) => line.includes("launch-checklist.md"));
+    .find((line) => line.includes("11-acik-isler.md)"));
   check(
     indexRow !== undefined && /\.sh -> \.com 301/.test(indexRow),
-    "docs/README.md's launch-checklist.md row does not agree on the .sh -> .com direction"
+    `docs/README.md's ${OPEN_WORK} row does not agree on the .sh -> .com direction`
   );
 
   // The 2026-09-02 decision made www the canonical host, with the apex
@@ -117,24 +122,23 @@ function checkDomainDirection() {
     );
   }
 
-  const roadmap = readDoc("docs/10-yol-haritasi.md");
   check(
     /curl -I https:\/\/dogancanyildiz\.sh[^\n]*dogancanyildiz\.com/.test(
-      roadmap
+      openWork
     ),
-    "docs/10-yol-haritasi.md's curl check does not show the .sh -> .com redirect"
+    `${OPEN_WORK}'s curl check does not show the .sh -> .com redirect`
   );
   check(
-    /Karar: `\.sh -> \.com` 301 Cloudflare Redirect Rule/.test(roadmap),
-    "docs/10-yol-haritasi.md does not record the .sh -> .com redirect decision"
+    /Karar: `\.sh -> \.com` 301 Cloudflare Redirect Rule/.test(openWork),
+    `${OPEN_WORK} does not record the .sh -> .com redirect decision`
   );
 
   // Guards the exclusion above: if the historical tree ever loses its note
-  // the blanket skip stops being justified.
-  for (const file of [
-    "docs/plans/README.md",
-    "docs/plans/handoffs/README.md",
-  ]) {
+  // the blanket skip stops being justified. The plans themselves were removed
+  // on 2026-09-03 and live in git history, so docs/plans/README.md is the only
+  // place left that has to carry the note.
+  {
+    const file = "docs/plans/README.md";
     const doc = readDoc(file);
     check(
       /Domain varsayımı notu/.test(doc),
@@ -184,8 +188,6 @@ const COOLIFY = "docs/deploy/coolify-kurulum.md";
 const README = "README.md";
 const TRAEFIK = "docs/deploy/traefik-ve-origin.md";
 const CLOUDFLARE = "docs/deploy/cloudflare-kurulum.md";
-const FAZ1_CHECKLIST = "docs/plans/handoffs/faz-1-manual-checklist.md";
-const FAZ1_HANDOFF = "docs/plans/handoffs/faz-1.md";
 
 function checkDeployDocs() {
   // The Dockerfile ARG lost its default in fc470e0, so a build without the
@@ -212,12 +214,10 @@ function checkDeployDocs() {
   // (uptime left the body on 2026-08-28). A checklist that prints the body as
   // a literal makes a healthy deploy look broken at the gate that blocks
   // going to production.
-  for (const path of [COOLIFY, FAZ1_HANDOFF]) {
-    check(
-      !/200 `?\{"status":"ok"\}`?/.test(readDoc(path)),
-      `${path} expects a literal {"status":"ok"} health check body`
-    );
-  }
+  check(
+    !/200 `?\{"status":"ok"\}`?/.test(readDoc(COOLIFY)),
+    `${COOLIFY} expects a literal {"status":"ok"} health check body`
+  );
   {
     const doc = readDoc(COOLIFY);
     check(/checks/.test(doc), `${COOLIFY} does not name checks as a field`);
@@ -235,19 +235,19 @@ function checkDeployDocs() {
   // (http-0-<uuid>, https-0-<uuid>). A label written on a router that has no
   // rule is silently ignored by Traefik, which would ship the site without
   // HSTS.
-  for (const path of [TRAEFIK, FAZ1_CHECKLIST]) {
-    const doc = readDoc(path);
+  {
+    const doc = readDoc(TRAEFIK);
     check(
       !/routers\.portfolio/.test(doc),
-      `${path} still targets a router literally named portfolio`
+      `${TRAEFIK} still targets a router literally named portfolio`
     );
     check(
       /routers\.https-0-<uuid>\.middlewares/.test(doc),
-      `${path} does not use the generated https-0-<uuid> router name`
+      `${TRAEFIK} does not use the generated https-0-<uuid> router name`
     );
     check(
       /security-headers@file,compress@file/.test(doc),
-      `${path} does not keep the existing security-headers/compress middlewares`
+      `${TRAEFIK} does not keep the existing security-headers/compress middlewares`
     );
   }
   check(
@@ -259,15 +259,15 @@ function checkDeployDocs() {
   // while ufw only filters INPUT. An allowlist written in ufw alone leaves
   // the origin open to the whole internet while the checklist ticks the box
   // that gates TRUST_CF_CONNECTING_IP=true.
-  for (const path of [TRAEFIK, FAZ1_CHECKLIST]) {
-    const doc = readDoc(path);
+  {
+    const doc = readDoc(TRAEFIK);
     check(
       /DOCKER-USER/.test(doc),
-      `${path} does not restrict the published ports through DOCKER-USER`
+      `${TRAEFIK} does not restrict the published ports through DOCKER-USER`
     );
     check(
       !/ufw allow from/.test(doc),
-      `${path} allowlists 80/443 in ufw, which Docker's FORWARD chain bypasses`
+      `${TRAEFIK} allowlists 80/443 in ufw, which Docker's FORWARD chain bypasses`
     );
   }
   {
@@ -287,12 +287,10 @@ function checkDeployDocs() {
   // edge overwrites the header and the edge rate limiting rule answers 429 on
   // its own. It proves nothing while gating the flag that decides whether the
   // contact rate limit can be bypassed.
-  for (const path of [TRAEFIK, FAZ1_CHECKLIST]) {
-    check(
-      !/-H "CF-Connecting-IP: 203\.0\.113/.test(readDoc(path)),
-      `${path} sends a spoofed CF-Connecting-IP header through Cloudflare as proof`
-    );
-  }
+  check(
+    !/-H "CF-Connecting-IP: 203\.0\.113/.test(readDoc(TRAEFIK)),
+    `${TRAEFIK} sends a spoofed CF-Connecting-IP header through Cloudflare as proof`
+  );
   {
     const doc = readDoc(TRAEFIK);
     check(

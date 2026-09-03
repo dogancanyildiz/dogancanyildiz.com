@@ -1,243 +1,168 @@
 # Tasarım Yönü, UI/UX ve Frontend
-Durum: Uygulandı (Faz 3, PR #5; içerik Faz 4, PR #6; UI/güven güncellemesi PR #11; 2026-08-28 denetim kapanışı: kontrast, token sözleşmesi, landmark/odak, hareket kararı; 2026-09-02 3. tur: hedef boyutu sweep'i, consent geri alma kontrolü; 2026-09-02 marka varlıkları: işaret bileşeni, statik ikonlar, yeni OG düzeni; 2026-09-02 paylaş bloğu: kart yazı ve proje sayfalarının sonunda; 2026-09-02 sertifika rozetleri: Hakkımda sertifika bölümü verene göre gruplanıp rozet görselleriyle çiziliyor; 2026-09-02 sertifika önizlemesi: rozet tıklanınca büyüyor, satırlar iki sütun, anahtar kelime satırı, eğitim listesinde okul amblemleri; 2026-09-03 karar değişikliği: izin bandı ve ölçüm anahtarı kaldırıldı, Umami izin beklemeden yükleniyor), kalan: sahibinin görsel onayları ve tarayıcı turu · Karar: 2026-08-27 · Güncelleme: 2026-09-03 · Kapsam: dogancanyildiz.com
 
-## Özet
+Durum: Uygulandı (Faz 3 #5; denetim kapanışı #34; marka paketi, paylaş bloğu ve sertifika v2 #45; izin bandı kaldırıldı #53) · Karar: 2026-08-27 · Güncelleme: 2026-09-03 · Kapsam: dogancanyildiz.com
 
-Mevcut tema teknik olarak "Emerald" değil, Tailwind'in emerald ramp'inin oklch'e çevrilmiş hali: sRGB karşılığı light background #ecfdf5, yani emerald-50 ile birebir örtüşüyor. Ziyaretçinin tanıdığı bir framework varsayılanı premium okunmuyor, "shadcn kurulmuş" okunuyor. Buna ek olarak iki ayrı bug tasarımı sessizce geçersiz kılıyor: globals.css:161'deki h1-h4 kuralı hiç tanımlanmamış bir `--font-fraunces` değişkenine işaret ediyor ve next/font hiç yüklenmiyor (tüm başlıklar sistem fontuna düşüyor), globals.css:66 ile :69'daki `--primary` ve `--muted-foreground` aynı değerde (oklch(0.516 0.114 157.2)) olduğu için üç seviyeli metin hiyerarşisi ikiye düşmüş durumda. Üç moodboard karşılaştırıldı; **Terminal Editorial** yönü seçildi: nötr zemin, rol tabanlı bir font sistemi (Geist Sans + Geist Mono + Instrument Serif), tek sütun editoryal layout ve minimum hareket. Ops Console yönünün bento/telemetri fikri tek bir "systems" bölümü olarak bu yönün içine gömülüyor, Quiet Print yönünden yalnızca blog okuma ölçüleri alınıyor. Mobil navigasyon şu an tamamen kırık (header.tsx:44 `hidden md:flex`, footer'da sayfa linki yok) ve `prefers-reduced-motion` desteği sıfır; bu doküman bu iki kırığın da düzeltilmesini karar setine dahil ediyor.
+## Kararlar
 
-## Karar(lar)
+1. **Yön: Terminal Editorial.** Nötr zemin, rol tabanlı üç fontlu tipografi,
+   tek sütun editoryal omurga, minimum hareket. Karşılaştırılan iki alternatif
+   yönden yalnızca parça alındı: Ops Console'un bento/telemetri fikri tek bir
+   Systems bölümü olarak içeri gömüldü (bento grid mobilde hiyerarşiyi
+   çökertiyor, uzun okumayla çelişiyor), Quiet Print'ten yalnızca blog okuma
+   ölçüleri (66ch measure, 1.6 satır yüksekliği, 18-20px gövde).
+2. **Tipografi:** Geist Sans Variable gövde ve başlıklarda, Geist Mono veri
+   katmanında (yıl, stack etiketi, commit SHA, sertifika kimliği), Instrument
+   Serif yalnızca blockquote ve OG kartında. Hepsi `next/font/local` ile
+   vendor edilmiş woff2'den, `latin` + `latin-ext` alt kümesiyle.
+3. **Palet:** nötr gri/siyah-beyaz zemin; yeşil tek role indirildi: link, focus
+   ring ve "up" durumu. Bir DevOps sitesinde yeşilin "marka" değil "up"
+   demesi, canlı status paneliyle tutarlı.
+4. **Layout:** ana sayfa `Hero` -> seçili projeler -> `ExperienceSummary` ->
+   `SkillsStrip` -> son yazılar -> `Systems` -> `ContactCta`. Container
+   `max-w-6xl` (`page-shell`). Proje ve yazı listeleri kart değil numaralı
+   editoryal satır; detay sayfasında 4 hücreli mono künye (Rol / Stack / Yıl /
+   Sonuç).
+5. **Hareket:** sitede JS animasyon katmanı yok (karar değişikliği,
+   2026-08-28). Yalnızca imleç yanıp sönmesi ve kalıp açılışı gibi küçük CSS
+   animasyonları var, hepsi `prefers-reduced-motion` altında kapanıyor.
+6. **Erişilebilirlik:** WCAG 2.2 SC 2.5.8 tabanı (24x24 CSS px; kontroller ve
+   metin bağlantıları 44px `tap-target`), form durum mesajlarında
+   `role="alert"` / `role="status"`, solid aksan + 2px offset focus ring.
 
-1. **Tasarım yönü**: Terminal Editorial (A). Nötr zemin + rol tabanlı üç fontlu tipografi + tek sütun editoryal omurga + minimum hareket.
-2. **Tipografi**: Geist Sans Variable (gövde, UI ve tüm başlıklar) + Geist Mono Variable (etiket, yıl, stack rozeti, uptime, commit SHA, sertifika kodu). İkisi de `next/font/local` ile vendor edilmiş woff2 dosyalarından yüklenir, `latin` + `latin-ext` alt kümesi zorunlu. Instrument Serif yalnızca OG image route'unda kalır; sayfa başlıkları Geist Sans kullanır.
-3. **Palet**: Nötr gri/siyah-beyaz zemin, emerald tek role indirilir: link, focus ring ve "up" durumu.
-4. **Layout**: Ana sayfa `Hero` → seçili projeler → son yazılar → yetkinlik bölümü (`SkillsStrip`). **Güncel sıra (2026-08-28):** `Hero` → seçili projeler (`featured`) → `ExperienceSummary` → `SkillsStrip` → son yazılar → `Systems` (Faz 5 status paneli) → `ContactCta`; bkz. "Uygulama durumu" bölümündeki Layout paragrafı. Container `max-w-6xl` (`page-shell`). Proje ve yazı listeleri editorial index satırları (`content-entry`, numaralı sol sütun, outcome vurgusu). Yetkinlikler kategorize iki sütun grid (`SkillCategoryList`), teknoloji pill'leri yatay wrap, `simple-icons` ile marka logoları, sıra HTML → CSS → JS → framework mantığında. İç sayfalar `PageSection` + `PageHeader`; contact gizlilik metni görünür.
-5. **Hareket**: motion (eski framer-motion) LazyMotion + `m` ile, yalnızca opacity + 2-4px translate, 150-220ms, stagger 40ms ve en fazla 4 eleman; `useReducedMotion` + global `prefers-reduced-motion` CSS fallback'i zorunlu.
-6. **Erişilebilirlik**: WCAG 2.2 SC 2.5.8 (24x24 CSS px minimum hedef boyutu), contact form durum mesajlarında `role="alert"` / `role="status"`, solid accent + 2px offset focus ring.
+### Neden bu değerler
 
-### Üç moodboard karşılaştırması
+Başlangıçtaki tema teknik olarak marka değil Tailwind'in emerald ramp'inin
+oklch'e çevrilmiş haliydi (light background emerald-50 ile birebir aynı) ve
+`--primary` ile `--muted-foreground` aynı değerdeydi, yani üç seviyeli metin
+hiyerarşisi ikiye düşmüştü. Ayrıca `globals.css` hiç tanımlanmamış bir
+`--font-fraunces` değişkenine işaret ediyordu ve `next/font` hiç
+yüklenmiyordu: tüm başlıklar sessizce sistem fontuna düşüyordu, CSS tanımsız
+custom property'i hata vermeden yok saydığı için de fark edilmiyordu.
 
-| Yön | Font çifti | Palet | Layout | Hareket | Fit |
-|---|---|---|---|---|---|
-| **A. Terminal Editorial** (seçilen) | Geist Sans + Geist Mono + Instrument Serif (yalnız h1/pull quote) | Nötr zemin: dark #0a0c0f, light #f9fafb; emerald tek aksan (dark #4fcc8d, light #007041) | Tek sütun editoryal, satır listeleri, mono künye, tam genişlik kapak | opacity + 2-4px translate, 150-220ms, stagger 40ms/max 4 | 9/10 |
-| B. Ops Console | Inter Variable + JetBrains Mono | Grafit zemin + semantik durum renkleri (up/degraded/down) | Bento grid dashboard, kart başına ayrı mobil sıralama gerekir | Sayısal ticker'lar, transform yok | 6/10 |
-| C. Quiet Print | Newsreader Variable + Geist/Inter + IBM Plex Mono | Sıcak kağıt zemini, tek kısıtlı aksan, light-first | İki sütun + sidenote, mobilde sidenote çöküyor | Neredeyse hareketsiz, crossfade | 5/10 |
-
-Terminal Editorial'ın 9/10 fit skoru full-stack + DevOps + security kimliğine en iyi oturmasından geliyor: serif display "yazıyorum, düşünüyorum" der, mono metadata "terminalde yaşıyorum" der, nötr zemin ikisinin önüne geçmez. Ops Console kimliği en doğrudan anlatan ama en riskli yön: terminal/hacker klişesine en yakın, bento grid mobilde tek sütuna düştüğünde hiyerarşi kayboluyor ve uzun okuma (blog) bu dille çelişiyor. Quiet Print en "premium" hissi veren yön ama developer sinyali zayıf, DevOps/security kimliği tamamen içerikten çıkmak zorunda kalıyor.
-
-**Seçilen yöne B ve C'den alınanlar**: Ops Console'un bento/telemetri fikri tüm siteye yayılmıyor, yalnızca ana sayfada tek bir "systems" bölümü olarak (Gatus'tan beslenen mono şerit, bkz. [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md)) A'nın içine gömülüyor. Quiet Print'ten yalnızca blog okuma ölçüleri taşınıyor: 66ch measure, 1.6 satır yüksekliği, 18-20px gövde puntosu.
-
-## Gerekçe
-
-**Palet.** Mevcut tema marka değil varsayılan. Hesaplanan sRGB karşılıkları Tailwind'in emerald ramp'iyle birebir örtüşüyor. Ayrıca globals.css:66 (`--primary`) ve globals.css:69 (`--muted-foreground`) aynı değerde: oklch(0.516 0.114 157.2). Kontrast oranı bu çift için 5.02:1, AA geçiyor ama "ikincil metin" olarak okunmuyor çünkü marka rengiyle aynı. Nötr zemine geçiş bunu düzeltiyor ve emerald'in taşıdığı anlamı geri kazandırıyor: bir DevOps sitesinde yeşil artık "marka" değil "up" demeye başlıyor, bu da canlı status widget'ıyla tutarlı.
+Referans sitelerin ortak kalıbı renkle değil tipografiyle ayrışmak: nötr
+grotesk gövde + mono metadata + isteğe bağlı editoryal serif display.
+`next/font/google` reddedildi çünkü build sırasında Google'a ağ isteği atıyor
+ve build kendi sunucusunda alınıyor (vercel/next.js#91653).
 
 Nötr token değerleri (kontrast hesaplandı, hepsi AA üstü):
 
-| Rol | Dark | Light | Kontrast (zemine karşı) |
-|---|---|---|---|
+| Rol | Dark | Light | Kontrast |
+| --- | --- | --- | --- |
 | Zemin | #0a0c0f | #f9fafb | - |
 | Yüzey / kart | #14171b | #ffffff | - |
 | Metin | #f1f3f4 | #14181c | - |
-| Muted (ikincil metin) | #999fa6 | #60656b | dark 7.32:1, light 5.62:1 |
-| Çizgi (hairline) | #2a2e33 | - | - |
-| Aksan (link/focus/up) | #4fcc8d | #007041 | dark 9.67:1, light 5.96:1 |
+| Muted | #999fa6 | #60656b | 7.32:1 / 5.62:1 |
+| Aksan (link/focus/up) | #4fcc8d | #007041 | 9.67:1 / 5.96:1 |
 
-Değişiklik yalnızca `:root` ve `.dark` token bloklarını değil, body arka planındaki üç katmanlı gradyanı, `surface-panel` gölgesindeki hard-coded `rgba(4,120,87,0.30)` değerini ve `project-card` içindeki `bg-accent/40`, `border-primary/30` gibi doğrudan renk referanslarını da kapsıyor. Yarım yapılırsa yeşil artıklar kalır ve sonuç ilk halinden kötü görünür; bu yüzden tek PR'da bitirilecek iş olarak işaretlendi.
+## Uygulama
 
-**Tipografi.** İncelenen referans sitelerin hiçbiri renkle değil tipografiyle ayrışıyor: leerob.com'un derlenmiş CSS'inde üç ayrı sistem var (`--font-geist-sans`, `--font-geist-mono` ve `src: local(Iowan Old Style)` ile yüklenen sıfır-byte maliyetli bir serif); joshwcomeau.com'da `--font-family` Wotfard, `--font-family-mono` Cartograph CF, `--font-family-spicy` Sriracha; emilkowal.ski'de dört ayrı yüz (Sans/Serif/serifInline/Mono). Ortak kalıp: nötr grotesk gövde + mono metadata + isteğe bağlı editoryal serif display, yani rol tabanlı bir font sistemi. Bu projede ise şu an hiç font yüklenmiyor: globals.css:161 `font-family: var(--font-fraunces)` diyor ama bu değişken `:root`'ta, `.dark`'ta ya da `@theme inline` bloğunda hiçbir yerde set edilmiyor (grep tek eşleşme veriyor) ve `src/` altında hiç `next/font` importu yok. package.json'da Fraunces bağımlılığı da yok. Sonuç: başlıklar sessizce `--font-sans-stack`'e (Inter, Avenir Next, Segoe UI) düşüyor, hata da vermiyor çünkü CSS tanımsız custom property'i sessizce yok sayıyor.
+### Token sözleşmesi
 
-Çözüm: Geist Sans Variable, Geist Mono Variable ve Instrument Serif 400 woff2 dosyaları latin + latin-ext alt kümeleriyle `@fontsource` paketlerinden alınıp `src/fonts/` altına repoya konur ve `next/font/local` ile yüklenir; CSS değişkenleri `--font-sans` / `--font-mono` / `--font-display` olarak body'ye inject edilir, globals.css:161'deki ölü referans `--font-display`'e bağlanır. `next/font/google` reddedildi çünkü build sırasında Google'a çıkıyor; build Coolify/GitHub Actions üzerinde kendi sunucusunda alınacağı için bu deploy'u kırabilen gerçek bir bağımlılık (bkz. Riskler). latin-ext şart, aksi halde TR sayfalarda ğ/İ/ı/ş fallback fonta düşer; doğrulama fonts.googleapis.com üzerinden yapıldı, Instrument Serif dahil incelenen tüm adaylar U+0100-02BA aralığını (Türkçe kapsamı) içeriyor, yani engel font seçimi değil konfigürasyon disiplini.
+`--border` yalnızca dekoratif hairline (ayırıcı, pill kenarı, kod bloğu
+çerçevesi); `--border-strong` bir kontrolün kendi sınırını çizdiği her yer
+(outline buton, tema düğmesi, dil değiştirici); `--input-border` form alanları
+için alias. İki temada da zemine karşı en az 3:1 (WCAG 1.4.11).
+`tests/design-tokens.test.ts` kontrastı oklch'ten hesaplayıp assert ediyor ve
+`globals.css`'te tanımlı her özel sınıfın `src/` altında kullanıldığını
+doğruluyor (ölü CSS testi). Etiket tipografisi iki kademeli: bölüm etiketi
+`.eyebrow` 0.8125rem/0.12em, satır içi etiketler (`.meta-label`, `.tag-pill`)
+0.75rem/0.1em.
 
-Kullanım kuralı net: serif yalnızca h1 ve büyük pull quote'ta (Instrument Serif tek ağırlıklı ve variable değil, h3/h4 seviyesine indirilirse zayıf ve amatör görünür), mono yalnızca veri katmanında (yıl, stack etiketi, uptime yüzdesi, deploy zamanı, commit SHA, sertifika kodu). Mono'yu tema değil veri katmanı olarak kullanmak "yeşil-siyah terminal" klişesinden kaçınırken "bu kişi terminalde çalışıyor" bilgisini gövde metnini bozmadan veriyor.
+Tailwind kaynak taraması `source("../")` ile `src/`'ye kısıtlı; aksi halde
+dokümanlarda ve testlerde geçen emekli sınıf adları derlenen CSS'e giriyordu.
 
-**Layout.** Mobil navigasyon eksikliği şu an kullanılabilirlik açısından kritik bir kırık: header.tsx:44'teki nav listesi `hidden md:flex` ile yalnızca md breakpoint üzerinde görünüyor, altında hiçbir alternatif (Sheet/Dialog/hamburger) yok; footer.tsx'te de About/Projects/Home linkleri yok, yalnızca Contact butonu ve sosyal ikonlar var. Küçük ekranda ziyaretçinin Home dışında hiçbir sayfaya ulaşma yolu yok. md altı için Radix Dialog tabanlı bir mobil menü ve footer'a sayfa linkleri ekleniyor.
+### Marka paketi
 
-Proje ve yazı listelerinin kart yerine satır (yıl · başlık · rol · stack, mono hizalı) olması hem uzun listede tarama hızını artırıyor hem de kart tasarımının gerektirdiği görsel/gradyan bağımlılığını azaltıyor. Proje detayında üstte 4 hücreli mono künye (Role / Stack / Year / Outcome), recruiter'ın 30 saniyede alması gereken dört bilgiyi açıklama paragrafını okumaya gerek bırakmadan veriyor; örnek: "DevOps Chapter Lead / Docker · GH Actions · Coolify / self-hosted CI-CD / 1 platform, 0 Vercel". project-card.tsx:96'da şu an tüm kart bir `Link` içine sarılmış; repo ve canlı link eklendiğinde iç içe interaktif eleman sorunu çıkarıyor. Düzeltme: başlık link olur, kart `::after` ile genişletilmiş tıklama alanı alır.
+- **İşaret** (`src/components/brand/brand-mark.tsx`): DCY harfleri artı sağ
+  altta yeşil blok, harf metinleri path'e çevrili, yani hiçbir yazı tipi
+  yüklenmeden okunuyor. Tek bileşen iki temayı da karşılıyor: harfler
+  `currentColor`, blok `fill-primary`. İki ayrı SVG vendor edip birini
+  gizlemek, tema sınıfı gelmeden yanlış renkte bir kare gösterirdi.
+- **Lockup** (`brand-lockup.tsx`): işaret + ince dikey ayırıcı + isim + yeşil
+  mono tagline. 480px altında yalnızca işaret görünüyor, isim `sr-only` bir
+  kopyayla ekran okuyucuda kalıyor. Header'da yeşil blok terminal imleci gibi
+  yanıp sönüyor (1.06s step-end, WCAG 2.3.1 eşiğinin çok altında,
+  `prefers-reduced-motion` açıkken sabit); footer'da sabit.
+- **Header kontrolleri düz.** Dil değiştirici kapsül, tema düğmesi daire
+  olmaktan çıktı; TR önce, aktif dil yeşil alt çizgi.
+- **Statik ikonlar:** `src/app/favicon.ico`, `icon.png`, `apple-icon.png`.
+  Üretilen `ImageResponse` rotaları ve `/favicon.ico -> /icon` yönlendirmesi
+  kalktı. Apple ikonu opak, çünkü iOS saydam ikonu beyaza bindiriyor.
+- **OG kartı** (`src/lib/seo/og-layout.tsx`): sol üstte yeşil Geist Mono
+  prompt satırı, ortada sayfa başlığı, sol altta isim ve unvan, arkada çok
+  düşük kontrastlı filigran. Üç rota da aynı düzeni çağırıyor.
 
-**Hareket.** `src/` içinde tek bir `prefers-reduced-motion` kuralı yok (grep sıfır sonuç), buna karşılık project-card.tsx:83-92 her karta `index * 0.08` gecikme veriyor; 6 projede son kart görünür olduktan 400ms sonra beliriyor, bu "scroll reveal" hissi yerine sitenin yavaş olduğu izlenimini bırakıyor. Çözüm: motion `LazyMotion` + `m` ile yüklenir, yalnızca opacity + 2-4px translate, 150-220ms, stagger 40ms'e indirilir ve en fazla 4 elemanla sınırlanır; `useReducedMotion` hook'uyla variant'lar koşullu hale getirilir ve globals.css'e global `@media (prefers-reduced-motion: reduce)` fallback'i eklenir.
+### Sayfa parçaları
 
-**Erişilebilirlik.** İki somut madde doğrulandı. Birincisi, WCAG 2.2 SC 2.5.8 minimum 24x24 CSS px hedef boyutu istiyor; project-card.tsx:56'daki `size-11` (44px) ok butonu bu şartı karşılıyor ama header'daki dil/tema anahtarları ve tag pill'lerinin ölçülmesi gerekiyor. İkincisi, contact-form.tsx:120-129'daki `status === "error"/"success"` koşullu render edilen `<p>` etiketlerinde `aria-live`, `role="status"` veya `role="alert"` yok (grep sıfır sonuç); form submit sonrası DOM'a eklenen mesajı ekran okuyucu kullanıcıları fark etmeyebilir. Honeypot alanı (contact-form.tsx:116-119) doğru şekilde `aria-hidden` + `tabIndex=-1` ile gizlenmiş, bu kısım korunuyor. Ayrıca mevcut `--ring` opaklığı (%55) nötr zeminde zayıf kalacağı için focus ring solid accent + 2px offset'e geçiyor.
+- **Paylaş bloğu** (`share-card.tsx`): yazı ve proje sayfalarının sonunda,
+  prose bittikten sonra ve `ContactCta`'dan önce. Sayfanın kendi OG kartını
+  gösteriyor (mockup değil, servis edilen PNG'nin kendisi), X/LinkedIn/
+  WhatsApp/e-posta bağlantıları ve bir "bağlantıyı kopyala" düğmesi. Kopyalama
+  sonucu `role="status"` bölgesinde duyuruluyor; pano yoksa veya yazma
+  reddedilirse aynı yoldan hata mesajı geliyor, kurtarma yolu düğmenin yanında
+  duran mono URL.
+- **Sertifikalar** (`certificate-list.tsx`): verene göre gruplu, satır başında
+  64px rozet slotu, `md` ve üstünde iki sütun. Satırdaki tek bağlantı
+  "Doğrula"; adı bağlantı yapmak ekran okuyucuya aynı yere iki kapı açardı.
+  Rozet görseli tıklanınca platformun kendi `<dialog>`'u ile büyüyor
+  (`showModal()` Escape'i, `inert` arka planı, odak tuzağını ve top layer'ı
+  bedava veriyor). Adın altında verenin kendi beceri etiketlerinden en çok
+  altı anahtar kelime. Eğitim satırlarında 40px okul amblemi slotu; amblemi
+  olmayan kayıt slotu boş bırakıyor.
+- **Kalıp için iki elle yazılmış davranış:** dışarı tıklayınca kapanma
+  (`::backdrop` bir element değil, ona yapılan tıklama hedef olarak dialog'u
+  bildiriyor, bu yüzden dialog'un kendi `padding`'i sıfır) ve `body` kaydırma
+  kilidi. Kilit `close` olayına bağlı değil: Chrome, Escape ile kapatılmış bir
+  `<dialog>` üzerinde sonraki `close()` çağrılarında olayı göndermiyor ve
+  temizlik yalnızca `onClose`'a bağlı kalsaydı sayfa kaydırılamaz kalıyordu.
 
-## Reddedilen alternatifler (neden)
+### Ölçüm ve gizlilik (2026-09-03)
 
-- **Mevcut emerald paletini korumak**: Son commit'te yeni geldi ama kaynağı Tailwind varsayılanı, ayırt edici değil; ayrıca `--primary`/`--muted-foreground` çakışması sürer.
-- **Ops Console'u tüm site yönü yapmak**: Terminal/hacker klişesine en yakın yön, bento grid mobilde hiyerarşiyi çökertiyor, uzun okuma (blog) diliyle çelişiyor. Yalnızca ana sayfadaki "systems" bölümü olarak içeri gömülüyor.
-- **Quiet Print / light-first editoryal yön**: En premium hissi veren yön ama developer sinyali zayıf, DevOps/security kimliği tamamen içerikten çıkmak zorunda kalırdı. Buradan yalnızca blog okuma ölçüleri alınıyor.
-- **`next/font/google` ile Instrument Serif/Fraunces yüklemek**: Build sırasında Google'a çıkan bir bağımlılık; self-host build senaryosunda pazarlık konusu değil (bkz. Riskler).
-- **`@fontsource` paketini doğrudan CSS'e import etmek**: node_modules yolu kırılgan, `next/font`'un preload/CSS değişkeni avantajı kaybolur.
-- **Yalnızca sistem font stack'i**: Mevcut durumun ta kendisi, yani tipografik sistem yok demek.
-- **React ViewTransition ile sayfa geçişleri**: motion bağımlılığını azaltırdı ve proje kapağının grid'den detaya morph etmesini bedavaya getirirdi, ama Safari'de davranış farkları var ve şu an YAGNI; ertelendi, motion (LazyMotion) ile devam ediliyor.
-- **CSS scroll-driven animations (`animation-timeline: scroll()`) ile okuma ilerleme çubuğu**: Firefox'ta hâlâ bayrak arkasında; gerekirse `@supports` ile progressive enhancement olarak eklenir, tek yol olarak kurulmaz.
-- **Nav'ı mobilde yatay kaydırılabilir bar yapmak**: Dialog'dan daha az keşfedilebilir, Radix Dialog tabanlı mobil menü tercih edildi.
-- **Tüm kartı `Link`'e sarmaya devam etmek**: Repo/canlı link eklendiğinde iç içe interaktif eleman sorunu çıkarır.
-
-## Uygulama durumu (2026-08-27)
-
-Bu kararların kod tarafı Faz 3'te (dal `feature/faz-3-tasarim-sistemi`, PR #5, merge commit `a3b2aed`) uygulandı; hero, header ve içerik metinleri Faz 4'te (dal `feature/faz-4-icerik-ve-yayin`, PR #6, henüz merge edilmedi, HEAD `8b4fe40`) yeniden ele alındı.
-
-**Fontlar.** Geist Sans, Geist Mono ve Instrument Serif woff2 dosyaları (latin + latin-ext, artı lisans metinleri) `src/fonts/` altında repoya vendor edildi, `src/fonts/index.ts` `next/font/local` ile yüklüyor ve `fontVariables`'ı hem `src/app/[lang]/layout.tsx` hem `src/app/global-not-found.tsx`'teki `<html>` etiketine bağlıyor. `grep -rn "next/font/google" src` sıfır sonuç veriyor; hiçbir Google Fonts isteği yok.
-
-**Palet.** `src/app/globals.css` nötr oklch token sistemine geçti (`--background: oklch(0.9846 0.0017 247.8)` light, `oklch(0.1535 0.0072 258.4)` dark), `--shadow-color` token'ı eklendi ve panel gölgeleri buradan türetiliyor. `--primary` (oklch(0.4794 0.1156 156.3)) ile `--muted-foreground` (oklch(0.5044 0.0114 252.9)) artık ayrı değerler, çakışma bug'ı kapandı.
-
-**Layout (2026-08-28 güncel).** Ana sayfa: `Hero` (metrik strip, opsiyonel profil fotoğrafı, GitHub/LinkedIn) → seçili projeler (`ProjectList`, `featured` olanlar, yoksa ilk üç; live/repo chip) → `ExperienceSummary` → `SkillsStrip` → son yazılar (`PostList`) → `Systems` (Gatus durumu, 24 saat uptime, son yayın SHA ve zamanı; veri yoksa nötr satır) → `ContactCta`. About sayfasında sticky `AboutSubnav` ve bölüm anchor'ları. Proje/yazı listeleri numaralı editorial satır (`ContentEntryIndex` / `ContentEntryBody`). `<Screenshot>` ve `<ProjectMeta>` MDX kısayolları 2026-08-28'de kaldırıldı (hiçbir içerik kullanmıyordu, planlanmamıştı, tip güvenliğini bozuyordu). Kapaksız yayın kuralı sürüyor (`content/images/` teslimat bekliyor); kapak geldiğinde `coverAlt` alanı zorunlu, kapak sütunu CSS'i `lg` genişlikte artık gerçekten çalışıyor.
-
-**Hareket.** `src/components/motion-provider.tsx` `LazyMotion` + `domAnimation` + `m` kalıbını kuruyor ve kök layout'ta sarmalayıcı olarak kullanılıyor. `src/lib/motion.ts` stagger'ı 40ms'e (`STAGGER_SECONDS = 0.04`), süreyi 180ms'e sabitliyor ve `MAX_STAGGER_ITEMS = 4` ile sınırlıyor; `useReducedMotion` her animasyonlu bileşende okunuyor. `globals.css` içinde global `@media (prefers-reduced-motion: reduce)` fallback'i var; `.motion-item` sınıfı SSR'da `opacity: 0` hidden varyantını reduced-motion kullanıcıları için geçersiz kılıyor.
-
-**Erişilebilirlik.** `src/app/[lang]/layout.tsx:88-89` skip link (`.skip-link`, `#main`), `contact-form.tsx:121` ve `:129` `role="alert"`/`role="status"`, `:139` `aria-busy={status === "loading"}`, `globals.css` `.tap-target` sınıfı (header nav, dil anahtarı, footer), `theme-toggle.tsx:27` ve `:40` `aria-label={t("a11y.toggleTheme")}` ile TR/EN çevirili. Hepsi doğrulandı.
-
-**Faz 4 sapmaları (2026-08-27):** Hero metrik/available rozeti, header sr-only isim ve footer Contact CTA site sahibi onayıyla geri alındı (UI/UX yenileme). **Güncelleme (PR #35, 2026-08-30):** contact formunda artık zorunlu, kapalı kümeli bir hizmet başlığı var (`topic`: web/devops/security/other, NativeSelect); `subject` gövdede kabul edilmiyor, posta konusu topic etiketinden türetiliyor. Header görünür tam adı ve yanında GitHub/LinkedIn ikonlarını (SocialLinks, mobil menüde de) taşıyor; hero'daki sosyal ikonlar kalktı; footer etiketli metin bağlantılarına döndü (Privacy ve WhatsApp dahil). /privacy, /coming-soon, /updating ve 404 ortak StatusScreen ailesini kullanıyor; Umami script'i consent banner onayından sonra enjekte ediliyor.
-
-**Hâlâ açık olanlar:**
-- Tarayıcıda ekran görüntüsü turu yapılmadı (Faz 3 manuel checklist'in 14 maddelik listesi, `docs/plans/handoffs/faz-3-manual-checklist.md`, sahibini bekliyor).
-- Proje kapakları büyük ölçüde teslim edilmedi (Köklü Hukuk 2026-09-02'de ilk kapaklı proje oldu, bkz. [08-icerik-stratejisi.md](08-icerik-stratejisi.md)); detay sayfası kapak alanını yalnızca `project.cover` varsa render ediyor, liste satır formatında kapaksız (kararla uyumlu).
-- React ViewTransition alınmadı (`grep -ri "ViewTransition" src` sıfır sonuç); motion (LazyMotion) ile devam ediliyor, reddedilen alternatifler bölümündeki karar hâlâ geçerli.
-
-## Uygulama durumu (2026-08-28)
-
-Dal `feature/audit-closure`; kanıt `src/app/globals.css`, `tests/design-tokens.test.ts`, `src/components/**`, `tests/accessibility.test.ts`, `tests/list-sections.test.ts`, render testleri (`*.test.tsx`).
-
-- **Hareket (karar değişikliği).** Sitede artık JS animasyonu yok: hero, yetkinlik şeridi, proje ve yazı listeleri (SSR HTML'de `opacity:0` LCP'yi hidrasyona kilitliyordu, reduced-motion kaçışı bu elemanları kapsamıyordu; denetim, high) ve doğrulama turunda contact sayfası (tek kalan `m.*` tüketicisi; LazyMotion tembel import'u formu hidrasyon + ikinci chunk'a kadar görünmez bırakıyordu) sunucu bileşenine döndü. `motion` bağımlılığı, `MotionProvider`, `src/lib/motion.ts` ve `.motion-item` kuralı kaldırıldı; `@media (prefers-reduced-motion: reduce)` kuralı duruyor. Kararın 5. maddesi (LazyMotion + `m`, 40 ms stagger) fiilen geçersiz; geri getirilecekse CSS geçişleriyle (`@starting-style` veya sınıf tabanlı, hidrasyona bağlı olmadan) yapılmalı. **Sahibinin görsel onayı bekleniyor.**
-- **Token sözleşmesi.** `--border` yalnızca dekoratif hairline (ayırıcı, pill kenarı, kod bloğu çerçevesi); `--border-strong` bir kontrolün kendi sınırını çizdiği her yer (outline buton, tema düğmesi, dil değiştirici), `--input-border` form alanları için alias. İki temada da zemine karşı en az 3:1 (WCAG 1.4.11); `tests/design-tokens.test.ts` oklch'den kontrastı hesaplayıp assert ediyor ve `globals.css`'te tanımlı her özel sınıfın `src/` altında kullanıldığını doğruluyor (ölü CSS testi; `.pull-quote` allowlist'te bekliyor). `--shadow-color`, `.section-label`, `.display-hero`, `.list-row`, `tw-animate-css` ve `shadcn/tailwind.css` import'ları silindi, prod CSS derlemesi hiçbir devDependency'ye bağlı değil. Katman düzeni düzeltildi (`components` < `utilities`), bu yüzden `.tag-pill` üstündeki `normal-case tracking-normal` override'ları artık çalışıyor: yetkinlik ve teknoloji pill'leri BÜYÜK HARF yerine normal yazım, 0.75rem (**görsel onay**).
-- **Etiket tipografisi iki kademeli:** bölüm etiketi `.eyebrow` 0.8125rem/0.12em; satır içi bilgi etiketleri (`.meta-label`, `.tag-pill`, `.prose-content th`) 0.75rem/0.1em (10px taban kalktı).
-- **Prose.** `.prose-content` artık blockquote (display fontu `var(--font-display)` italik, Instrument Serif burada render oluyor; preload kapalı), table (`.table-wrap` sarmalayıcı, 375px'te taşma yok), hr, h4, strong, kbd kurallarını taşıyor; `:focus-within` hover ile eşdeğer, hover `@media (hover: hover)` içinde; `forced-colors` uyarlaması var.
-- **Erişilebilirlik.** Dil değiştirici görünen "TR"/"EN" metnini korur, bağlam sr-only, `lang` ve `hrefLang`; marka bağlantısında `aria-label` yok; tema düğmesi hidrasyon öncesi/sonrası aynı kutu, ikon CSS ile, `aria-pressed` (düğme mevcut temanın ikonunu gösterir, **görsel onay**); about alt-nav IntersectionObserver ile `aria-current="location"`, kenar maskesi, `scroll-mt-32`; skip link hedefi `main` odaklanınca görünür outline; header tek `isActive`, `h-16`; mobil menü `aria-current`; dil değiştirici `<nav>` dışında; yetkinlik grupları landmark üretmiyor; `PageHeader` `titleId` ile `aria-labelledby`; footer server component, `/api/health` linki yok, feed linki düz `<a>`; `ContactCta`/footer h2 `.section-heading` ölçeğinde (**görsel onay**); 404 h1 `.page-title`; proje kartı Live/Source linkleri 24px `tap-target`; hero metrik linklerinde "etiket: değer" adı; `viewport.themeColor` iki tema için (`--background` token'larından elle çevrildi, token değişirse `layout.tsx`'teki iki hex güncellenmeli). `NextIntlClientProvider` yalnızca client bileşenlerinin okuduğu namespace'leri alıyor (`CLIENT_MESSAGE_NAMESPACES`, testle kilitli).
-- **Fontlar.** Instrument Serif kalıyor ama preload kapalı; `geistSansExt` preload açık (Türkçe glifler ilk ekranda); sans ve display yüzlerinin son web yüzü `adjustFontFallback` ile metrik uyumlu fallback taşıyor, mono `false` (Next yalnızca Arial/Times kabul ediyor); latin yüzlerinde `adjustFontFallback` unicode-range bölünmesi nedeniyle kapalı kalmalı. CLS canlıda ölçülmedi (site 526).
-- **Doğrulama turunun eklediği güvenlik ağı:** `design-tokens.test.ts` artık kaynakta kullanılan her proje sınıfının `globals.css`'te tanımlı olduğunu da denetliyor (ölü CSS temizliği `.display-hero`'yu götürmüştü, hero h1 gövde boyutunda kalmıştı; geri geldi). Türkçe 404 kendi ana sayfasına ve diğer dile link veriyor.
-- **Hâlâ açık:** tarayıcı ekran görüntüsü turu ve yukarıdaki dört görsel onay (hareket katmanının tamamen kalkması dahil); proje kapakları teslimat bekliyor.
-
-## Uygulama durumu (2026-09-02, marka varlıkları)
-
-Dal `feature/brand-assets`; sahibinin Claude Design export'u (`.local/export/`, gitignore altında) siteye bağlandı.
-
-- **Marka işareti.** İşaret DCY harfleri artı sağ alt yeşil blok; harf metinleri path'e çevrilmiş, yani hiçbir yazı tipi yüklenmeden okunuyor. `src/components/brand/brand-mark.tsx`: export'tan inline React SVG, sunucu bileşeni. Tek bileşen iki temayı da karşılıyor: harfler `currentColor`, blok `fill-primary` (`--primary` açıkta #007041, koyuda #4fcc8d, yani export'un iki dosyasıyla aynı değerler). İki SVG'yi vendor edip birini gizlemek tema sınıfı gelmeden yanlış rengi bir kare gösterirdi. `aria-hidden`; header'daki marka linkinin erişilebilir adı yanındaki isim metni olarak kalıyor.
-- **Lockup ve header ölçümü.** Header, sahibinin lockup'unu birebir kullanıyor: işaret (24px), ince dikey ayırıcı (`bg-border-strong`), üstte isim (15px, medium), altında yeşil mono tagline `brand.tagline` = "Full Stack · DevOps" (iki katalogda aynı, `aria-hidden`; linkin erişilebilir adı yalnızca isim). Cihaz emülasyonuyla ölçüldü: 480px altında satır lockup ile 44px kontrolleri birlikte taşıyamıyor, orada yalnızca işaret görünüyor ve isim `sr-only` bir kopyayla ekran okuyucuda kalıyor (`sr-only min-[480px]:hidden` / `hidden min-[480px]:flex`); sağ kontrol grubu `shrink-0` (eskiden `min-w-0` ile küçülüp düğmeleri kadraj dışına itiyordu). Tablet dikeyde (768-834px) nav ve sosyal ikonlar lockup'a yer bırakmıyordu: sosyal ikonlar `lg:block`, nav aralığı `gap-3 lg:gap-5`. 320, 375, 480, 640, 768, 810, 834, 1024 ve 1280'de yatay taşma yok ve lockup 480'den itibaren tam genişlikte (222px). `tests/accessibility.test.ts` tek ve kırılım noktalı `sr-only` dışındaki kullanımı yasaklıyor.
-- **İmleç animasyonu.** İşaretteki yeşil blok header'da terminal imleci gibi yanıp sönüyor (`cursor="blink"`, `.brand-cursor`: 1.06s step-end, yaklaşık saniyede bir flaş, WCAG 2.3.1 eşiğinin çok altında); `prefers-reduced-motion` açıkken animasyon kapalı ve blok sabit yanıyor; footer'daki lockup varsayılan sabit. `tests/motion.test.ts` kilitliyor.
-- **Header kontrolleri (sahibinin isteği).** Dil değiştirici kapsül ve tema düğmesi daire olmaktan çıktı; ikisi de düz, nav metinleriyle aynı dilde. TR önce (varsayılan yerel), aktif dil foreground + yeşil alt çizgi, arada `bg-border-strong` ince çizgi; tema ve menü düğmeleri `rounded-md` ghost. `tests/design-tokens.test.ts` bu iki bileşende kutu kenarlığı ve `rounded-full` olmamasını kilitliyor.
-- **Statik ikonlar.** İkonlar artık üretilen route değil, statik dosya: `src/app/favicon.ico` (16 + 32 + 48, PNG gömlü), `src/app/icon.png` (192, saydam dış köşeler), `src/app/apple-icon.png` (180, opak; iOS saydam ikonu beyaza bindiriyor). İkisi de yeniden kısılmış durumda: tasarım aracının yazdığı 5.7 KB'lık `caBX` (C2PA) chunk'ı görselin kendisinden büyüktü. Eski `icon.tsx`/`apple-icon.tsx` ve `/favicon.ico -> /icon` yönlendirmesi kalktı. Renkler: koyu zemin #0a0c0f, açık zemin #fafbfb, metin #f1f3f4 / #2b3036, ayırıcı #2a2e33 / #e6e8ea, yeşil #4fcc8d / #007041.
-- **OG görseli.** Düzen sahibinin referansından (`.local/export/og-image-1200x630.png`) birebir: sol üstte yeşil Geist Mono prompt satırı, ortada sayfa başlığı için boş bant, sol altta isim (Geist 700) ve unvan (Geist Mono 500), arkada çok düşük kontrastlı (#15181c) "dogancanyildiz" filigranı. Kimlik görselinde başlık bandı boş kalıyor (arkasında tek bir sayfa yok), prompt `~/dogancanyildiz $ whoami`. Blog yazısı ve proje detayı aynı düzeni kendi başlıklarıyla çiziyor, prompt `$ cat blog/<slug>.md` / `$ cat projects/<slug>.md`. Ortak kod `src/lib/seo/og-layout.tsx`, üç rota da onu çağırıyor. Sayfa rotaları slug'ı bulamazsa `notFound()` çağırıyor; aksi halde var olmayan bir slug için de 200 kart üretiliyor ve istenen yol prompt satırına birebir yazılıyordu. `dynamicParams = false` bu işi göremiyor: Next metadata görsel rotaları için prerender manifest'ine somut yol yazmıyor, bayrak konunca gerçek kartlar da 404 dönüyor (`next start` üzerinde doğrulandı). Filigran sağa değil sola yaslı: referanstaki boyutta kelime yaklaşık 900px genişliğinde ve sağa yaslandığında başı kadrajın dışına çıkıyor. Eski `BrandMarkText` rozeti ve `src/lib/brand-mark.tsx` kaldırıldı.
-- **Hâlâ açık:** header lockup, imleç animasyonu, düz dil/tema kontrolleri ve statik ikonların hepsi görsel onay bekliyor; tarayıcı ekran görüntüsü turu yapılmadı.
-
-## Uygulama durumu (2026-09-02, 3. tur)
-
-Dal `feature/audit-followups`; 31 Ağustos incelemesinin hedef boyutu ve consent bulguları bu turda kapandı.
-
-- **Hedef boyutu sweep'i** (**görsel onay**). Footer metin bağlantıları (`footerTextLinkClass`) `min-h-6` (24px) yerine `tap-target` (44px) aldı; sayfa/elsewhere sütunları satır başına ~20px büyüdü, footer belirgin şekilde uzadı. Header marka linki de `tap-target` aldı (görünür ölçü değişmedi, zaten `h-16` satırın içindeydi). Contact sayfasındaki e-posta ve WhatsApp linkleri 24px SC 2.5.8 tabanına çıktı (4px büyüme). Hata sınırının (`error.tsx`) iki butonu 36px'ten 44px'e çıktı. Hepsi `tests/accessibility.test.ts`'in yeni render tabanlı kontrolleriyle (`guaranteedHeightPx`, `measuredTargets`) kilitli; eski dizge arama testi footer regresyonunu göremiyordu, kaldırıldı.
-- **Consent geri alınabilir oldu.** `/privacy`'de yeni `ConsentControls` istemci bileşeni (durum cümlesi `role="status"` bölgesinde + tek geri alma/izin verme düğmesi); banner artık `role="dialog"` değil `role="region"` (odak çalma, `aria-modal`, Escape yok, kararla uyumlu). "Şimdi değil" -> "Reddet" oldu (ret kalıcı davranışıyla artık metin de uyumlu). `privacy.formBody` `topic` alanından bahsediyor, yeni `privacy.whatsappTitle`/`whatsappBody` WhatsApp mesajının Meta üzerinden gittiğini söylüyor.
-- **Mobil menü odak tuzağı artık test ediliyor**, form konu (`topic`) alanı gönderim sırasında kilitleniyor (diğer alanlarla tutarlı).
-- **Hâlâ açık (bilinçli, sahibinde):** consent banner'ın `position: fixed` alt bant olması, cevaplanmadan önce odaklı bir footer linkini gizleyebilir (SC 2.4.11, düşük risk); dış linklerde (footer/header/contact WhatsApp) yeni sekmede açıldığına dair görünür/duyurulan bir işaret yok (WCAG 3.2.5, AAA, isteğe bağlı).
-
-## Uygulama durumu (2026-09-02, paylaş bloğu)
-
-Dal `feature/brand-assets`; sahibinin isteği üzerine sayfa kartı sitede de bir yer aldı.
-
-- **Yeri.** Yazı ve proje detay sayfalarında, prose bittikten sonra ve `ContactCta`'dan önce (`src/components/sections/share-card.tsx`). Sıra bilinçli: blok okunan parçaya ait, siteye değil, ve iletişim çağrısı sayfayı kapatan son ses olarak kalıyor. Yerleşim `tests/pages/content-page-contracts.test.ts` ile kilitli.
-- **Dili.** Kart ve rozet yok; üstte `border-border` hairline, `meta-label` başlık ("Paylaş" / "Share") ve tek cümlelik açıklama, ContactCta'nın açtığı kalıbın aynısı. Kartın kendisi en fazla 35rem (560px), `rounded-md` ve ince çerçeve; `w-full` + `h-auto` birlikte, çünkü yalnızca genişliği ezmek 1200x630 oranını bozuyor.
-- **Bağlantılar.** X, LinkedIn, WhatsApp, e-posta: düz metin + mevcut marka işareti, `tap-target` (44px), footer metin bağlantılarıyla aynı biçim. Yeni `XIcon` `src/components/ui/brand-icon.tsx` desenine eklendi. WhatsApp adresi numarasız `wa.me` paylaşım sayfası; `src/lib/site.ts`'teki `whatsappHref` sahibiyle sohbet açar, o bu blokta "paylaş"ı "bana yaz"a çevirirdi.
-- **Kopyala düğmesi.** Tek istemci parçası (`copy-link-button.tsx`); metin 2 saniye "Kopyalandı"ya dönüyor ve `role="status" aria-live="polite"` bölgesinde duyuruluyor, çünkü bir kontrolün adının değişmesi kendi başına duyuru değil. Pano yoksa (güvensiz origin) veya yazma reddedilirse aynı yoldan "Kopyalanamadı, adresi seçip kopyalayın" geliyor; kurtarma yolu mesaj değil, düğmenin yanında zaten duran mono URL, bu yüzden hata da başarıyla aynı süre sonra siliniyor. Etiketlerin hepsi sunucu bileşeninden prop olarak geliyor: `share` namespace'i istemci kataloğuna girseydi iki rotada var olan bir düğme için dokuz dize kabuğun her sayfasına yüklenirdi.
-- **Emülasyon turu.** `next start` (3162) üzerinde 1280 açık tema ve 375 koyu tema, `/blog/ccna-dan-web-guvenligine` ve `/en/projects/hubit`: kart 560x295 ve 343x181 (1200:630 korunuyor), bağlantılar geniş ekranda tek satır, 375'te iki satıra sarıyor, `document.scrollWidth` 320/375/1280'de görünüm genişliğine eşit (yatay taşma yok).
-
-## Uygulama durumu (2026-09-02, sertifika rozetleri)
-
-Dal `feature/brand-assets`; sertifika bölümü düz ad listesinden rozetli, verene göre gruplanmış bir bloğa döndü (`src/components/sections/certificate-list.tsx`).
-
-- **Yeri ve kimliği.** Hakkımda sayfasındaki `#about-certificates` bölümü ve alt-nav girdisi aynen duruyor; değişen yalnızca bölümün içi. Bölüm markup'ı sayfadan kendi bileşenine taşındı, sayfa zaten uzundu ve bu blok kendi render testini hak ediyor.
-- **Gruplama.** Veren adı `meta-label` bir `h3` olarak grubun üstünde: Hackviser, Cisco Networking Academy, IBM SkillsBuild, Global AI Hub. Grup içinde yeniden eskiye; katılım rozeti (Learn-A-Thon 2026) tarihi yeni olsa da değerlendirmeli belgelerin altında kalıyor, çünkü aynı ağırlıkta bir kanıt değil.
-- **Rozet görselleri çerçevesiz.** Her satırın solunda 64px yüksekliğinde sabit bir slot (`h-16 w-24`), içinde `next/image` ile yerel PNG. Rozetlerin kendi silüeti var, çerçeve kutu olmayan şekillerin etrafına kutu çizerdi. Hackviser sertifikası yatay (1600x1031) ve aynı slota `object-contain` ile oturuyor. Görseli olmayan tek kayıt (Global AI Hub) slotu boş bırakıyor: adlar bölümün tamamında tek bir sol kenarda kalıyor, ve eksik görsel için sayfada özür niteliğinde bir metin yok.
-- **Satır başına tek bağlantı.** Bağlantı "Doğrula", ad veya görsel değil. Ad iddianın kendisi, bağlantı onu kontrol etme yolu; adı bağlantı yapmak satırdaki tek somut bilgiyi renklendirir ve ekran okuyucuya aynı yere iki kapı açardı. Görünür kelime liste boyunca tekrar ettiği için her bağlantı kendi belgesini adlandıran bir `aria-label` taşıyor (SC 2.5.3 gereği görünür kelimeyle başlıyor) ve `tap-target` (44px) sınıfını alıyor.
-- **Veri katmanı mono kalıyor.** Sertifika kimliği (yalnızca CAPT'te var) `font-mono text-xs`, tipografi kararındaki "mono yalnızca veri katmanında" kuralına uygun. Tarih `format.dateTime` ile okuyucunun dilinde ve UTC'ye sabitlenmiş ay + yıl olarak yazılıyor; sabitlenmemiş bir tarih UTC'nin batısındaki ziyaretçide bir önceki aya kayıyor.
-- **Görsel kaynağı.** On bir Credly rozeti ve bir Hackviser sertifikası `public/images/badges/` altında, kaynakları ve kullanım gerekçesi aynı klasördeki `README.md`'de. CSP `img-src 'self' data:` olduğu için hotlink yok; rozetler Credly'nin 600x600 orijinalinden sharp ile kayıpsız yeniden kodlandı (yazılan dosya piksel piksel kaynakla aynı), Hackviser sertifikası 1600x1031 olarak bayt bayt kopyalandı.
-- **Emülasyon turu.** `next start` (3163) üzerinde 1280 açık tema ve 375 koyu tema, `/hakkimda#about-certificates`; `document.scrollWidth` 320/375/768/1280'de görünüm genişliğine eşit (yatay taşma yok).
-
-## Uygulama durumu (2026-09-02, sertifika önizlemesi ve okul amblemleri)
-
-Aynı dal (`feature/brand-assets`); sertifika satırı üç yerde değişti (görsel tıklanabilir, satırlar iki sütun, adın altında anahtar kelime satırı) ve eğitim listesi okul amblemi aldı.
-
-- **Görsel artık düğme.** 64px'lik bir amblem süstür: CCNA rozetinin içindeki kurs adı ve Hackviser sertifikasının her kelimesi o boyutta okunmuyor. Görsel, satırda ziyaretçinin başka türlü ulaşamayacağı tek şey olduğu için kontrol haline geldi; `aria-label` "Büyüt: {ad}" / "Enlarge {name}". Bağlantı hâlâ "Doğrula", yani satırda bir bağlantı ve bir düğme var, ikisi farklı işler yapıyor: biri siteden çıkıyor, diğeri sayfada kalıyor.
-- **Kalıp platformun kendi `<dialog>`'u.** `showModal()` Escape'i, arka planın `inert` olmasını, odak tuzağını ve top layer'ı bedava veriyor; z-index yok. Bileşenin elle yazdığı yalnızca iki davranış var, çünkü platform ikisini vermiyor: dışarı tıklayınca kapanma (`::backdrop` bir element değil, ona yapılan tıklama hedef olarak dialog'u bildiriyor, bu yüzden dialog'un kendi `padding`'i sıfır) ve `body` kaydırma kilidi. Kapanınca odak düğmeye dönüyor.
-- **Genişlik `max-width` değil `width`.** `<dialog>` varsayılan olarak `width: fit-content` ve shrink-to-fit, içindeki görselin yüzde genişliğini `auto` sayıyor; kutu altındaki sertifika adının max-content genişliğine çöküyordu (130px rozetin etrafında 164px panel, yani büyütmesi gereken şeyden küçük). `width: min(90vw, 632px)`: 632 = 600px içerik + panelin iki yandan 16px'i, böylece `sizes="(min-width: 768px) 600px, 90vw"` gerçekten tuttuğu sözü söylüyor. CDP ile okundu: 320'de 282px panel, 768 ve 1280'de 632px, büyük görsel 598px ve optimizer'dan `w=1200` iniyor; satırdaki küçük kopya aynı dosyadan `sizes="64px"` ile `w=128` iniyor.
-- **Açılış animasyonu keyframe, transition değil.** Kapalı bir dialog `display:none`, yani geçilecek bir başlangıç değeri yok; 150ms opaklık `@keyframes` ile. `::backdrop` kasten dışarıda: base katmanındaki `prefers-reduced-motion` bloğu `*` seçicisiyle çalışıyor ve bir pseudo-element'i yakalamıyor, hareket istemeyen ziyaretçide arka plan yine de animasyon oynardı.
-- **Kaydırma kilidi `close` olayına bağlı değil.** Chrome, Escape ile kapatılmış bir `<dialog>` üzerinde sonraki `close()` çağrılarında `close` olayını göndermiyor (Chrome 152'de, çerçevesiz düz bir sayfada da doğrulandı). Temizlik yalnızca `onClose`'a bağlı olduğunda aç, Escape, aç, kapat gibi sıradan bir sıra `body`'yi `overflow: hidden`'da bırakıyor ve sayfa sayfa yenilenene kadar kaydırılamıyordu. Kilit artık kilidi alan yerin yanında, `close()`'u çağıran fonksiyonda bırakılıyor; `onClose` da duruyor, çünkü Escape yolu olayı gönderiyor. Temizlik idempotent, iki yoldan da çalışıyor.
-- **Kapat düğmesi görselin üstünde, üzerinde değil.** Rozetler saydam PNG, Hackviser sertifikası beyaz bir sayfa; üste bindirilen bir ikon her satırda ve her temada başka bir zemine düşerdi. Panelin en üstünde sağa yaslı, `tap-target`, `aria-label` "Önizlemeyi kapat" / "Close preview".
-- **Satırlar md ve üstünde iki sütun** (`grid gap-x-8 md:grid-cols-2`), Yetkinlikler bölümüyle aynı ritim; telefonda tek sütun. Ayırıcı `divide-y`'dan her satırın `border-t`'sine döndü: `divide-y` kardeşler arasına kaynak sırasına göre çizer, iki sütunlu bir grid'de bu satırın ortasına bir çizgi koyup sağ sütunun üstünü boş bırakır. Üst kenar grid satırının kendi kenarı olduğu için iki sütun aynı yerde aynı ince çizgiyi alıyor, ve liste son satırdan sonra duruyor, yarısının altına sarkan bir çizgi bırakmıyor.
-- **Anahtar kelime satırı.** Adın altında tek satır, `text-xs text-muted-foreground`, orta nokta ayırıcı: "SOC izleme · saldırı analizi · olay müdahalesi". Kurs adı kendi hattının dışındaki hiç kimseye bir şey anlatmıyor; kelimeler verenin kendi beceri etiketlerinden birebir alındı (Credly rozet sayfaları, Hackviser sertifika metni), yeniden yazılmadı. Kayıt başına en çok altı: fazlası satır olmaktan çıkıp adla yarışan bir paragraf oluyor. `withCheckedCertificates` eksik satırı, altıdan fazlasını, boş etiketi ve iki dil arasında eşleşmeyen sayıyı build sırasında düşürüyor.
-- **Eğitim satırlarında okul amblemi.** Satır başında 40px yükseklikte sabit bir slot (`h-10 w-24`), `next/image`, `alt=""` (okul adı yanında zaten metin olarak yazılı). 24 birimlik genişlik kare değil, çünkü dört amblemin ikisi kelime logosu ve onlarda 40px yükseklik 170px genişlik demek. Amblemi olmayan kayıt slotu boş bırakıyor. Kaynak ve lisans `public/images/schools/README.md`'de: iki SVG Wikimedia Commons'tan (kamu malı), iki PNG tr.wikipedia'dan (adil kullanım), hepsi kimlik amaçlı. `next/image` `.svg` kaynağı kendiliğinden optimizer'a sokmuyor.
-- **Bilinen ödünleşme.** Koyu temada Konya Teknik Üniversitesi amblemi zayıflıyor: logonun siyaha yakın parçası (#1a1a18) koyu zeminde kayboluyor, geriye kırmızı halka kalıyor. Arkasına beyaz bir plaka koymak bunu çözerdi ama tasarım dilinde yeni kart/rozet kutusu yok; amblem dekoratif ve okul adı yanında yazılı olduğu için bilgi kaybı yok, bu yüzden olduğu gibi bırakıldı.
-- **Emülasyon turu.** `next start` (3170) üzerinde `/hakkimda`: bölüm görüntüleri 1280 açık ve 375 koyu temada, ayrıca bir rozet düğmesine tıklanıp kalıp açıkken aynı iki kırılımda. Escape kalıbı kapatıyor, `body.style.overflow` geri geliyor ve odak düğmeye dönüyor (üçü de CDP ile okundu). `document.scrollWidth` 320/375/768/1280'de görünüm genişliğine eşit, kalıp açıkken de. Aç, Escape, aç, kapat sırası da gerçek fare ve gerçek Escape tuşuyla koşuldu: `close` olayı sayacı 1'de kalırken `body.style.overflow` her kapanışta boşalıyor, hesaplanan `overflow-y` `visible` dönüyor; tekerlek olayıyla ölçüldüğünde kilitliyken sayfa kıpırdamıyor, kilit kalkınca kıpırdıyor.
-
-## Karar değişikliği (2026-09-03, izin bandı kaldırıldı)
-
-Dal `feature/umami-always-on-and-events`; sahibinin kararı.
-
-- **İzin bandı ve ölçüm anahtarı kalktı.** `src/components/consent/` (banner,
-  provider, `/privacy`'deki `ConsentControls`), `src/lib/consent.ts` ve
-  `dcy-consent` localStorage anahtarı silindi; `consent.*` çeviri anahtarları
-  iki katalogdan da çıktı. Gerekçe: Umami bu kurulumda çerez koymuyor ve IP
-  saklamıyor (tekil ziyaretçi günlük değişen tuzla türetilen, ertesi gün
-  geçersiz olan bir hash), yani izin istenecek bir işleme yok. Bunu sormak,
-  sormaya gerek olmayan bir şeyi soruyordu.
-- **Bunun kapattığı açık madde.** Yukarıdaki 3. tur listesindeki "consent
-  banner'ın `position: fixed` alt bant olması" (SC 2.4.11) artık geçersiz:
-  bant yok. Dış linklerde yeni sekme işareti olmaması maddesi açık kalıyor.
-- **Tracker.** `src/components/umami-script.tsx` içindeki `UmamiTracker`
-  layout'a `<script defer>` basıyor (nonce, inline kod veya istemci bileşeni
-  yok; CSP zaten origin'e izin veriyor), yalnızca production derlemesinde ve
-  yalnızca iki Umami değeri de setken.
-- **Özel olaylar.** `data-umami-event` öznitelikleriyle, adlar
-  `src/lib/analytics-events.ts` içinde tek yerde: `cv-download` (Hakkımda CV
-  düğmesi), `contact-submit` (form 200 aldığında, konu etiketiyle),
-  `whatsapp-click` (footer ve iletişim sayfası), `outbound-click` (host ile:
-  header/mobil menü sosyal ikonları, footer, paylaş bloğu, sertifika doğrulama
-  linkleri), `theme-toggle` ve `locale-switch`. Script yüklü değilse hiçbiri
-  bir şey yapmıyor.
-- **`/privacy` metni** artık bunu düz anlatıyor: çerez yok, tema localStorage'da
-  ve sunucuya gitmiyor, Umami ne topluyor, formun IP'yi neden kısa süre
-  loglayıp döngüyle sildiği, Cloudflare'ın kendi edge günlüklerini tuttuğu.
+İzin bandı, `/privacy` üzerindeki ölçüm anahtarı ve `dcy-consent` localStorage
+anahtarı kaldırıldı (`src/components/consent/` silindi). Gerekçe: Umami bu
+kurulumda çerez koymuyor ve IP saklamıyor (tekil ziyaretçi günlük değişen bir
+tuzdan türetilen, ertesi gün geçersiz olan bir hash), yani izin istenecek bir
+işleme yok. Tracker'ı `src/components/umami-script.tsx` layout'a `<script
+defer>` olarak basıyor. Özel olay adları tek yerde:
+`src/lib/analytics-events.ts` (`cv-download`, `contact-submit`,
+`whatsapp-click`, `outbound-click`, `theme-toggle`, `locale-switch`); script
+yüklü değilse hiçbiri bir şey yapmıyor.
 
 ## Riskler ve tripwire'lar
 
-- **Font yükleme yolu altyapıya bağlı**: `next/font/google` build sırasında Google'a ağ isteği atıyor; Coolify + Docker + GitHub Actions ile kendi sunucusunda build alırken bu deploy'u kırabilir (vercel/next.js#91653, "Failed to fetch Geist from Google Fonts"). Tripwire: hiçbir Google Fonts importu kabul edilmez, yalnızca vendor edilmiş woff2 + `next/font/local`.
-- **latin-ext unutulursa** TR sayfalarında ğ/İ/ı/ş fallback fonta düşer ve iki dilli sitede görünür bir tipografi kırılması olur. Tripwire: `next/font/local` subsets/kaynak dosya kontrolü PR review checklist'ine eklenir.
-- **Instrument Serif tek ağırlıklı (400), variable değil**: Yalnızca 48px üstü display kullanımında iyi duruyor; h3/h4 seviyesine indirilirse zayıf görünür. Kural: yalnızca h1 ve büyük pull quote.
-- **Nötr palete geçiş yarım kalırsa** (token blokları tamamlanır ama body gradyanı, `surface-panel` hard-coded rgba veya component'lerdeki doğrudan renk referansları atlanırsa) yeşil artıklar kalır, sonuç ilk halinden kötü görünür. Tripwire: PR'da grep ile `emerald`, `rgba(4,120,87` ve doğrudan hex renk referansları taranır.
-- **CSS scroll-driven animations Firefox'ta bayrak arkasında** (FF 152, Haziran 2026 itibarıyla doğrulandı): okuma ilerleme çubuğu gibi özellikler `@supports` ile progressive enhancement olarak kurulmalı.
-- **İçerik hazır olmadan görsel yön uygulanırsa** hiçbir tasarım kurtarmaz: proje kartlarındaki "görsel alanlar" şu an project-card.tsx:35 ve project-detail.tsx:42'de CSS radial-gradient placeholder, gerçek proje görseli yok. Gerçek ekran görüntüsü olmayan projeler kapaksız yayınlanır, CSS gradyan placeholder kullanılmaz (bkz. [08-icerik-stratejisi.md](08-icerik-stratejisi.md)).
-- **Canlı status/"systems" bölümü gerçek veri istiyor**: Statik "%99.9 uptime" yazısı DevOps kimliğini güçlendirmez, zayıflatır; veri kaynağı ve gizlilik sınırları [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md)'de.
-
-## Uygulama notları
-
-Faz 3 (Tasarım sistemi) sırası, [10-yol-haritasi.md](10-yol-haritasi.md) ile senkron:
-
-1. Geist Sans/Mono Variable + Instrument Serif woff2 (latin + latin-ext) `src/fonts/` altına vendor edilir, `next/font/local` ile yüklenir, globals.css:161'deki ölü `--font-fraunces` referansı düzeltilir.
-2. globals.css token blokları nötr palete geçirilir, emerald yalnızca link/focus/status rengine indirilir, `--primary`/`--muted-foreground` ayrışması düzeltilir.
-3. body gradyanı, `surface-panel` gölgesindeki hard-coded rgba ve bileşenlerdeki doğrudan renk referansları temizlenir.
-4. md altı için Radix Dialog tabanlı mobil menü eklenir, footer'a sayfa linkleri eklenir.
-5. LazyMotion + `m`'ye geçiş; stagger 40ms, en fazla 4 eleman; `useReducedMotion` + global `prefers-reduced-motion` CSS fallback'i.
-6. Erişilebilirlik: contact form mesajlarına `role="alert"`/`role="status"`, 24x24 minimum hedef boyutu denetimi, solid focus ring.
-7. `opengraph-image` ve `icon` route'ları gerçek isim, unvan ve yeni paletle yeniden yazılır (mevcut "Building clean, fast experiences for the web" şablon metni gider).
-8. project-list'te başlık link olur, satır `::after` ile genişletilmiş tıklama alanı alır (`src/components/sections/project-list.tsx`).
+- **Hiçbir Google Fonts importu kabul edilmez.** Tripwire: `grep -rn
+  "next/font/google" src` sıfır sonuç vermeli.
+- **latin-ext unutulursa** TR sayfalarında ğ/İ/ı/ş fallback fonta düşer.
+- **Instrument Serif tek ağırlıklı (400), variable değil.** Yalnızca büyük
+  display kullanımında iyi duruyor; h3/h4 seviyesine indirilirse amatör
+  görünür.
+- **Yeşil artıkları.** Nötr palete geçiş yarım kalırsa (body gradyanı,
+  `surface-panel` gölgesindeki hard-coded rgba, bileşenlerdeki doğrudan renk
+  referansları) sonuç ilk halinden kötü görünür; PR'da `emerald`,
+  `rgba(4,120,87` ve doğrudan hex renk taraması yapılmalı.
+- **Bilinen ödünleşme:** koyu temada Konya Teknik Üniversitesi amblemi
+  zayıflıyor (logonun siyaha yakın parçası kayboluyor). Arkasına beyaz plaka
+  koymak tasarım diline yeni bir kutu eklerdi; amblem dekoratif ve okul adı
+  yanında yazılı olduğu için bilgi kaybı yok, olduğu gibi bırakıldı.
+- **CSS scroll-driven animations** Firefox'ta hâlâ bayrak arkasında; okuma
+  ilerleme çubuğu gibi özellikler `@supports` ile progressive enhancement
+  olarak kurulmalı.
+- **Kapaksız yayın kuralı sürüyor:** gerçek ekran görüntüsü olmayan proje
+  kapaksız yayınlanır, CSS gradyan veya stok görsel placeholder kullanılmaz.
 
 ## İlgili dokümanlar
 
-- [00-ozet-ve-karar.md](00-ozet-ve-karar.md)
-- [01-mevcut-durum-denetimi.md](01-mevcut-durum-denetimi.md) (audit bulgularının tamamı)
-- [02-stack-karari.md](02-stack-karari.md) (motion/framer-motion sürüm kararı, Next 16.3.3 yükseltmesi)
-- [04-i18n.md](04-i18n.md) (locale switcher, dil bazlı font/latin-ext bağlantısı)
-- [05-backend-icerik-ve-servisler.md](05-backend-icerik-ve-servisler.md) (Gatus status widget veri kaynağı)
-- [08-icerik-stratejisi.md](08-icerik-stratejisi.md) (proje görselleri, case study formatı, kapaksız düzen kuralı)
-- [10-yol-haritasi.md](10-yol-haritasi.md) (Faz 3 zamanlaması)
+- [00-ozet-ve-karar.md](./00-ozet-ve-karar.md)
+- [04-i18n.md](./04-i18n.md) - latin-ext alt kümesi, dil değiştirici
+- [07-seo-ve-metadata.md](./07-seo-ve-metadata.md) - OG kartının metadata tarafı
+- [08-icerik-stratejisi.md](./08-icerik-stratejisi.md) - kapak kuralı, sertifika içeriği
+- [11-acik-isler.md](./11-acik-isler.md) - bekleyen görsel onaylar
 
 ## Kaynaklar
 
-- leerob.com derlenmiş CSS (Geist Sans/Mono değişkenleri ve `local(Iowan Old Style)` @font-face): https://leerob.com/_next/static/chunks/38df25e856253ffd.css
-- joshwcomeau.com derlenmiş CSS (`--font-family: Wotfard`, `--font-family-mono: Cartograph CF`): https://www.joshwcomeau.com/_next/static/css/5f479326fc7a6aa8.css
-- brittanychiang.com derlenmiş CSS (next/font Inter + sistem mono stack): https://brittanychiang.com/_next/static/css/1205f04d95fac248.css
-- Emil Kowalski kişisel sitesi (Sans/Serif/serifInline/Mono dört yüzlü sistem): https://emilkowal.ski
-- Rauno Freiberg kişisel sitesi (JetBrains Mono + Georgia): https://rauno.me
-- Linear self-hosted InterVariable font dosyası: https://static.linear.app/fonts/InterVariable.woff2
-- Next.js Font Module API referansı (build-time indirme, subsets, variable, localFont): https://nextjs.org/docs/app/api-reference/components/font
-- Next.js issue #91653, "Build failed: Failed to fetch Geist from Google Fonts": https://github.com/vercel/next.js/issues/91653
-- Geist Font (Vercel, OFL-1.1): https://vercel.com/font
-- Fontsource variable Geist paketi (npm, self-host): https://www.npmjs.com/package/@fontsource-variable/geist
-- Google Fonts CSS API, Instrument Serif unicode-range (latin-ext U+0100-02BA): https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap
-- WCAG 2.2 checklist, 2.5.8 Target Size (Minimum) 24x24 CSS px, AA: https://www.levelaccess.com/blog/wcag-2-2-aa-summary-and-checklist-for-website-owners/
-- MDN, CSS scroll-driven animations (animation-timeline, tarayıcı desteği): https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scroll-driven_animations
-- UXPin, Optimal line length for readability: https://www.uxpin.com/studio/blog/optimal-line-length-for-readability/
+- https://nextjs.org/docs/app/api-reference/components/font
+- https://github.com/vercel/next.js/issues/91653
+- https://vercel.com/font
+- https://www.levelaccess.com/blog/wcag-2-2-aa-summary-and-checklist-for-website-owners/
+- https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scroll-driven_animations
+- https://www.uxpin.com/studio/blog/optimal-line-length-for-readability/

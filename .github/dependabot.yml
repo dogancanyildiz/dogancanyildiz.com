@@ -30,7 +30,7 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: react-dom
         update-types: [version-update:semver-major]
-      # Exact pin, see docs/02-stack-karari.md. Bumped by hand.
+      # Exact pin, see docs/05-backend-icerik-ve-servisler.md. Bumped by hand.
       - dependency-name: velite
       # eslint-plugin-react (via eslint-config-next) does not run on ESLint 10
       # yet; bumped by hand when eslint-config-next supports the next major.
