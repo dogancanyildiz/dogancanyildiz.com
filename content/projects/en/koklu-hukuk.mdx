@@ -2,7 +2,7 @@
 title: Köklü Hukuk ve Danışmanlık
 slug: koklu-hukuk
 translationKey: koklu-hukuk
-summary: "The website of a law firm in Ankara, from logo to deployment: two languages, ten practice areas, direct contact instead of a form, no CMS or database."
+summary: "The website of a law firm in Ankara, from logo to deployment: bilingual, ten practice areas, direct contact instead of a form, no CMS or database."
 role: Design, development and deployment
 stack:
   - Next.js
@@ -29,7 +29,7 @@ Köklü Hukuk ve Danışmanlık is a law firm in Etimesgut, Ankara. The domain w
 
 ## Why it was built this way
 
-On a law firm site the content is known at build time and nothing changes per visitor, so I left out the CMS and the database. The copy lives in typed content files, the pages render statically, and Server Components are the default; client code exists only for the menu, the language switcher and the accordions. Choosing direct channels over a form backend was just as practical: keeping no personal data on the server removes the compliance burden up front, and a lawyer already has a written channel that works. Deployment runs on Coolify on my own server through a multi stage Dockerfile, so the cost is fixed and a push updates the site. There are no analytics cookies, only the required cookie notice.
+On a law firm site the content is known at build time and nothing changes per visitor, so I left out the CMS and the database. The copy lives in typed content files, the pages render statically, and Server Components are the default; client code exists only for the menu, the language switcher and the accordions. Choosing direct channels over a form backend was just as practical: keeping no personal data on the server removes the compliance burden up front, and a lawyer already has a written channel that works. Deployment runs on [Coolify on my own server](/blog/self-hosting-with-coolify) through a multi stage Dockerfile, so the cost is fixed and a push updates the site. There are no analytics cookies, only the required cookie notice.
 
 ## What I learned
 

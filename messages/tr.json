@@ -40,7 +40,8 @@
     "latestPostsLink": "Tüm yazılar",
     "skillsTitle": "Çalıştığım araçlar",
     "skillsEyebrow": "Ne yapıyorum",
-    "skillsSubtitle": "Öbekler teslimat sırasına göre diziliyor: arayüzden yayına, en altta güvenlik katmanı."
+    "skillsSubtitle": "Öbekler teslimat sırasına göre diziliyor: arayüzden yayına, en altta güvenlik katmanı.",
+    "skillsServicesLink": "Bu araçlarla aldığım işleri hizmetler sayfasında topladım."
   },
   "footer": {
     "tagline": "Teslim ettiğim işlerin ve yazdığım yazıların kaydı.",
@@ -121,7 +122,7 @@
   },
   "contact": {
     "title": "İletişim",
-    "description": "Yapılmasını istediğiniz işi yazın, kapsamı ve ilk adımı birlikte netleştirelim.",
+    "description": "Web sitesi veya uygulama işinizi yazın; kapsamı ve ilk adımı birlikte netleştirelim.",
     "intro": "Ne yaptırmak istediğinizi yazın. Elimdeki işlere göre uygun mu değil mi, açıkça söylerim.",
     "ctaTitle": "Aklınızda bir iş var mı?",
     "ctaBody": "Birkaç cümle yeter: ne yapılacak ve ne zamana kadar.",
@@ -219,7 +220,7 @@
   "metadata": {
     "defaultTitle": "Doğan Can YILDIZ | Full Stack Web Geliştirici ve DevOps Uzmanı",
     "siteName": "Doğan Can YILDIZ",
-    "defaultDescription": "BerrSoft'ta beş üretim uygulamasını mimariden bakıma kadar teslim ettim. Uygulamayı yazan da çalıştığı Linux sunucuyu işleten de aynı kişi: ben. Konya, Türkiye.",
+    "defaultDescription": "Kurumsal web sitesi ve Next.js uygulaması işi alıyorum. BerrSoft'ta beş üretim uygulamasını mimariden bakıma kadar tek başıma teslim ettim. Konya, Türkiye.",
     "ogAlt": "Doğan Can YILDIZ, Full Stack Web Geliştirici ve DevOps Uzmanı",
     "ogAltPage": "{title}. Doğan Can YILDIZ, Full Stack Web Geliştirici ve DevOps Uzmanı"
   },
