@@ -36,7 +36,7 @@ sunucu log'una `warn` seviyesinde tek satır düşer.
 | Değişken | Katman | Değer / kaynak |
 |---|---|---|
 | `NEXT_PUBLIC_SITE_URL` | Build | `https://www.dogancanyildiz.com` |
-| `NEXT_PUBLIC_BUILD_SHA` | Build | Elle girilmez; boşsa Dockerfile Coolify'ın otomatik geçtiği `SOURCE_COMMIT` build-arg'ına döner, CI ise `github.sha`'yı geçirir |
+| `NEXT_PUBLIC_BUILD_SHA` | Build | Coolify'da boş bırakılır; CI `github.sha`'yı geçirir. Coolify `SOURCE_COMMIT`'i build-arg olarak geçirmiyor, yalnızca çalışma anında konteynere env olarak veriyor, bu yüzden boşsa `src/lib/build-info.ts` sunucu tarafında `SOURCE_COMMIT`'i okur (`^[0-9a-f]{7,40}$` doğrulaması, uymayan değer yok sayılır). Build sırasındaki prerender'da değer yoktur, hücre "Veri yok" kalır; ana sayfa 60 sn'de bir yeniden üretildiği için ilk yenilemede dolar |
 | `NEXT_PUBLIC_BUILD_DATE` | Build | Elle girilmez; boşsa Dockerfile build anındaki UTC saatini (ISO 8601) kullanır |
 | `NEXT_PUBLIC_STATUS_URL` | Build | Kuma public status sayfasının tam adresi; boşsa Systems'taki link satırı gizlenir, yalnızca https kabul edilir. Canlı durum widget'ı yalnızca `https://<host>/status/<slug>` desenine uyan bir değerde çalışır; başka bir https adresi verilirse hücre yalnızca link basar |
 | `UMAMI_SCRIPT_URL` | Build | `https://umami.dravcore.com` (`src/lib/analytics.ts` `UMAMI_ORIGIN` ile aynı olmak zorunda, aksi halde production build durur) |
