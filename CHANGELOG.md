@@ -10,6 +10,23 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-03
+
+### Features
+
+- `15b8f37` **seo**: şema kapsamı ve teknik AEO (Person→hakkımda, liste şemaları)
+- `f2fcb69` **content**: iç bağlantı ağı, mdx link override ve ticari sinyaller
+- `99fe109` **services**: /hizmetler (EN /services) hizmet sayfası ekle
+
+### Other
+
+- `01cee0b` iki yeni yazı — gerçek istemci IP ve non-root Docker
+- `3c17fa4` **release**: sync version v0.9.1 (#77)
+- `d05dbcd` Faz 4a mevcut içerik düzeltmeleri
+- `790688e` **services**: prettier formatı uygula
+
+**Tam değişiklik listesi**: [v0.9.1...v0.10.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.9.1...v0.10.0)
+
 ## [0.9.1] - 2026-09-03
 
 ### Fixes
@@ -213,7 +230,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.7.0...v0.8.0

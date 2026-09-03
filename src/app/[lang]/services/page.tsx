@@ -5,7 +5,13 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/lib/content";
 import { PageHeader } from "@/components/ui/page-header";
+import {
+  ContentEntryBody,
+  ContentEntryIndex,
+} from "@/components/ui/content-entry";
+import { SkillTag } from "@/components/ui/skill-tag";
 import { PageSection } from "@/components/layout/page-section";
+import { ServicesSubnav } from "@/components/sections/services-subnav";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocale } from "@/lib/route-params";
@@ -70,7 +76,7 @@ function postSlugs(locale: Locale) {
 const inlineLinkClass = "text-primary underline underline-offset-4";
 const evidenceLinkClass =
   "inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline";
-const sectionClass = "space-y-4 border-t border-border pt-8";
+const sectionClass = "space-y-5 border-t border-border pt-8 scroll-mt-32";
 
 // Rich-text chunk renderers for the inline case and post links. Lower-cased
 // and returning through a Link so the t.rich tag callbacks stay call
@@ -106,12 +112,12 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
   const post = postSlugs(locale);
 
   const steps = [
-    t("step1"),
-    t("step2"),
-    t("step3"),
-    t("step4"),
-    t("step5"),
-    t("step6"),
+    { title: t("step1Title"), body: t("step1Body") },
+    { title: t("step2Title"), body: t("step2Body") },
+    { title: t("step3Title"), body: t("step3Body") },
+    { title: t("step4Title"), body: t("step4Body") },
+    { title: t("step5Title"), body: t("step5Body") },
+    { title: t("step6Title"), body: t("step6Body") },
   ];
 
   const faqs = [
@@ -122,10 +128,17 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
     { q: t("faq5Q"), a: t("faq5A") },
     { q: t("faq6Q"), a: t("faq6A") },
   ];
+  const faqsLeft = faqs.slice(0, 3);
+  const faqsRight = faqs.slice(3);
 
   return (
     <PageSection>
-      <PageHeader as="h1" title={t("h1")} description={t("lead")} />
+      <PageHeader
+        as="h1"
+        eyebrow={t("eyebrow")}
+        title={t("h1")}
+        description={t("lead")}
+      />
 
       <div className="flex flex-wrap gap-x-8 gap-y-4 border-y border-border py-5">
         <div>
@@ -148,101 +161,218 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
         </div>
       </div>
 
-      <section className={sectionClass}>
-        <h2 className="section-heading">{t("s1Title")}</h2>
-        <p className="section-copy">{t("s1p1")}</p>
-        <p className="section-copy">{t("s1p2")}</p>
-        <p className="section-copy">{t("s1p3")}</p>
-        <p className="section-copy">{t("s1p4")}</p>
-        <p className="section-copy">
-          {t.rich("s1p5", {
-            hubit: (chunks) => renderProjectLink(project.hubit, chunks),
-          })}
-        </p>
-        <p>
-          <Link
-            href={{
-              pathname: "/projects/[slug]",
-              params: { slug: project.koklu },
-            }}
-            className={evidenceLinkClass}
-          >
-            {t("s1LinkLabel")}
-            <ArrowUpRight className="size-4" aria-hidden="true" />
-          </Link>
-        </p>
+      <ServicesSubnav locale={locale} />
+
+      {/* h1 -> h2 -> h3: the eyebrow above already names this group visibly,
+          so the h2 that closes the heading gap between the page h1 and each
+          offer's h3 is sr-only rather than a second printed "Hizmetler". */}
+      <section aria-labelledby="services-offer-heading">
+        <h2 id="services-offer-heading" className="sr-only">
+          {t("eyebrow")}
+        </h2>
+        <ul className="content-stack">
+          <li id="services-corporate" className="content-entry scroll-mt-32">
+            <ContentEntryIndex index={0} />
+            <ContentEntryBody>
+              <span className="tag-pill">{t("s1Pill")}</span>
+              <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
+                {t("s1Title")}
+              </h3>
+              <p className="outcome-accent">
+                <span className="meta-label">{t("kanitLabel")}</span>{" "}
+                {t.rich("s1Kanit", {
+                  koklu: (chunks) => renderProjectLink(project.koklu, chunks),
+                })}
+              </p>
+              <p className="section-copy">{t("s1p1")}</p>
+              <p className="section-copy">{t("s1p2")}</p>
+              <p className="section-copy">{t("s1p3")}</p>
+              <p className="section-copy">
+                {t.rich("s1p5", {
+                  hubit: (chunks) => renderProjectLink(project.hubit, chunks),
+                })}
+              </p>
+              <p className="limit-accent">
+                <span className="meta-label">{t("limitLabel")}</span>{" "}
+                {t("s1Limit")}
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-1">
+                <li>
+                  <SkillTag label="Next.js" />
+                </li>
+              </ul>
+              <p>
+                <Link
+                  href={{
+                    pathname: "/projects/[slug]",
+                    params: { slug: project.koklu },
+                  }}
+                  className={evidenceLinkClass}
+                >
+                  {t("s1LinkLabel")}
+                  <ArrowUpRight className="size-4" aria-hidden="true" />
+                </Link>
+              </p>
+            </ContentEntryBody>
+          </li>
+
+          <li id="services-app" className="content-entry scroll-mt-32">
+            <ContentEntryIndex index={1} />
+            <ContentEntryBody>
+              <span className="tag-pill">{t("s2Pill")}</span>
+              <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
+                {t("s2Title")}
+              </h3>
+              <p className="outcome-accent">
+                <span className="meta-label">{t("kanitLabel")}</span>{" "}
+                {t.rich("s2Kanit", {
+                  wikonya: (chunks) =>
+                    renderProjectLink(project.wikonya, chunks),
+                })}
+              </p>
+              <p className="section-copy">{t("s2p1")}</p>
+              <p className="section-copy">{t("s2p2")}</p>
+              <p className="section-copy">{t("s2p3")}</p>
+              <p className="limit-accent">
+                <span className="meta-label">{t("limitLabel")}</span>{" "}
+                {t("s2Limit")}
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-1">
+                {[
+                  "Next.js",
+                  "React",
+                  "Node.js",
+                  "Express",
+                  "PHP",
+                  "MySQL",
+                  "MongoDB",
+                  "SQLite",
+                ].map((tag) => (
+                  <li key={tag}>
+                    <SkillTag label={tag} />
+                  </li>
+                ))}
+              </ul>
+            </ContentEntryBody>
+          </li>
+
+          <li id="services-deployment" className="content-entry scroll-mt-32">
+            <ContentEntryIndex index={2} />
+            <ContentEntryBody>
+              <span className="tag-pill">{t("s3Pill")}</span>
+              <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
+                {t("s3Title")}
+              </h3>
+              <p className="outcome-accent">
+                <span className="meta-label">{t("kanitLabel")}</span>{" "}
+                {t.rich("s3Kanit", {
+                  cargopilot: (chunks) =>
+                    renderProjectLink(project.cargoPilot, chunks),
+                })}
+              </p>
+              <p className="section-copy">{t("s3p1")}</p>
+              <p className="limit-accent">
+                <span className="meta-label">{t("limitLabel")}</span>{" "}
+                {t("s3Limit")}
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-1">
+                {["Docker", "GitHub Actions", "Coolify", "Traefik"].map(
+                  (tag) => (
+                    <li key={tag}>
+                      <SkillTag label={tag} />
+                    </li>
+                  )
+                )}
+              </ul>
+              <p>
+                <Link
+                  href={{
+                    pathname: "/blog/[slug]",
+                    params: { slug: post.coolify },
+                  }}
+                  className={evidenceLinkClass}
+                >
+                  {t("s3LinkLabel")}
+                  <ArrowUpRight className="size-4" aria-hidden="true" />
+                </Link>
+              </p>
+            </ContentEntryBody>
+          </li>
+
+          <li id="services-security" className="content-entry scroll-mt-32">
+            <ContentEntryIndex index={3} />
+            <ContentEntryBody>
+              <span className="tag-pill">{t("s4Pill")}</span>
+              <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
+                {t("s4Title")}
+              </h3>
+              <p className="section-copy">{t("s4p1")}</p>
+              <p className="section-copy">
+                {t.rich("s4p2", {
+                  bilet: (chunks) => renderProjectLink(project.ticket, chunks),
+                  ratelimit: (chunks) => renderPostLink(post.ccna, chunks),
+                })}
+              </p>
+              <p className="limit-accent">
+                <span className="meta-label">{t("limitLabel")}</span>{" "}
+                {t("s4Limit")}
+              </p>
+            </ContentEntryBody>
+          </li>
+        </ul>
       </section>
 
-      <section className={sectionClass}>
-        <h2 className="section-heading">{t("s2Title")}</h2>
-        <p className="section-copy">{t("s2p1")}</p>
-        <p className="section-copy">{t("s2p2")}</p>
-        <p className="section-copy">{t("s2p3")}</p>
-        <p className="section-copy">
-          {t.rich("s2p4", {
-            wikonya: (chunks) => renderProjectLink(project.wikonya, chunks),
-          })}
-        </p>
-      </section>
-
-      <section className={sectionClass}>
-        <h2 className="section-heading">{t("s3Title")}</h2>
-        <p className="section-copy">{t("s3p1")}</p>
-        <p className="section-copy">
-          {t.rich("s3p2", {
-            cargopilot: (chunks) =>
-              renderProjectLink(project.cargoPilot, chunks),
-          })}
-        </p>
-        <p className="section-copy">{t("s3p3")}</p>
-        <p>
-          <Link
-            href={{ pathname: "/blog/[slug]", params: { slug: post.coolify } }}
-            className={evidenceLinkClass}
-          >
-            {t("s3LinkLabel")}
-            <ArrowUpRight className="size-4" aria-hidden="true" />
-          </Link>
-        </p>
-      </section>
-
-      <section className={sectionClass}>
-        <h2 className="section-heading">{t("s4Title")}</h2>
-        <p className="section-copy">{t("s4p1")}</p>
-        <p className="section-copy">
-          {t.rich("s4p2", {
-            bilet: (chunks) => renderProjectLink(project.ticket, chunks),
-            ratelimit: (chunks) => renderPostLink(post.ccna, chunks),
-          })}
-        </p>
-        <p className="section-copy">{t("s4p3")}</p>
-      </section>
-
-      <section className={sectionClass}>
+      <section id="services-process" className={sectionClass}>
         <h2 className="section-heading">{t("processTitle")}</h2>
         <p className="section-copy">{t("processIntro")}</p>
-        <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-foreground/90">
-          {steps.map((step) => (
-            <li key={step}>{step}</li>
+        <ul className="content-stack">
+          {steps.map((step, index) => (
+            <li key={step.title} className="content-entry">
+              <ContentEntryIndex index={index} />
+              <ContentEntryBody className="space-y-1.5">
+                <h3 className="text-base font-semibold leading-snug tracking-tight sm:text-lg">
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-foreground/90">
+                  {step.body}
+                </p>
+              </ContentEntryBody>
+            </li>
           ))}
-        </ol>
-        <p className="section-copy">{t("processOutro")}</p>
+        </ul>
+        <div>
+          <p className="meta-label">{t("responseTimeLabel")}</p>
+          <p className="mt-1 text-sm leading-relaxed text-foreground">
+            {t("processOutro")}
+          </p>
+        </div>
       </section>
 
-      <section className={sectionClass}>
+      <section id="services-faq" className={sectionClass}>
+        <p className="eyebrow">{t("faqEyebrow")}</p>
         <h2 className="section-heading">{t("faqTitle")}</h2>
-        <dl className="divide-y divide-border">
-          {faqs.map((item) => (
-            <div key={item.q} className="py-5 first:pt-0">
-              <dt className="text-base font-semibold leading-snug text-foreground">
-                {item.q}
-              </dt>
-              <dd className="mt-2 text-sm leading-relaxed text-foreground/90">
-                {item.a}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <div className="grid grid-cols-1 gap-x-10 lg:grid-cols-2">
+          <dl className="divide-y divide-border">
+            {faqsLeft.map((item) => (
+              <div key={item.q} className="py-5 first:pt-0">
+                <dt className="text-base font-medium leading-snug text-foreground">
+                  {item.q}
+                </dt>
+                <dd className="mt-2 section-copy">{item.a}</dd>
+              </div>
+            ))}
+          </dl>
+          <dl className="divide-y divide-border border-t border-border pt-5 lg:border-t-0 lg:pt-0">
+            {faqsRight.map((item) => (
+              <div key={item.q} className="py-5 first:pt-0">
+                <dt className="text-base font-medium leading-snug text-foreground">
+                  {item.q}
+                </dt>
+                <dd className="mt-2 section-copy">{item.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </section>
 
       <ContactCta scope="services" />
