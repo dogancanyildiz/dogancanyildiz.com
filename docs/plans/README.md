@@ -1,64 +1,60 @@
-# Faz Planları
+# Faz Planları (arşiv)
 
-Durum: Tarihsel kayıt · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
+Durum: Arşiv · Kapsam: dogancanyildiz.com · Güncelleme: 2026-09-03
 
-Bu klasör, `docs/`'taki karar dokümanlarından türetilen uygulama planlarını
-tutar (writing-plans formatı): faz başına bir `2026-08-27-faz-N-*.md`, artı
-faz numarasına bağlı olmayan tekil işlerin planları. Her plan işi başlamadan
-önce yazıldı ve yürütülürken adım adım izlendi; gerçekte ne yapıldığı,
-sapmalar ve teslim durumu için bu dosyalar değil `docs/plans/handoffs/`
-altındaki devir notu ve `docs/00-ozet-ve-karar.md` /
-`docs/10-yol-haritasi.md`'deki "Uygulama durumu" bölümleri tek doğru
-kaynaktır. Tek istisna 2026-09-02 planı: sahibinin kararları ve gerçekleşen
-sapmalar o dosyanın kendi başına eklendi, yani plan hem tarihsel kayıt hem
-de o işin URL matrisi referansı.
+Modernizasyon 27 Ağustos 2026'da faz başına bir uygulama planıyla yürütüldü;
+her fazın sonunda bir devir notu ve sahibi için bir manuel checklist yazıldı.
+Fazların hepsi tamamlandı, site 3 Eylül 2026'da yayına çıktı ve plan
+dosyalarıyla devir notları depodan kaldırıldı. Bu dosya hangi fazın ne yaptığını
+ve hangi PR ile geldiğini tutar; tam metinler git geçmişinde duruyor.
 
-## Domain varsayımı notu (2026-08-27)
+## Fazlar
 
-Bu klasördeki plan dosyaları 2026-08-27 günü, o anki ana karar
-"dogancanyildiz.sh ana domain, dogancanyildiz.com yalnızca 301 hedefi"
-varsayımıyla yazıldı; metinlerinde bu yönde domain örnekleri, DNS/redirect
-talimatları ve env değerleri geçer. Aynı günün akşamı site sahibi kararı
-tersine çevirdi: dogancanyildiz.com ana domain, dogancanyildiz.sh yalnızca
-301 ile ona yönlenen ikincil domain oldu (bkz.
-[../11-acik-sorular.md](../11-acik-sorular.md) soru 5).
+| Faz | Ne yaptı | PR |
+| --- | --- | --- |
+| 0. Güvenlik ve hijyen | next 16.1.6 -> 16.3.3, güvenlik başlıkları ve CSP, contact route'unun sunucu tarafında sertleştirilmesi, `/api/health`, Node 24 pini, create-next-app kalıntılarının temizliği. | #2 |
+| 1. Deploy hattı | Çok aşamalı Dockerfile, `.dockerignore`, GitHub Actions kapısı, `docker-compose.yml` (yalnızca yerel doğrulama) ve panel checklist'lerinin ilk hali. | #3 |
+| 2. i18n yeniden mimarisi | Cookie tabanlı i18n yerine `app/[lang]` + next-intl, `proxy.ts`, canonical/hreflang/x-default, tüm içerik rotalarının statik üretime alınması. | #4 |
+| 3. Tasarım sistemi | Vendor'lanmış fontlar (`next/font/local`), nötr oklch palet, mobil menü, erişilebilirlik ve hareket kuralları. | #5 |
+| 4. İçerik ve yayın | Velite içerik pipeline'ı, gerçek case study'ler ve blog yazıları, şablon persona'nın tamamen kaldırılması. | #6 |
+| 5. Altyapı vitrini ve ölçüm | Systems paneli, build SHA ve tarihi, Umami entegrasyonu, Dependabot ve CodeQL. | #31 |
+| Yerel yollar ve çeviri slug'ı (faz dışı) | TR bölüm ve detay yollarının Türkçeleşmesi, `translationKey` ile çeviri eşlemesi, üç 308 tablosu. | #45 |
 
-Bu plan dosyalarının metinleri geriye dönük düzeltilmedi; tarihsel kayıt
-olarak, yazıldıkları andaki `.sh` varsayımıyla duruyorlar. Fiili uygulama
-(kod, testler, `.env.example`, dokümanlar) her yerde `.com` ana domain
-kararıyla yapıldı; bkz. `docs/00-ozet-ve-karar.md`, `docs/06-devops-ve-deploy.md`
-"Karar değişikliği" notları ve dal `feature/com-primary-and-release-flow`.
-Bir plan dosyasını okurken domain örneklerine güvenmeyin, güncel karar için
-her zaman `docs/` altındaki numaralı karar dokümanlarına bakın.
+Faz numarası taşımayan turlar: `.com` ana domain kararı ve sürüm otomasyonu
+(#7, #8), güven sinyalleri ve editoryal UI yenilemesi (#11, #12), deponun public
+yapılması, Dependabot/CodeQL ve güvenlik politikası (#14), 28 Ağustos
+denetiminin kod tarafı kapanışı (#34), kimlik/consent/topic/WhatsApp (#35),
+Türkçe varsayılan locale (#36), gözlemlenebilirliğin panele taşınması ve Mailcow
+SMTP (#37), ultrareview kapanışı (#39), metin yenilemesi (#42, #43), 3. denetim
+turu (#44), marka paketi ve sertifika rozetleri (#45), depo adı ve lisans
+ayrımı (#49), Coolify apex yönlendirmesi ve healthcheck düzeltmesi (#52),
+Umami'nin izin beklemeden yüklenmesi ve özel olaylar (#53).
 
-**Ek not (2026-08-28):** 28 Ağustos denetimi `dogancanyildiz.sh` alan adının
-hiç kayıtlı olmadığını gösterdi (DNS'te zone yok). Faz 5 planı 90 yerde `.sh`
-hostname'i kullanıyor (`status.dogancanyildiz.sh`, `analytics.dogancanyildiz.sh`);
-uygulama `.com` ile yapıldı; 2026-08-30'da gözlemlenebilirlik Coolify servis
-kataloğuna taşındı ve `infra/` klasörü tamamen kaldırıldı (izleme Uptime Kuma,
-ölçüm merkezi Umami `umami.dravcore.com`).
-`.sh` için karar sahibinde: ya alan adı kaydedilip Cloudflare'a eklenir ve
-`docs/deploy/cloudflare-kurulum.md` bölüm "Zone: dogancanyildiz.sh" uygulanır,
-ya da `.sh` kapsam dışı ilan edilir ve README, launch-checklist, cloudflare-kurulum,
-traefik-ve-origin'deki 301 satırları kaldırılır. Karar gelene kadar `.sh -> .com`
-301'i "canlıya alınmadı, alan adı kayıtsız" olarak okunmalı (bkz.
-`docs/plans/handoffs/denetim-kapanisi-2026-08-28.md`).
+## Domain varsayımı notu (tarihsel)
 
-## Dosyalar
+Plan dosyaları 27 Ağustos 2026'da, o anki karar olan "dogancanyildiz.sh ana
+domain" varsayımıyla yazıldı; metinlerinde bu yönde DNS örnekleri ve env
+değerleri geçer. Aynı günün akşamı sahibi yönü tersine çevirdi: ana domain
+dogancanyildiz.com, `.sh` yalnızca 301 hedefi. Plan metinleri geriye dönük
+düzeltilmedi, uygulama her yerde `.com` ile yapıldı. Bu dosyalar git
+geçmişinden okunurken domain örneklerine güvenilmemeli.
 
-| Dosya | Faz | Durum |
-|---|---|---|
-| [2026-08-27-faz-0-guvenlik-ve-hijyen.md](2026-08-27-faz-0-guvenlik-ve-hijyen.md) | 0. Güvenlik ve hijyen | Uygulandı, PR #2 merged |
-| [2026-08-27-faz-1-deploy-hatti.md](2026-08-27-faz-1-deploy-hatti.md) | 1. Deploy hattı | Uygulandı, PR #3 merged; panel adımları sahibinde |
-| [2026-08-27-faz-2-i18n-app-lang.md](2026-08-27-faz-2-i18n-app-lang.md) | 2. i18n yeniden mimarisi | Uygulandı, PR #4 merged |
-| [2026-08-27-faz-3-tasarim-sistemi.md](2026-08-27-faz-3-tasarim-sistemi.md) | 3. Tasarım sistemi | Uygulandı, PR #5 merged |
-| [2026-08-27-faz-4-icerik-ve-yayin.md](2026-08-27-faz-4-icerik-ve-yayin.md) | 4. İçerik ve yayın | Uygulandı, PR #6 merged (2026-08-27) |
-| [2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md](2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md) | 5. Altyapı vitrini ve ölçüm | Kod tarafı uygulandı, PR #31 merged (2026-08-28, v0.3.1); Coolify/Cloudflare panel adımları `handoffs/faz-5-manual-checklist.md`'de sahibinde |
-| [2026-09-02-yerel-yollar-ve-ceviri-slug.md](2026-09-02-yerel-yollar-ve-ceviri-slug.md) | Faz dışı iş: yerelleştirilmiş yollar ve çeviri başına slug | Uygulandı, dal `feature/brand-assets` (2026-09-02, 10 commit, taban `7a73af6` - `3a58bee`); sahibinin kararları ve sapmalar dosyanın başındaki iki bölümde, devir notu `handoffs/yerel-yollar-2026-09-02.md` |
+## Tam metinlere erişim
 
-## İlgili dokümanlar
+Plan ve devir notu dosyalarının tamamı `v0.5.0` etiketinde duruyor:
 
-- [../00-ozet-ve-karar.md](../00-ozet-ve-karar.md) - güncel kararlar tablosu
-- [../10-yol-haritasi.md](../10-yol-haritasi.md) - faz sırası ve bitiş kriterleri
-- [../11-acik-sorular.md](../11-acik-sorular.md) - domain kararının değişikliği (soru 5)
-- [handoffs/README.md](handoffs/README.md) - devir notları ve manuel checklist'ler
+```bash
+git show v0.5.0:docs/plans/2026-08-27-faz-0-guvenlik-ve-hijyen.md
+git show v0.5.0:docs/plans/2026-08-27-faz-1-deploy-hatti.md
+git show v0.5.0:docs/plans/2026-08-27-faz-2-i18n-app-lang.md
+git show v0.5.0:docs/plans/2026-08-27-faz-3-tasarim-sistemi.md
+git show v0.5.0:docs/plans/2026-08-27-faz-4-icerik-ve-yayin.md
+git show v0.5.0:docs/plans/2026-08-27-faz-5-altyapi-vitrini-ve-olcum.md
+git show v0.5.0:docs/plans/2026-09-02-yerel-yollar-ve-ceviri-slug.md
+
+git ls-tree --name-only v0.5.0 docs/plans/handoffs/
+git show v0.5.0:docs/plans/handoffs/faz-4.md
+```
+
+Güncel kararlar için plan dosyaları değil `docs/` altındaki karar dokümanları
+okunur; başlangıç noktası [../00-ozet-ve-karar.md](../00-ozet-ve-karar.md).

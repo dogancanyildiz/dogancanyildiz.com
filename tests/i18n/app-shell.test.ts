@@ -191,7 +191,7 @@ describe("app/[lang] route tree", () => {
   it("keeps the html lang attribute and metadataBase in the root layout", () => {
     const layout = read("src/app/[lang]/layout.tsx");
     expect(layout).toContain("<html lang={lang}");
-    // Dropping this resolves og:image against localhost, see docs/plans/handoffs/faz-1.md.
+    // Dropping this resolves og:image against localhost, see docs/06-devops-ve-deploy.md.
     expect(layout).toContain("metadataBase: new URL(siteUrl())");
   });
 
@@ -200,7 +200,7 @@ describe("app/[lang] route tree", () => {
     // etc.) that globals.css's :root font stacks consume. :root sits above
     // <body> in the tree, so a copy of the class on <body> leaves those
     // properties undefined at :root and every stack falls through to its
-    // system fallback. See docs/plans/handoffs/faz-3.md.
+    // system fallback. See docs/03-tasarim-ui-ux.md.
     const layout = read("src/app/[lang]/layout.tsx");
     expect(layout).toContain('import { fontVariables } from "@/fonts"');
     expect(layout).toMatch(/<html\b[^>]*className=\{fontVariables\}/);
@@ -296,7 +296,7 @@ describe("global-not-found font parity", () => {
     // globals.css's :root font stacks consume those properties. A copy on
     // <body> instead leaves --font-sans-latin etc. undefined at :root, so
     // every stack falls straight through to its system fallback. See
-    // docs/plans/handoffs/faz-3.md.
+    // docs/03-tasarim-ui-ux.md.
     expect(source).toMatch(/<html\b[^>]*className=\{fontVariables\}/);
     expect(source).not.toMatch(/<body\b[^>]*fontVariables/);
   });

@@ -130,11 +130,11 @@ function checkDomainDirection() {
   );
 
   // Guards the exclusion above: if the historical tree ever loses its note
-  // the blanket skip stops being justified.
-  for (const file of [
-    "docs/plans/README.md",
-    "docs/plans/handoffs/README.md",
-  ]) {
+  // the blanket skip stops being justified. The plans themselves were removed
+  // on 2026-09-03 and live in git history, so docs/plans/README.md is the only
+  // place left that has to carry the note.
+  {
+    const file = "docs/plans/README.md";
     const doc = readDoc(file);
     check(
       /Domain varsayımı notu/.test(doc),
@@ -184,8 +184,6 @@ const COOLIFY = "docs/deploy/coolify-kurulum.md";
 const README = "README.md";
 const TRAEFIK = "docs/deploy/traefik-ve-origin.md";
 const CLOUDFLARE = "docs/deploy/cloudflare-kurulum.md";
-const FAZ1_CHECKLIST = "docs/plans/handoffs/faz-1-manual-checklist.md";
-const FAZ1_HANDOFF = "docs/plans/handoffs/faz-1.md";
 
 function checkDeployDocs() {
   // The Dockerfile ARG lost its default in fc470e0, so a build without the
@@ -212,12 +210,10 @@ function checkDeployDocs() {
   // (uptime left the body on 2026-08-28). A checklist that prints the body as
   // a literal makes a healthy deploy look broken at the gate that blocks
   // going to production.
-  for (const path of [COOLIFY, FAZ1_HANDOFF]) {
-    check(
-      !/200 `?\{"status":"ok"\}`?/.test(readDoc(path)),
-      `${path} expects a literal {"status":"ok"} health check body`
-    );
-  }
+  check(
+    !/200 `?\{"status":"ok"\}`?/.test(readDoc(COOLIFY)),
+    `${COOLIFY} expects a literal {"status":"ok"} health check body`
+  );
   {
     const doc = readDoc(COOLIFY);
     check(/checks/.test(doc), `${COOLIFY} does not name checks as a field`);
@@ -235,19 +231,19 @@ function checkDeployDocs() {
   // (http-0-<uuid>, https-0-<uuid>). A label written on a router that has no
   // rule is silently ignored by Traefik, which would ship the site without
   // HSTS.
-  for (const path of [TRAEFIK, FAZ1_CHECKLIST]) {
-    const doc = readDoc(path);
+  {
+    const doc = readDoc(TRAEFIK);
     check(
       !/routers\.portfolio/.test(doc),
-      `${path} still targets a router literally named portfolio`
+      `${TRAEFIK} still targets a router literally named portfolio`
     );
     check(
       /routers\.https-0-<uuid>\.middlewares/.test(doc),
-      `${path} does not use the generated https-0-<uuid> router name`
+      `${TRAEFIK} does not use the generated https-0-<uuid> router name`
     );
     check(
       /security-headers@file,compress@file/.test(doc),
-      `${path} does not keep the existing security-headers/compress middlewares`
+      `${TRAEFIK} does not keep the existing security-headers/compress middlewares`
     );
   }
   check(
@@ -259,15 +255,15 @@ function checkDeployDocs() {
   // while ufw only filters INPUT. An allowlist written in ufw alone leaves
   // the origin open to the whole internet while the checklist ticks the box
   // that gates TRUST_CF_CONNECTING_IP=true.
-  for (const path of [TRAEFIK, FAZ1_CHECKLIST]) {
-    const doc = readDoc(path);
+  {
+    const doc = readDoc(TRAEFIK);
     check(
       /DOCKER-USER/.test(doc),
-      `${path} does not restrict the published ports through DOCKER-USER`
+      `${TRAEFIK} does not restrict the published ports through DOCKER-USER`
     );
     check(
       !/ufw allow from/.test(doc),
-      `${path} allowlists 80/443 in ufw, which Docker's FORWARD chain bypasses`
+      `${TRAEFIK} allowlists 80/443 in ufw, which Docker's FORWARD chain bypasses`
     );
   }
   {
@@ -287,12 +283,10 @@ function checkDeployDocs() {
   // edge overwrites the header and the edge rate limiting rule answers 429 on
   // its own. It proves nothing while gating the flag that decides whether the
   // contact rate limit can be bypassed.
-  for (const path of [TRAEFIK, FAZ1_CHECKLIST]) {
-    check(
-      !/-H "CF-Connecting-IP: 203\.0\.113/.test(readDoc(path)),
-      `${path} sends a spoofed CF-Connecting-IP header through Cloudflare as proof`
-    );
-  }
+  check(
+    !/-H "CF-Connecting-IP: 203\.0\.113/.test(readDoc(TRAEFIK)),
+    `${TRAEFIK} sends a spoofed CF-Connecting-IP header through Cloudflare as proof`
+  );
   {
     const doc = readDoc(TRAEFIK);
     check(
