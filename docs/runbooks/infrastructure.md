@@ -26,8 +26,8 @@ o adresi gösterir; Systems paneli yalnızca link verir, Kuma'nın API'sinden ve
 | Değişken | Katman | Değer / kaynak |
 |---|---|---|
 | `NEXT_PUBLIC_SITE_URL` | Build | `https://www.dogancanyildiz.com` |
-| `NEXT_PUBLIC_BUILD_SHA` | Build | `${SOURCE_COMMIT}` veya CI `github.sha` |
-| `NEXT_PUBLIC_BUILD_DATE` | Build | deploy zamanı (ISO) |
+| `NEXT_PUBLIC_BUILD_SHA` | Build | Elle girilmez; boşsa Dockerfile Coolify'ın otomatik geçtiği `SOURCE_COMMIT` build-arg'ına döner, CI ise `github.sha`'yı geçirir |
+| `NEXT_PUBLIC_BUILD_DATE` | Build | Elle girilmez; boşsa Dockerfile build anındaki UTC saatini (ISO 8601) kullanır |
 | `NEXT_PUBLIC_STATUS_URL` | Build | Kuma public status sayfasının tam adresi; boşsa Systems'taki link satırı gizlenir, yalnızca https kabul edilir |
 | `UMAMI_SCRIPT_URL` | Build | `https://umami.dravcore.com` (`src/lib/analytics.ts` `UMAMI_ORIGIN` ile aynı olmak zorunda, aksi halde production build durur) |
 | `UMAMI_WEBSITE_ID` | Build | Merkezi Umami panelindeki bu siteye ait website UUID'si |

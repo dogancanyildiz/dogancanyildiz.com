@@ -65,7 +65,10 @@ describe("Dockerfile", () => {
   });
 
   it("uses npm run build as the single build entry point", () => {
-    expect(dockerfile()).toMatch(/RUN npm run build/);
+    // The NEXT_PUBLIC_BUILD_DATE fallback prefixes this RUN line with an
+    // inline shell assignment, so the entry point is asserted as a suffix
+    // rather than a standalone "RUN npm run build" line.
+    expect(dockerfile()).toMatch(/npm run build$/m);
   });
 
   it("accepts NEXT_PUBLIC_SITE_URL as a build argument", () => {
@@ -91,7 +94,6 @@ describe("Dockerfile", () => {
   it("carries every optional public build variable through the builder stage", () => {
     const content = dockerfile();
     for (const name of [
-      "NEXT_PUBLIC_BUILD_SHA",
       "NEXT_PUBLIC_BUILD_DATE",
       "NEXT_PUBLIC_STATUS_URL",
       "UMAMI_SCRIPT_URL",
@@ -103,6 +105,18 @@ describe("Dockerfile", () => {
       expect(content).toMatch(new RegExp(`^ARG ${name}`, "m"));
       expect(content).toMatch(new RegExp(`^ENV ${name}=\\$${name}$`, "m"));
     }
+  });
+
+  it("falls back NEXT_PUBLIC_BUILD_SHA to Coolify's SOURCE_COMMIT build-arg", () => {
+    const content = dockerfile();
+    // Coolify passes SOURCE_COMMIT into every Dockerfile build automatically,
+    // so an empty NEXT_PUBLIC_BUILD_SHA still resolves to a real commit
+    // without anything entered in the Coolify UI.
+    expect(content).toMatch(/^ARG NEXT_PUBLIC_BUILD_SHA$/m);
+    expect(content).toMatch(/^ARG SOURCE_COMMIT=""$/m);
+    expect(content).toMatch(
+      /^ENV NEXT_PUBLIC_BUILD_SHA=\$\{NEXT_PUBLIC_BUILD_SHA:-\$SOURCE_COMMIT\}$/m
+    );
   });
 
   it("copies only the standalone output, static assets and public", () => {
