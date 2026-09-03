@@ -149,6 +149,9 @@ yüklü değilse hiçbiri bir şey yapmıyor.
   olarak kurulmalı.
 - **Kapaksız yayın kuralı sürüyor:** gerçek ekran görüntüsü olmayan proje
   kapaksız yayınlanır, CSS gradyan veya stok görsel placeholder kullanılmaz.
+- **Hizmetler sayfası hizalandı (2026-09-03):** `/hizmetler` artık About ve
+  Projeler ile aynı `PageHeader`/`PageSubnav`/numaralı liste dilini kullanıyor,
+  metin içeriği değişmedi.
 
 ## İlgili dokümanlar
 

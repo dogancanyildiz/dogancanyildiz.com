@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/content";
 import { speaking } from "@/content/profile";
 import { testimonials } from "@/content/testimonials";
-import { AboutSubnavList } from "@/components/sections/about-subnav-list";
+import { PageSubnavList } from "@/components/ui/page-subnav-list";
 
 interface AboutSubnavProps {
   locale: Locale;
@@ -52,5 +52,5 @@ export async function AboutSubnav({ locale }: AboutSubnavProps) {
     .filter((section) => section.isVisible?.() ?? true)
     .map((section) => ({ id: section.id, label: t(section.messageKey) }));
 
-  return <AboutSubnavList items={items} ariaLabel={t("subnavLabel")} />;
+  return <PageSubnavList items={items} ariaLabel={t("subnavLabel")} />;
 }
