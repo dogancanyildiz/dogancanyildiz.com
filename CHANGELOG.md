@@ -10,6 +10,18 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-09-03
+
+### Features
+
+- `83d7758` **services**: hizmetler sayfasını site diline hizala (#82)
+
+### Other
+
+- `5523204` **release**: sync version v0.10.0 (#81)
+
+**Tam değişiklik listesi**: [v0.10.0...v0.11.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.10.0...v0.11.0)
+
 ## [0.10.0] - 2026-09-03
 
 ### Features
@@ -230,7 +242,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.8.0...v0.9.0
