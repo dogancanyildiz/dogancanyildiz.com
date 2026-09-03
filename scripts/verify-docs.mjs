@@ -28,11 +28,13 @@ function check(condition, message) {
 }
 
 // ---------------------------------------------------------------------------
-// Domain redirect direction: the owner's 2026-08-27 decision made
-// dogancanyildiz.com primary, with dogancanyildiz.sh only 301ing to it. Any
-// document describing the reverse hop is a leftover from the superseded
-// decision, except docs/plans/ (the archive index for the execution records
-// written while .sh was still primary, carrying its own historical note).
+// Second domain: the owner's 2026-09-03 decision put dogancanyildiz.sh out of
+// scope. It was never registered, so every zone table, Redirect Rule and
+// checklist step written for it described work that could not be done and a
+// hop that never existed. The name may only appear in a line that marks it as
+// out of scope (the decision records) or in docs/plans/, the archive index for
+// execution records written while .sh was still assumed to be the primary
+// domain, which carries its own historical note.
 // ---------------------------------------------------------------------------
 
 // The two documents the domain checks below anchor on. Renaming either means
@@ -42,8 +44,8 @@ const OPEN_WORK = "docs/11-acik-isler.md";
 
 const HISTORICAL_TREES = ["docs/plans"];
 const HISTORICAL_MARKER = /Karar değişikliği|tarihsel/i;
-const REVERSED_DIRECTION =
-  /(dogancanyildiz)?\.com\s*(->|→)\s*(dogancanyildiz)?\.sh|com to sh/;
+const OUT_OF_SCOPE_DOMAIN = /dogancanyildiz\.sh|\bsh to com\b|\.sh -> \.com/;
+const OUT_OF_SCOPE_MARKER = /kapsam dışı/i;
 
 /** @param {string} dir */
 function markdownFiles(dir) {
@@ -61,7 +63,7 @@ function markdownFiles(dir) {
 }
 
 function checkDomainDirection() {
-  const files = markdownFiles("docs");
+  const files = [...markdownFiles("docs"), README];
 
   check(
     files.includes("docs/README.md"),
@@ -79,30 +81,23 @@ function checkDomainDirection() {
   for (const file of files) {
     const lines = readFileSync(join(root, file), "utf8").split("\n");
     lines.forEach((line, index) => {
-      if (!REVERSED_DIRECTION.test(line)) return;
-      if (HISTORICAL_MARKER.test(line)) return;
+      if (!OUT_OF_SCOPE_DOMAIN.test(line)) return;
+      if (OUT_OF_SCOPE_MARKER.test(line) || HISTORICAL_MARKER.test(line))
+        return;
       problems.push(
-        `${file}:${index + 1}: states the .com -> .sh direction without a ` +
-          `historical marker: ${line.trim()}`
+        `${file}:${index + 1}: describes the out of scope second domain as ` +
+          `live work: ${line.trim()}`
       );
     });
   }
 
-  const openWork = readDoc(OPEN_WORK);
   check(
-    // The 2026-09-02 decision made www the canonical host: the .sh redirect's
-    // final hop is now www.dogancanyildiz.com, so the www. prefix is optional
-    // here on purpose, not a loosening of the direction check itself.
-    /dogancanyildiz\.sh -> (www\.)?dogancanyildiz\.com/.test(openWork),
-    `${OPEN_WORK} does not state the .sh -> .com redirect`
+    /kapsam dışı/i.test(readDoc(OPEN_WORK)),
+    `${OPEN_WORK} does not record that the second domain is out of scope`
   );
-
-  const indexRow = readDoc("docs/README.md")
-    .split("\n")
-    .find((line) => line.includes("11-acik-isler.md)"));
   check(
-    indexRow !== undefined && /\.sh -> \.com 301/.test(indexRow),
-    `docs/README.md's ${OPEN_WORK} row does not agree on the .sh -> .com direction`
+    /İkinci alan adı alınmayacak/.test(readDoc(SUMMARY)),
+    `${SUMMARY}'s decision history does not carry the second domain decision`
   );
 
   // The 2026-09-02 decision made www the canonical host, with the apex
@@ -121,17 +116,6 @@ function checkDomainDirection() {
       `${CLOUDFLARE} does not filter the apex to www rule on the apex host`
     );
   }
-
-  check(
-    /curl -I https:\/\/dogancanyildiz\.sh[^\n]*dogancanyildiz\.com/.test(
-      openWork
-    ),
-    `${OPEN_WORK}'s curl check does not show the .sh -> .com redirect`
-  );
-  check(
-    /Karar: `\.sh -> \.com` 301 Cloudflare Redirect Rule/.test(openWork),
-    `${OPEN_WORK} does not record the .sh -> .com redirect decision`
-  );
 
   // Guards the exclusion above: if the historical tree ever loses its note
   // the blanket skip stops being justified. The plans themselves were removed
