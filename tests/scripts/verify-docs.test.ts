@@ -16,11 +16,20 @@ describe("scripts/verify-docs.mjs", () => {
     expect(formatted).toBe(true);
   });
 
-  it("checks the domain redirect direction and the deploy checklists", () => {
+  it("checks the domain scope and the deploy checklists", () => {
     const content = script();
-    expect(content).toContain("REVERSED_DIRECTION");
+    expect(content).toContain("OUT_OF_SCOPE_DOMAIN");
     expect(content).toContain("coolify-kurulum.md");
     expect(content).toContain("traefik-ve-origin.md");
+  });
+
+  it("still guards the apex to www direction after the second domain left", () => {
+    // The .sh checks were the bulk of the domain section. Dropping them must
+    // not take the canonical host guard with them: nothing in the app can
+    // observe the apex hop, so the Cloudflare checklist is the only record.
+    const content = script();
+    expect(content).toContain("apex to www");
+    expect(content).not.toContain("REVERSED_DIRECTION");
   });
 
   it("guards the locale scheme against the pre-2026-08-30 English-at-root wording", () => {

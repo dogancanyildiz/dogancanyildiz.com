@@ -22,7 +22,7 @@ kopyalamaz. Sürüm geçmişi kökteki [`CHANGELOG.md`](../CHANGELOG.md)'de.
 | [07-seo-ve-metadata.md](07-seo-ve-metadata.md) | `generateMetadata`, canonical/hreflang/x-default, sitemap, robots, JSON-LD, OG kartları, RSS |
 | [08-icerik-stratejisi.md](08-icerik-stratejisi.md) | Case study formatı, blog dil politikası, sertifika ve eğitim sunumu, içerik kontrol listesi |
 | [09-guvenlik.md](09-guvenlik.md) | CVE hattı, güvenlik başlıkları ve CSP, env sırları, Cloudflare güven sınırı, bakım otomasyonu |
-| [11-acik-isler.md](11-acik-isler.md) | Kapanmamış işler: teslimatlar, panel adımları, canlı doğrulamalar, `.sh -> .com 301` kararı, kabul edilmiş teknik borç |
+| [11-acik-isler.md](11-acik-isler.md) | Kapanmamış işler: teslimatlar, panel adımları, canlı doğrulamalar, kabul edilmiş teknik borç |
 | [trust-maintenance-checklist.md](trust-maintenance-checklist.md) | Güven sinyallerinin bakım ritmi (linkler, JSON-LD, Search Console) |
 | [deploy/](deploy/) | Panel checklist'leri: Coolify, Cloudflare, Traefik/origin, Mailcow SMTP |
 | [runbooks/infrastructure.md](runbooks/infrastructure.md) | Uptime Kuma, merkezi Umami, ortam değişkenleri, bakım ritmi |
