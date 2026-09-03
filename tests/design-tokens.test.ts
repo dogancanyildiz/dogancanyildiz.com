@@ -127,16 +127,47 @@ describe("colour tokens", () => {
     }
   });
 
-  it("ships one status token per theme, for the one status surface", () => {
-    expect(css.match(/--status-up:/g)).toHaveLength(2);
-    expect(css).toContain("--color-status-up: var(--status-up);");
-    // --status-down was defined in both themes and mapped into the Tailwind
-    // namespace for a live monitoring panel that was then decided against:
-    // the Systems section renders build-time data and links out to Uptime
-    // Kuma instead, so nothing on the site ever paints a failure state.
-    expect(css).not.toContain("--status-down");
-    expect(css).not.toContain("--color-status-down");
+  // The Systems panel now paints a live state read from Uptime Kuma's public
+  // status page, so the palette carries one token per state Kuma can report.
+  // Each has to exist in both themes: a single :root definition would leave
+  // the dark page painting the light value.
+  const STATUS_TOKENS = [
+    "status-up",
+    "status-down",
+    "status-pending",
+    "status-maintenance",
+  ] as const;
+
+  it.each(STATUS_TOKENS)("defines --%s in both themes", (name) => {
+    expect(css.match(new RegExp(`--${name}:`, "g"))).toHaveLength(2);
+    expect(css).toContain(`--color-${name}: var(--${name});`);
   });
+
+  it("keeps the four status colours apart from one another", () => {
+    for (const theme of ["light", "dark"] as const) {
+      const values = STATUS_TOKENS.map((name) =>
+        tokenValue(themeBlocks[theme], `--${name}`)
+      );
+      expect(new Set(values).size, `${theme}: status tokens collide`).toBe(
+        values.length
+      );
+    }
+  });
+
+  it.each(STATUS_TOKENS)(
+    "keeps --%s readable as a non-text graphic in both themes",
+    (name) => {
+      for (const theme of ["light", "dark"] as const) {
+        for (const ground of ["background", "card"] as const) {
+          // WCAG 1.4.11: 3:1 for a graphical object that carries meaning.
+          expect(
+            tokenContrast(theme, name, ground),
+            `${theme}: --${name} on --${ground}`
+          ).toBeGreaterThanOrEqual(3);
+        }
+      }
+    }
+  );
 
   it("uses a solid focus ring colour, no alpha suffix", () => {
     const ringValues = [...css.matchAll(/--ring:\s*([^;]+);/g)].map(
@@ -500,7 +531,13 @@ describe("no undefined project classes in src", () => {
     [...declared].map((name) => name.split("-")[0])
   );
   // Strings that share a project prefix but are not class names.
-  const NOT_CLASSES = new Set(["content-type", "content-length"]);
+  // "status-page" is a path segment of Uptime Kuma's public JSON API
+  // (/api/status-page/<slug>), not a class name.
+  const NOT_CLASSES = new Set([
+    "content-type",
+    "content-length",
+    "status-page",
+  ]);
 
   const offenders = new Map<string, Set<string>>();
   for (const { file, body } of sourceFiles) {
