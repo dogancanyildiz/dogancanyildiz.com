@@ -305,6 +305,13 @@
     @apply border-l-2 border-primary/45 pl-3 text-sm font-medium leading-snug text-foreground/90;
   }
 
+  /* Same left-rule treatment as .outcome-accent but on the neutral border
+     color: a proof line earns the primary accent, a limit is a boundary,
+     not a highlight. */
+  .limit-accent {
+    @apply border-l-2 border-border pl-3 text-sm font-medium leading-snug text-foreground/90;
+  }
+
   .entry-arrow {
     @apply ml-auto size-4 shrink-0 translate-x-0 text-muted-foreground opacity-100 transition-all duration-200 sm:opacity-0 sm:group-hover:translate-x-0.5 sm:group-hover:text-primary sm:group-hover:opacity-100 sm:group-focus-within:translate-x-0.5 sm:group-focus-within:text-primary sm:group-focus-within:opacity-100;
   }

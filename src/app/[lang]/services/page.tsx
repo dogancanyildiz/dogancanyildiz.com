@@ -77,11 +77,6 @@ const inlineLinkClass = "text-primary underline underline-offset-4";
 const evidenceLinkClass =
   "inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline";
 const sectionClass = "space-y-5 border-t border-border pt-8 scroll-mt-32";
-// Same left-rule treatment as .outcome-accent (the "SONUÇ" line on a project
-// card) but on the neutral border color: a proof line earns the primary
-// accent, a limit is a boundary, not a highlight.
-const limitLineClass =
-  "border-l-2 border-border pl-3 text-sm font-medium leading-snug text-foreground/90";
 
 // Rich-text chunk renderers for the inline case and post links. Lower-cased
 // and returning through a Link so the t.rich tag callbacks stay call
@@ -142,7 +137,7 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
         as="h1"
         eyebrow={t("eyebrow")}
         title={t("h1")}
-        description={`${t("headline")} ${t("lead")}`}
+        description={t("lead")}
       />
 
       <div className="flex flex-wrap gap-x-8 gap-y-4 border-y border-border py-5">
@@ -168,153 +163,164 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
 
       <ServicesSubnav locale={locale} />
 
-      <ul className="content-stack">
-        <li id="services-corporate" className="content-entry scroll-mt-32">
-          <ContentEntryIndex index={0} />
-          <ContentEntryBody>
-            <span className="tag-pill">{t("s1Pill")}</span>
-            <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
-              {t("s1Title")}
-            </h3>
-            <p className="outcome-accent">
-              <span className="meta-label">{t("kanitLabel")}</span>{" "}
-              {t.rich("s1Kanit", {
-                koklu: (chunks) => renderProjectLink(project.koklu, chunks),
-              })}
-            </p>
-            <p className="section-copy">{t("s1p1")}</p>
-            <p className="section-copy">{t("s1p2")}</p>
-            <p className="section-copy">{t("s1p3")}</p>
-            <p className="section-copy">
-              {t.rich("s1p5", {
-                hubit: (chunks) => renderProjectLink(project.hubit, chunks),
-              })}
-            </p>
-            <p className={limitLineClass}>
-              <span className="meta-label">{t("limitLabel")}</span>{" "}
-              {t("s1Limit")}
-            </p>
-            <ul className="flex flex-wrap gap-2 pt-1">
-              <li>
-                <SkillTag label="Next.js" />
-              </li>
-            </ul>
-            <p>
-              <Link
-                href={{
-                  pathname: "/projects/[slug]",
-                  params: { slug: project.koklu },
-                }}
-                className={evidenceLinkClass}
-              >
-                {t("s1LinkLabel")}
-                <ArrowUpRight className="size-4" aria-hidden="true" />
-              </Link>
-            </p>
-          </ContentEntryBody>
-        </li>
-
-        <li id="services-app" className="content-entry scroll-mt-32">
-          <ContentEntryIndex index={1} />
-          <ContentEntryBody>
-            <span className="tag-pill">{t("s2Pill")}</span>
-            <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
-              {t("s2Title")}
-            </h3>
-            <p className="outcome-accent">
-              <span className="meta-label">{t("kanitLabel")}</span>{" "}
-              {t.rich("s2Kanit", {
-                wikonya: (chunks) => renderProjectLink(project.wikonya, chunks),
-              })}
-            </p>
-            <p className="section-copy">{t("s2p1")}</p>
-            <p className="section-copy">{t("s2p2")}</p>
-            <p className="section-copy">{t("s2p3")}</p>
-            <p className={limitLineClass}>
-              <span className="meta-label">{t("limitLabel")}</span>{" "}
-              {t("s2Limit")}
-            </p>
-            <ul className="flex flex-wrap gap-2 pt-1">
-              {[
-                "Next.js",
-                "React",
-                "Node.js",
-                "Express",
-                "PHP",
-                "MySQL",
-                "MongoDB",
-                "SQLite",
-              ].map((tag) => (
-                <li key={tag}>
-                  <SkillTag label={tag} />
+      {/* h1 -> h2 -> h3: the eyebrow above already names this group visibly,
+          so the h2 that closes the heading gap between the page h1 and each
+          offer's h3 is sr-only rather than a second printed "Hizmetler". */}
+      <section aria-labelledby="services-offer-heading">
+        <h2 id="services-offer-heading" className="sr-only">
+          {t("eyebrow")}
+        </h2>
+        <ul className="content-stack">
+          <li id="services-corporate" className="content-entry scroll-mt-32">
+            <ContentEntryIndex index={0} />
+            <ContentEntryBody>
+              <span className="tag-pill">{t("s1Pill")}</span>
+              <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
+                {t("s1Title")}
+              </h3>
+              <p className="outcome-accent">
+                <span className="meta-label">{t("kanitLabel")}</span>{" "}
+                {t.rich("s1Kanit", {
+                  koklu: (chunks) => renderProjectLink(project.koklu, chunks),
+                })}
+              </p>
+              <p className="section-copy">{t("s1p1")}</p>
+              <p className="section-copy">{t("s1p2")}</p>
+              <p className="section-copy">{t("s1p3")}</p>
+              <p className="section-copy">
+                {t.rich("s1p5", {
+                  hubit: (chunks) => renderProjectLink(project.hubit, chunks),
+                })}
+              </p>
+              <p className="limit-accent">
+                <span className="meta-label">{t("limitLabel")}</span>{" "}
+                {t("s1Limit")}
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-1">
+                <li>
+                  <SkillTag label="Next.js" />
                 </li>
-              ))}
-            </ul>
-          </ContentEntryBody>
-        </li>
+              </ul>
+              <p>
+                <Link
+                  href={{
+                    pathname: "/projects/[slug]",
+                    params: { slug: project.koklu },
+                  }}
+                  className={evidenceLinkClass}
+                >
+                  {t("s1LinkLabel")}
+                  <ArrowUpRight className="size-4" aria-hidden="true" />
+                </Link>
+              </p>
+            </ContentEntryBody>
+          </li>
 
-        <li id="services-deployment" className="content-entry scroll-mt-32">
-          <ContentEntryIndex index={2} />
-          <ContentEntryBody>
-            <span className="tag-pill">{t("s3Pill")}</span>
-            <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
-              {t("s3Title")}
-            </h3>
-            <p className="outcome-accent">
-              <span className="meta-label">{t("kanitLabel")}</span>{" "}
-              {t.rich("s3Kanit", {
-                cargopilot: (chunks) =>
-                  renderProjectLink(project.cargoPilot, chunks),
-              })}
-            </p>
-            <p className="section-copy">{t("s3p1")}</p>
-            <p className={limitLineClass}>
-              <span className="meta-label">{t("limitLabel")}</span>{" "}
-              {t("s3Limit")}
-            </p>
-            <ul className="flex flex-wrap gap-2 pt-1">
-              {["Docker", "GitHub Actions", "Coolify", "Traefik"].map((tag) => (
-                <li key={tag}>
-                  <SkillTag label={tag} />
-                </li>
-              ))}
-            </ul>
-            <p>
-              <Link
-                href={{
-                  pathname: "/blog/[slug]",
-                  params: { slug: post.coolify },
-                }}
-                className={evidenceLinkClass}
-              >
-                {t("s3LinkLabel")}
-                <ArrowUpRight className="size-4" aria-hidden="true" />
-              </Link>
-            </p>
-          </ContentEntryBody>
-        </li>
+          <li id="services-app" className="content-entry scroll-mt-32">
+            <ContentEntryIndex index={1} />
+            <ContentEntryBody>
+              <span className="tag-pill">{t("s2Pill")}</span>
+              <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
+                {t("s2Title")}
+              </h3>
+              <p className="outcome-accent">
+                <span className="meta-label">{t("kanitLabel")}</span>{" "}
+                {t.rich("s2Kanit", {
+                  wikonya: (chunks) =>
+                    renderProjectLink(project.wikonya, chunks),
+                })}
+              </p>
+              <p className="section-copy">{t("s2p1")}</p>
+              <p className="section-copy">{t("s2p2")}</p>
+              <p className="section-copy">{t("s2p3")}</p>
+              <p className="limit-accent">
+                <span className="meta-label">{t("limitLabel")}</span>{" "}
+                {t("s2Limit")}
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-1">
+                {[
+                  "Next.js",
+                  "React",
+                  "Node.js",
+                  "Express",
+                  "PHP",
+                  "MySQL",
+                  "MongoDB",
+                  "SQLite",
+                ].map((tag) => (
+                  <li key={tag}>
+                    <SkillTag label={tag} />
+                  </li>
+                ))}
+              </ul>
+            </ContentEntryBody>
+          </li>
 
-        <li id="services-security" className="content-entry scroll-mt-32">
-          <ContentEntryIndex index={3} />
-          <ContentEntryBody>
-            <span className="tag-pill">{t("s4Pill")}</span>
-            <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
-              {t("s4Title")}
-            </h3>
-            <p className="section-copy">{t("s4p1")}</p>
-            <p className="section-copy">
-              {t.rich("s4p2", {
-                bilet: (chunks) => renderProjectLink(project.ticket, chunks),
-                ratelimit: (chunks) => renderPostLink(post.ccna, chunks),
-              })}
-            </p>
-            <p className={limitLineClass}>
-              <span className="meta-label">{t("limitLabel")}</span>{" "}
-              {t("s4Limit")}
-            </p>
-          </ContentEntryBody>
-        </li>
-      </ul>
+          <li id="services-deployment" className="content-entry scroll-mt-32">
+            <ContentEntryIndex index={2} />
+            <ContentEntryBody>
+              <span className="tag-pill">{t("s3Pill")}</span>
+              <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
+                {t("s3Title")}
+              </h3>
+              <p className="outcome-accent">
+                <span className="meta-label">{t("kanitLabel")}</span>{" "}
+                {t.rich("s3Kanit", {
+                  cargopilot: (chunks) =>
+                    renderProjectLink(project.cargoPilot, chunks),
+                })}
+              </p>
+              <p className="section-copy">{t("s3p1")}</p>
+              <p className="limit-accent">
+                <span className="meta-label">{t("limitLabel")}</span>{" "}
+                {t("s3Limit")}
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-1">
+                {["Docker", "GitHub Actions", "Coolify", "Traefik"].map(
+                  (tag) => (
+                    <li key={tag}>
+                      <SkillTag label={tag} />
+                    </li>
+                  )
+                )}
+              </ul>
+              <p>
+                <Link
+                  href={{
+                    pathname: "/blog/[slug]",
+                    params: { slug: post.coolify },
+                  }}
+                  className={evidenceLinkClass}
+                >
+                  {t("s3LinkLabel")}
+                  <ArrowUpRight className="size-4" aria-hidden="true" />
+                </Link>
+              </p>
+            </ContentEntryBody>
+          </li>
+
+          <li id="services-security" className="content-entry scroll-mt-32">
+            <ContentEntryIndex index={3} />
+            <ContentEntryBody>
+              <span className="tag-pill">{t("s4Pill")}</span>
+              <h3 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
+                {t("s4Title")}
+              </h3>
+              <p className="section-copy">{t("s4p1")}</p>
+              <p className="section-copy">
+                {t.rich("s4p2", {
+                  bilet: (chunks) => renderProjectLink(project.ticket, chunks),
+                  ratelimit: (chunks) => renderPostLink(post.ccna, chunks),
+                })}
+              </p>
+              <p className="limit-accent">
+                <span className="meta-label">{t("limitLabel")}</span>{" "}
+                {t("s4Limit")}
+              </p>
+            </ContentEntryBody>
+          </li>
+        </ul>
+      </section>
 
       <section id="services-process" className={sectionClass}>
         <h2 className="section-heading">{t("processTitle")}</h2>
