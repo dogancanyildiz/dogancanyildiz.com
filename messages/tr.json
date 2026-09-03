@@ -236,13 +236,24 @@
   "systems": {
     "eyebrow": "Sistemler",
     "title": "Canlı altyapı",
-    "description": "Bu siteyi çalıştıran sunucu da yayına taşıyan hat da bana ait. Aşağıdaki yayın bilgisi bu sayfayı şu an servis eden derlemeden geliyor, durum ise ayrı bir sayfada tutuluyor.",
+    "description": "Bu siteyi çalıştıran sunucu da yayına taşıyan hat da bana ait. Aşağıdaki yayın bilgisi bu sayfayı şu an servis eden derlemeden geliyor, canlı durum ise izleme sisteminden dakikada bir tazeleniyor.",
     "deployLabel": "Son yayın",
-    "commitLabel": "Commit",
+    "releaseLabel": "Sürüm",
+    "releaseTitle": "Sürüm notları, GitHub'da açılır",
+    "commitTitle": "Bu yayını üreten commit, GitHub'da açılır",
+    "commitAria": "Commit {sha}, GitHub'da aç",
     "statusLabel": "Canlı durum",
     "statusPage": "Durum sayfasını aç",
     "stackLabel": "Altyapı",
-    "noData": "Veri yok"
+    "noData": "Veri yok",
+    "liveUp": "Çalışıyor",
+    "liveDown": "Kesinti",
+    "livePending": "Bekliyor",
+    "liveMaintenance": "Bakımda",
+    "liveUnknown": "Bilinmiyor",
+    "liveUptimeWindow": "son 24 saat",
+    "liveChecks": "Son {count} kontrol",
+    "livePing": "{ping} ms"
   },
   "a11y": {
     "skipToContent": "İçeriğe geç",

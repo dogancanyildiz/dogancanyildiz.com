@@ -64,12 +64,42 @@ export function log(
 const ERROR_CODE_PATTERN = /^[A-Za-z][A-Za-z0-9_]{0,31}$/;
 
 /**
+ * How much of a thrown string survives into the log line.
+ *
+ * Long enough to recognise which throw site fired, short enough that a value
+ * built out of visitor input cannot fill the log with it.
+ */
+const MAX_THROWN_STRING = 200;
+
+/**
+ * Control and format characters are dropped rather than escaped.
+ *
+ * JSON.stringify already escapes them, so this is not about forging a log
+ * line; it is about a value that arrives with newlines, tabs or zero width
+ * marks rendering as one readable token in the Coolify log view.
+ */
+function condense(value: string): string {
+  return value
+    .replace(/[\p{Cc}\p{Cf}]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, MAX_THROWN_STRING);
+}
+
+/**
  * Turns an unknown thrown value into a short, safe label.
  *
- * The message never appears: it can quote the payload that caused it, and the
- * payload is exactly what must not reach the log. The name alone is often not
- * enough to act on, though, because nodemailer throws a plain "Error" and puts
- * the actionable part in `code`, so a code shaped `code` is kept next to it.
+ * An Error's message never appears: it can quote the payload that caused it,
+ * and the payload is exactly what must not reach the log. The name alone is
+ * often not enough to act on, though, because nodemailer throws a plain
+ * "Error" and puts the actionable part in `code`, so a code shaped `code` is
+ * kept next to it.
+ *
+ * A thrown string has no name to fall back on, so it keeps its text, but never
+ * verbatim: an unbounded value echoed straight into the line is the same
+ * hazard as an Error message, only without the type in front of it. It is
+ * labelled with its type, collapsed onto one line and cut at
+ * MAX_THROWN_STRING.
  */
 export function describeError(error: unknown): string {
   if (error instanceof Error) {
@@ -78,5 +108,9 @@ export function describeError(error: unknown): string {
       ? `${error.name}/${code}`
       : error.name;
   }
-  return typeof error === "string" ? error : "UnknownError";
+  if (typeof error === "string") {
+    const text = condense(error);
+    return text ? `String/${text}` : "String";
+  }
+  return "UnknownError";
 }

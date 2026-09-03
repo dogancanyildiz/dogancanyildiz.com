@@ -7,7 +7,7 @@ Hedef Coolify sürümü: v4.3.1. Bu adımlar Coolify panelinde el ile yürütül
 - [ ] Coolify -> Sources -> "+ Add" -> GitHub App.
 - [ ] App'i `dogancanyildiz/dogancanyildiz.com` reposuna kur.
 - [ ] Repository permissions: Contents `Read`, Metadata `Read`, Pull requests `Read and write`, Checks `Read and write`, Deployments `Read and write`, Webhooks `Read and write`.
-- [ ] Doğrulama: Coolify kaynak sayfasında repo listesi görünüyor. Pull requests izni eksikse Preview Deployments sessizce çalışmaz, Deploy Key ile bu özellik hiç desteklenmiyor.
+- [ ] Doğrulama: Coolify kaynak sayfasında repo listesi görünüyor.
 
 ## 2. Uygulama kaynağı
 
@@ -20,9 +20,7 @@ Hedef Coolify sürümü: v4.3.1. Bu adımlar Coolify panelinde el ile yürütül
 
 ## 3. Domain
 
-**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; tarihsel kurulum tersini tarif ediyordu.
-
-**Karar (2026-09-02):** kanonik host www.
+**Karar (2026-09-02):** kanonik host www. Tek alan adı `dogancanyildiz.com`; ikinci bir alan adı 2026-09-03 kararıyla kapsam dışı.
 
 **Karar değişikliği (2026-09-03, ilk canlı deploy):** apex -> www yönlendirmesi Coolify'ın dahili "Direction" ayarıyla (Traefik) yapılır; sahibi diğer sitesiyle aynı düzeni istedi. Cloudflare'deki `apex to www` Redirect Rule (`docs/deploy/cloudflare-kurulum.md` bölüm 3b) artık zorunlu değil, isteğe bağlı bir edge katmanı: eklenirse aynı yönde olduğu için çakışmaz ve yönlendirme 301 olarak edge'de biter. Coolify'ın yönlendirmesi **307** döner; kalıcı 301 istenirse Cloudflare kuralı eklenir.
 
@@ -45,18 +43,14 @@ Coolify'da her değişkenin yanındaki "Build Variable?" kutusu, o değişkenin 
 
 - [ ] Doğrulama: deploy sonrası Coolify build logunda `SMTP_PASSWORD` değeri geçmiyor (Runtime sırlar build'e hiç girmemeli, Build Variable işaretli tek değerler `NEXT_PUBLIC_*` ve `UMAMI_*`).
 - [ ] Doğrulama: canlı sayfanın HTML kaynağında `https://www.dogancanyildiz.com` geçiyor (`NEXT_PUBLIC_SITE_URL` gerçekten gömülmüş).
-- [ ] Doğrulama: `TRUST_CF_CONNECTING_IP` yalnızca Task 9 bittikten sonra `true` yapıldı; PR preview ortamlarında `false` kalıyor (preview'lar Cloudflare'ın arkasında değil).
+- [ ] Doğrulama: `TRUST_CF_CONNECTING_IP` yalnızca Task 9 bittikten sonra `true` yapıldı. Cloudflare'ın arkasında olmayan bir ortama deploy edilirse `false` kalmalı.
 - [ ] Build değişkenleri `NEXT_PUBLIC_BUILD_SHA` (Coolify `SOURCE_COMMIT`) ve `NEXT_PUBLIC_BUILD_DATE` (deploy zamanı, ISO) set; boşsa Systems paneli "son yayın" alanını gizler ve footer yıl basmaz. Faz 5 değişkenleri (`NEXT_PUBLIC_STATUS_URL`, `UMAMI_SCRIPT_URL` ve `UMAMI_WEBSITE_ID`, üçü de Build) `docs/runbooks/infrastructure.md`'de. `CSP_REPORT_ONLY=1` yalnızca tek bir ölçüm deploy'u için Build değişkeni olarak eklenir ve sonra kaldırılır.
 - [ ] Doğrulama: container açılış logunda `SMTP_*`, `CONTACT_EMAIL`, `FROM_EMAIL` için hata satırı yok ve `curl -s https://www.dogancanyildiz.com/api/health` gövdesinde `"status":"ok"` (eksik mail değişkeni `"degraded"` üretir, HTTP yine 200).
 
-## 5. Auto deploy ve Preview Deployments
+## 5. Auto deploy
 
 - [ ] Advanced -> "Auto Deploy" açık. `main`'e push, GitHub App webhook'u üzerinden yeniden deploy tetikler.
-- [ ] Advanced -> "Preview Deployments" açık.
-- [ ] Preview URL şablonu: `http://{{pr_id}}.preview.dogancanyildiz.com`
-  - **Preview için ayrı `NEXT_PUBLIC_SITE_URL` (karar, 2026-08-28):** `/api/contact` `Origin` başlığını `NEXT_PUBLIC_SITE_URL` ile birebir karşılaştırır (F-042); production değerini taşıyan bir preview'da form 403 alır. Coolify'da preview deployment'lar için Build değişkeni preview host'una (`http://<pr>.preview.dogancanyildiz.com`) çevrilir; canonical/hreflang/sitemap/RSS de preview'a çözülür, bu beklenen davranıştır (faz-2 ve faz-4 checklist'lerindeki çelişki bu kararla kapandı).
-  - Şema bilerek `http`. Cloudflare ücretsiz planı wildcard DNS kaydını proxy'leyemiyor, dolayısıyla `*.preview` kaydı gri bulut kalıyor; gri bulutta Let's Encrypt HTTP-01 doğrulaması origin'e doğrudan ulaşmak zorunda kalır ve origin yalnızca Cloudflare IP'lerine açık olduğu için başarısız olur. Preview'lar TLS'siz ve yalnızca allowlist'teki admin IP'sinden erişilebilir kalır, bkz. `docs/deploy/traefik-ve-origin.md`.
-- [ ] Doğrulama: test PR'ı açıldığında Coolify PR'a preview URL'i içeren bir yorum bırakıyor.
+- [ ] Advanced -> "Preview Deployments" kapalı (karar 2026-09-03): tek geliştirici, her PR CI'dan geçiyor.
 
 ## 6. Health check
 

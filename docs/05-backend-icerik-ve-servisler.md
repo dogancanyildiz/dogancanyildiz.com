@@ -4,7 +4,8 @@ Durum: Uygulandı (içerik pipeline Faz 4 #6; contact sertleştirmesi Faz 0 #2, 
 
 Dört karar: içerik pipeline'ı, contact formu, izleme/status paneli ve ölçüm.
 Ortak kısıt tek Coolify container'ı: in-memory rate limit, build-time MDX
-derlemesi ve üçüncü taraftan veri çekmeyen bir panel bu kısıttan çıkıyor.
+derlemesi ve sunucu tarafında önbellekli okunan bir durum paneli bu kısıttan
+çıkıyor.
 Hiçbiri ayrı veritabanı veya CMS gerektirmiyor.
 
 ## 1. İçerik pipeline'ı: Velite
@@ -109,11 +110,21 @@ kurulumdan geriye gitmek olurdu.
 ## 3. Systems paneli ve izleme
 
 **Karar (2026-08-30):** Gatus kaldırıldı, gerçek izleme Coolify'daki Uptime
-Kuma'ya taşındı. Kuma'nın JSON iç yapısı dokümante olmadığı için Systems paneli
-üçüncü taraftan veri **çekmiyor**: yalnızca build sabitlerini gösteriyor (son
-yayın tarihi, commit SHA, stack satırı) ve `NEXT_PUBLIC_STATUS_URL` doluysa
-public status sayfasına link veriyor (yalnızca https, boşsa satır gizli). Ana
-sayfa bu sayede tamamen statik, revalidate yok.
+Kuma'ya taşındı. O gün Systems panelinin üçüncü taraftan veri çekmemesine karar
+verilmişti; ana sayfa tamamen statikti.
+
+**Karar değişikliği (2026-09-03):** Sahibi panelde Kuma'nın görsel yapısını
+istedi. `src/lib/status-page.ts` Kuma'nın herkese açık iki JSON ucunu
+(`/api/status-page/<slug>` ve `/api/status-page/heartbeat/<slug>`) sunucu
+tarafında, `fetch` ile 60 saniyelik ISR (`next.revalidate`) ve 4 saniyelik zaman
+aşımıyla okur; `src/components/sections/live-status.tsx` durum noktası, 24
+saatlik uptime yüzdesi ve son 40 kontrolün çubuk şeridini basar. Tarayıcıdan
+istek gitmediği için CSP değişmedi; Kuma'nın `msg` alanı zod sınırında atılır ve
+hiçbir zaman render edilmez. Kuma erişilemezse hücre yalnızca linke düşer, build
+düşmez. `NEXT_PUBLIC_STATUS_URL` boşken sayfa tamamen statik kalır; doluyken
+`/tr` ve `/en` 60 saniyede bir yeniden üretilir. Aynı yeniden üretim sayesinde
+commit hücresi build'de boş kalan `NEXT_PUBLIC_BUILD_SHA` yerine Coolify'ın
+çalışma anında verdiği `SOURCE_COMMIT`'i gösterir (`src/lib/build-info.ts`).
 
 **Sızıntı kuralı (değişmedi).** Panel ve public status sayfası hiçbir zaman
 hostname, port, iç servis adresi, IP veya Coolify UI adresi göstermez.
