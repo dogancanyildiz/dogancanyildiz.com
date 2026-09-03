@@ -10,6 +10,20 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-03
+
+### Features
+
+- `db9da07` **analytics**: load umami without consent and add custom events (#53)
+
+### Other
+
+- `e147ee7` **deploy**: apex yönlendirmesi Coolify'da, healthcheck host düzeltmesi (#52)
+- `3ff1f63` **release**: sync version v0.4.0 (#50)
+- `00f2ff4` depo adı dogancanyildiz.com oldu, lisans ayrımı ve README rozetleri (#49)
+
+**Tam değişiklik listesi**: [v0.4.0...v0.5.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.4.0...v0.5.0)
+
 ## [0.4.0] - 2026-09-02
 
 ### Features
@@ -137,7 +151,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.2.0...v0.3.0
