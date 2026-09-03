@@ -11,6 +11,14 @@ async function loadBuildInfo() {
 }
 
 describe("buildInfo", () => {
+  it("carries the package version bundled at build time", async () => {
+    const { buildInfo, commitUrl } = await import("@/lib/build-info");
+    expect(buildInfo.version).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(commitUrl("abc1234")).toBe(
+      "https://github.com/dogancanyildiz/dogancanyildiz.com/commit/abc1234"
+    );
+  });
+
   it("derives the year from NEXT_PUBLIC_BUILD_DATE", async () => {
     vi.stubEnv("NEXT_PUBLIC_BUILD_DATE", "2027-01-05T10:00:00+00:00");
     vi.stubEnv("NEXT_PUBLIC_BUILD_SHA", "abc1234");

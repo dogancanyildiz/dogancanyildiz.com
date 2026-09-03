@@ -49,7 +49,7 @@ vi.mock("next-intl/server", () => ({
 // buildInfo is read at module scope in src/lib/build-info.ts, so stubbing
 // process.env after import cannot reach it; the module is mocked with a
 // mutable holder instead.
-const build = { sha: "", date: "" };
+const build = { sha: "", date: "", version: "0.7.0" };
 vi.mock("@/lib/build-info", () => ({
   buildInfo: {
     get sha() {
@@ -58,8 +58,13 @@ vi.mock("@/lib/build-info", () => ({
     get date() {
       return build.date;
     },
+    get version() {
+      return build.version;
+    },
   },
   formatBuildSha: (sha: string) => sha.slice(0, 7),
+  commitUrl: (sha: string) =>
+    `https://github.com/dogancanyildiz/dogancanyildiz.com/commit/${sha}`,
 }));
 
 // The live status cell reads Uptime Kuma over the network. Its rendering is
@@ -88,8 +93,20 @@ describe("Systems", () => {
 
     // The deploy date is formatted, never the raw ISO string (N-12).
     expect(screen.queryByText("2026-08-28T09:12:33+00:00")).toBeNull();
-    expect(screen.getByText(/UTC/)).toBeInTheDocument();
-    expect(screen.getByText("0123abc")).toBeInTheDocument();
+    // Istanbul clock with the zone on the value; 09:12 UTC reads 12:12 GMT+3.
+    expect(screen.getByText(/12:12.*GMT\+3/)).toBeInTheDocument();
+    // The version is what a visitor reads; the sha is fine print linking to
+    // the commit on GitHub.
+    expect(screen.getByText("v0.7.0")).toBeInTheDocument();
+    const commitLink = screen.getByRole("link", { name: /0123abc/ });
+    expect(commitLink).toHaveAttribute(
+      "href",
+      "https://github.com/dogancanyildiz/dogancanyildiz.com/commit/0123abcd456"
+    );
+    expect(commitLink).toHaveAttribute(
+      "rel",
+      expect.stringContaining("noopener")
+    );
     expect(
       screen.getByText("Next.js · Docker · Coolify · Traefik · Cloudflare")
     ).toBeInTheDocument();
@@ -114,7 +131,10 @@ describe("Systems", () => {
     render(await resolveServerTree(<Systems />));
 
     expect(screen.queryByRole("link")).toBeNull();
-    expect(screen.getAllByText("No data").length).toBeGreaterThanOrEqual(3);
+    // Date and status fall back; the version always renders, the sha simply
+    // disappears from the release cell.
+    expect(screen.getAllByText("No data").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("v0.7.0")).toBeInTheDocument();
   });
 
   it("drops a status link that is not https instead of rendering it", async () => {
