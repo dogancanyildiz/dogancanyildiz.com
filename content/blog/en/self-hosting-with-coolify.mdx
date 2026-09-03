@@ -3,7 +3,7 @@ title: How this site ships to my own server with Coolify
 slug: self-hosting-with-coolify
 translationKey: self-hosting-with-coolify
 date: 2026-08-20
-summary: A managed platform would have taken ten minutes. Here is what the pipeline I built instead does, and where it tripped me up.
+summary: A managed platform would have taken ten minutes. Here is what the Coolify pipeline I built instead does, and where it tripped me up.
 tags:
   - devops
   - coolify
@@ -16,11 +16,11 @@ Hosting this site on a managed platform would have taken ten minutes. Running it
 
 ## How the pipeline works
 
-The application is built by a multi stage Dockerfile with separate deps, builder and runner stages. The running container drops to a non root user and carries only the standalone output, the static assets and the public folder. Coolify watches the repository through its GitHub App integration: every commit on the main branch triggers a deploy, and every pull request gets its own preview URL. Traefik sits in front and handles TLS termination and routing.
+The application is built by a multi stage Dockerfile with separate deps, builder and runner stages. The running container drops to a non root user and carries only the standalone output, the static assets and the public folder. Coolify, a self hosted, open source deployment platform, watches the repository through its GitHub App integration: every commit on the main branch triggers a deploy, and every pull request gets its own preview URL. Traefik sits in front and handles TLS termination and routing.
 
 ## Where it tripped me up
 
-The first snag was the health check. Connection refused from curl or wget based Coolify health checks on Node containers is a known issue, which is why the check in this repository uses Node's own fetch call and is verified on staging before it is wired to production. The second was the environment variable layer. Values prefixed with NEXT_PUBLIC_ are inlined at build time, so they have to arrive as build variables; in this repository the build fails on purpose when the site url is missing, so a wrong address is never silently baked into the bundle. The reverse is worse: marking an API key as a build variable can leak it into image layers and build logs.
+The first snag was the health check. Coolify's built in HTTP health check needs curl or wget inside the container ([Coolify docs](https://coolify.io/docs/knowledge-base/health-checks)); the `node:24-alpine` image I use ships without curl, and its wget is the limited busybox applet. So instead of leaning on an external binary, the check in this repository uses Node's own fetch call and is verified on staging before it is wired to production. The second was the environment variable layer. Values prefixed with NEXT_PUBLIC_ are inlined at build time, so they have to arrive as build variables; in this repository the build fails on purpose when the site url is missing, so a wrong address is never silently baked into the bundle. The reverse is worse: marking an API key as a build variable can leak it into image layers and build logs.
 
 ## What I got out of it
 
