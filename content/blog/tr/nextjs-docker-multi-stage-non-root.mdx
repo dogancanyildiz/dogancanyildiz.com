@@ -1,0 +1,61 @@
+---
+title: Next.js'i Docker'da multi-stage ve root olmayan kullanıcıyla çalıştırmak
+slug: nextjs-docker-multi-stage-non-root
+translationKey: nextjs-docker-multi-stage-non-root
+date: 2026-09-03
+summary: Aynı imajı hem küçük hem de root olmadan çalışacak biçimde kurdum. Dockerfile'ın üç aşamasının ne taşıdığını ve her kararın nedenini anlatıyorum.
+tags:
+  - docker
+  - devops
+  - nextjs
+---
+
+## İki karar, tek Dockerfile
+
+Bu sitenin imajını kurarken iki şeye baştan karar verdim: çalışan konteyner root olmayacak ve build tek katmanlı olmayacak. İkisi de güvenlik ve boyut için. Root olarak çalışan bir konteynerde bir açık, konteynerin sınırına kadar her şeye erişim demek; oysa uygulamanın sunucuyu dinlemek ve kendi dosyalarını okumak dışında hiçbir yetkiye ihtiyacı yok. Tek aşamalı bir build ise derleme araçlarını, kaynağı ve tüm `node_modules` ağacını son imaja taşır, bunların hiçbiri çalışma anında gerekmez. Çok aşamalı build tam olarak bu ayrımı yapmayı sağlıyor.
+
+## Üç aşama, üç iş
+
+Dockerfile üç aşamaya bölünüyor ve her biri farklı bir işi bitiriyor. `deps` bağımlılıkları kuruyor, `builder` `next build` çalıştırıyor, `runner` yalnızca çalışması gerekeni taşıyor. Aşamaları ayrı tutmanın somut faydası önbellek: bağımlılıklar kendi katmanında kurulunca, yalnızca kaynak değiştiğinde `npm` önbelleği geçersiz olmuyor. `devDependencies` bu ilk aşamada gerekli, çünkü Next build'i bir sonraki aşamada koşuyor.
+
+Son imajda ne olduğu kadar ne **olmadığı** da önemli. Runner aşaması yalnızca üç şeyi kopyalıyor:
+
+```dockerfile
+COPY --from=builder --chown=node:node /app/public ./public
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+```
+
+Standalone çıktı, sunucunun ihtiyaç duyduğu bağımlılıkları kendi içine gömüyor, o yüzden `deps` aşamasının şişkin `node_modules` klasörü, kaynak dosyalar ve derleme araçları son imaja hiç girmiyor. Runner tabanında `node` kullanıcısı hazır geldiği için ayrıca bir `addgroup` veya `adduser` çağrısına da gerek kalmıyor.
+
+## İmaj neden küçük, yüzey neden dar
+
+Son imajı küçük tutan asıl şey, ona hiç konmayan dosyalar. Standalone çıktı sadece çalışma anında gerekeni içerdiği için, saldırı yüzeyi de aynı oranda daralıyor: kabuk üstünde çalıştırılacak derleme aracı, geçici build betiği veya kullanılmayan geliştirme bağımlılığı orada yok. İki karar bu yüzeyi biraz daha kısıyor.
+
+Birincisi önbellek bağlama noktası. `npm`'in indirme önbelleği bir katmana yazılmak yerine geçici bir mount üzerinden veriliyor, böylece build'ler arası korunuyor ama imaj katmanına hiç işlenmiyor. İkincisi kurulum betikleri:
+
+```dockerfile
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --ignore-scripts && \
+    npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher
+```
+
+`--ignore-scripts`, bağımlılık ağacındaki her paketin `install` ve `postinstall` betiğini atlıyor. Bunlar düz bir `npm ci` sırasında otomatik çalışan, ağaçtan gelen keyfi kod parçaları. Betik taşıyan paketler burada bir avuç yerel eklenti ve hepsi zaten hazır derlenmiş bir ikili getiriyor; `npm rebuild` sadece o beş betiği yeniden koşuyor, ağacın geri kalanına keyfi kod çalıştırma izni vermeden. Yani varsayılan davranış kapatılıp, gerçekten gereken tek adım açıkça geri açılıyor.
+
+## Kullanıcı ve dosya sahipliği
+
+Root olmayan kullanıcıya geçmek tek satır, ama sırası önemli. Dosyalar `USER node` satırından önce kopyalanıyor ve kopyalanırken `--chown=node:node` ile sahipliği doğrudan `node` kullanıcısına veriliyor. Sahipliği sonradan ayrı bir `RUN chown -R` ile düzeltmek de mümkün, ama o komut dosyaları yeni bir katmanda bir daha yazardı ve o yol için imaj boyutunu gereksiz büyütürdü. Kopyalama anında sahiplik vermek hem fazladan katmanı hem de kullanıcı geçtikten sonra ortaya çıkacak "izin yok" hatalarını baştan siliyor.
+
+## Sağlık kontrolü neden node fetch
+
+Sağlık kontrolü `curl` veya `wget` yerine Node'un kendi `fetch` çağrısıyla yazıldı, ve bunun gerçek bir gerekçesi var. Coolify'ın Dockerfile ile derlenen Node konteynerlerinde `curl` ve `wget` tabanlı kontroller bağlantı reddi veriyor ([coollabsio/coolify#7500](https://github.com/coollabsio/coolify/issues/7500)), üstelik `node:24-alpine` imajında `curl` zaten hiç yok. Konteynerin içine bir ikili eklemek yerine, zaten var olan Node çalışma zamanı kullanılıyor:
+
+```dockerfile
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+  CMD ["node", "-e", "fetch(`http://127.0.0.1:${process.env.PORT || 3000}/api/health`).then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+```
+
+30 saniyelik başlangıç süresi standalone sunucunun soğuk açılışını karşılıyor, `PORT` da geri okunuyor ki çalışma anında bir port değişikliği yapılırsa kontrol yine doğru portu yoklasın.
+
+## Kapanış
+
+Bu Dockerfile'daki her aşama bir şeyi son imajın dışında tutmak için var, ve root olmayan kullanıcı bu sadeliğin doğal sonucu. Aynı imajı üstünde çalıştığım yayın hattının nasıl kurulduğunu [Coolify yazısında](/yazilar/coolify-ile-kendi-sunucumda) anlatmıştım; bu yazı onun bir katman altı, imajın kendisi.
