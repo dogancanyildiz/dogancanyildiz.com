@@ -133,6 +133,12 @@ yapılamıyordu, yayına çıktıktan sonra da sırası gelmedi.
   (`GHSA-f88m-g3jw-g9cj`) geri gelir. Tripwire: velite kendi aralığını
   `^0.35`'e taşıdığında `package.json`'daki `overrides` bloğu silinebilir,
   ayrıntı [09](./09-guvenlik.md) bölüm "Bağımlılık durumu".
+- **WhatsApp numarası kaynak kodda sabit** (`src/lib/site.ts`,
+  `WHATSAPP_NUMBER`) ve footer üzerinden her sayfanın HTML'inde.
+  **Bilinçli kabul (2026-09-03):** numara herkese açık iş numarası, CV'de ve
+  diğer kanallarda zaten yayında; env'e taşımak sızıntıyı azaltmaz, yalnızca
+  bir build değişkeni daha ekler. Ayrıntı ve gerekçe
+  [09](./09-guvenlik.md) bölüm "Kişisel veri yüzeyi".
 - **typescript 7 ve eslint 10 majorları Dependabot'ta ignore.**
   `eslint-plugin-react` eslint 10'u desteklemiyor (transitif olarak
   `eslint-config-next` üzerinden), üst akış bekleniyor.

@@ -113,6 +113,21 @@ ifadeleri (JSX, `export`, `import`) elle okunmalı. Dışarıdan içerik katkıs
 düzenli hale gelirse karar (sanitize, ya da MDX yerine düz Markdown) yeniden
 değerlendirilir.
 
+## Kişisel veri yüzeyi
+
+Sitenin HTML'inde sabit duran tek kişisel iletişim verisi WhatsApp numarası
+(`src/lib/site.ts`, `WHATSAPP_NUMBER`); footer üzerinden her sayfada geçiyor
+ve `whatsappHref` onu `wa.me` bağlantısına çeviriyor.
+
+**Bilinçli kabul (2026-09-03):** numara herkese açık iş numarası. CV'de,
+LinkedIn'de ve diğer kanallarda zaten yayında olduğu için env'e taşımak
+sızıntıyı azaltmaz; yalnızca bir build değişkeni daha ekler ve değişken
+tanımlanmadığında iletişim bloğu sessizce kaybolur. Numara Person JSON-LD'ye
+girmiyor (bkz. `src/lib/site.ts` yorumu): yapılandırılmış veriye girmesi
+kazıyıcılar için ayrı bir kolaylık olurdu, sohbet bağlantısı ise bir iletişim
+yolu, kimlik URL'i değil. Karar numara özelleşirse geri alınır, o durumda
+`WHATSAPP_NUMBER` env'den okunur ve boşken blok gizlenir.
+
 ## Bağımlılık durumu
 
 `npm audit` 0 high. velite -> sharp <0.35.0 libvips zinciri
