@@ -161,7 +161,11 @@ describe("mdx element overrides", () => {
     expect(html).toContain('<table id="prices">');
   });
 
-  it("no longer maps shortcodes no content file uses", () => {
-    expect(Object.keys(mdxComponents)).toEqual(["table"]);
+  it("maps only the element overrides, no unused shortcodes", () => {
+    // `table` wraps wide tables for horizontal scroll; `a` routes same-site
+    // links written in a body through the next-intl Link so they navigate
+    // client-side and stay locale-correct (see mdx-components.test.tsx). No
+    // shortcode component is mapped, since no content file reaches for one.
+    expect(Object.keys(mdxComponents)).toEqual(["table", "a"]);
   });
 });

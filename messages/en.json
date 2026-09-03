@@ -40,7 +40,8 @@
     "latestPostsLink": "All posts",
     "skillsTitle": "The tools I work with",
     "skillsEyebrow": "Capabilities",
-    "skillsSubtitle": "The groups follow the delivery order: from the interface out to deployment, with the security layer underneath."
+    "skillsSubtitle": "The groups follow the delivery order: from the interface out to deployment, with the security layer underneath.",
+    "skillsServicesLink": "I keep the work I take on with these tools on the services page."
   },
   "footer": {
     "tagline": "A record of the work I ship and the posts I write.",
@@ -121,7 +122,7 @@
   },
   "contact": {
     "title": "Contact",
-    "description": "Tell me the scope and the deadline, and we can settle the first step from there.",
+    "description": "Tell me about your website or app project; we can settle the scope and the first step from there.",
     "intro": "Tell me what you want built. I will say plainly whether it fits what I have on.",
     "ctaTitle": "Something you need built?",
     "ctaBody": "A few lines are enough: the scope, and the date you need it by.",
@@ -219,7 +220,7 @@
   "metadata": {
     "defaultTitle": "Doğan Can YILDIZ | Full Stack Web Developer and DevOps Specialist",
     "siteName": "Doğan Can YILDIZ",
-    "defaultDescription": "Five production applications at BerrSoft, taken from architecture to maintenance. I write the application and run the Linux server it ships on. Konya, Türkiye.",
+    "defaultDescription": "I take on corporate website and Next.js application work. At BerrSoft I delivered five production apps from architecture to maintenance, solo. Konya, Türkiye.",
     "ogAlt": "Doğan Can YILDIZ, Full Stack Web Developer and DevOps Specialist",
     "ogAltPage": "{title}. Doğan Can YILDIZ, Full Stack Web Developer and DevOps Specialist"
   },

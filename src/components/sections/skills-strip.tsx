@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import type { SkillGroup } from "@/content/profile";
+import { Link } from "@/i18n/navigation";
 import { SkillCategoryList } from "@/components/sections/skill-group-grid";
 import { PageHeader } from "@/components/ui/page-header";
 
@@ -25,6 +26,16 @@ export async function SkillsStrip({ groups }: SkillsStripProps) {
         description={t("skillsSubtitle")}
       />
       <SkillCategoryList groups={groups} />
+      {/* One quiet line tying the toolset to the work I take on, so the skills
+          section has a way through to the services page without a button. */}
+      <p className="text-sm text-muted-foreground">
+        <Link
+          href="/services"
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          {t("skillsServicesLink")}
+        </Link>
+      </p>
     </div>
   );
 }
