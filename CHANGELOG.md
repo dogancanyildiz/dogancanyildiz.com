@@ -10,6 +10,19 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-03
+
+### Features
+
+- `b045434` **systems**: canlı durum widget'ı ve commit için SOURCE_COMMIT geri dönüşü (#62)
+
+### Other
+
+- `816fef6` faz 1 arama görünürlüğü metin rötuşları (#60)
+- `f4ac45e` **release**: sync version v0.6.0 (#61)
+
+**Tam değişiklik listesi**: [v0.6.0...v0.7.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.6.0...v0.7.0)
+
 ## [0.6.0] - 2026-09-03
 
 ### Features
@@ -164,7 +177,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.1...v0.4.0
