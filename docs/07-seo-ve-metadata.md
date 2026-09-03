@@ -17,10 +17,9 @@ Durum: Uygulandı (Faz 2 #4, Faz 4 #6; denetim kapanışı #34; TR varsayılan #
    `BreadcrumbList`.
 6. **Her sayfa kendi OG kartını basar.**
 7. **`NEXT_PUBLIC_SITE_URL` build'de zorunlu:** eksikse `next build` patlar.
-8. **Yayın öncesi elle doğrulama zorunlu adım:** Search Console'da iki property
-   (`www.dogancanyildiz.com` ana property olarak sitemap gönderir;
-   `dogancanyildiz.sh` yalnızca yönlendirme sağlığını izlemek için, sitemap
-   gönderilmez), ayrıca üçüncü parti hreflang test aracı ve Rich Results Test.
+8. **Yayın öncesi elle doğrulama zorunlu adım:** Search Console'da tek property
+   (`www.dogancanyildiz.com`, sitemap oradan gönderilir), ayrıca üçüncü parti
+   hreflang test aracı ve Rich Results Test.
 
 ## Gerekçe
 

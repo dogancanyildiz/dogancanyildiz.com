@@ -35,3 +35,20 @@ export const CSP_REPORT_LIMITS = {
   idle: 30,
   measuring: 600,
 } as const;
+
+/**
+ * Reports written to the log from a single request, per mode.
+ *
+ * It has to move with the per client budget above, not stay fixed: the strict
+ * report-only policy makes one page view emit roughly twenty violations, and a
+ * browser is free to deliver them as one reports+json batch. A cap of twenty
+ * would then throw away most of a page view exactly during the window the
+ * measurement is running, while the raised request budget promised the reports
+ * would get through. The measuring value keeps a single batch intact with room
+ * to spare; the idle value stays small because with the report-only header off
+ * a large batch is noise or an attack, never a real browser.
+ */
+export const CSP_REPORTS_PER_REQUEST = {
+  idle: 20,
+  measuring: 200,
+} as const;
