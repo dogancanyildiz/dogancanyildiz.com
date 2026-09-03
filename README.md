@@ -228,14 +228,21 @@ Kontrol panelinde, bu depoda olmayan adımlar adım adım checklist:
 src/app        App Router rotaları, api handler'ları, metadata rotaları
 src/components UI, yerleşim ve bölüm bileşenleri
 src/lib        Çatıdan bağımsız yardımcılar, her biri birim testli
-docs           Mimari kararlar ve fazlı yol haritası
-docs/plans     Faz başına yürütülebilir uygulama planları
+content        Proje ve blog MDX dosyaları, dil başına klasör
+docs           Mimari kararlar, panel checklist'leri, açık işler
 ```
 
 ## Belgelendirme
 
-Mimari kararlar `docs/` altında. Özet için `docs/00-ozet-ve-karar.md`,
-faz sırası için `docs/10-yol-haritasi.md`.
+Mimari kararlar `docs/` altında; giriş noktası
+[`docs/00-ozet-ve-karar.md`](./docs/00-ozet-ve-karar.md) (bugünkü durum,
+kararlar tablosu, stack gerekçesi, faz özeti ve karar geçmişi). Kapanmamış
+işler ve canlı doğrulamalar
+[`docs/11-acik-isler.md`](./docs/11-acik-isler.md)'de, klasörün tam dizini
+[`docs/README.md`](./docs/README.md)'de. Yürütülmüş faz planları ve devir
+notları 2026-09-03'te arşive alındı; özeti
+[`docs/plans/README.md`](./docs/plans/README.md), tam metinleri git
+geçmişinde.
 
 ## Dallama ve sürümler
 

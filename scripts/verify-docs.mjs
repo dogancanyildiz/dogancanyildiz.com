@@ -31,9 +31,14 @@ function check(condition, message) {
 // Domain redirect direction: the owner's 2026-08-27 decision made
 // dogancanyildiz.com primary, with dogancanyildiz.sh only 301ing to it. Any
 // document describing the reverse hop is a leftover from the superseded
-// decision, except docs/plans/ (execution records written while .sh was
-// still primary, each carrying its own historical-assumption note).
+// decision, except docs/plans/ (the archive index for the execution records
+// written while .sh was still primary, carrying its own historical note).
 // ---------------------------------------------------------------------------
+
+// The two documents the domain checks below anchor on. Renaming either means
+// updating this pair, not hunting for string literals across the file.
+const SUMMARY = "docs/00-ozet-ve-karar.md";
+const OPEN_WORK = "docs/11-acik-isler.md";
 
 const HISTORICAL_TREES = ["docs/plans"];
 const HISTORICAL_MARKER = /Karar değişikliği|tarihsel/i;
@@ -63,12 +68,12 @@ function checkDomainDirection() {
     "docs/README.md not found while collecting decision documents"
   );
   check(
-    files.includes("docs/10-yol-haritasi.md"),
-    "docs/10-yol-haritasi.md not found while collecting decision documents"
+    files.includes(SUMMARY),
+    `${SUMMARY} not found while collecting decision documents`
   );
   check(
-    files.includes("docs/launch-checklist.md"),
-    "docs/launch-checklist.md not found while collecting decision documents"
+    files.includes(OPEN_WORK),
+    `${OPEN_WORK} not found while collecting decision documents`
   );
 
   for (const file of files) {
@@ -83,21 +88,21 @@ function checkDomainDirection() {
     });
   }
 
-  const checklist = readDoc("docs/launch-checklist.md");
+  const openWork = readDoc(OPEN_WORK);
   check(
     // The 2026-09-02 decision made www the canonical host: the .sh redirect's
     // final hop is now www.dogancanyildiz.com, so the www. prefix is optional
     // here on purpose, not a loosening of the direction check itself.
-    /dogancanyildiz\.sh -> (www\.)?dogancanyildiz\.com/.test(checklist),
-    "docs/launch-checklist.md does not state the .sh -> .com redirect"
+    /dogancanyildiz\.sh -> (www\.)?dogancanyildiz\.com/.test(openWork),
+    `${OPEN_WORK} does not state the .sh -> .com redirect`
   );
 
   const indexRow = readDoc("docs/README.md")
     .split("\n")
-    .find((line) => line.includes("launch-checklist.md"));
+    .find((line) => line.includes("11-acik-isler.md)"));
   check(
     indexRow !== undefined && /\.sh -> \.com 301/.test(indexRow),
-    "docs/README.md's launch-checklist.md row does not agree on the .sh -> .com direction"
+    `docs/README.md's ${OPEN_WORK} row does not agree on the .sh -> .com direction`
   );
 
   // The 2026-09-02 decision made www the canonical host, with the apex
@@ -117,16 +122,15 @@ function checkDomainDirection() {
     );
   }
 
-  const roadmap = readDoc("docs/10-yol-haritasi.md");
   check(
     /curl -I https:\/\/dogancanyildiz\.sh[^\n]*dogancanyildiz\.com/.test(
-      roadmap
+      openWork
     ),
-    "docs/10-yol-haritasi.md's curl check does not show the .sh -> .com redirect"
+    `${OPEN_WORK}'s curl check does not show the .sh -> .com redirect`
   );
   check(
-    /Karar: `\.sh -> \.com` 301 Cloudflare Redirect Rule/.test(roadmap),
-    "docs/10-yol-haritasi.md does not record the .sh -> .com redirect decision"
+    /Karar: `\.sh -> \.com` 301 Cloudflare Redirect Rule/.test(openWork),
+    `${OPEN_WORK} does not record the .sh -> .com redirect decision`
   );
 
   // Guards the exclusion above: if the historical tree ever loses its note
