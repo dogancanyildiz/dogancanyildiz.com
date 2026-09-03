@@ -13,7 +13,8 @@
     "languageLabel": "Dil",
     "menu": "Menü",
     "openMenu": "Menüyü aç",
-    "closeMenu": "Menüyü kapat"
+    "closeMenu": "Menüyü kapat",
+    "services": "Hizmetler"
   },
   "hero": {
     "location": "Konya, Türkiye",
@@ -166,7 +167,10 @@
       "errorFields": "Lütfen işaretlenen alanları kontrol edin.",
       "errorTimeout": "İstek çok uzun sürdü. Mesajınız yine de bana ulaşmış olabilir, tekrar göndermeden önce biraz bekleyin.",
       "retryAfter": "{seconds} sn sonra tekrar deneyin"
-    }
+    },
+    "servicesCtaTitle": "Yapılmasını istediğiniz iş ne?",
+    "servicesCtaBody": "Kaç sayfa, kaç dil ve ne zamana kadar gerektiğini yazın; kapsamı oradan netleştiririz.",
+    "servicesCtaButton": "Kapsamı yazın"
   },
   "notFound": {
     "code": "404",
@@ -254,5 +258,60 @@
   "a11y": {
     "skipToContent": "İçeriğe geç",
     "toggleTheme": "Temayı değiştir"
+  },
+  "services": {
+    "title": "Konya'da web ve Next.js geliştirme | Doğan Can YILDIZ",
+    "description": "Kurumsal web sitesi, Next.js uygulaması ve Docker ile yayına alma işini logodan sunucuya kadar tek elden alıyorum. Konya merkezli, Türkiye geneli uzaktan.",
+    "h1": "Kurumsal web sitesi, Next.js uygulaması ve yayına alma işi alıyorum",
+    "lead": "Konya'da yaşıyorum, işi uzaktan yürütüyorum. Şu ana kadar teslim ettiğim işlerin bir kısmı Ankara'da, bir kısmı İstanbul'da. Aşağıda hangi işi aldığımı, hangisini almadığımı yazdım, sürecin kendisi de altta.",
+    "locationLabel": "Konum",
+    "locationValue": "Konya, Türkiye",
+    "workLabel": "Çalışma biçimi",
+    "workValue": "Uzaktan, Türkiye geneli",
+    "contactLabel": "Muhatap",
+    "contactValue": "Tek kişi",
+    "s1Title": "Kurumsal web sitesi tasarımı ve geliştirme",
+    "s1p1": "Kurumsal bir siteyi logodan yayına kadar tek elden yapıyorum. Köklü Hukuk ve Danışmanlık'ta böyle yürüdü: Ankara Etimesgut'ta çalışan bir hukuk bürosu için logo tasarımı, arayüz tasarımı, kod ve yayın bendeydi, içerik ve yasal metinler avukat onayıyla girildi. Site Temmuz 2024'ten beri yayında, Temmuz 2026'da mimariyi sıfırdan yeniden kurdum.",
+    "s1p2": "Sitenin iki dilli olması yalnızca metinlerin çevrilmesi demek değil. Yollar da yerelleştirildi: /tr/calisma-alanlari ile /en/practice-areas ayrı adresler, yani her dilin sayfası aramada tek başına duruyor. Bunun üstünde on çalışma alanı sayfası, ekip ve avukat detayı, SSS, makaleler ve KVKK metinleri var.",
+    "s1p3": "CMS ve veritabanı koymadım. Bir hukuk bürosu sitesinde içerik derleme zamanında biliniyor, ziyaretçiye göre değişen veri yok; metinler tipli içerik dosyalarında duruyor ve sayfalar statik render ediliyor. İletişim formu yerine telefon, e-posta ve WhatsApp bağlantıları var: sunucuda kişisel veri tutmamak KVKK yükünü baştan kaldırıyor.",
+    "s1p4": "Bu kurgu her siteye uymaz. İçeriğiniz haftada birkaç kez değişecekse yönetim katmanı gerekir, onu kapsamda konuşuruz.",
+    "s1p5": "Tasarım tarafı kurumsal sitelerle sınırlı değil: <hubit>Hubit</hubit>'in arayüzünü tasarladım, ön yüzünü de ben yazdım.",
+    "s1LinkLabel": "Köklü Hukuk vaka çalışmasını okuyun",
+    "s2Title": "Next.js ve React ile uygulama geliştirme",
+    "s2p1": "Sitenin ötesine geçen işleri de yazıyorum: kullanıcı girişi olan, veri tutan, iş kuralları çalışan uygulamalar. Kasım 2024'ten beri BerrSoft'ta tam zamanlı Full Stack geliştiriciyim; beş üretim uygulaması oradan benim elimden çıktı, mimari, API tasarımı, yayın ve yayın sonrası bakım bendeydi.",
+    "s2p2": "Ön yüz Next.js ve React, arka yüz Node.js/Express ve PHP. Veritabanı her projede yeniden verdiğim bir karar: MySQL, MongoDB veya SQLite. Hangisinin seçileceği verinin şekline bağlı, alışkanlığa değil.",
+    "s2p3": "Serbest işte de yapı aynı. Ekran tasarımını, API'yi, yayın hattını ve yayından sonra çıkan hatayı aynı kişi karşılıyor, arada koordinasyon katmanı yok. Bunun görünür bir sınırı var: tek kişiyim, aynı anda az sayıda iş yürütüyorum ve ne zaman başlayabileceğimi ilk yazışmada söylüyorum.",
+    "s2p4": "BerrSoft'ta yazdığım uygulamalar burada vaka çalışması olarak durmuyor; açık kaynak olduğu için okunabilen iş <wikonya>Wikonya</wikonya>, frontend'ini React ile yazdım.",
+    "s3Title": "Yayına alma, Docker ve CI/CD",
+    "s3p1": "Yayına alma işini tek başına da alıyorum. Uygulamayı Docker ile paketliyorum, derleme ve yayın adımlarını GitHub Actions üzerinde kuruyorum, sonucu kendi sunucumdaki ya da sizin sunucunuzdaki Coolify'da çalıştırıyorum. Alan adı ve TLS sertifikası Traefik'in arkasında duruyor, push edince site güncelleniyor. Bu sitenin kendisi de o hatta yayında.",
+    "s3p2": "<cargopilot>Cargo Pilot</cargopilot>'ta DevOps chapter lead olarak altyapıyı kurdum ve oradan kalan ders şu: bir yayın hattı ancak ekip ona güvendiğinde işe yarıyor, geri dönüş yolu belirsizse kimse cuma günü yayın almıyor. Kurduğum hatlarda geri alma yolunu deploy yolu kadar açık tutuyorum.",
+    "s3p3": "Sınırı da söyleyeyim. Kubernetes kurulumu, bulut göçü ve çok bölgeli mimari benim alanım değil; tek sunucuda ya da birkaç konteynerde duran işlerde çalışıyorum, kurumsal ölçekli altyapı danışmanlığı yapmıyorum.",
+    "s3LinkLabel": "Bu site kendi sunucumda Coolify ile yayında",
+    "s4Title": "Güvenlik ayrı bir kalem değil, işin içinde",
+    "s4p1": "Ücretli güvenlik denetimi ve sızma testi hizmeti vermiyorum; güvenlik teslim ettiğim işin içinde geliyor. Pratikte şu demek: girdi doğrulaması sınırda yapılıyor, güvenilen durum sunucuda tutuluyor, konteyner root'tan çıkarılıyor, dışarı açılan yüzey küçük kalıyor, hız sınırlayıcı proxy'nin arkasında doğru başlıktan okunuyor.",
+    "s4p2": "Bu alışkanlıklar iki yerden geldi. <bilet>Bilet satın alma uygulamasını</bilet> yazdıktan sonra bir eğitim programı kapsamında kendi koduma sızma testi yaptım; çıkan bulgular girdi doğrulamasını ve oturum yönetimini değiştirdi, konteyneri de root'tan çıkardı. İkincisi ağ tarafından geldi: CCNA ve Hackviser CAPT'tan sonra uygulamayı dışarı nasıl açtığım değişti, en pahalıya patlayan örnek <ratelimit>yanlış başlıktan okunan bir hız sınırlayıcıydı</ratelimit>.",
+    "s4p3": "Sertifikalı bir denetim raporuna ihtiyacınız varsa bu işi meslek olarak yapan firmalara gitmeniz gerekir. Ben o ölçekte bir kanıt sunmuyorum, sunuyormuş gibi de yapmıyorum.",
+    "processTitle": "Nasıl çalışıyorum",
+    "processIntro": "Süreç altı adım ve üçüncü adımdan önce kod yazmıyorum.",
+    "step1": "Ne yapılacağını yazın. Form ya da e-posta fark etmez, birkaç cümle yeter.",
+    "step2": "Kapsamı konuşuruz: kaç sayfa veya ekran, kaç dil, hangi entegrasyonlar, yayın kimin sunucusunda duracak.",
+    "step3": "Kapsamı ve fiyatı yazılı veriyorum. Onay gelmeden kod yazmıyorum.",
+    "step4": "Geliştirme boyunca çalışan bir adres oluyor, ilerlemeyi ekrandan kendiniz görüyorsunuz.",
+    "step5": "Yayına alma: Docker imajı, yayın hattı, alan adı ve sertifika.",
+    "step6": "Devir: kaynak kod, sunucu erişimi ve neyin nerede durduğunu anlatan bir not. Bakım bundan sonra konuşuluyor.",
+    "processOutro": "Gelen mesajları genellikle iki ila üç iş günü içinde yanıtlıyorum.",
+    "faqTitle": "Sık sorulanlar",
+    "faq1Q": "Fiyatı nasıl belirliyorsunuz?",
+    "faq1A": "Kapsam yazıya döküldükten sonra sabit fiyat veriyorum. \"Kurumsal site\" cümlesi beş sayfalık bir siteyi de iki dilli otuz sayfalık bir siteyi de anlatıyor, bu yüzden önce kalemleri ayırıyoruz: sayfa sayısı, dil sayısı, tasarımın sıfırdan mı yapılacağı, entegrasyonlar, yayının nerede duracağı ve bakımın dahil olup olmadığı. Kapsam sonradan büyürse aradaki farkı yeniden konuşuruz.",
+    "faq2Q": "Ne kadar sürer?",
+    "faq2A": "Kapsam netleştikten sonra tarih veriyorum, öncesinde değil. Konya'da da olsanız başka bir şehirde de süreyi sayfa sayısından çok içerik belirliyor: metinler ve görseller hazırsa iş hızlı ilerliyor, \"yazıları sonra göndeririz\" denen projelerde takvim kayıyor. Elimdeki işlerin durumuna göre ne zaman başlayabileceğimi de ilk yazışmada söylüyorum, çünkü aynı anda az sayıda iş yürütüyorum.",
+    "faq3Q": "Konya dışına iş alıyor musunuz?",
+    "faq3A": "Alıyorum, teslim ettiğim işlerin çoğu zaten Konya dışında. Köklü Hukuk Ankara'da bir hukuk bürosu, tam zamanlı çalıştığım BerrSoft İstanbul'da. Süreç uzaktan yürüyor: yazışma, ekran paylaşımı ve çalışan bir test adresi genelde yetiyor. Konya içindeyseniz yüz yüze de görüşebiliriz, ama bunu şart olarak koymuyorum. Uzaktan çalışmak bu işte istisna değil, varsayılan.",
+    "faq4Q": "Siteyi kendim güncelleyebilecek miyim, CMS koyuyor musunuz?",
+    "faq4A": "Varsayılanım CMS'siz ve statik, ama bu bir kural değil. İçerik yılda birkaç kez değişiyorsa CMS bakım yükü ve güvenlik yüzeyi getiriyor, karşılığında bir şey vermiyor; Köklü Hukuk'ta bu yüzden koymadım. Blog, ilan ya da ürün gibi düzenli değişen bir içeriğiniz varsa yönetim katmanını kapsamda konuşuruz ve bunu baştan söylemeniz gerekir.",
+    "faq5Q": "Site nerede barınacak?",
+    "faq5A": "Üç seçenek var: kendi sunucum, sizin sunucunuz ya da bir bulut sağlayıcı. Kendi tarafımda Coolify ve Docker çalışıyor; bu sitenin kendisi de orada duruyor, Köklü Hukuk da. Kendi sunucunuzu tercih ederseniz kurulumu ben yapıyorum, erişim ve fatura sizde kalıyor. Alan adının kimin adına kayıtlı olacağını da baştan yazıyoruz.",
+    "faq6Q": "Bakım dahil mi?",
+    "faq6A": "Teslimden sonrası ayrı konuşuluyor, çünkü bakım tek seferlik bir kalem değil. Köklü Hukuk sitesini iki yıl güncel tuttum; küçük değişiklikler birikince mimari her yeni istekte biraz daha direndi ve sonunda yeniden kurmak yamaya devam etmekten ucuza geldi. Sizin işiniz için de aynı soruyu erken sormak gerekiyor: bu site iki yıl sonra ne kadar değişmiş olacak?"
   }
 }

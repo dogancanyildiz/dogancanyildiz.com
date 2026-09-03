@@ -25,6 +25,7 @@ export type StaticPathname =
   | "/projects"
   | "/blog"
   | "/contact"
+  | "/services"
   | "/privacy"
   | "/coming-soon"
   | "/updating";

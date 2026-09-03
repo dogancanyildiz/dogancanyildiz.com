@@ -44,6 +44,10 @@ export const pathnames = {
     tr: "/iletisim",
     en: "/contact",
   },
+  "/services": {
+    tr: "/hizmetler",
+    en: "/services",
+  },
   "/privacy": {
     tr: "/gizlilik",
     en: "/privacy",
