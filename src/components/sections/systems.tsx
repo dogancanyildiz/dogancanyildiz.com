@@ -1,7 +1,7 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { LiveStatus } from "@/components/sections/live-status";
-import { buildInfo, formatBuildSha } from "@/lib/build-info";
+import { buildInfo, commitUrl, formatBuildSha } from "@/lib/build-info";
 
 /**
  * Hard-coded on purpose. This line names technologies, never machines: no
@@ -35,7 +35,9 @@ const DATE_FORMAT = {
   day: "numeric",
   hour: "numeric",
   minute: "2-digit",
-  timeZone: "UTC",
+  // Istanbul time: the owner and most visitors read the clock in TRT, and the
+  // zone name stays on the value so nobody has to guess.
+  timeZone: "Europe/Istanbul",
   timeZoneName: "short",
 } as const;
 
@@ -107,8 +109,22 @@ export async function Systems() {
             {buildDate ? format.dateTime(buildDate, DATE_FORMAT) : t("noData")}
           </SystemsField>
 
-          <SystemsField label={t("commitLabel")}>
-            <span className="font-mono">{buildSha ?? t("noData")}</span>
+          <SystemsField label={t("releaseLabel")}>
+            <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <span>v{buildInfo.version}</span>
+              {buildSha ? (
+                <a
+                  href={commitUrl(buildInfo.sha)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={t("commitTitle")}
+                  aria-label={t("commitAria", { sha: buildSha })}
+                  className="font-mono text-xs text-muted-foreground underline decoration-dotted underline-offset-4 hover:text-foreground"
+                >
+                  {buildSha}
+                </a>
+              ) : null}
+            </span>
           </SystemsField>
 
           <SystemsField label={t("statusLabel")}>
