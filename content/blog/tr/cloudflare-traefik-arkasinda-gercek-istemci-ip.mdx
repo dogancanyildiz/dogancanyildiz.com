@@ -1,0 +1,71 @@
+---
+title: Cloudflare ve Traefik arkasında gerçek istemci IP'sini doğru okumak
+slug: cloudflare-traefik-arkasinda-gercek-istemci-ip
+translationKey: reading-the-real-client-ip
+date: 2026-09-03
+summary: Hız sınırlayıcı ziyaretçiyi hangi adresle tanımalı? Cloudflare ve Traefik arkasında gerçek istemci IP'sini taklit edilemeden okumanın kararı.
+tags:
+  - guvenlik
+  - network
+  - devops
+---
+
+## Sorun: hız sınırlayıcı ziyaretçiyi hangi adresle tanısın
+
+İletişim formundaki hız sınırlayıcının tek bir kararı var: bu isteği hangi anahtara sayacağım. O anahtar yanlış başlıktan okunursa koruma sessizce işe yaramaz hale geliyor. Uygulama Cloudflare'in, onun da arkasında Traefik'in arkasında duruyor, yani istek koda ulaşana kadar en az iki vekil sunucudan geçiyor. Her vekil kendi başlığını ekliyor, ve bu başlıkların hangisi gerçekten ziyaretçiyi taşıyor, hangisi istemcinin kendi doldurabildiği düz bir metin, karar burada başlıyor. Aynı soruyu ilk kez [CCNA sonrası yayın kararlarında](/yazilar/ccna-dan-web-guvenligine) sormuştum: istek buraya nasıl ulaştı ve kim ulaşmasına izin verdi.
+
+## CF-Connecting-IP tek başına neden yetmez
+
+Cloudflare'in eklediği CF-Connecting-IP güvenilir görünüyor ama tek başına güven vermiyor. Bu düz bir HTTP başlığı, ve herhangi bir istemci onu isteğine ekleyebilir. Traefik'in forwardedHeaders.trustedIPs ayarı da yardıma gelmiyor, çünkü o ayar yalnızca X-Forwarded-* ailesini yönetiyor, CF-Connecting-IP'ye hiç dokunmuyor. Başlık ancak origin yalnızca Cloudflare'den gelen bağlantıları kabul ettiğinde güvenilir oluyor; bunu ya Traefik'in ipAllowList'i ya da sunucunun güvenlik duvarı sağlıyor, ki bu ayrı bir katman. Kod bu kararı kendisi tahmin etmiyor: başlığa güvenilip güvenilmeyeceği dışarıdan bir `trustCloudflare` seçeneğiyle geliyor.
+
+```ts
+export function getClientIp(headers: Headers, options: ClientIpOptions): string {
+  if (options.trustCloudflare) {
+    const cloudflareIp = normalizeClientIp(headers.get("cf-connecting-ip") ?? "");
+    if (cloudflareIp) {
+      return cloudflareIp;
+    }
+  }
+  // ...
+}
+```
+
+## X-Forwarded-For'da neden son hop
+
+trustCloudflare kapalıyken geri düşülen başlık X-Forwarded-For, ama ondan yalnızca son giriş okunuyor. Bu başlık virgülle ayrılmış bir hop listesi, ve soldaki her değer istemci tarafından yazılabildiği için taklit edilebilir. Güvenilebilecek tek giriş, uygulamanın hemen önündeki güvenilir vekilin eklediği son hop. Cloudflare'in arkasında bu son hop bir Cloudflare uç adresi oluyor: kaba, çünkü ziyaretçinin kendisi değil edge, ama taklit edilemez. Tam ziyaretçi adresi için yine trustCloudflare gerekiyor.
+
+```ts
+const forwarded = headers.get("x-forwarded-for") ?? "";
+const hops = forwarded
+  .split(",")
+  .map((hop) => hop.trim())
+  .filter((hop) => hop.length > 0);
+const nearest = normalizeClientIp(hops[hops.length - 1] ?? "");
+```
+
+## IPv6'da tek adres tek ziyaretçi değil
+
+Anahtar hangi başlıktan gelirse gelsin, IPv6'da tek bir adres tek bir ziyaretçiye karşılık gelmiyor. Bir sağlayıcı tek aboneye en küçük blok olarak bir /64 veriyor, ve o blok içindeki her host aynı hattın parçası. Sınırlayıcıyı tam adres üzerinden anahtarlarsam, bir ziyaretçi 2^64 adres arasında dolaşıp her biri için taze bir bütçe alabilir, üstelik yol boyunca sınırlayıcının sınırlı haritasındaki diğer anahtarları da dışarı atabilir. Bu yüzden IPv6 adresinin yalnızca ilk dört 16 bitlik grubu, yani /64'ü anahtar oluyor.
+
+## Anahtar olmadan önce normalizasyon
+
+Bir başlık kazandıktan sonra değeri doğrudan anahtar yapmıyorum, önce tek bir kanonik biçime indiriyorum. Aynı adresin iki farklı yazımı, büyük veya küçük harf, baştaki sıfırlar, bir zone kimliği, bir port ya da IPv4'ün IPv6 içine gömülü hâli, hepsi aynı anahtarı vermeli. Aksi hâlde tek ziyaretçi iki bütçe tutabilir. ::ffff:203.0.113.9 ile 203.0.113.9 aynı ziyaretçi, ikisi de aynı IPv4 anahtarına iniyor; geçersiz bir değer ise anahtar olmuyor, null dönüyor ve o istek çözülemeyen adreslerin paylaştığı ayrı, bilerek daha gevşek kovaya düşüyor.
+
+```ts
+export function normalizeClientIp(value: string): string | null {
+  const candidate = stripPort(value.trim());
+  const version = isIP(candidate);
+  if (version === 4) {
+    return candidate;
+  }
+  if (version !== 6) {
+    return null;
+  }
+  const groups = ipv6Groups(candidate);
+  return groups ? ipv6Key(groups) : null;
+}
+```
+
+## Ne kazandım
+
+Sonuçta uygulama güvenini yalnızca doğrulayabildiği bir zincire veriyor. trustCloudflare açıkken ve origin yalnızca Cloudflare'i kabul ederken gerçek ziyaretçi adresini okuyor; o güven yoksa taklit edilemeyen kaba hop'a düşüyor, hiçbir zaman istemcinin kendi doldurduğu bir başlığa değil. Bu iç sınırlayıcı da tek koruma değil: /api/contact'ın önünde Cloudflare'in kendi hız sınırlama kuralı dış katman olarak duruyor, ve iç katman yanılırsa bile dış katman ayakta kalıyor. Kişisel bir site için bu takas bana değdi, çünkü her karar depoda, taklit edilemeyecek bir güven zincirinin gerekçesiyle birlikte duruyor.
