@@ -64,8 +64,8 @@ Coolify'da her değişkenin yanındaki "Build Variable?" kutusu, o değişkenin 
 
 İki geçerli ayar:
 
-- UI Healthcheck açık ve **Host: `127.0.0.1`** (`localhost` değil). wget IPv4'e bağlanır, kontrol geçer.
-- UI Healthcheck kapalı. Coolify o zaman Dockerfile'daki probe'a düşer; o zaten `127.0.0.1` ve node'un yerleşik `fetch`'iyle çalışır.
+- **Kullanılan (2026-09-03):** UI Healthcheck açık ve **Host: `127.0.0.1`** (`localhost` değil). wget IPv4'e bağlanır, kontrol geçer; ilk başarılı deploy bu ayarla alındı.
+- Alternatif: UI Healthcheck kapalı. Coolify o zaman Dockerfile'daki probe'a düşer; o zaten `127.0.0.1` ve node'un yerleşik `fetch`'iyle çalışır.
 
 UI açık tutulacaksa değerler Dockerfile ile aynı olmalı ki iki katman çelişmesin:
 
