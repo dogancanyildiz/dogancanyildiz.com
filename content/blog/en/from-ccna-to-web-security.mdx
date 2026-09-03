@@ -5,7 +5,7 @@ translationKey: ccna-dan-web-guvenligine
 legacySlugs:
   - ccna-dan-web-guvenligine
 date: 2026-06-10
-summary: The most expensive example was a rate limiter keyed off the wrong header.
+summary: The most expensive example after CCNA was a rate limiter keyed off the wrong header.
 tags:
   - network
   - security
@@ -18,7 +18,7 @@ The most lasting lesson from completing the CCNA track was that a packet does no
 
 ## What that looks like in practice
 
-That perspective shows up most in deployment decisions. Which port a service exposes, which headers a reverse proxy forwards and where the real client address is read are choices that look independent of application code but directly define security. A rate limiter keyed off the wrong header, for example, puts every visitor in one bucket and silently disables the protection.
+That perspective shows up most in deployment decisions. Which port a service exposes, which headers a reverse proxy forwards and where the real client address is read are choices that look independent of application code but directly define security. A rate limiter keyed off the wrong header, such as X-Forwarded-For, which the client itself can populate, puts every visitor in one bucket and silently disables the protection.
 
 ## Why subnetting still matters
 
