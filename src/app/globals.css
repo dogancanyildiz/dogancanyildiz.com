@@ -13,6 +13,9 @@
   --font-mono: var(--font-mono-stack);
   --color-ring: var(--ring);
   --color-status-up: var(--status-up);
+  --color-status-down: var(--status-down);
+  --color-status-pending: var(--status-pending);
+  --color-status-maintenance: var(--status-maintenance);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
@@ -68,11 +71,15 @@
   --border-strong: oklch(0.635 0.0114 252.9);
   --input-border: var(--border-strong);
   --ring: oklch(0.4794 0.1156 156.3);
-  /* Availability dot in the hero, the site's only status surface. There is
-     no matching "down" token: the Systems panel renders build-time data and
-     links out to Uptime Kuma rather than reporting a live state, so nothing
-     here ever paints a failure. */
+  /* Status surfaces: the availability dot in the hero and the live status
+     cell of the Systems panel, which now paints Uptime Kuma's four states.
+     Every value clears 3:1 against --card and --background, the WCAG 1.4.11
+     floor for a non-text graphic that carries meaning; the state is always
+     spelled out in words next to the colour as well. */
   --status-up: oklch(0.4794 0.1156 156.3);
+  --status-down: oklch(0.5054 0.1905 27.5);
+  --status-pending: oklch(0.5722 0.1226 71.5);
+  --status-maintenance: oklch(0.5175 0.1345 259.4);
   --ambient-grid-line: color-mix(in oklab, var(--foreground) 8%, transparent);
   --ambient-grid-opacity: 0.55;
   --ambient-glow: color-mix(in oklab, var(--foreground) 10%, transparent);
@@ -98,6 +105,9 @@
   --input-border: var(--border-strong);
   --ring: oklch(0.7591 0.1444 158);
   --status-up: oklch(0.7591 0.1444 158);
+  --status-down: oklch(0.7106 0.1661 22.2);
+  --status-pending: oklch(0.8033 0.1268 78.5);
+  --status-maintenance: oklch(0.7226 0.1122 259.4);
   --ambient-grid-line: color-mix(in oklab, var(--foreground) 4%, transparent);
   --ambient-grid-opacity: 0.5;
   --ambient-glow: color-mix(in oklab, oklch(1 0 0) 10%, transparent);

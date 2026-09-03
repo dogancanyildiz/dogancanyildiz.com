@@ -18,8 +18,18 @@ verilmiştir.
 | Umami (merkezi) | `umami.dravcore.com` (ayrı Coolify kaynağı, bu repo dışında) | Bu site orada bir website kaydı; tracker script'i oradan yüklenir |
 
 Kuma'nın public status sayfası hangi domain'de yayınlanırsa `NEXT_PUBLIC_STATUS_URL`
-o adresi gösterir; Systems paneli yalnızca link verir, Kuma'nın API'sinden veri
-çekmez (dokümante değil, sürümle kırılır; `docs/05` karar kaydı).
+o adresi gösterir. **Karar değişikliği (2026-09-03):** Systems paneli artık
+yalnızca link vermiyor, Kuma'nın kimlik doğrulaması istemeyen public JSON
+uçlarını (`/api/status-page/<slug>` ve `/api/status-page/heartbeat/<slug>`)
+**sunucu tarafında** okuyup durum noktasını, 24 saatlik uptime yüzdesini ve son
+kontrollerin kalp atışı şeridini basıyor. Okuma `next: { revalidate: 60 }` ile
+yapılıyor: ana sayfa statik prerender kalıyor, veri en fazla 60 saniyede bir
+tazeleniyor. İstek tarayıcıdan değil sunucudan gittiği için CSP değişmedi ve
+izleme origin'i client bundle'a girmiyor. Şema `zod` ile doğrulanıyor, zaman
+aşımı 4 saniye, Kuma'nın `msg` alanı hiçbir zaman render edilmiyor. Uç
+erişilemezse, zaman aşarsa veya yanıt şemaya uymazsa hücre eski haline
+(yalnızca "Durum sayfasını aç" linki) düşer ve `next build` bundan etkilenmez;
+sunucu log'una `warn` seviyesinde tek satır düşer.
 
 ## portfolio uygulamasının ortam değişkenleri
 
@@ -28,7 +38,7 @@ o adresi gösterir; Systems paneli yalnızca link verir, Kuma'nın API'sinden ve
 | `NEXT_PUBLIC_SITE_URL` | Build | `https://www.dogancanyildiz.com` |
 | `NEXT_PUBLIC_BUILD_SHA` | Build | Elle girilmez; boşsa Dockerfile Coolify'ın otomatik geçtiği `SOURCE_COMMIT` build-arg'ına döner, CI ise `github.sha`'yı geçirir |
 | `NEXT_PUBLIC_BUILD_DATE` | Build | Elle girilmez; boşsa Dockerfile build anındaki UTC saatini (ISO 8601) kullanır |
-| `NEXT_PUBLIC_STATUS_URL` | Build | Kuma public status sayfasının tam adresi; boşsa Systems'taki link satırı gizlenir, yalnızca https kabul edilir |
+| `NEXT_PUBLIC_STATUS_URL` | Build | Kuma public status sayfasının tam adresi; boşsa Systems'taki link satırı gizlenir, yalnızca https kabul edilir. Canlı durum widget'ı yalnızca `https://<host>/status/<slug>` desenine uyan bir değerde çalışır; başka bir https adresi verilirse hücre yalnızca link basar |
 | `UMAMI_SCRIPT_URL` | Build | `https://umami.dravcore.com` (`src/lib/analytics.ts` `UMAMI_ORIGIN` ile aynı olmak zorunda, aksi halde production build durur) |
 | `UMAMI_WEBSITE_ID` | Build | Merkezi Umami panelindeki bu siteye ait website UUID'si |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | Runtime | Mailcow submission (587); uygulama parolası, `docs/deploy/mailcow-smtp.md` |
@@ -95,8 +105,12 @@ tekrar okunur: içerik üretim maliyeti, build süresi ve bakım yükü not edil
 
 ## Widget davranışı
 
-Ana sayfadaki Systems bölümü üçüncü taraf veri çekmez: son yayın tarihi
-(`timeZoneName: "short"` ile), commit SHA'sı, stack satırı ve
-`NEXT_PUBLIC_STATUS_URL` doluysa public status sayfasına bir link gösterir.
-Build değişkenleri boşsa ilgili alanlar nötr "veri yok" satırına düşer; sayfa
-tamamen statiktir, revalidate yoktur.
+Ana sayfadaki Systems bölümünün dört hücresinden üçü build sabitidir: son yayın
+tarihi (`timeZoneName: "short"` ile), commit SHA'sı ve stack satırı. Dördüncü
+hücre, "Canlı durum", Kuma'nın public JSON'unu sunucu tarafında 60 saniyelik
+ISR ile okur (`src/lib/status-page.ts`, `src/components/sections/live-status.tsx`)
+ve durum noktası, 24 saatlik uptime yüzdesi, son 40 kontrolün çubuk şeridi ve
+"Durum sayfasını aç" linkini basar. 320px'te en eski 16 çubuk gizlenir, son 24'ü
+görünür kalır. Kuma erişilemezse hücre yalnızca linke düşer. Build değişkenleri
+boşsa ilgili alanlar nötr "veri yok" satırına düşer. Sayfa prerender edilmeye
+devam eder; tek fark HTML'in en fazla dakikada bir yeniden üretilmesidir.

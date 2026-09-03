@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
+import { LiveStatus } from "@/components/sections/live-status";
 import { buildInfo, formatBuildSha } from "@/lib/build-info";
 
 /**
@@ -15,11 +16,12 @@ const STACK = [
 ] as const;
 
 /**
- * The panel deliberately renders no third party monitoring data (decision
- * 2026-08-30, docs/05-backend-icerik-ve-servisler.md): live monitoring runs on
- * Uptime Kuma, whose JSON internals are undocumented and version brittle, so
- * the site links to the public status page instead of parsing it. Everything
- * shown here is build-time data the deploy itself produced.
+ * Three of the four cells are build-time data the deploy itself produced. The
+ * fourth reads Uptime Kuma's public status page JSON, on the server, through
+ * a 60 second ISR cache (src/lib/status-page.ts). The earlier "no third party
+ * data here" rule was about Kuma's undocumented internals, so the parse is
+ * schema validated and every failure, including an unreachable host during
+ * `next build`, drops the cell back to the plain status page link.
  */
 
 /**
@@ -110,19 +112,7 @@ export async function Systems() {
           </SystemsField>
 
           <SystemsField label={t("statusLabel")}>
-            {statusUrl ? (
-              <a
-                href={statusUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline decoration-border-strong underline-offset-4 transition-colors hover:text-primary"
-              >
-                {t("statusPage")}
-                <span aria-hidden="true"> ↗</span>
-              </a>
-            ) : (
-              t("noData")
-            )}
+            {statusUrl ? <LiveStatus href={statusUrl} /> : t("noData")}
           </SystemsField>
 
           <SystemsField label={t("stackLabel")}>
