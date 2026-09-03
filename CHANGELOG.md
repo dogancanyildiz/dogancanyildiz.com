@@ -10,6 +10,19 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-03
+
+### Features
+
+- `bab8e6b` **docker**: fall back to SOURCE_COMMIT and build time for build info (#56)
+
+### Other
+
+- `cb62642` yürütülmüş planları arşive al, karar dokümanlarını birleştir ve güncel duruma çek (#57)
+- `b5809bf` **release**: sync version v0.5.0 (#55)
+
+**Tam değişiklik listesi**: [v0.5.0...v0.6.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.5.0...v0.6.0)
+
 ## [0.5.0] - 2026-09-03
 
 ### Features
@@ -151,7 +164,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.3.0...v0.3.1
