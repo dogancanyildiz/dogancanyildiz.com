@@ -115,13 +115,19 @@ değerlendirilir.
 
 ## Bağımlılık durumu
 
-`npm audit --omit=dev` 0 bulgu; `npm audit --include=dev` 2 high
-(velite -> sharp <0.35.0, `GHSA-f88m-g3jw-g9cj`). **Bilinçli kabul edilen
-risk:** sharp yalnızca build zamanında, güvenilen içerik üzerinde çalışıyor ve
-düzeltme velite'ı `0.0.0`'a düşüren `--force`. Tripwire: velite sharp >= 0.35
-aralığına geçtiğinde kapatılır. CI'daki `npm audit --omit=dev
---audit-level=high` adımı prod grafiğini koruyor, `dependency-review-action`
-PR'larda yüksek şiddetli yeni bağımlılığı durduruyor.
+`npm audit` 0 high. velite -> sharp <0.35.0 libvips zinciri
+(`GHSA-f88m-g3jw-g9cj`, Dependabot #58) `package.json`'daki
+`overrides: { "sharp": "^0.35.0" }` ile kapandı: velite `^0.34.5` istiyor,
+override onu next'in zaten kullandığı 0.35.4'e sabitliyor ve iki ağaç tek
+kopyada birleşiyor (`npm ls sharp` ikisini de 0.35.4 gösteriyor).
+`npm audit fix --force` yolu kapalı, o velite'ı `0.0.0`'a düşürüyor.
+Override'a dokunulduğunda `npx velite --clean --strict` (içerik görselleri) ve
+`next build` (next/image optimizasyonu) yeniden koşulmalı, sharp yalnızca bu
+iki yerde çalışıyor. velite kendi aralığını `^0.35` yapınca override
+silinebilir.
+CI'daki `npm audit --omit=dev --audit-level=high` adımı prod grafiğini
+koruyor, `dependency-review-action` PR'larda yüksek şiddetli yeni bağımlılığı
+durduruyor.
 
 `npm ci --ignore-scripts` + beş paketin `npm rebuild`'i install-script yüzeyini
 daraltıyor (`Dockerfile`, `ci.yml`, `links.yml`, üçünde de aynı).

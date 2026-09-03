@@ -136,10 +136,11 @@ yapılamıyordu, yayına çıktıktan sonra da sırası gelmedi.
 
 ## 6. Kabul edilmiş teknik borç
 
-- **`npm audit --include=dev` 2 high** (velite -> sharp <0.35.0). Prod grafiği
-  temiz; sharp yalnızca build zamanında güvenilen içerik üzerinde çalışıyor,
-  düzeltme velite'ı `0.0.0`'a düşürüyor. Tripwire: velite sharp >= 0.35'e
-  geçtiğinde kapanır.
+- **`sharp` npm `overrides` ile sabitleniyor** (`^0.35.0`). velite hâlâ
+  `^0.34.5` istiyor; override kalkarsa libvips zinciri
+  (`GHSA-f88m-g3jw-g9cj`) geri gelir. Tripwire: velite kendi aralığını
+  `^0.35`'e taşıdığında `package.json`'daki `overrides` bloğu silinebilir,
+  ayrıntı [09](./09-guvenlik.md) bölüm "Bağımlılık durumu".
 - **typescript 7 ve eslint 10 majorları Dependabot'ta ignore.**
   `eslint-plugin-react` eslint 10'u desteklemiyor (transitif olarak
   `eslint-config-next` üzerinden), üst akış bekleniyor.
