@@ -1,6 +1,6 @@
 {
   "name": "dogancanyildiz.com",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -23,6 +23,9 @@
   },
   "engines": {
     "node": ">=24"
+  },
+  "overrides": {
+    "sharp": "^0.35.0"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

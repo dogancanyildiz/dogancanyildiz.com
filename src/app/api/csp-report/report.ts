@@ -1,6 +1,10 @@
 import { createRateLimiter } from "@/lib/rate-limit";
 
-import { CSP_REPORT_LIMITS, isCspMeasurementEnabled } from "./mode";
+import {
+  CSP_REPORT_LIMITS,
+  CSP_REPORTS_PER_REQUEST,
+  isCspMeasurementEnabled,
+} from "./mode";
 
 /**
  * Parsing and throttling for the CSP violation collector.
@@ -18,10 +22,15 @@ export const MAX_REPORT_BYTES = 64 * 1024;
  *
  * The byte cap alone does not bound the log: a minimal reports+json envelope
  * is a few dozen bytes, so one accepted request can carry well over a thousand
- * of them and each one costs a line. A browser batches a handful, never this
- * many, so anything past the cap is noise and is dropped rather than written.
+ * of them and each one costs a line. Anything past the cap is dropped rather
+ * than written.
+ *
+ * The cap follows the same measurement switch as the per client budget below,
+ * for the same reason: see CSP_REPORTS_PER_REQUEST in ./mode.
  */
-export const MAX_REPORTS_PER_REQUEST = 20;
+export const MAX_REPORTS_PER_REQUEST = isCspMeasurementEnabled()
+  ? CSP_REPORTS_PER_REQUEST.measuring
+  : CSP_REPORTS_PER_REQUEST.idle;
 
 const ACCEPTED_CONTENT_TYPES = [
   // Deprecated report-uri format, still what Firefox and Safari send.

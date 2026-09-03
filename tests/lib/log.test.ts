@@ -78,7 +78,25 @@ describe("describeError", () => {
 
   it("falls back to a constant for non error values", () => {
     expect(describeError({ secret: true })).toBe("UnknownError");
-    expect(describeError("boom")).toBe("boom");
+  });
+
+  it("labels a thrown string with its type instead of echoing it", () => {
+    expect(describeError("boom")).toBe("String/boom");
+    expect(describeError("   ")).toBe("String");
+  });
+
+  it("collapses a thrown string onto one bounded line", () => {
+    // A thrown string can be assembled out of visitor input, so it gets the
+    // same treatment the Error branch gives a code: bounded, and never able
+    // to spread a payload across the log view.
+    const noisy = describeError("line one\nline two\tthree\u200bfour");
+    expect(noisy).toBe("String/line one line two three four");
+    expect(noisy).not.toContain("\n");
+
+    const long = describeError(`x${"y".repeat(500)}`);
+    // "String/" plus exactly MAX_THROWN_STRING characters of the value.
+    expect(long).toHaveLength("String/".length + 200);
+    expect(long.startsWith("String/xy")).toBe(true);
   });
 
   it("keeps the provider error code next to the name", () => {

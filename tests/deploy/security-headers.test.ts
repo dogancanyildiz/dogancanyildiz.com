@@ -108,7 +108,11 @@ describe("asset caching", () => {
 
   it("never marks an unhashed asset immutable", async () => {
     const { rules } = await loadHeaders("production");
+    // /_next/static is the one hashed tree, and its rule only restates the
+    // value the framework would have set on its own. Everything else keeps a
+    // path that outlives its content, so immutable there is unbustable.
     const cacheValues = rules
+      .filter((rule) => rule.source !== "/_next/static/:path*")
       .flatMap((rule) => rule.headers)
       .filter((header) => header.key === "Cache-Control")
       .map((header) => header.value);
@@ -117,6 +121,45 @@ describe("asset caching", () => {
     for (const cacheValue of cacheValues) {
       expect(cacheValue).not.toContain("immutable");
     }
+  });
+
+  it("keeps the hashed build output immutable for a year", async () => {
+    const { forSource } = await loadHeaders("production");
+
+    expect(value(forSource("/_next/static/:path*"), "Cache-Control")).toBe(
+      "public, max-age=31536000, immutable"
+    );
+  });
+
+  it("gives html a short edge ttl instead of the framework's one year", async () => {
+    const { forSource } = await loadHeaders("production");
+    const cacheControl = value(forSource("/:path*"), "Cache-Control") ?? "";
+
+    // Next's own value for a prerendered route is s-maxage=31536000, which
+    // would pin a page at the edge for a year once a Cache Rule exists.
+    expect(cacheControl).not.toContain("s-maxage=31536000");
+    expect(cacheControl).toBe(
+      "public, max-age=0, s-maxage=300, stale-while-revalidate=86400"
+    );
+  });
+
+  it("lets the edge hold an og card for a day on every og route shape", async () => {
+    const { forSource } = await loadHeaders("production");
+
+    for (const source of [
+      "/opengraph-image/:id*",
+      "/:path*/opengraph-image/:id*",
+    ]) {
+      expect(value(forSource(source), "Cache-Control")).toBe(
+        "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800"
+      );
+    }
+  });
+
+  it("keeps the api routes out of every cache", async () => {
+    const { forSource } = await loadHeaders("production");
+
+    expect(value(forSource("/api/:path*"), "Cache-Control")).toBe("no-store");
   });
 
   it("caches the static icon files for a day", async () => {
