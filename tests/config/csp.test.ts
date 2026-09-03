@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   CSP_REPORT_LIMITS,
+  CSP_REPORTS_PER_REQUEST,
   isCspMeasurementEnabled,
 } from "@/app/api/csp-report/mode";
 
@@ -185,5 +186,31 @@ describe("measurement switch", () => {
     const { CSP_REPORT_RATE_LIMIT } =
       await import("@/app/api/csp-report/report");
     expect(CSP_REPORT_RATE_LIMIT.limit).toBe(CSP_REPORT_LIMITS.measuring);
+  });
+
+  it("caps the reports per request at the idle batch size by default", async () => {
+    const { MAX_REPORTS_PER_REQUEST } =
+      await import("@/app/api/csp-report/report");
+    expect(MAX_REPORTS_PER_REQUEST).toBe(CSP_REPORTS_PER_REQUEST.idle);
+  });
+
+  it("raises the reports per request cap with the request budget", async () => {
+    // Raising the per client budget without raising this cap would let the
+    // measurement accept the request and then drop most of the page view it
+    // was opened to measure: one batch carries around twenty violations.
+    vi.stubEnv("CSP_REPORT_ONLY", "1");
+    const { MAX_REPORTS_PER_REQUEST } =
+      await import("@/app/api/csp-report/report");
+    expect(MAX_REPORTS_PER_REQUEST).toBe(CSP_REPORTS_PER_REQUEST.measuring);
+    expect(MAX_REPORTS_PER_REQUEST).toBeGreaterThan(
+      CSP_REPORTS_PER_REQUEST.idle
+    );
+  });
+
+  it("keeps both budgets moving in the same direction", async () => {
+    expect(CSP_REPORT_LIMITS.measuring).toBeGreaterThan(CSP_REPORT_LIMITS.idle);
+    expect(CSP_REPORTS_PER_REQUEST.measuring).toBeGreaterThan(
+      CSP_REPORTS_PER_REQUEST.idle
+    );
   });
 });

@@ -174,6 +174,73 @@ const ONE_DAY_CACHE = {
   value: "public, max-age=86400",
 };
 
+/**
+ * Default cache policy for everything the app renders.
+ *
+ * Next gives a statically prerendered route `s-maxage=31536000` (one year) and
+ * no max-age at all: see node_modules/next/dist/server/lib/cache-control.js.
+ * Nothing at the edge acts on it today because there is no Cloudflare Cache
+ * Rule for HTML, but the day one is added the edge would hold every page for a
+ * year and a deploy would not change what visitors see. Five minutes at the
+ * edge with a day of stale-while-revalidate keeps the CDN useful and bounds
+ * how long a deploy can stay invisible; max-age=0 keeps the browser out of the
+ * guessing game it plays when only s-maxage is present.
+ *
+ * It sits on the catch all rule so a new page inherits it without an edit
+ * here. Every rule below overrides it for a path that needs something else,
+ * because the router applies matching rules in order and the last write to a
+ * key wins (next/dist/server/lib/router-utils/resolve-routes.js). Next itself
+ * only fills in its own value when the response has none
+ * (next/dist/server/send-payload.js), so these win over the framework.
+ */
+const DEFAULT_CACHE = {
+  key: "Cache-Control",
+  value: "public, max-age=0, s-maxage=300, stale-while-revalidate=86400",
+};
+
+/**
+ * Restates the framework's own value for the hashed build output.
+ *
+ * router-server.js only applies "public, max-age=31536000, immutable" to
+ * /_next/static when the response carries no cache-control yet, and
+ * DEFAULT_CACHE above already put one there. Without this rule the catch all
+ * would silently downgrade every hashed chunk to a five minute edge TTL.
+ */
+const IMMUTABLE_BUILD_OUTPUT = {
+  key: "Cache-Control",
+  value: "public, max-age=31536000, immutable",
+};
+
+/**
+ * The OpenGraph cards are rendered with satori and resvg on every request that
+ * misses: about 50 KB of PNG per share scrape, and a social network refetches
+ * the same card often. The image only changes when the content or the brand
+ * does, and both ship a new build, so a day at the edge with a week of
+ * stale-while-revalidate is safe. max-age=0 keeps the browser revalidating,
+ * which is what the framework's own default already did.
+ */
+const OG_IMAGE_CACHE = {
+  key: "Cache-Control",
+  value: "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+};
+
+/** Health, contact and the CSP collector are per request answers. */
+const NO_STORE = { key: "Cache-Control", value: "no-store" };
+
+/**
+ * Every public path that resolves to an OpenGraph image route.
+ *
+ * The file routes are /[lang]/opengraph-image/[__metadata_id__] and the two
+ * per page ones under blog/[slug] and projects/[slug]; next-intl serves them
+ * under the localized slugs (/yazilar/..., /projeler/...) and under the
+ * unprefixed Turkish root, so the match is written against the segment name
+ * that survives every one of those forms rather than against each URL.
+ */
+const OG_IMAGE_SOURCES = [
+  "/opengraph-image/:id*",
+  "/:path*/opengraph-image/:id*",
+];
+
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
@@ -191,6 +258,7 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           ...staticSecurityHeaders(isProduction),
+          DEFAULT_CACHE,
           {
             key: "Reporting-Endpoints",
             value: `${CSP_REPORT_GROUP}="${cspReportEndpoint()}"`,
@@ -242,6 +310,12 @@ const nextConfig: NextConfig = {
       { source: "/favicon.ico", headers: [ONE_DAY_CACHE] },
       { source: "/icon.png", headers: [ONE_DAY_CACHE] },
       { source: "/apple-icon.png", headers: [ONE_DAY_CACHE] },
+      { source: "/_next/static/:path*", headers: [IMMUTABLE_BUILD_OUTPUT] },
+      ...OG_IMAGE_SOURCES.map((source) => ({
+        source,
+        headers: [OG_IMAGE_CACHE],
+      })),
+      { source: "/api/:path*", headers: [NO_STORE] },
     ];
   },
 };

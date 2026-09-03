@@ -6,10 +6,13 @@ Durum: Uygulandı, site 2026-09-03'te canlıda (Faz 1 #3; CI/Docker sertleştirm
 
 ### 1. Build yolu: Coolify GitHub App + git tabanlı Dockerfile
 
-Kararı tek bir zorunlu koşul belirledi: PR başına önizleme URL'i. Coolify'da bu
-özellik yalnızca GitHub App entegrasyonu ve git tabanlı build ile çalışıyor,
-Deploy Key desteklemiyor. Elenen yollar: GHCR image + pull (preview'ı native
-desteklemiyor, gelecekteki yükseltme kapısı), Nixpacks (üreticisi aktif
+Kararı o tarihte tek bir zorunlu koşul belirledi: PR başına önizleme URL'i.
+Coolify'da bu özellik yalnızca GitHub App entegrasyonu ve git tabanlı build ile
+çalışıyor, Deploy Key desteklemiyor. **Güncelleme (2026-09-03):** Preview
+Deployments kapatıldı (tek geliştirici, her PR CI'dan geçiyor), ama GitHub App
++ Dockerfile build pack seçimi kendi başına da doğru kaldığı için
+değiştirilmedi. Elenen yollar: GHCR image + pull (gelecekteki yükseltme
+kapısı), Nixpacks (üreticisi aktif
 geliştirmediğini ilan etti, halefi beta), docker-compose build pack (Coolify'da
 zero-downtime rolling update'i tamamen devre dışı bırakıyor, tek servisli bir
 sitede kazanç yok). Rolling update dört koşula bağlı ve seçilen yol dördünü de
@@ -31,7 +34,7 @@ Kararda olmayan, uygulamada eklenen üç şey:
 
 - **`NEXT_PUBLIC_SITE_URL` ARG'ının varsayılanı yok.** Unutulan bir build
   argümanı `/robots.txt` prerender'ında `resolveSiteUrl` ile build'i düşürüyor;
-  prod URL'in sessizce preview imajına gömülmesini önlüyor. Aynı kural
+  prod URL'in sessizce yanlış bir ortamın imajına gömülmesini önlüyor. Aynı kural
   `NEXT_PUBLIC_STATUS_URL`, `NEXT_PUBLIC_BUILD_SHA` ve
   `NEXT_PUBLIC_BUILD_DATE` için de geçerli: bu ARG'lardan biri unutulursa
   ilgili alan üretimde sessizce boş kalıyordu (PR #39'un asıl bulgusu).
@@ -94,14 +97,10 @@ Tam açıklamalar `.env.example` ve README'nin "Ortam değişkenleri" tablosunda
   301 ile biter ve kalıcı sinyal verir; iki katman aynı yönde olduğu için
   çakışmaz. Ters kombinasyon ("Redirect to non-www" + edge'de apex to www)
   sonsuz döngü üretir, asla kurulmaz.
-- **`.sh -> .com` 301 Cloudflare Redirect Rules'ta**, tek atlama, path
-  korunarak, hedef doğrudan `https://www.dogancanyildiz.com/${path}`. Dil
-  prefix'ine dokunulmaz; zincirli yönlendirme (üçüncü bir atlama) yasak.
-  Traefik'teki `redirectregex` karşılığı yalnızca Cloudflare proxied modu bir
-  nedenle devre dışı kalırsa devreye giren yedek yol. Bu kural henüz canlı
-  değil: `dogancanyildiz.sh` kayıtlı değil, kapsam kararı sahibinde
-  ([11-acik-isler.md](./11-acik-isler.md)).
-- **Cross-domain 301 uygulama kodunda çözülmez.** Next.js `redirects()`
+- **İkinci alan adı kapsam dışı** (karar 2026-09-03): hiç kaydedilmedi,
+  planlanan `301` zinciri ve Traefik'teki `redirectregex` yedeği
+  dokümanlardan kaldırıldı ([11-acik-isler.md](./11-acik-isler.md) bölüm 4).
+- **Host tabanlı 301 uygulama kodunda çözülmez.** Next.js `redirects()`
   uygulamayı domain bilgisine bağlardı; yönlendirme edge/proxy katmanının işi,
   böylece domain değişse bile uygulama kodu dokunulmadan kalıyor.
 
@@ -132,10 +131,6 @@ karara yol açıyor:
   cache'leniyor; `/api/contact` için ücretsiz planın izin verdiği tek kuralla
   10 saniyede 3 istek. Uygulama içi in-memory limit iç katman olarak aynen
   duruyor.
-- **PR preview'ları DNS-only (gri bulut):** ücretsiz planda wildcard DNS
-  kaydı proxy'lenemiyor. Preview'lar yalnızca origin firewall'unda allowlist'e
-  alınmış admin IP'sinden erişilebilir ve kendi `NEXT_PUBLIC_SITE_URL`
-  değerini almalı (contact API `Origin`'i bu değerle karşılaştırıyor).
 
 Panelde tıklanacak adımların tamamı checklist olarak
 [deploy/cloudflare-kurulum.md](./deploy/cloudflare-kurulum.md),
