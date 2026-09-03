@@ -1,5 +1,5 @@
 # Tasarım Yönü, UI/UX ve Frontend
-Durum: Uygulandı (Faz 3, PR #5; içerik Faz 4, PR #6; UI/güven güncellemesi PR #11; 2026-08-28 denetim kapanışı: kontrast, token sözleşmesi, landmark/odak, hareket kararı; 2026-09-02 3. tur: hedef boyutu sweep'i, consent geri alma kontrolü; 2026-09-02 marka varlıkları: işaret bileşeni, statik ikonlar, yeni OG düzeni; 2026-09-02 paylaş bloğu: kart yazı ve proje sayfalarının sonunda; 2026-09-02 sertifika rozetleri: Hakkımda sertifika bölümü verene göre gruplanıp rozet görselleriyle çiziliyor; 2026-09-02 sertifika önizlemesi: rozet tıklanınca büyüyor, satırlar iki sütun, anahtar kelime satırı, eğitim listesinde okul amblemleri), kalan: sahibinin görsel onayları ve tarayıcı turu · Karar: 2026-08-27 · Güncelleme: 2026-09-02 · Kapsam: dogancanyildiz.com
+Durum: Uygulandı (Faz 3, PR #5; içerik Faz 4, PR #6; UI/güven güncellemesi PR #11; 2026-08-28 denetim kapanışı: kontrast, token sözleşmesi, landmark/odak, hareket kararı; 2026-09-02 3. tur: hedef boyutu sweep'i, consent geri alma kontrolü; 2026-09-02 marka varlıkları: işaret bileşeni, statik ikonlar, yeni OG düzeni; 2026-09-02 paylaş bloğu: kart yazı ve proje sayfalarının sonunda; 2026-09-02 sertifika rozetleri: Hakkımda sertifika bölümü verene göre gruplanıp rozet görselleriyle çiziliyor; 2026-09-02 sertifika önizlemesi: rozet tıklanınca büyüyor, satırlar iki sütun, anahtar kelime satırı, eğitim listesinde okul amblemleri; 2026-09-03 karar değişikliği: izin bandı ve ölçüm anahtarı kaldırıldı, Umami izin beklemeden yükleniyor), kalan: sahibinin görsel onayları ve tarayıcı turu · Karar: 2026-08-27 · Güncelleme: 2026-09-03 · Kapsam: dogancanyildiz.com
 
 ## Özet
 
@@ -162,6 +162,35 @@ Aynı dal (`feature/brand-assets`); sertifika satırı üç yerde değişti (gö
 - **Eğitim satırlarında okul amblemi.** Satır başında 40px yükseklikte sabit bir slot (`h-10 w-24`), `next/image`, `alt=""` (okul adı yanında zaten metin olarak yazılı). 24 birimlik genişlik kare değil, çünkü dört amblemin ikisi kelime logosu ve onlarda 40px yükseklik 170px genişlik demek. Amblemi olmayan kayıt slotu boş bırakıyor. Kaynak ve lisans `public/images/schools/README.md`'de: iki SVG Wikimedia Commons'tan (kamu malı), iki PNG tr.wikipedia'dan (adil kullanım), hepsi kimlik amaçlı. `next/image` `.svg` kaynağı kendiliğinden optimizer'a sokmuyor.
 - **Bilinen ödünleşme.** Koyu temada Konya Teknik Üniversitesi amblemi zayıflıyor: logonun siyaha yakın parçası (#1a1a18) koyu zeminde kayboluyor, geriye kırmızı halka kalıyor. Arkasına beyaz bir plaka koymak bunu çözerdi ama tasarım dilinde yeni kart/rozet kutusu yok; amblem dekoratif ve okul adı yanında yazılı olduğu için bilgi kaybı yok, bu yüzden olduğu gibi bırakıldı.
 - **Emülasyon turu.** `next start` (3170) üzerinde `/hakkimda`: bölüm görüntüleri 1280 açık ve 375 koyu temada, ayrıca bir rozet düğmesine tıklanıp kalıp açıkken aynı iki kırılımda. Escape kalıbı kapatıyor, `body.style.overflow` geri geliyor ve odak düğmeye dönüyor (üçü de CDP ile okundu). `document.scrollWidth` 320/375/768/1280'de görünüm genişliğine eşit, kalıp açıkken de. Aç, Escape, aç, kapat sırası da gerçek fare ve gerçek Escape tuşuyla koşuldu: `close` olayı sayacı 1'de kalırken `body.style.overflow` her kapanışta boşalıyor, hesaplanan `overflow-y` `visible` dönüyor; tekerlek olayıyla ölçüldüğünde kilitliyken sayfa kıpırdamıyor, kilit kalkınca kıpırdıyor.
+
+## Karar değişikliği (2026-09-03, izin bandı kaldırıldı)
+
+Dal `feature/umami-always-on-and-events`; sahibinin kararı.
+
+- **İzin bandı ve ölçüm anahtarı kalktı.** `src/components/consent/` (banner,
+  provider, `/privacy`'deki `ConsentControls`), `src/lib/consent.ts` ve
+  `dcy-consent` localStorage anahtarı silindi; `consent.*` çeviri anahtarları
+  iki katalogdan da çıktı. Gerekçe: Umami bu kurulumda çerez koymuyor ve IP
+  saklamıyor (tekil ziyaretçi günlük değişen tuzla türetilen, ertesi gün
+  geçersiz olan bir hash), yani izin istenecek bir işleme yok. Bunu sormak,
+  sormaya gerek olmayan bir şeyi soruyordu.
+- **Bunun kapattığı açık madde.** Yukarıdaki 3. tur listesindeki "consent
+  banner'ın `position: fixed` alt bant olması" (SC 2.4.11) artık geçersiz:
+  bant yok. Dış linklerde yeni sekme işareti olmaması maddesi açık kalıyor.
+- **Tracker.** `src/components/umami-script.tsx` içindeki `UmamiTracker`
+  layout'a `<script defer>` basıyor (nonce, inline kod veya istemci bileşeni
+  yok; CSP zaten origin'e izin veriyor), yalnızca production derlemesinde ve
+  yalnızca iki Umami değeri de setken.
+- **Özel olaylar.** `data-umami-event` öznitelikleriyle, adlar
+  `src/lib/analytics-events.ts` içinde tek yerde: `cv-download` (Hakkımda CV
+  düğmesi), `contact-submit` (form 200 aldığında, konu etiketiyle),
+  `whatsapp-click` (footer ve iletişim sayfası), `outbound-click` (host ile:
+  header/mobil menü sosyal ikonları, footer, paylaş bloğu, sertifika doğrulama
+  linkleri), `theme-toggle` ve `locale-switch`. Script yüklü değilse hiçbiri
+  bir şey yapmıyor.
+- **`/privacy` metni** artık bunu düz anlatıyor: çerez yok, tema localStorage'da
+  ve sunucuya gitmiyor, Umami ne topluyor, formun IP'yi neden kısa süre
+  loglayıp döngüyle sildiği, Cloudflare'ın kendi edge günlüklerini tuttuğu.
 
 ## Riskler ve tripwire'lar
 

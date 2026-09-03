@@ -119,7 +119,7 @@ Büyüklük: L. En çok elle yazılan içerik burada, iki dilde.
 - [x] Gatus compose + config repoda (2026-08-28). **Karar değişikliği (2026-08-30):** Gatus tamamen kaldırıldı; gerçek izleme Coolify servis kataloğundan kurulan Uptime Kuma'da, `infra/` silindi.
 - [x] Ana sayfaya systems bölümü (2026-08-28). **2026-08-30:** panel inceldi: üçüncü taraf verisi çekmez, build bilgisi + `NEXT_PUBLIC_STATUS_URL` linki gösterir; `status.ts` ve 60 sn revalidate kaldırıldı, ana sayfa tamamen statik.
 - [x] Build-time commit SHA ve deploy zamanı widget'ta (`NEXT_PUBLIC_BUILD_SHA/DATE` + `build-info.ts`, 2026-08-28).
-- [x] Umami: CSP + consent + layout entegrasyonu (2026-08-28). **2026-08-30:** merkezi kuruluma geçildi (`umami.dravcore.com`), repodaki compose silindi; site oraya website olarak eklenir.
+- [x] Umami: CSP + consent + layout entegrasyonu (2026-08-28). **2026-08-30:** merkezi kuruluma geçildi (`umami.dravcore.com`), repodaki compose silindi; site oraya website olarak eklenir. **Karar değişikliği (2026-09-03):** izin bandı ve `/privacy` ölçüm anahtarı kaldırıldı, tracker izin beklemeden yükleniyor (Umami çerezsiz ve IP saklamıyor); `data-umami-event` ile özel olaylar eklendi.
 - [x] Dependabot + CodeQL repoda; Renovate kaldırıldı (`security-automation.test.ts`, 2026-08-28).
 - [ ] Coolify'da Uptime Kuma kurulumu, merkezi Umami'ye site kaydı ve portfolio env redeploy (manuel: `docs/plans/handoffs/faz-5-manual-checklist.md`).
 - [x] Release akışı çalıştı: v0.2.0 (PR #8), v0.3.0 (PR #12), v0.3.1 (Faz 5 PR #31 + PR #32, 2026-08-28).

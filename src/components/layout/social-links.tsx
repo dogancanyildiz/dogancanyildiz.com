@@ -1,4 +1,5 @@
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icon";
+import { outboundEvent } from "@/lib/analytics-events";
 import { SOCIAL } from "@/lib/site";
 
 const ICON_LINK_CLASS =
@@ -23,6 +24,7 @@ export function SocialLinks({ githubLabel, linkedinLabel }: SocialLinksProps) {
         rel="noopener noreferrer"
         aria-label={githubLabel}
         className={ICON_LINK_CLASS}
+        {...outboundEvent(SOCIAL.github)}
       >
         <GithubIcon className="size-4" />
       </a>
@@ -32,6 +34,7 @@ export function SocialLinks({ githubLabel, linkedinLabel }: SocialLinksProps) {
         rel="noopener noreferrer"
         aria-label={linkedinLabel}
         className={ICON_LINK_CLASS}
+        {...outboundEvent(SOCIAL.linkedin)}
       >
         <LinkedinIcon className="size-4" />
       </a>

@@ -6,6 +6,7 @@ import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
 import { WhatsAppIcon } from "@/components/ui/brand-icon";
 import { CONTACT_EMAIL_PUBLIC, whatsappHref } from "@/lib/site";
+import { UMAMI_EVENT, outboundEvent, umamiEvent } from "@/lib/analytics-events";
 
 export function ContactPageContent() {
   const t = useTranslations("contact");
@@ -31,6 +32,7 @@ export function ContactPageContent() {
               <a
                 href={`mailto:${CONTACT_EMAIL_PUBLIC}`}
                 className="inline-block min-h-6 break-all text-sm text-primary underline-offset-4 hover:underline"
+                {...outboundEvent(`mailto:${CONTACT_EMAIL_PUBLIC}`)}
               >
                 {CONTACT_EMAIL_PUBLIC}
               </a>
@@ -48,6 +50,9 @@ export function ContactPageContent() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex min-h-6 items-center text-sm text-primary underline-offset-4 hover:underline"
+                {...umamiEvent(UMAMI_EVENT.whatsappClick, {
+                  surface: "contact",
+                })}
               >
                 {t("whatsappAction")}
               </a>

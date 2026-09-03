@@ -38,10 +38,13 @@ o adresi gösterir; Systems paneli yalnızca link verir, Kuma'nın API'sinden ve
 | `CSP_REPORT_ONLY` | Build, geçici | `1` yalnızca tek bir ölçüm deploy'u için; sıkı report-only CSP'yi yayınlar, sonra kaldırılır |
 
 Posta değişkenlerinden biri eksikse container açılışta JSON hata satırı basar ve
-`/api/health` `"status":"degraded"` döner (HTTP 200). Tracker script'i consent
-onayından sonra enjekte edilir ve `data-domains="www.dogancanyildiz.com"` taşır:
-aynı merkezi Umami'ye ekli diğer siteler veya preview kopyaları bu website
-kaydına veri yazamaz.
+`/api/health` `"status":"degraded"` döner (HTTP 200). **Karar değişikliği
+(2026-09-03):** tracker artık izin beklemiyor, layout'a `<script defer>` olarak
+basılıyor ve yalnızca production derlemesinde çıkıyor; izin bandı ve `/privacy`
+üzerindeki açma/kapama kontrolü kaldırıldı (gerekçe: Umami çerezsiz ve IP
+saklamıyor). Script yine `data-domains="www.dogancanyildiz.com"` taşır: aynı
+merkezi Umami'ye ekli diğer siteler veya preview kopyaları bu website kaydına
+veri yazamaz.
 
 ## Sızıntı kuralı
 

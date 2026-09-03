@@ -68,19 +68,19 @@ ayrımı kozmetik değil. Build değişkenini yalnızca runtime işaretlemek
 derlemeyi doğrudan düşürür; bir sırrı build değişkeni yapmak imaj
 katmanlarına ve derleme loglarına sızdırır.
 
-| Değişken                                    | Coolify katmanı | Zorunlu       | Not                                                                                                                                                                                                                                                                                                   |
-| ------------------------------------------- | --------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`                      | Build           | Evet          | `next build` client bundle'a gömer. Dockerfile `ARG`'ının varsayılanı yok; bu argümansız derleme `/robots.txt` prerender'ında `resolveSiteUrl`'de düşer, tanımsız bir değer göndermez.                                                                                                                |
-| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` | Runtime         | Üretimde evet | Mailcow submission (587, STARTTLS zorunlu; 465 implicit TLS). Uygulama parolası kullanılır; Build işaretlenirse imaj katmanına sızar. `SMTP_PORT` opsiyonel, varsayılan 587.                                                                                                                          |
-| `CONTACT_EMAIL`                             | Runtime         | Üretimde evet | Form mesajlarının gittiği kutu.                                                                                                                                                                                                                                                                       |
-| `FROM_EMAIL`                                | Runtime         | Üretimde evet | Mailcow'da tanımlı, DKIM imzalı gönderici adres.                                                                                                                                                                                                                                                      |
-| `TRUST_CF_CONNECTING_IP`                    | Runtime         | Hayır         | Yalnızca origin yalnızca Cloudflare'dan erişilebilir ve Traefik Cloudflare aralıklarına güvendikten sonra `true`. `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.                                                                                                                              |
-| `NEXT_PUBLIC_BUILD_SHA`                     | Build           | Hayır         | Systems panelindeki commit SHA; Coolify `SOURCE_COMMIT` veya CI `github.sha`. Boşsa alan gizlenir.                                                                                                                                                                                                    |
-| `NEXT_PUBLIC_BUILD_DATE`                    | Build           | Hayır         | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa ikisi de gizlenir.                                                                                                                                                                                                                        |
-| `NEXT_PUBLIC_STATUS_URL`                    | Build           | Hayır         | Systems panelinin link verdiği public status sayfası (Uptime Kuma). Yalnızca https kabul edilir; boşsa satır gizlenir.                                                                                                                                                                                |
-| `UMAMI_SCRIPT_URL`                          | Build           | Hayır         | Merkezi self-host Umami origin'i (`https://umami.dravcore.com`). CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                                                                                                                                      |
-| `UMAMI_WEBSITE_ID`                          | Build           | Hayır         | Umami website UUID. Tag yalnızca iki Umami değeri de setken üretilir ve script'i ConsentProvider ancak ziyaretçi onay verdikten sonra enjekte eder (PR #35); onay yoksa hiçbir şey yüklenmez. Basılır. Tercih `/privacy`'deki kontrolden geri alınabilir (2026-09-02); geri alınca script kaldırılır. |
-| `CSP_REPORT_ONLY`                           | Build           | Hayır         | Tek bir ölçüm deploy'u için `1`: sıkı report-only CSP'yi yayınlar, `/api/csp-report` bütçesini yükseltir. Pencere bitince kaldır.                                                                                                                                                                     |
+| Değişken                                    | Coolify katmanı | Zorunlu       | Not                                                                                                                                                                                                                     |
+| ------------------------------------------- | --------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`                      | Build           | Evet          | `next build` client bundle'a gömer. Dockerfile `ARG`'ının varsayılanı yok; bu argümansız derleme `/robots.txt` prerender'ında `resolveSiteUrl`'de düşer, tanımsız bir değer göndermez.                                  |
+| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` | Runtime         | Üretimde evet | Mailcow submission (587, STARTTLS zorunlu; 465 implicit TLS). Uygulama parolası kullanılır; Build işaretlenirse imaj katmanına sızar. `SMTP_PORT` opsiyonel, varsayılan 587.                                            |
+| `CONTACT_EMAIL`                             | Runtime         | Üretimde evet | Form mesajlarının gittiği kutu.                                                                                                                                                                                         |
+| `FROM_EMAIL`                                | Runtime         | Üretimde evet | Mailcow'da tanımlı, DKIM imzalı gönderici adres.                                                                                                                                                                        |
+| `TRUST_CF_CONNECTING_IP`                    | Runtime         | Hayır         | Yalnızca origin yalnızca Cloudflare'dan erişilebilir ve Traefik Cloudflare aralıklarına güvendikten sonra `true`. `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.                                                |
+| `NEXT_PUBLIC_BUILD_SHA`                     | Build           | Hayır         | Systems panelindeki commit SHA; Coolify `SOURCE_COMMIT` veya CI `github.sha`. Boşsa alan gizlenir.                                                                                                                      |
+| `NEXT_PUBLIC_BUILD_DATE`                    | Build           | Hayır         | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa ikisi de gizlenir.                                                                                                                                          |
+| `NEXT_PUBLIC_STATUS_URL`                    | Build           | Hayır         | Systems panelinin link verdiği public status sayfası (Uptime Kuma). Yalnızca https kabul edilir; boşsa satır gizlenir.                                                                                                  |
+| `UMAMI_SCRIPT_URL`                          | Build           | Hayır         | Merkezi self-host Umami origin'i (`https://umami.dravcore.com`). CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                                                        |
+| `UMAMI_WEBSITE_ID`                          | Build           | Hayır         | Umami website UUID. Tag yalnızca iki Umami değeri de setken ve yalnızca production derlemesinde üretilir; script layout'a `<script defer>` olarak basılır ve izin beklemez (2026-09-03 kararı, aşağıya bakın). Basılır. |
+| `CSP_REPORT_ONLY`                           | Build           | Hayır         | Tek bir ölçüm deploy'u için `1`: sıkı report-only CSP'yi yayınlar, `/api/csp-report` bütçesini yükseltir. Pencere bitince kaldır.                                                                                       |
 
 ## Uluslararasılaştırma
 
@@ -152,6 +152,18 @@ katmanlarına ve derleme loglarına sızdırır.
   gruplu PR'lar `dev`'e, güvenlik güncellemeleri isteğe bağlı) ve CodeQL
   (`.github/workflows/codeql.yml`, javascript-typescript, her PR ve haftalık).
   İkisi de depo Security sekmesine raporlar.
+- **Ölçüm ve gizlilik (karar değişikliği, 2026-09-03).** Site çerez
+  kullanmıyor. Ziyaret sayımı sahibin kendi sunucusundaki Umami ile yapılıyor:
+  çerez yok, IP saklanmıyor, tekil ziyaretçi günlük değişen bir tuzdan
+  türetilen ve ertesi gün geçersiz olan bir hash ile sayılıyor. Ortada çerez ve
+  kişisel veri olmadığı için tracker izin beklemiyor; izin bandı, `/privacy`
+  üzerindeki açma/kapama kontrolü ve `dcy-consent` localStorage anahtarı
+  kaldırıldı (`src/components/consent/` silindi). Tracker'ı artık
+  `src/components/umami-script.tsx` içindeki `UmamiTracker` basıyor.
+  `data-umami-event` öznitelikleriyle toplanan özel olaylar
+  `src/lib/analytics-events.ts` içinde tek listede: `cv-download`,
+  `contact-submit`, `whatsapp-click`, `outbound-click`, `theme-toggle`,
+  `locale-switch`. Ne toplandığının okunur anlatımı `/privacy` sayfasında.
 - Açık mı buldun? [SECURITY.md](./SECURITY.md) veya canlı sitedeki
   `/.well-known/security.txt`.
 
