@@ -57,8 +57,13 @@ function projectSlugs(locale: Locale) {
 function postSlugs(locale: Locale) {
   return {
     coolify:
-      locale === "tr" ? "coolify-ile-kendi-sunucumda" : "self-hosting-with-coolify",
-    ccna: locale === "tr" ? "ccna-dan-web-guvenligine" : "from-ccna-to-web-security",
+      locale === "tr"
+        ? "coolify-ile-kendi-sunucumda"
+        : "self-hosting-with-coolify",
+    ccna:
+      locale === "tr"
+        ? "ccna-dan-web-guvenligine"
+        : "from-ccna-to-web-security",
   };
 }
 
@@ -156,7 +161,10 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
         </p>
         <p>
           <Link
-            href={{ pathname: "/projects/[slug]", params: { slug: project.koklu } }}
+            href={{
+              pathname: "/projects/[slug]",
+              params: { slug: project.koklu },
+            }}
             className={evidenceLinkClass}
           >
             {t("s1LinkLabel")}
@@ -182,7 +190,8 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
         <p className="section-copy">{t("s3p1")}</p>
         <p className="section-copy">
           {t.rich("s3p2", {
-            cargopilot: (chunks) => renderProjectLink(project.cargoPilot, chunks),
+            cargopilot: (chunks) =>
+              renderProjectLink(project.cargoPilot, chunks),
           })}
         </p>
         <p className="section-copy">{t("s3p3")}</p>
