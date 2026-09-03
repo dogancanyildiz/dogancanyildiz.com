@@ -53,6 +53,7 @@ export const LOCALE_PAGES = [
   "/projects",
   "/blog",
   "/contact",
+  "/services",
   "/privacy",
   "/coming-soon",
   "/updating",

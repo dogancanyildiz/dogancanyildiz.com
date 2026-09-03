@@ -13,7 +13,8 @@
     "languageLabel": "Language",
     "menu": "Menu",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "services": "Services"
   },
   "hero": {
     "location": "Konya, Türkiye",
@@ -166,7 +167,10 @@
       "errorFields": "Please check the highlighted fields.",
       "errorTimeout": "The request took too long. It may still have reached me, so please wait a moment before sending it again.",
       "retryAfter": "Try again in {seconds}s"
-    }
+    },
+    "servicesCtaTitle": "What is it you need built?",
+    "servicesCtaBody": "Tell me how many pages, how many languages and the date you need it by. We can settle the scope from there.",
+    "servicesCtaButton": "Describe the scope"
   },
   "notFound": {
     "code": "404",
@@ -243,5 +247,60 @@
   "a11y": {
     "skipToContent": "Skip to content",
     "toggleTheme": "Toggle theme"
+  },
+  "services": {
+    "title": "Web and Next.js development in Konya | Doğan Can YILDIZ",
+    "description": "I build corporate websites and Next.js applications and ship them with Docker, from the logo to the server. Konya based, working remotely across Türkiye.",
+    "h1": "I build corporate websites and Next.js applications, and I ship them myself",
+    "lead": "I live in Konya, Türkiye and work remotely. Some of what I have delivered sits in Ankara, some of it in İstanbul. Below is the work I take on and the work I turn down, with the process further down.",
+    "locationLabel": "Location",
+    "locationValue": "Konya, Türkiye",
+    "workLabel": "How I work",
+    "workValue": "Remote, anywhere in Türkiye",
+    "contactLabel": "Who you deal with",
+    "contactValue": "One person",
+    "s1Title": "Corporate website design and development",
+    "s1p1": "I take a corporate site from the logo to the live server on my own. That is how Köklü Hukuk ve Danışmanlık went: for a law firm in Etimesgut, Ankara, the logo, the interface design, the code and the deployment were mine, and the copy and the legal texts went in with the lawyer's approval. The site has been live since July 2024, and in July 2026 I rebuilt the architecture from scratch.",
+    "s1p2": "Being bilingual means more than translated copy. The paths are localized as well: /tr/calisma-alanlari and /en/practice-areas are separate addresses, so each language has a page that stands on its own in search. On top of that sit ten practice area pages, a team page with the lawyer's profile, an FAQ, articles and the legal texts.",
+    "s1p3": "I left out the CMS and the database. On a law firm site the content is known at build time and nothing changes per visitor, so the copy lives in typed content files and the pages render statically. Instead of a contact form there are phone, email and WhatsApp links: keeping no personal data on the server removes the compliance burden up front.",
+    "s1p4": "This shape does not fit every site. If your content changes a few times a week you need an editing layer, and that goes into the scope.",
+    "s1p5": "Design work is not limited to corporate sites: on <hubit>Hubit</hubit> I designed the interface and wrote the front end.",
+    "s1LinkLabel": "Read the Köklü Hukuk case study",
+    "s2Title": "Application development with Next.js and React",
+    "s2p1": "I also build the things that go past a website: logins, stored data, business rules that have to run. Since November 2024 I have been a full time Full Stack developer at BerrSoft, and five production applications came out of my hands there; the architecture, the API design, the deployment and the maintenance after launch were all mine.",
+    "s2p2": "The front end is Next.js and React, the back end Node.js/Express and PHP. The database is a call I make again on every project: MySQL, MongoDB or SQLite, chosen by the shape of the data rather than by habit.",
+    "s2p3": "Freelance work has the same shape. The screen design, the API, the deployment pipeline and the bug that turns up after launch all land on the same person, with no coordination layer in between. That has a visible limit: I am one person, I keep few jobs running at once, and I say when I can start in the first exchange.",
+    "s2p4": "The applications I wrote at BerrSoft are not here as case studies; the one you can read is <wikonya>Wikonya</wikonya>, an open source platform whose front end I wrote in React.",
+    "s3Title": "Deployment, Docker and CI/CD",
+    "s3p1": "I take deployment on its own as well. I package the application with Docker, set up the build and release steps on GitHub Actions, and run the result on Coolify, either on my server or on yours. The domain and the TLS certificate sit behind Traefik, and a push updates the site. This site ships on that same pipeline.",
+    "s3p2": "On <cargopilot>Cargo Pilot</cargopilot> I built the infrastructure as DevOps chapter lead, and the lesson that stayed with me is this: a pipeline only works once the team trusts it, and nobody deploys on a Friday when the way back is unclear. On the pipelines I set up I keep the way back as open as the way out.",
+    "s3p3": "Here is the limit. Kubernetes clusters, cloud migrations and multi region architecture are not my area; I work on things that sit on one server or in a handful of containers, and I do not sell enterprise scale infrastructure consulting.",
+    "s3LinkLabel": "How this site ships to my own server with Coolify",
+    "s4Title": "Security is not a separate line item",
+    "s4p1": "I do not sell paid security audits or penetration testing; security comes inside the work I deliver. In practice that means input validation at the boundary, trusted state kept on the server, the container off root, a small exposed surface, and a rate limiter that reads the right header behind the proxy.",
+    "s4p2": "Those habits came from two places. After writing a <bilet>ticket purchasing application</bilet> I ran a penetration test against my own code inside a training program; the findings rewrote its input validation and its session handling, and moved the container off root. The second came from the network side: after CCNA and the Hackviser CAPT certificate, what I expose and how I expose it changed, and the most expensive example was <ratelimit>a rate limiter reading the wrong header</ratelimit>.",
+    "s4p3": "If you need a certified audit report, that belongs with firms who do it for a living. I do not offer evidence at that scale, and I do not pretend to.",
+    "processTitle": "How the work runs",
+    "processIntro": "There are six steps, and I write no code before step three.",
+    "step1": "Write down what you need built. Form or email, either is fine, and a few lines are enough.",
+    "step2": "We settle the scope: how many pages or screens, how many languages, which integrations, whose server it will run on.",
+    "step3": "I put the scope and the price in writing. No code before you approve it.",
+    "step4": "There is a working address throughout development, so you watch the progress on screen yourself.",
+    "step5": "Deployment: the Docker image, the pipeline, the domain and the certificate.",
+    "step6": "Handover: source code, server access, and a note saying what sits where. Maintenance is discussed after that.",
+    "processOutro": "I usually reply within two to three business days.",
+    "faqTitle": "Questions I get",
+    "faq1Q": "How do you price the work?",
+    "faq1A": "I quote a fixed price once the scope is written down. The words \"corporate website\" cover a five page site and a bilingual thirty page one, so we separate the items first: page count, languages, whether the design starts from zero, integrations, hosting, and whether maintenance is in. If the scope grows later, we price the difference then.",
+    "faq2Q": "How long does it take?",
+    "faq2A": "I give a date once the scope is settled, not before. Content decides the schedule more than page count: when the copy and images are ready the work moves fast, and projects where the text is coming later are where calendars slip. I say when I can start in the first exchange, since I keep few jobs running at once.",
+    "faq3Q": "Do you take work outside Konya?",
+    "faq3A": "Yes, and most of the work is already outside Konya. Köklü Hukuk is a law firm in Ankara, and BerrSoft, where I work full time, is in İstanbul. The work runs remotely: written messages, a screen share and a live test address cover it. If you are in Konya we can meet in person, but that is not a condition.",
+    "faq4Q": "Will I be able to update the site myself, do you add a CMS?",
+    "faq4A": "My default is static with no CMS, though that is not a rule. When content changes a few times a year, a CMS adds maintenance and attack surface for nothing; that is why Köklü Hukuk has none. If you have a blog or listings that change regularly, an editing layer goes into the scope; say so up front.",
+    "faq5Q": "Where will the site be hosted?",
+    "faq5A": "Three options: my server, your server, or a cloud provider. On my side that means Coolify and Docker, and this site and the Köklü Hukuk site both run there. If you prefer your own server I set it up, and the access and the invoice stay with you. Who the domain is registered to gets written down at the start.",
+    "faq6Q": "Is maintenance included?",
+    "faq6A": "Maintenance is priced separately, because it is not a one time item. I kept the Köklü Hukuk site current for two years; small changes piled up until the architecture resisted every new request, and rebuilding came out cheaper than patching. The same question is worth asking early for your site: how different will it be in two years?"
   }
 }
