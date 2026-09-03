@@ -1,3 +1,5 @@
+import pkg from "../../package.json";
+
 function resolveBuildYear(buildDate: string): string {
   const fromBuildDate = buildDate.slice(0, 4);
   if (/^\d{4}$/.test(fromBuildDate)) return fromBuildDate;
@@ -54,6 +56,17 @@ export function resolveBuildSha(
   return SHA_PATTERN.test(runtime) ? runtime : "";
 }
 
+/**
+ * The repository the site is built from. Used to link a build sha to its
+ * commit page; the visitor sees a version, the sha is the fine print.
+ */
+export const REPOSITORY_URL =
+  "https://github.com/dogancanyildiz/dogancanyildiz.com";
+
+export function commitUrl(sha: string): string {
+  return `${REPOSITORY_URL}/commit/${sha}`;
+}
+
 const buildDate = process.env.NEXT_PUBLIC_BUILD_DATE?.trim() ?? "";
 
 /**
@@ -63,6 +76,9 @@ const buildDate = process.env.NEXT_PUBLIC_BUILD_DATE?.trim() ?? "";
  * resolveBuildSha above.
  */
 export const buildInfo = {
+  // package.json is bundled at build time, so the version is the one the
+  // release workflow synced before this build, never a runtime lookup.
+  version: pkg.version,
   sha: resolveBuildSha(
     process.env.NEXT_PUBLIC_BUILD_SHA,
     process.env.SOURCE_COMMIT
