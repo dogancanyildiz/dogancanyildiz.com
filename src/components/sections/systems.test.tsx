@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { resolveServerTree } from "../../../tests/helpers/render";
+import type { LiveStatusSnapshot } from "@/lib/status-page";
 
 // Real next-intl resolves the locale from the request scope Next's
 // middleware sets up (see src/i18n/request.ts), which this render never
@@ -61,10 +62,19 @@ vi.mock("@/lib/build-info", () => ({
   formatBuildSha: (sha: string) => sha.slice(0, 7),
 }));
 
+// The live status cell reads Uptime Kuma over the network. Its rendering is
+// covered by live-status.test.tsx; here the fetch is replaced so the panel
+// test stays offline and can flip between "Kuma answered" and "it did not".
+const liveStatus: { value: LiveStatusSnapshot | null } = { value: null };
+vi.mock("@/lib/status-page", () => ({
+  getLiveStatus: async () => liveStatus.value,
+}));
+
 const { Systems } = await import("./systems");
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  liveStatus.value = null;
 });
 
 describe("Systems", () => {
@@ -114,6 +124,55 @@ describe("Systems", () => {
     render(await resolveServerTree(<Systems />));
 
     expect(screen.queryByRole("link")).toBeNull();
+  });
+
+  it("puts the live status widget in the status cell when Kuma answers", async () => {
+    activeLocale = "en";
+    build.sha = "0123abcd456";
+    build.date = "2026-08-28T09:12:33+00:00";
+    vi.stubEnv(
+      "NEXT_PUBLIC_STATUS_URL",
+      "https://uptime.example.org/status/site"
+    );
+    liveStatus.value = {
+      status: "up",
+      uptime24: 0.999,
+      monitorName: "dogancanyildiz.com",
+      checkedAt: "2026-09-03T09:39:57.000Z",
+      beats: [
+        { status: "up", time: "2026-09-03T09:38:57.000Z", ping: 160 },
+        { status: "up", time: "2026-09-03T09:39:57.000Z", ping: 171 },
+      ],
+    };
+
+    const { container } = render(await resolveServerTree(<Systems />));
+
+    expect(screen.getByText("Operational")).toBeInTheDocument();
+    expect(screen.getByText("99.9%")).toBeInTheDocument();
+    expect(container.querySelectorAll('[role="img"]')).toHaveLength(2);
+    // The panel's other three cells are untouched by the widget.
+    expect(screen.getByText("0123abc")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /status page/i })
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the bare status link when Kuma cannot be read", async () => {
+    activeLocale = "en";
+    vi.stubEnv(
+      "NEXT_PUBLIC_STATUS_URL",
+      "https://uptime.example.org/status/site"
+    );
+    liveStatus.value = null;
+
+    const { container } = render(await resolveServerTree(<Systems />));
+
+    expect(container.querySelectorAll('[role="img"]')).toHaveLength(0);
+    expect(screen.queryByText("Operational")).toBeNull();
+    expect(screen.getByRole("link", { name: /status page/i })).toHaveAttribute(
+      "href",
+      "https://uptime.example.org/status/site"
+    );
   });
 
   it("renders the Turkish copy for the tr locale", async () => {
