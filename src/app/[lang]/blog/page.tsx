@@ -4,8 +4,11 @@ import { ContactCta } from "@/components/sections/contact-cta";
 import { PostList } from "@/components/sections/post-list";
 import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
+import { JsonLd } from "@/components/seo/json-ld";
 import { routing } from "@/i18n/routing";
 import { getPosts, toPostCardData } from "@/lib/content";
+import { absoluteUrl, contentUrl } from "@/lib/seo/alternates";
+import { buildCollectionPage } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocale } from "@/lib/route-params";
 
@@ -42,8 +45,21 @@ export default async function BlogPage({
   const t = await getTranslations({ locale, namespace: "blog" });
   const posts = getPosts(locale).map(toPostCardData);
 
+  // The list a crawler reads matches the list a reader sees: same titles, same
+  // order, each linking to its own post.
+  const collection = buildCollectionPage(locale, {
+    name: t("title"),
+    description: t("description"),
+    url: absoluteUrl(locale, "/blog"),
+    items: posts.map((post) => ({
+      name: post.title,
+      url: contentUrl(locale, "post", post.slug),
+    })),
+  });
+
   return (
     <PageSection>
+      <JsonLd data={collection} />
       <PageHeader as="h1" title={t("title")} description={t("description")} />
       {posts.length > 0 ? (
         <PostList posts={posts} />

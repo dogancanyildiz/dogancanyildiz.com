@@ -3,10 +3,13 @@ import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { certificates } from "@/content/profile";
 import { routing } from "@/i18n/routing";
+import { siteConfig } from "@/lib/site-config";
 import {
   buildBlogPosting,
   buildBreadcrumbList,
+  buildCollectionPage,
   buildCredentials,
+  buildItemList,
   buildProjectCreativeWork,
   buildWebSite,
   identityUrl,
@@ -79,6 +82,69 @@ describe("buildBreadcrumbList", () => {
         "@type": "ListItem",
         position: 2,
         name: "Bir yazı",
+      },
+    ]);
+  });
+});
+
+describe("buildItemList", () => {
+  it("numbers the entries from one, in order, each with its own url", () => {
+    const list = buildItemList([
+      { name: "First", url: "https://dogancanyildiz.com/yazilar/first" },
+      { name: "Second", url: "https://dogancanyildiz.com/yazilar/second" },
+    ]);
+
+    expect(list["@type"]).toBe("ItemList");
+    expect(list.itemListElement).toEqual([
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "First",
+        url: "https://dogancanyildiz.com/yazilar/first",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Second",
+        url: "https://dogancanyildiz.com/yazilar/second",
+      },
+    ]);
+  });
+});
+
+describe("buildCollectionPage", () => {
+  it("wraps the visible listing as an ItemList tied back to the website node", () => {
+    const page = buildCollectionPage("tr", {
+      name: "Yazılar",
+      description: "Yazdıklarım",
+      url: "https://dogancanyildiz.com/yazilar",
+      items: [
+        {
+          name: "Bir yazı",
+          url: "https://dogancanyildiz.com/yazilar/bir-yazi",
+        },
+      ],
+    });
+
+    expect(page["@type"]).toBe("CollectionPage");
+    // The page is its own node and part of the shared WebSite, referenced by
+    // id rather than repeated.
+    expect(page["@id"]).toBe("https://dogancanyildiz.com/yazilar");
+    expect(page.url).toBe("https://dogancanyildiz.com/yazilar");
+    expect(page.inLanguage).toBe("tr");
+    expect(page.isPartOf).toEqual({ "@id": websiteId() });
+    // name and description are the page's own heading and lead, both visible.
+    expect(page.name).toBe("Yazılar");
+    expect(page.description).toBe("Yazdıklarım");
+
+    const list = page.mainEntity as Record<string, unknown>;
+    expect(list["@type"]).toBe("ItemList");
+    expect(list.itemListElement).toEqual([
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Bir yazı",
+        url: "https://dogancanyildiz.com/yazilar/bir-yazi",
       },
     ]);
   });
@@ -212,5 +278,32 @@ describe("buildCredentials", () => {
 
     expect(source).toContain("hasCredential");
     expect(source).toContain("buildCredentials(locale)");
+  });
+});
+
+describe("Person node fields", () => {
+  const source = readFileSync(
+    join(process.cwd(), "src/components/seo/person-jsonld.tsx"),
+    "utf8"
+  );
+
+  it("carries the fields with a visible counterpart on the page", () => {
+    // knowsLanguage (the languages section), hasOccupation (the role line) and
+    // email (the footer mailto) all have a visible home, so they ride on every
+    // render.
+    expect(source).toContain("knowsLanguage");
+    expect(source).toContain("hasOccupation");
+    expect(source).toContain("CONTACT_EMAIL_PUBLIC");
+  });
+
+  it("emits description only when a page passes its visible text", () => {
+    // Structured text with no visible counterpart is hidden content, so the
+    // description field is gated on the prop the About page supplies from its
+    // own lead.
+    expect(source).toMatch(/description \? \{ description \} : \{\}/);
+  });
+
+  it("keeps knowsLanguage as the real profile languages", () => {
+    expect([...siteConfig.person.knowsLanguage]).toEqual(["tr", "en"]);
   });
 });

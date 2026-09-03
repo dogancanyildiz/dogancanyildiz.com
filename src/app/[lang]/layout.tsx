@@ -132,6 +132,35 @@ export async function generateMetadata({
         imageAlt: t("ogAlt"),
       }
     ),
+    // Home default, mirrored from openGraph. Every page that goes through
+    // buildPageMetadata sets its own; this is the fallback for the root and the
+    // few segments that build metadata by hand.
+    twitter: {
+      card: "summary_large_image",
+      title: t("defaultTitle"),
+      description: t("defaultDescription"),
+      images: [absoluteUrl(lang, OG_IMAGE_PATH)],
+    },
+    // Site-wide crawl directives. index/follow stay on; the max-* values let a
+    // search result carry a large image, a full-length snippet and a full
+    // video preview. googleBot repeats them so Google reads them whether it
+    // takes the generic block or its own. A segment that needs to opt out
+    // (coming-soon, updating) returns its own robots object, which Next
+    // substitutes for this one wholesale rather than merging into it.
+    robots: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
   };
 }
 

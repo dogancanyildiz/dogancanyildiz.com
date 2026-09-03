@@ -103,6 +103,56 @@ export function buildBreadcrumbList(
   };
 }
 
+export interface ListEntry {
+  name: string;
+  url: string;
+}
+
+/**
+ * CollectionPage + ItemList for a listing page (the blog index, the projects
+ * index).
+ *
+ * `name` and `description` are the page's own visible heading and lead, and
+ * every `itemListElement` names an entry that is visible on the page, in the
+ * same order it renders, so the structured list and the printed list are one
+ * and the same. The ItemList is the page's `mainEntity`; the page is tied back
+ * to the site through `isPartOf`, referencing the WebSite node by its shared
+ * `@id` rather than repeating it.
+ */
+export function buildCollectionPage(
+  locale: Locale,
+  page: { name: string; description: string; url: string; items: ListEntry[] }
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": page.url,
+    url: page.url,
+    name: page.name,
+    description: page.description,
+    inLanguage: locale,
+    isPartOf: { "@id": websiteId() },
+    mainEntity: buildItemList(page.items),
+  };
+}
+
+/**
+ * ItemList of listing entries, numbered from one in the order given. Each
+ * `ListItem` carries the entry's own url, so the list is a set of links a
+ * consumer can follow rather than bare positions.
+ */
+export function buildItemList(items: ListEntry[]): Record<string, unknown> {
+  return {
+    "@type": "ItemList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      url: item.url,
+    })),
+  };
+}
+
 /**
  * WebSite node for one locale. Rendered by the home page of each locale rather
  * than by the shared layout, so every subpage does not repeat it.
