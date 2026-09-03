@@ -94,14 +94,10 @@ Tam açıklamalar `.env.example` ve README'nin "Ortam değişkenleri" tablosunda
   301 ile biter ve kalıcı sinyal verir; iki katman aynı yönde olduğu için
   çakışmaz. Ters kombinasyon ("Redirect to non-www" + edge'de apex to www)
   sonsuz döngü üretir, asla kurulmaz.
-- **`.sh -> .com` 301 Cloudflare Redirect Rules'ta**, tek atlama, path
-  korunarak, hedef doğrudan `https://www.dogancanyildiz.com/${path}`. Dil
-  prefix'ine dokunulmaz; zincirli yönlendirme (üçüncü bir atlama) yasak.
-  Traefik'teki `redirectregex` karşılığı yalnızca Cloudflare proxied modu bir
-  nedenle devre dışı kalırsa devreye giren yedek yol. Bu kural henüz canlı
-  değil: `dogancanyildiz.sh` kayıtlı değil, kapsam kararı sahibinde
-  ([11-acik-isler.md](./11-acik-isler.md)).
-- **Cross-domain 301 uygulama kodunda çözülmez.** Next.js `redirects()`
+- **İkinci alan adı kapsam dışı** (karar 2026-09-03): hiç kaydedilmedi,
+  planlanan `301` zinciri ve Traefik'teki `redirectregex` yedeği
+  dokümanlardan kaldırıldı ([11-acik-isler.md](./11-acik-isler.md) bölüm 4).
+- **Host tabanlı 301 uygulama kodunda çözülmez.** Next.js `redirects()`
   uygulamayı domain bilgisine bağlardı; yönlendirme edge/proxy katmanının işi,
   böylece domain değişse bile uygulama kodu dokunulmadan kalıyor.
 

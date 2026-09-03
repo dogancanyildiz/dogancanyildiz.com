@@ -25,7 +25,7 @@ Bu satırlar `curl` ile ölçüldü, tahmin değil:
   (`report-uri /api/csp-report` dahil, `script-src`'te Umami origin'i) var.
 - Umami tracker yükleniyor (`umami.dravcore.com/script.js`) ve sayfada
   `data-umami-event` öznitelikleri görünüyor.
-- `dogancanyildiz.sh` DNS'te çözülmüyor.
+- İkinci alan adı DNS'te çözülmüyor; 2026-09-03 kararıyla kapsam dışı, bölüm 4.
 
 ## 1. Sahibinin teslimatları
 
@@ -84,22 +84,14 @@ iki satırı panelin gerçek haline göre güncellenmeli, ve HSTS tek katmana
 indirilmeli (tercihen uygulama satırı kaldırılıp edge veya Traefik tek kaynak
 yapılmalı).
 
-## 4. `dogancanyildiz.sh` kararı
+## 4. İkinci alan adı: kapandı
 
-Alan adı kayıtlı değil, DNS'te zone yok. İki yoldan biri seçilmeli:
-
-- **Kaydedilir:** Cloudflare'a zone eklenir ve
-  `docs/deploy/cloudflare-kurulum.md` bölüm 3 uygulanır.
-  Karar: `.sh -> .com` 301 Cloudflare Redirect Rule ile, tek atlama, path
-  korunarak; `dogancanyildiz.sh -> www.dogancanyildiz.com`. Doğrulama:
-  `curl -I https://dogancanyildiz.sh/projeler` tek atlamada `https://www.dogancanyildiz.com/projeler` adresine 301 dönmeli,
-  ikinci bir `location` satırı çıkmamalı.
-- **Kapsam dışı ilan edilir:** README, `docs/deploy/cloudflare-kurulum.md`
-  bölüm 3 ve `docs/deploy/traefik-ve-origin.md`'deki yedek redirect satırları
-  kaldırılır.
-
-Karar gelene kadar bu 301 "canlıya alınmadı, alan adı kayıtsız" olarak
-okunmalı.
+**Karar (2026-09-03): kapsam dışı, alınmayacak.** Alan adı hiç kaydedilmedi,
+DNS'te zone yoktu ve `.com` canlıya çıktığından beri yayını da engellemiyordu;
+geriye yalnızca karşılıksız checklist satırları kalmıştı. Cloudflare
+checklist'indeki ikinci zone ve ona ait Redirect Rule bölümü,
+`docs/deploy/traefik-ve-origin.md`'deki yedek `redirectRegex` middleware'i ve
+README'deki satır silindi. Tek kanonik host `www.dogancanyildiz.com`.
 
 ## 5. Canlı doğrulamalar
 

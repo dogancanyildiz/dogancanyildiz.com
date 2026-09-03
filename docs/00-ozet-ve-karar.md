@@ -56,7 +56,7 @@ kapanış kaydı `git show v0.5.0:docs/01-mevcut-durum-denetimi.md` ile okunur.
 | SEO / metadata | `generateMetadata` + canonical/hreflang/x-default + JSON-LD + sayfa başına OG kartı | [07](./07-seo-ve-metadata.md) | Uygulandı (Faz 2-4, #4/#6; kartlar #45) |
 | İçerik stratejisi | Case study omurgası, düşük hacimli TR-first blog, placeholder yok | [08](./08-icerik-stratejisi.md) | Uygulandı (Faz 4, #6) |
 | Güvenlik | Yükseltme + güvenlik başlıkları + CSP + bakım otomasyonu | [09](./09-guvenlik.md) | Uygulandı (Faz 0 #2, Dependabot/CodeQL #14) |
-| Ana domain | `dogancanyildiz.com` ana domain, kanonik host `www`; `dogancanyildiz.sh` yalnızca 301 hedefi | [06](./06-devops-ve-deploy.md) | Kod tarafı uygulandı (#7/#8, www #45); `.sh` kayıtlı değil |
+| Ana domain | `dogancanyildiz.com` tek alan adı, kanonik host `www` | [06](./06-devops-ve-deploy.md) | Uygulandı (#7/#8, www #45) |
 | Dallanma ve sürüm | `feature/* -> dev -> main`, main'e her merge otomatik sürüm üretir | [06](./06-devops-ve-deploy.md) | Uygulandı (#7/#8) |
 
 ## Stack
@@ -161,6 +161,7 @@ tarihsel halleri artık tekrarlanmıyor.
 | 2026-09-02 | Depo adı `portfolio` yerine `dogancanyildiz.com` | LICENSE saf MIT'e döndü, içerik ayrımı `LICENSE-CONTENT.md`'ye taşındı (#49) |
 | 2026-09-03 | Apex -> www yönlendirmesi Coolify'da | Traefik 307; Cloudflare'daki `apex to www` kuralı isteğe bağlı edge katmanı (#52) |
 | 2026-09-03 | İzin bandı kaldırıldı | Umami çerezsiz ve IP saklamadığı için izin beklemeden yükleniyor; `src/components/consent/` silindi (#53) |
+| 2026-09-03 | İkinci alan adı alınmayacak | Kapsam dışı; ikinci zone, `sh to com` Redirect Rule ve Traefik yedek regex'i dokümanlardan silindi |
 
 ## Kapsam dışı (YAGNI)
 

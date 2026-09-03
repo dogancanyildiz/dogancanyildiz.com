@@ -4,7 +4,7 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 
 ## 1. DNS kayıtları
 
-**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir. Aşağıdaki iki zone tanımı sahibinin son kararına göre; tarihsel kurulum bunun tersini (`.sh` origin'e işaret eden asıl zone, `.com` yalnızca redirect) tarif ediyordu.
+**Karar (2026-09-03):** tek zone var, `dogancanyildiz.com`. İkinci alan adı kapsam dışı bırakıldı, hiç kaydedilmedi; bu dokümanda ikinci bir zone ve ona ait Redirect Rule aranmamalı.
 
 `ORIGIN_IPV4` yerine sunucunun statik IPv4 adresi yazılır.
 
@@ -24,17 +24,6 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 - [ ] **CAA kaydı** (2026-08-28 denetimi, yoktu): `CAA 0 issue "letsencrypt.org"`, `CAA 0 issue "pki.goog"`, `CAA 0 iodef "mailto:me@dogancanyildiz.com"`. Origin CA'ya geçilirse `letsencrypt.org` satırı kaldırılabilir.
 - [ ] `*.preview` kaydı yalnızca PR preview kullanılacaksa eklenir; kullanılmayacaksa bu satır ve `docs/deploy/coolify-kurulum.md` bölüm 5 kaldırılır (karar sahibinde, 2026-08-28 denetimi F-029).
 
-### Zone: dogancanyildiz.sh (yalnızca redirect, origin'e ulaşmaz)
-
-**Not (2026-08-28):** `dogancanyildiz.sh` kayıtlı değil, bu zone Cloudflare'da yok. Aşağıdaki tablo ve bölüm 3'teki kural, sahibi alan adını kaydederse uygulanır; kapsam dışı ilan edilirse bu bölüm silinir (`docs/plans/README.md`).
-
-| Tip | Ad | İçerik | Proxy |
-|---|---|---|---|
-| A | `@` | `192.0.2.1` | Proxied (turuncu bulut) |
-| CNAME | `www` | `dogancanyildiz.sh` | Proxied (turuncu bulut) |
-
-`192.0.2.1` RFC 5737 dokümantasyon aralığından bir adres. Redirect Rule istek origin'e hiç gitmeden edge'de cevaplandığı için gerçek bir sunucuya işaret etmesi gerekmiyor; proxied bir kaydın var olması yeterli, olmazsa Rules hiç çalışmaz.
-
 ## 2. SSL/TLS
 
 - [ ] SSL/TLS -> Overview -> Encryption mode: **Full (strict)**. Flexible seçilirse Cloudflare ile origin arası düz HTTP'ye düşer.
@@ -43,51 +32,11 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 - [ ] Origin sertifikası Traefik'in Let's Encrypt HTTP-01 akışıyla kalır. Cloudflare proxied modda `/.well-known/acme-challenge` yolunu geçirir, "Always Use HTTPS" bu yolu engellemez. **Kesinti notu (2026-08-28):** site her HTTPS yolda 526 (Invalid SSL certificate) veriyor ve origin'de port 80 Traefik router'sız 404 dönüyor; Coolify'da uygulamanın çalıştığı ve Custom Labels'taki router satırları doğrulanmalı, kalıcı çözüm olarak Cloudflare Origin CA sertifikası (15 yıl, yalnızca Cloudflare güvenir) değerlendirilmeli.
 - [ ] HSTS Cloudflare'da **açılmaz**. Şu an uygulama (`next.config.ts`, production) `max-age=31536000; includeSubDomains` gönderiyor; Traefik'teki `security-headers` middleware'i devreye alınınca uygulama satırı kaldırılır ve tek kaynak Traefik olur, bkz. `docs/deploy/traefik-ve-origin.md`. Yayından önce yayında olan tüm alt alanların (ör. dev, preview, send, Kuma status sayfası hangi alt alandaysa o) TLS sonlandırdığı doğrulanmalı, `includeSubDomains` hepsini bir yıl https'e kilitler.
 
-## 3. Redirect Rule: `sh to com`
-
-Rules -> Redirect Rules -> Create rule.
-
-- [ ] Rule name: `sh to com`
-- [ ] Custom filter expression:
-
-```
-(http.host eq "dogancanyildiz.sh" or http.host eq "www.dogancanyildiz.sh")
-```
-
-- [ ] Then: URL redirect -> Type: **Dynamic**
-- [ ] Expression:
-
-```
-concat("https://www.dogancanyildiz.com", http.request.uri.path)
-```
-
-- [ ] Status code: **301**
-- [ ] Preserve query string: **açık**
-- [ ] Hedef bilerek `https://www.dogancanyildiz.com` köküne gidiyor. **Güncelleme (2026-08-30):** kökte artık Türkçe servis ediliyor (EN `/en` altında). Eski İngilizce yollar (`/about` vb.) origin'de 308 ile `/en/...`'e taşındığı için `.sh` üzerinden gelen eski bir link fiilen iki atlama yapar (.sh 301 www, sonra 308); bu bilinçli kabul edilir, tek atlama şartı yalnızca `.sh` kuralının kendisi içindir.
-
-Doğrulama:
-
-```bash
-curl -sI https://dogancanyildiz.sh/projects | grep -i -E '^(HTTP|location)'
-curl -sI 'https://www.dogancanyildiz.sh/hakkimda?utm_source=x' | grep -i -E '^(HTTP|location)'
-```
-
-Beklenen:
-
-```
-HTTP/2 301
-location: https://www.dogancanyildiz.com/projects
-HTTP/2 301
-location: https://www.dogancanyildiz.com/hakkimda?utm_source=x
-```
-
-Tek atlama şartı: ikinci bir `301` veya `location` satırı çıkmamalı.
-
 ## 3b. Redirect Rule: `apex to www` (dogancanyildiz.com zone'u)
 
 **Karar (2026-09-02):** kanonik host `www.dogancanyildiz.com`, apex ona yönlenir.
 
-**Güncelleme (2026-09-03):** yönlendirme fiilen Coolify'ın "Redirect to www" ayarıyla origin'de (Traefik, 307) yapılıyor; bu bölümdeki kural **isteğe bağlı**. Eklenirse apex isteği origin'e hiç düşmeden edge'de 301 ile biter, origin kapalıyken bile çalışır ve Google'a kalıcı sinyal verir; iki katman aynı yönde olduğu için çakışmaz. Ters yön (Coolify'da "Redirect to non-www" + burada apex to www) sonsuz döngü üretir, o kombinasyona asla izin verilmez. Bu kural bölüm 1'deki `.com` zone'unda tanımlanır ve bölüm 3'teki `.sh` kuralından **bağımsızdır**: `.sh` kapsam dışı ilan edilip bölüm 3 silinse bile bu bölüm yerinde kalır.
+**Güncelleme (2026-09-03):** yönlendirme fiilen Coolify'ın "Redirect to www" ayarıyla origin'de (Traefik, 307) yapılıyor; bu bölümdeki kural **isteğe bağlı**. Eklenirse apex isteği origin'e hiç düşmeden edge'de 301 ile biter, origin kapalıyken bile çalışır ve Google'a kalıcı sinyal verir; iki katman aynı yönde olduğu için çakışmaz. Ters yön (Coolify'da "Redirect to non-www" + burada apex to www) sonsuz döngü üretir, o kombinasyona asla izin verilmez. Bu kural bölüm 1'deki tek zone'da tanımlanır; bölüm numarası `3b` olarak bırakıldı çünkü bölüm 3 (kapsam dışı ikinci alan adının Redirect Rule'u) 2026-09-03'te silindi ve diğer dokümanlar bu numarayla bu bölüme atıf yapıyor.
 
 Rules -> Redirect Rules -> Create rule.
 
@@ -106,7 +55,7 @@ concat("https://www.dogancanyildiz.com", http.request.uri)
 ```
 
 - [ ] Status code: **301**
-- [ ] Preserve query string: **kapalı** (`http.request.uri` sorgu dizesini zaten taşıyor; bölüm 3'teki kuraldan farklı olarak bu anahtar açık bırakılırsa sorgu iki kez eklenir)
+- [ ] Preserve query string: **kapalı** (`http.request.uri` sorgu dizesini zaten taşıyor; `http.request.uri.path` kullanan bir ifadenin aksine bu anahtar açık bırakılırsa sorgu iki kez eklenir)
 - [ ] Coolify'daki Direction "Redirect to www" olarak kalır (aynı yön); "Redirect to non-www" ile birlikte kullanılamaz.
 
 Doğrulama:

@@ -20,9 +20,7 @@ Hedef Coolify sürümü: v4.3.1. Bu adımlar Coolify panelinde el ile yürütül
 
 ## 3. Domain
 
-**Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; tarihsel kurulum tersini tarif ediyordu.
-
-**Karar (2026-09-02):** kanonik host www.
+**Karar (2026-09-02):** kanonik host www. Tek alan adı `dogancanyildiz.com`; ikinci bir alan adı 2026-09-03 kararıyla kapsam dışı.
 
 **Karar değişikliği (2026-09-03, ilk canlı deploy):** apex -> www yönlendirmesi Coolify'ın dahili "Direction" ayarıyla (Traefik) yapılır; sahibi diğer sitesiyle aynı düzeni istedi. Cloudflare'deki `apex to www` Redirect Rule (`docs/deploy/cloudflare-kurulum.md` bölüm 3b) artık zorunlu değil, isteğe bağlı bir edge katmanı: eklenirse aynı yönde olduğu için çakışmaz ve yönlendirme 301 olarak edge'de biter. Coolify'ın yönlendirmesi **307** döner; kalıcı 301 istenirse Cloudflare kuralı eklenir.
 
