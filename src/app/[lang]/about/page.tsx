@@ -23,6 +23,7 @@ import {
   speaking,
 } from "@/content/profile";
 import { routing } from "@/i18n/routing";
+import { UMAMI_EVENT, umamiEvent } from "@/lib/analytics-events";
 import { hasCv } from "@/lib/cv";
 import { profileImagePath } from "@/lib/profile-image";
 import { CV_PATH } from "@/lib/site";
@@ -105,7 +106,11 @@ export default async function AboutPage({ params }: AboutPageProps) {
 
       {showCv ? (
         <Button asChild size="sm">
-          <a href={CV_PATH} download>
+          <a
+            href={CV_PATH}
+            download
+            {...umamiEvent(UMAMI_EVENT.cvDownload, { locale })}
+          >
             <Download className="size-4" />
             {t("downloadCv")}
           </a>

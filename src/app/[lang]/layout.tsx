@@ -14,9 +14,7 @@ import { buildTranslationMap } from "@/lib/content";
 import { absoluteUrl, buildOpenGraph } from "@/lib/seo/alternates";
 import { OG_IMAGE_PATH } from "@/lib/seo/og-image";
 import { ThemeProvider } from "@/components/theme-provider";
-import { layoutUmamiTag } from "@/components/umami-script";
-import { ConsentProvider } from "@/components/consent/consent-provider";
-import { ConsentBanner } from "@/components/consent/consent-banner";
+import { UmamiTracker } from "@/components/umami-script";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -65,7 +63,6 @@ const CLIENT_MESSAGE_NAMESPACES = [
   "footer",
   "contact",
   "errorPage",
-  "consent",
   "a11y",
 ] as const;
 
@@ -74,7 +71,7 @@ const CLIENT_MESSAGE_NAMESPACES = [
 // component that reads it is the form on /contact, so the shell leaves it
 // out and src/app/[lang]/contact/page.tsx serves it to its own subtree from
 // a second provider. Everything else on the list belongs to the header,
-// footer, consent banner or error boundary, which render on every route.
+// footer or error boundary, which render on every route.
 const ROUTE_SCOPED_MESSAGE_NAMESPACES = ["contact"] as const;
 
 function pickMessages(
@@ -152,7 +149,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
     clientMessages,
     ROUTE_SCOPED_MESSAGE_NAMESPACES
   );
-  const analyticsTag = layoutUmamiTag();
 
   // Every content page's path in every locale that has it, keyed by this
   // locale's slug. The switcher is a client component in the header and the
@@ -173,23 +169,21 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
           disableTransitionOnChange
         >
           <NextIntlClientProvider messages={shellMessages}>
-            <ConsentProvider tag={analyticsTag}>
-              <a href="#main" className="skip-link">
-                {t("skipToContent")}
-              </a>
-              <Header translations={translations} />
-              <main
-                id="main"
-                tabIndex={-1}
-                className="flex-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
-              >
-                {children}
-              </main>
-              <Footer />
-              <ConsentBanner />
-            </ConsentProvider>
+            <a href="#main" className="skip-link">
+              {t("skipToContent")}
+            </a>
+            <Header translations={translations} />
+            <main
+              id="main"
+              tabIndex={-1}
+              className="flex-1 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+            >
+              {children}
+            </main>
+            <Footer />
           </NextIntlClientProvider>
         </ThemeProvider>
+        <UmamiTracker />
       </body>
     </html>
   );

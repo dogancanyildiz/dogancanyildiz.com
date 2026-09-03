@@ -2,6 +2,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { CredentialPreview } from "@/components/sections/credential-preview";
 import { certificateGroupsFor } from "@/content/profile";
 import type { CertificateEntry } from "@/content/profile";
+import { outboundEvent } from "@/lib/analytics-events";
 import type { Locale } from "@/lib/content";
 
 /**
@@ -129,6 +130,7 @@ export async function CertificateList({ locale }: { locale: Locale }) {
                         name: entry.name,
                       })}
                       className="tap-target inline-flex items-center text-sm text-primary underline underline-offset-4"
+                      {...outboundEvent(entry.verifyUrl)}
                     >
                       {t("certificateVerify")}
                     </a>

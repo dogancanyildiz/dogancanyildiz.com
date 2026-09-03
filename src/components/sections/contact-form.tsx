@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { UMAMI_EVENT, trackUmamiEvent } from "@/lib/analytics-events";
 import {
   EMAIL_PATTERN,
   HONEYPOT_FIELD,
@@ -215,6 +216,11 @@ export function ContactForm() {
         return;
       }
 
+      // Counted here rather than on the submit button: the click says a
+      // visitor tried, the 200 says a message actually reached the inbox,
+      // and only the second one is worth a number. Silent when the tracker
+      // is not loaded.
+      trackUmamiEvent(UMAMI_EVENT.contactSubmit, { topic: payload.topic });
       setStatus("success");
       requestFocus("status");
       form.reset();
