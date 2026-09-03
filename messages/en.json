@@ -235,6 +235,7 @@
     "description": "The server this site runs on and the pipeline that ships it are both mine. The deploy details below come from the build now serving this page, and the live status is refreshed from the monitor once a minute.",
     "deployLabel": "Last deploy",
     "releaseLabel": "Release",
+    "releaseTitle": "Release notes, opens on GitHub",
     "commitTitle": "The commit behind this release, opens on GitHub",
     "commitAria": "Commit {sha}, open on GitHub",
     "statusLabel": "Live status",

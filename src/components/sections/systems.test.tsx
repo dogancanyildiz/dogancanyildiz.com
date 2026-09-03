@@ -71,6 +71,15 @@ vi.mock("@/lib/build-info", () => ({
 // covered by live-status.test.tsx; here the fetch is replaced so the panel
 // test stays offline and can flip between "Kuma answered" and "it did not".
 const liveStatus: { value: LiveStatusSnapshot | null } = { value: null };
+
+// GitHub Releases is read the same way; null means "fall back to package.json".
+const latestRelease: { value: { version: string; url: string } | null } = {
+  value: null,
+};
+vi.mock("@/lib/release-info", () => ({
+  getLatestRelease: async () => latestRelease.value,
+  RELEASES_URL: "https://github.com/dogancanyildiz/dogancanyildiz.com/releases",
+}));
 vi.mock("@/lib/status-page", () => ({
   getLiveStatus: async () => liveStatus.value,
 }));
@@ -80,6 +89,7 @@ const { Systems } = await import("./systems");
 afterEach(() => {
   vi.unstubAllEnvs();
   liveStatus.value = null;
+  latestRelease.value = null;
 });
 
 describe("Systems", () => {
@@ -97,7 +107,12 @@ describe("Systems", () => {
     expect(screen.getByText(/12:12.*GMT\+3/)).toBeInTheDocument();
     // The version is what a visitor reads; the sha is fine print linking to
     // the commit on GitHub.
-    expect(screen.getByText("v0.7.0")).toBeInTheDocument();
+    // No release answer: the bundled version, linking to the releases list.
+    const versionLink = screen.getByRole("link", { name: "v0.7.0" });
+    expect(versionLink).toHaveAttribute(
+      "href",
+      "https://github.com/dogancanyildiz/dogancanyildiz.com/releases"
+    );
     const commitLink = screen.getByRole("link", { name: /0123abc/ });
     expect(commitLink).toHaveAttribute(
       "href",
@@ -130,9 +145,9 @@ describe("Systems", () => {
 
     render(await resolveServerTree(<Systems />));
 
-    expect(screen.queryByRole("link")).toBeNull();
-    // Date and status fall back; the version always renders, the sha simply
-    // disappears from the release cell.
+    // Date and status fall back; the version always renders (the only link
+    // left on the panel), the sha simply disappears from the release cell.
+    expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(screen.getAllByText("No data").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText("v0.7.0")).toBeInTheDocument();
   });
@@ -143,7 +158,7 @@ describe("Systems", () => {
 
     render(await resolveServerTree(<Systems />));
 
-    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.queryByRole("link", { name: /status/i })).toBeNull();
   });
 
   it("puts the live status widget in the status cell when Kuma answers", async () => {
@@ -203,5 +218,21 @@ describe("Systems", () => {
 
     expect(screen.getByText("Sistemler")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /durum/i })).toBeInTheDocument();
+  });
+
+  it("prefers the latest GitHub release over the bundled version", async () => {
+    activeLocale = "en";
+    latestRelease.value = {
+      version: "0.8.0",
+      url: "https://github.com/dogancanyildiz/dogancanyildiz.com/releases/tag/v0.8.0",
+    };
+
+    render(await resolveServerTree(<Systems />));
+
+    expect(screen.queryByText("v0.7.0")).toBeNull();
+    expect(screen.getByRole("link", { name: "v0.8.0" })).toHaveAttribute(
+      "href",
+      "https://github.com/dogancanyildiz/dogancanyildiz.com/releases/tag/v0.8.0"
+    );
   });
 });
