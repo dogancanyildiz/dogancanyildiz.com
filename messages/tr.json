@@ -235,6 +235,7 @@
     "description": "Bu siteyi çalıştıran sunucu da yayına taşıyan hat da bana ait. Aşağıdaki yayın bilgisi bu sayfayı şu an servis eden derlemeden geliyor, canlı durum ise izleme sisteminden dakikada bir tazeleniyor.",
     "deployLabel": "Son yayın",
     "releaseLabel": "Sürüm",
+    "releaseTitle": "Sürüm notları, GitHub'da açılır",
     "commitTitle": "Bu yayını üreten commit, GitHub'da açılır",
     "commitAria": "Commit {sha}, GitHub'da aç",
     "statusLabel": "Canlı durum",

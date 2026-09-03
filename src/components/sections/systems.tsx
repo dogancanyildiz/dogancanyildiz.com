@@ -2,6 +2,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { LiveStatus } from "@/components/sections/live-status";
 import { buildInfo, commitUrl, formatBuildSha } from "@/lib/build-info";
+import { getLatestRelease, RELEASES_URL } from "@/lib/release-info";
 
 /**
  * Hard-coded on purpose. This line names technologies, never machines: no
@@ -94,6 +95,11 @@ export async function Systems() {
       ? parsedBuildDate
       : null;
   const statusUrl = statusPageUrl();
+  // The live version comes from GitHub Releases; package.json is one release
+  // behind on main by construction (see src/lib/release-info.ts).
+  const release = await getLatestRelease();
+  const version = release?.version ?? buildInfo.version;
+  const releaseUrl = release?.url ?? RELEASES_URL;
 
   return (
     <div className="space-y-8">
@@ -111,7 +117,15 @@ export async function Systems() {
 
           <SystemsField label={t("releaseLabel")}>
             <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span>v{buildInfo.version}</span>
+              <a
+                href={releaseUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t("releaseTitle")}
+                className="underline decoration-dotted underline-offset-4 hover:text-muted-foreground"
+              >
+                v{version}
+              </a>
               {buildSha ? (
                 <a
                   href={commitUrl(buildInfo.sha)}
