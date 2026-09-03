@@ -75,8 +75,8 @@ katmanlarına ve derleme loglarına sızdırır.
 | `CONTACT_EMAIL`                             | Runtime         | Üretimde evet | Form mesajlarının gittiği kutu.                                                                                                                                                                                         |
 | `FROM_EMAIL`                                | Runtime         | Üretimde evet | Mailcow'da tanımlı, DKIM imzalı gönderici adres.                                                                                                                                                                        |
 | `TRUST_CF_CONNECTING_IP`                    | Runtime         | Hayır         | Yalnızca origin yalnızca Cloudflare'dan erişilebilir ve Traefik Cloudflare aralıklarına güvendikten sonra `true`. `trustedIPs` tek başına `CF-Connecting-IP`'yi korumaz.                                                |
-| `NEXT_PUBLIC_BUILD_SHA`                     | Build           | Hayır         | Systems panelindeki commit SHA; Coolify `SOURCE_COMMIT` veya CI `github.sha`. Boşsa alan gizlenir.                                                                                                                      |
-| `NEXT_PUBLIC_BUILD_DATE`                    | Build           | Hayır         | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa ikisi de gizlenir.                                                                                                                                          |
+| `NEXT_PUBLIC_BUILD_SHA`                     | Build           | Hayır         | Systems panelindeki commit SHA; CI `github.sha` geçirir, Coolify'da elle girilmez. Boşsa Dockerfile Coolify'ın otomatik geçtiği `SOURCE_COMMIT` build-arg'ına döner.                                                    |
+| `NEXT_PUBLIC_BUILD_DATE`                    | Build           | Hayır         | Systems paneli ve footer yılı için ISO deploy zamanı. Boşsa Dockerfile build anındaki UTC saatini kullanır.                                                                                                             |
 | `NEXT_PUBLIC_STATUS_URL`                    | Build           | Hayır         | Systems panelinin link verdiği public status sayfası (Uptime Kuma). Yalnızca https kabul edilir; boşsa satır gizlenir.                                                                                                  |
 | `UMAMI_SCRIPT_URL`                          | Build           | Hayır         | Merkezi self-host Umami origin'i (`https://umami.dravcore.com`). CSP'nin izin verdiği origin ile aynı olmalı (`src/lib/analytics.ts`), aksi halde derleme düşer.                                                        |
 | `UMAMI_WEBSITE_ID`                          | Build           | Hayır         | Umami website UUID. Tag yalnızca iki Umami değeri de setken ve yalnızca production derlemesinde üretilir; script layout'a `<script defer>` olarak basılır ve izin beklemez (2026-09-03 kararı, aşağıya bakın). Basılır. |
@@ -228,14 +228,21 @@ Kontrol panelinde, bu depoda olmayan adımlar adım adım checklist:
 src/app        App Router rotaları, api handler'ları, metadata rotaları
 src/components UI, yerleşim ve bölüm bileşenleri
 src/lib        Çatıdan bağımsız yardımcılar, her biri birim testli
-docs           Mimari kararlar ve fazlı yol haritası
-docs/plans     Faz başına yürütülebilir uygulama planları
+content        Proje ve blog MDX dosyaları, dil başına klasör
+docs           Mimari kararlar, panel checklist'leri, açık işler
 ```
 
 ## Belgelendirme
 
-Mimari kararlar `docs/` altında. Özet için `docs/00-ozet-ve-karar.md`,
-faz sırası için `docs/10-yol-haritasi.md`.
+Mimari kararlar `docs/` altında; giriş noktası
+[`docs/00-ozet-ve-karar.md`](./docs/00-ozet-ve-karar.md) (bugünkü durum,
+kararlar tablosu, stack gerekçesi, faz özeti ve karar geçmişi). Kapanmamış
+işler ve canlı doğrulamalar
+[`docs/11-acik-isler.md`](./docs/11-acik-isler.md)'de, klasörün tam dizini
+[`docs/README.md`](./docs/README.md)'de. Yürütülmüş faz planları ve devir
+notları 2026-09-03'te arşive alındı; özeti
+[`docs/plans/README.md`](./docs/plans/README.md), tam metinleri git
+geçmişinde.
 
 ## Dallama ve sürümler
 

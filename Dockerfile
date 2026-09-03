@@ -67,8 +67,11 @@ ARG NEXT_PUBLIC_BUILD_DATE
 ARG NEXT_PUBLIC_STATUS_URL=""
 ARG UMAMI_SCRIPT_URL=""
 ARG UMAMI_WEBSITE_ID=""
+# Coolify passes SOURCE_COMMIT into every Dockerfile build automatically, so
+# an empty NEXT_PUBLIC_BUILD_SHA falls back to it instead of staying blank.
+ARG SOURCE_COMMIT=""
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-ENV NEXT_PUBLIC_BUILD_SHA=$NEXT_PUBLIC_BUILD_SHA
+ENV NEXT_PUBLIC_BUILD_SHA=${NEXT_PUBLIC_BUILD_SHA:-$SOURCE_COMMIT}
 ENV NEXT_PUBLIC_BUILD_DATE=$NEXT_PUBLIC_BUILD_DATE
 ENV NEXT_PUBLIC_STATUS_URL=$NEXT_PUBLIC_STATUS_URL
 ENV UMAMI_SCRIPT_URL=$UMAMI_SCRIPT_URL
@@ -77,7 +80,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+# Coolify has no built in "build time" variable, so an empty
+# NEXT_PUBLIC_BUILD_DATE falls back to the current UTC time in ISO 8601.
+RUN NEXT_PUBLIC_BUILD_DATE="${NEXT_PUBLIC_BUILD_DATE:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}" npm run build
 
 # ---------------------------------------------------------------------------
 # Stage 3: runner
