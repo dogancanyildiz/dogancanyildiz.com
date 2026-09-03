@@ -19,7 +19,7 @@ Kaynak kararlar: `docs/06-devops-ve-deploy.md` bölüm 8, `docs/09-guvenlik.md` 
 - [ ] `*.preview` bilerek gri bulut: ücretsiz planda wildcard DNS kayıtları proxy'lenemez. Preview'lar bu yüzden TLS'siz `http` üzerinden ve yalnızca origin firewall'unda allowlist'e alınmış admin IP'sinden erişilebilir, bkz. `docs/deploy/traefik-ve-origin.md`.
 - [ ] Posta DNS kayıtları (MX, DKIM, SPF, DMARC) Mailcow kurulumuna aittir ve proxy'lenmez (gri bulut); 2026-08-31 kararıyla Resend kaldırıldı, gönderim `contact@dogancanyildiz.com` üzerinden Mailcow SMTP ile yapılır, bkz. `docs/deploy/mailcow-smtp.md`.
 - [ ] **Uyarı:** `me@dogancanyildiz.com` alıcı adresini taşıyan MX kayıtlarına dokunulmaz; A/CNAME kayıtlarının eklenmesi mevcut postayı etkilemez.
-- [ ] `dogancanyildiz.com -> www.dogancanyildiz.com` yönlendirmesi (kanonik host www, bölüm 3b) bu zone'daki bir Redirect Rule ile yapılır, Coolify'ın dahili www ayarı kullanılmaz.
+- [ ] `dogancanyildiz.com -> www.dogancanyildiz.com` yönlendirmesi (kanonik host www) **2026-09-03'ten beri Coolify'ın dahili "Redirect to www" ayarıyla** yapılıyor (`docs/deploy/coolify-kurulum.md` bölüm 3). Bölüm 3b'deki Redirect Rule isteğe bağlı bir edge katmanı, eklenirse aynı yönde olduğu için çakışmaz.
 
 - [ ] **CAA kaydı** (2026-08-28 denetimi, yoktu): `CAA 0 issue "letsencrypt.org"`, `CAA 0 issue "pki.goog"`, `CAA 0 iodef "mailto:me@dogancanyildiz.com"`. Origin CA'ya geçilirse `letsencrypt.org` satırı kaldırılabilir.
 - [ ] `*.preview` kaydı yalnızca PR preview kullanılacaksa eklenir; kullanılmayacaksa bu satır ve `docs/deploy/coolify-kurulum.md` bölüm 5 kaldırılır (karar sahibinde, 2026-08-28 denetimi F-029).
@@ -85,7 +85,9 @@ Tek atlama şartı: ikinci bir `301` veya `location` satırı çıkmamalı.
 
 ## 3b. Redirect Rule: `apex to www` (dogancanyildiz.com zone'u)
 
-**Karar (2026-09-02):** kanonik host `www.dogancanyildiz.com`, apex ondan 301 ile yönlenir. Bu kural bölüm 1'deki `.com` zone'unda tanımlanır ve bölüm 3'teki `.sh` kuralından **bağımsızdır**: `.sh` kapsam dışı ilan edilip bölüm 3 silinse bile bu bölüm yerinde kalır.
+**Karar (2026-09-02):** kanonik host `www.dogancanyildiz.com`, apex ona yönlenir.
+
+**Güncelleme (2026-09-03):** yönlendirme fiilen Coolify'ın "Redirect to www" ayarıyla origin'de (Traefik, 307) yapılıyor; bu bölümdeki kural **isteğe bağlı**. Eklenirse apex isteği origin'e hiç düşmeden edge'de 301 ile biter, origin kapalıyken bile çalışır ve Google'a kalıcı sinyal verir; iki katman aynı yönde olduğu için çakışmaz. Ters yön (Coolify'da "Redirect to non-www" + burada apex to www) sonsuz döngü üretir, o kombinasyona asla izin verilmez. Bu kural bölüm 1'deki `.com` zone'unda tanımlanır ve bölüm 3'teki `.sh` kuralından **bağımsızdır**: `.sh` kapsam dışı ilan edilip bölüm 3 silinse bile bu bölüm yerinde kalır.
 
 Rules -> Redirect Rules -> Create rule.
 
@@ -105,7 +107,7 @@ concat("https://www.dogancanyildiz.com", http.request.uri)
 
 - [ ] Status code: **301**
 - [ ] Preserve query string: **kapalı** (`http.request.uri` sorgu dizesini zaten taşıyor; bölüm 3'teki kuraldan farklı olarak bu anahtar açık bırakılırsa sorgu iki kez eklenir)
-- [ ] Coolify'ın dahili www/non-www ayarı bunun için kullanılmaz, tek kaynak burasıdır.
+- [ ] Coolify'daki Direction "Redirect to www" olarak kalır (aynı yön); "Redirect to non-www" ile birlikte kullanılamaz.
 
 Doğrulama:
 

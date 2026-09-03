@@ -9,6 +9,7 @@ import {
 } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import type { AppLocale } from "@/i18n/routing";
+import { UMAMI_EVENT, umamiEvent } from "@/lib/analytics-events";
 import { cn } from "@/lib/utils";
 
 const localeLabels: Record<string, string> = {
@@ -133,6 +134,11 @@ export function LanguageSwitcher({ translations }: LanguageSwitcherProps) {
               hrefLang={locale}
               lang={locale}
               aria-current={isActive ? "true" : undefined}
+              // Only the other locale carries the event: a press on the
+              // active one is a reload, not a switch.
+              {...(isActive
+                ? {}
+                : umamiEvent(UMAMI_EVENT.localeSwitch, { to: locale }))}
               className={cn(
                 "tap-target inline-flex items-center px-2.5 text-[0.72rem] font-semibold uppercase tracking-[0.2em] transition-colors",
                 isActive

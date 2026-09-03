@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { ogImageHref } from "@/i18n/navigation";
 import { LinkedinIcon, WhatsAppIcon, XIcon } from "@/components/ui/brand-icon";
 import { CopyLinkButton } from "@/components/sections/copy-link-button";
+import { outboundEvent } from "@/lib/analytics-events";
 import type { ContentKind, Locale } from "@/lib/content";
 import { contentUrl } from "@/lib/seo/alternates";
 import { OG_IMAGE_SIZE } from "@/lib/seo/og-image";
@@ -125,6 +126,10 @@ export async function ShareCard({ locale, kind, slug, title }: ShareCardProps) {
                 href.startsWith("mailto:") ? undefined : "noopener noreferrer"
               }
               className={shareLinkClass}
+              // outbound rather than a share event of its own: the host is
+              // already the network being shared to, and wa.me here is the
+              // generic share sheet rather than the owner's own chat.
+              {...outboundEvent(href)}
             >
               {icon}
               {label}

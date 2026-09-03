@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, type MouseEvent } from "react";
 import { X } from "lucide-react";
+import { outboundEvent } from "@/lib/analytics-events";
 
 export interface CredentialPreviewProps {
   /** Official credential name, printed under the enlarged artwork. */
@@ -183,6 +184,7 @@ export function CredentialPreview({
               rel="noopener noreferrer"
               aria-label={verifyLabel}
               className="tap-target mt-1 inline-flex items-center text-sm text-primary underline underline-offset-4"
+              {...outboundEvent(verifyUrl)}
             >
               {verifyText}
             </a>

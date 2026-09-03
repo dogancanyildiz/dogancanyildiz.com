@@ -142,6 +142,51 @@ describe("ContactForm submission", () => {
     });
   });
 
+  it("counts a delivered message as a contact-submit event carrying the topic", async () => {
+    const track = vi.fn();
+    window.umami = { track };
+    fetchMock.mockResolvedValue(jsonResponse(200, {}));
+    const user = userEvent.setup();
+    renderWithIntl(<ContactForm />);
+
+    await fillValidForm(user);
+    await user.click(screen.getByRole("button", { name: "Send message" }));
+    await screen.findByText(/Thanks, your message is on its way/);
+
+    expect(track).toHaveBeenCalledWith("contact-submit", { topic: "web" });
+    delete window.umami;
+  });
+
+  it("succeeds the same way when the tracker never loaded", async () => {
+    delete window.umami;
+    fetchMock.mockResolvedValue(jsonResponse(200, {}));
+    const user = userEvent.setup();
+    renderWithIntl(<ContactForm />);
+
+    await fillValidForm(user);
+    await user.click(screen.getByRole("button", { name: "Send message" }));
+
+    await screen.findByText(/Thanks, your message is on its way/);
+    expect(screen.getByRole("alert")).toHaveTextContent("");
+  });
+
+  it("does not count a rejected message", async () => {
+    const track = vi.fn();
+    window.umami = { track };
+    fetchMock.mockResolvedValue(
+      jsonResponse(400, { error: "Please check the highlighted fields." })
+    );
+    const user = userEvent.setup();
+    renderWithIntl(<ContactForm />);
+
+    await fillValidForm(user);
+    await user.click(screen.getByRole("button", { name: "Send message" }));
+    await screen.findByRole("alert");
+
+    expect(track).not.toHaveBeenCalled();
+    delete window.umami;
+  });
+
   it("still sends the request when the honeypot is filled, instead of faking a silent success", async () => {
     fetchMock.mockResolvedValue(jsonResponse(200, {}));
     const user = userEvent.setup();

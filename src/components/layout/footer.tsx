@@ -11,6 +11,7 @@ import {
   WhatsAppIcon,
 } from "@/components/ui/brand-icon";
 import { CONTACT_EMAIL_PUBLIC, SOCIAL, whatsappHref } from "@/lib/site";
+import { UMAMI_EVENT, outboundEvent, umamiEvent } from "@/lib/analytics-events";
 
 // .tap-target, not the bare 24px floor SC 2.5.8 asks for: these are
 // standalone links stacked in a column, not words inside a sentence, so the
@@ -90,6 +91,7 @@ export async function Footer() {
             <a
               href={`mailto:${CONTACT_EMAIL_PUBLIC}`}
               className="tap-target inline-flex min-w-0 items-center gap-2 break-all text-sm text-foreground transition-colors hover:text-primary"
+              {...outboundEvent(`mailto:${CONTACT_EMAIL_PUBLIC}`)}
             >
               <Mail className="size-4 shrink-0" aria-hidden="true" />
               <span className="min-w-0">{CONTACT_EMAIL_PUBLIC}</span>
@@ -102,6 +104,9 @@ export async function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={footerTextLinkClass}
+                  {...umamiEvent(UMAMI_EVENT.whatsappClick, {
+                    surface: "footer",
+                  })}
                 >
                   <WhatsAppIcon className="size-4 shrink-0" />
                   {t("footer.whatsapp")}
@@ -113,6 +118,7 @@ export async function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={footerTextLinkClass}
+                  {...outboundEvent(SOCIAL.github)}
                 >
                   <GithubIcon className="size-4 shrink-0" />
                   {t("footer.github")}
@@ -124,6 +130,7 @@ export async function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={footerTextLinkClass}
+                  {...outboundEvent(SOCIAL.linkedin)}
                 >
                   <LinkedinIcon className="size-4 shrink-0" />
                   {t("footer.linkedin")}

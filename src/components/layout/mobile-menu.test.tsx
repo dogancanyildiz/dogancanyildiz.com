@@ -73,9 +73,9 @@ describe("MobileMenu", () => {
   });
 
   it("moves focus into the panel and keeps Tab inside it while open", async () => {
-    // The panel is a real dialog, unlike the consent banner, so it owes the
-    // matching behaviour: focus goes in on open, Tab cannot walk out to the
-    // page behind it, and focus comes back to the trigger on close.
+    // The panel is a real dialog, so it owes the matching behaviour: focus
+    // goes in on open, Tab cannot walk out to the page behind it, and focus
+    // comes back to the trigger on close.
     const user = userEvent.setup();
     renderWithIntl(<MobileMenu />);
     const trigger = screen.getByRole("button", { name: "Open menu" });

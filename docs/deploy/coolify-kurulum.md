@@ -22,10 +22,14 @@ Hedef Coolify sürümü: v4.3.1. Bu adımlar Coolify panelinde el ile yürütül
 
 **Karar değişikliği (2026-08-27):** ana domain artık dogancanyildiz.com, dogancanyildiz.sh 301 ile ona yönlenir; tarihsel kurulum tersini tarif ediyordu.
 
-**Karar (2026-09-02):** kanonik host www. Apex, edge'de (Cloudflare) `www.dogancanyildiz.com`'a 301 ile yönlendiği için origin'e normalde hiç düşmez; yine de Coolify uygulamasına iki domain de tanımlanır, apex yedek olarak kalır (Cloudflare önünde bir kesinti veya yanlış yapılandırma durumunda origin apex isteğini de yanıtlayabilsin diye).
+**Karar (2026-09-02):** kanonik host www.
+
+**Karar değişikliği (2026-09-03, ilk canlı deploy):** apex -> www yönlendirmesi Coolify'ın dahili "Direction" ayarıyla (Traefik) yapılır; sahibi diğer sitesiyle aynı düzeni istedi. Cloudflare'deki `apex to www` Redirect Rule (`docs/deploy/cloudflare-kurulum.md` bölüm 3b) artık zorunlu değil, isteğe bağlı bir edge katmanı: eklenirse aynı yönde olduğu için çakışmaz ve yönlendirme 301 olarak edge'de biter. Coolify'ın yönlendirmesi **307** döner; kalıcı 301 istenirse Cloudflare kuralı eklenir.
 
 - [ ] Domains: `https://www.dogancanyildiz.com` ve `https://dogancanyildiz.com` (Traefik ikisi için de sertifika üretir ve router tanımlar).
-- [ ] "Redirect" ayarı (www -> non-www): Coolify'ın dahili www yönlendirmesi **kullanılmaz**. `dogancanyildiz.com -> www.dogancanyildiz.com` yönlendirmesi dahil tüm domain yönlendirmesi Cloudflare Redirect Rules'ta tek yerden tanımlanır, bkz. `docs/deploy/cloudflare-kurulum.md`.
+- [ ] www satırında Direction: **Redirect to www**. "Redirect to non-www" seçilirse kanonik www ile ters düşer: canonical, sitemap, Umami `data-domains` ve iletişim formunun Origin kontrolü (`NEXT_PUBLIC_SITE_URL`) hepsi www'ye bağlı, apex'te form 403 alır ve ölçüm düşmez (ilk deploy'da tam bu oldu).
+- [ ] Direction değişikliği Docker label'ı olarak konteynere yazılır, kaydetmek yetmez: **Redeploy** (veya Restart) gerekir, yoksa Traefik eski yönü kullanmaya devam eder.
+- [ ] Doğrulama: `curl -sI 'https://dogancanyildiz.com/en/blog?x=1'` `location: https://www.dogancanyildiz.com/en/blog?x=1` vermeli (yol ve sorgu korunur), `curl -sI https://www.dogancanyildiz.com/` `200` dönmeli.
 
 ## 4. Env değişkenleri
 
@@ -56,9 +60,17 @@ Coolify'da her değişkenin yanındaki "Build Variable?" kutusu, o değişkenin 
 
 ## 6. Health check
 
-Dockerfile'da bir `HEALTHCHECK` tanımlıysa Coolify'ın UI ayarını ezer. Bu repoda `HEALTHCHECK` tanımlı, dolayısıyla asıl kaynak Dockerfile'dır. UI ayarı yine de aynı değerlerle doldurulur ki iki katman çelişmesin.
+**Düzeltme (2026-09-03, Coolify v4.3.14):** UI'da Healthcheck açıksa Coolify kendi komutunu (önce `curl`, olmazsa `wget`) konteynerin `healthcheck` tanımı olarak yazar ve Dockerfile'daki `HEALTHCHECK` **ezilir**, tersi değil. `node:24-alpine` imajında curl yok; busybox `wget` de `localhost:3000`'e "connection refused" alır, çünkü Alpine'da `localhost` önce `::1`'e çözülür ve Next standalone yalnızca `0.0.0.0` (IPv4) dinler. Sonuç: uygulama "Ready" dediği hâlde üç deneme sonunda "unhealthy", rollout iptal.
+
+İki geçerli ayar:
+
+- **Kullanılan (2026-09-03):** UI Healthcheck açık ve **Host: `127.0.0.1`** (`localhost` değil). wget IPv4'e bağlanır, kontrol geçer; ilk başarılı deploy bu ayarla alındı.
+- Alternatif: UI Healthcheck kapalı. Coolify o zaman Dockerfile'daki probe'a düşer; o zaten `127.0.0.1` ve node'un yerleşik `fetch`'iyle çalışır.
+
+UI açık tutulacaksa değerler Dockerfile ile aynı olmalı ki iki katman çelişmesin:
 
 - [ ] Health Check: Enabled
+- [ ] Host: `127.0.0.1`
 - [ ] Path: `/api/health`
 - [ ] Port: `3000`
 - [ ] Method: `GET`, Expected Status: `200`
