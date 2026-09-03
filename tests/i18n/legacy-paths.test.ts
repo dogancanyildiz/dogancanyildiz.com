@@ -23,6 +23,7 @@ const STATIC_PAGES = [
   "/projects",
   "/blog",
   "/contact",
+  "/services",
   "/privacy",
   "/coming-soon",
   "/updating",

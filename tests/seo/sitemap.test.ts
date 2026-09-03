@@ -19,6 +19,8 @@ describe("sitemap", () => {
     expect(urls).toContain("https://dogancanyildiz.com/en/blog");
     expect(urls).toContain("https://dogancanyildiz.com/iletisim");
     expect(urls).toContain("https://dogancanyildiz.com/en/contact");
+    expect(urls).toContain("https://dogancanyildiz.com/hizmetler");
+    expect(urls).toContain("https://dogancanyildiz.com/en/services");
     expect(urls).toContain("https://dogancanyildiz.com/gizlilik");
     expect(urls).toContain("https://dogancanyildiz.com/en/privacy");
     expect(urls).not.toContain("https://dogancanyildiz.com/coming-soon");
@@ -184,19 +186,22 @@ describe("sitemap", () => {
   });
 
   // 2026-09-02 decision: a sixth project (koklu-hukuk, a brand name, same
-  // slug in both locales) plus the localized Turkish sections give
-  // 6 static x 2 + 6 projects x 2 + 3 posts x 2 = 30. A wrong count here is
-  // the cheapest place to catch a miscounted STATIC_PAGES entry or a project
-  // silently dropped from one locale.
-  it("lists exactly 30 urls: 6 static, 6 projects and 3 posts, each in both locales", async () => {
+  // slug in both locales) plus the localized Turkish sections gave
+  // 6 static x 2 + 6 projects x 2 + 3 posts x 2 = 30. The /hizmetler services
+  // page adds a seventh static page: 7 x 2 + 6 x 2 + 3 x 2 = 32. Two more
+  // posts (cloudflare-traefik-arkasinda-gercek-istemci-ip and
+  // nextjs-docker-multi-stage-non-root) take it to 7 x 2 + 6 x 2 + 5 x 2 = 36.
+  // A wrong count here is the cheapest place to catch a miscounted
+  // STATIC_PAGES entry or a project silently dropped from one locale.
+  it("lists exactly 36 urls: 7 static, 6 projects and 5 posts, each in both locales", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const { getPosts, getProjects } = await import("@/lib/content");
 
     expect(getProjects("tr")).toHaveLength(6);
     expect(getProjects("en")).toHaveLength(6);
-    expect(getPosts("tr")).toHaveLength(3);
-    expect(getPosts("en")).toHaveLength(3);
-    expect(sitemap()).toHaveLength(30);
+    expect(getPosts("tr")).toHaveLength(5);
+    expect(getPosts("en")).toHaveLength(5);
+    expect(sitemap()).toHaveLength(36);
   });
 
   it("gives the brand-named sixth project the same slug in both locales", async () => {

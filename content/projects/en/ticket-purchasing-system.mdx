@@ -18,7 +18,7 @@ order: 3
 
 ## What I did
 
-I built a ticket purchasing system as a security practice project inside the Siber Vatan training program, then ran a penetration test and a vulnerability assessment against my own application. The findings drove the second half of the work: input validation on every request that touches the database, session handling that survives a stolen cookie, and a Docker deployment where the application does not run as root and does not expose more than it needs to.
+I built a ticket purchasing system as a security practice project inside the Siber Vatan training program, then ran a [penetration test](/blog/capt-preparation-in-a-docker-lab) and a vulnerability assessment against my own application. The findings drove the second half of the work: input validation on every request that touches the database, session handling that survives a stolen cookie, and a Docker deployment where the application does not run as root and does not expose more than it needs to.
 
 ## Why it was built this way
 
@@ -26,4 +26,4 @@ Writing the application first and attacking it afterwards was the point. A vulne
 
 ## What I learned
 
-None of the fixes that mattered were exotic. Most of what I found came down to trusting a value that arrived from the client, and the pattern that closed it was always the same: validate at the boundary, keep the trusted state on the server, and never let the deployment be the place where a shortcut lives. Hardening the container turned out to be part of the same lesson, because however well the application is written, the system stays as permissive as the host underneath it.
+None of the fixes that mattered were exotic. Most of what I found came down to trusting a value that arrived from the client, and the pattern that closed it was always the same: validate at the boundary, keep the trusted state on the server, and never let the deployment be the place where a shortcut lives. Hardening the container turned out to be part of the same lesson, because however well the application is written, the system stays as permissive as [the host underneath it](/blog/from-ccna-to-web-security).

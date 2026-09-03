@@ -104,6 +104,11 @@ const PAGES: PageCase[] = [
     load: () => import("@/app/[lang]/contact/page"),
   },
   {
+    name: "services",
+    path: "/services",
+    load: () => import("@/app/[lang]/services/page"),
+  },
+  {
     name: "privacy",
     path: "/privacy",
     load: () => import("@/app/[lang]/privacy/page"),

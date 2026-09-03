@@ -20,8 +20,15 @@ The application is built by a multi stage Dockerfile with separate deps, builder
 
 ## Where it tripped me up
 
-The first snag was the health check. Coolify's built in HTTP health check needs curl or wget inside the container ([Coolify docs](https://coolify.io/docs/knowledge-base/health-checks)); the `node:24-alpine` image I use ships without curl, and its wget is the limited busybox applet. So instead of leaning on an external binary, the check in this repository uses Node's own fetch call and is verified on staging before it is wired to production. The second was the environment variable layer. Values prefixed with NEXT_PUBLIC_ are inlined at build time, so they have to arrive as build variables; in this repository the build fails on purpose when the site url is missing, so a wrong address is never silently baked into the bundle. The reverse is worse: marking an API key as a build variable can leak it into image layers and build logs.
+The first snag was the health check. Coolify's built in HTTP health check needs curl or wget inside the container ([Coolify docs](https://coolify.io/docs/knowledge-base/health-checks)); the `node:24-alpine` image I use ships without curl, and its wget is the limited busybox applet. So instead of leaning on an external binary, the check in this repository uses Node's own fetch call and is verified on staging before it is wired to production. The container's own health check came down to this line:
+
+```dockerfile
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+  CMD ["node", "-e", "fetch(`http://127.0.0.1:${process.env.PORT || 3000}/api/health`).then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+```
+
+The second was the environment variable layer. Values prefixed with NEXT_PUBLIC_ are inlined at build time, so they have to arrive as build variables; in this repository the build fails on purpose when the site url is missing, so a wrong address is never silently baked into the bundle. The reverse is worse: marking an API key as a build variable can leak it into image layers and build logs.
 
 ## What I got out of it
 
-The whole release step collapsed into one command, and every piece of the infrastructure lives in the repository. The price is maintenance: the server, the certificates and the updates are now my job. For a personal site that trade was worth it, because operating it is exactly the thing I wanted to learn.
+The whole release step collapsed into one command, and every piece of the infrastructure lives in the repository. The price is maintenance: the server, the certificates and the updates are now my job. For a personal site that trade was worth it, because operating it is exactly the thing I wanted to learn. I set up the same pipeline for a client site too; I keep that kind of work on the [services](/services) page.

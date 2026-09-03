@@ -1,0 +1,71 @@
+---
+title: Reading the real client IP behind Cloudflare and Traefik
+slug: reading-the-real-client-ip
+translationKey: reading-the-real-client-ip
+date: 2026-09-03
+summary: The contact form's rate limiter must key on the visitor, not a header the client can forge, so it reads the real client IP behind Cloudflare and Traefik.
+tags:
+  - security
+  - network
+  - devops
+---
+
+## The problem: which address does the rate limiter recognise a visitor by
+
+The rate limiter on the contact form makes one decision: which key do I count this request against. If that key is read from the wrong header, the protection silently stops working. The application sits behind Cloudflare, and behind Traefik behind that, so a request passes through at least two proxies before it reaches the code. Each proxy adds its own header, and which of those headers actually carries the visitor, versus which is plain text the client can populate, is where the decision starts. I first asked the same question in [deployment decisions after CCNA](/blog/from-ccna-to-web-security): how did this request get here, and who was allowed to reach it?
+
+## Why CF-Connecting-IP is not enough on its own
+
+The CF-Connecting-IP header Cloudflare adds looks trustworthy, but on its own it grants no trust. It is a plain HTTP header, and any client can set it on a request. Traefik's forwardedHeaders.trustedIPs setting does not help either, because that setting only governs the X-Forwarded-* family and never touches CF-Connecting-IP. The header becomes trustworthy only once the origin accepts connections from Cloudflare alone; either Traefik's ipAllowList or the host firewall provides that, and it is a separate layer. The code does not guess this decision itself: whether the header can be trusted arrives from the outside through a `trustCloudflare` option.
+
+```ts
+export function getClientIp(headers: Headers, options: ClientIpOptions): string {
+  if (options.trustCloudflare) {
+    const cloudflareIp = normalizeClientIp(headers.get("cf-connecting-ip") ?? "");
+    if (cloudflareIp) {
+      return cloudflareIp;
+    }
+  }
+  // ...
+}
+```
+
+## Why the last hop of X-Forwarded-For
+
+With trustCloudflare off, the fallback header is X-Forwarded-For, but only its last entry is read. This header is a comma separated list of hops, and every value to the left is client written and therefore forgeable. The one entry that can be trusted is the last hop, appended by the trusted proxy directly in front of the application. Behind Cloudflare that last hop is a Cloudflare edge address: coarse, because it is the edge and not the visitor, but impossible to forge. The exact visitor address still needs trustCloudflare.
+
+```ts
+const forwarded = headers.get("x-forwarded-for") ?? "";
+const hops = forwarded
+  .split(",")
+  .map((hop) => hop.trim())
+  .filter((hop) => hop.length > 0);
+const nearest = normalizeClientIp(hops[hops.length - 1] ?? "");
+```
+
+## In IPv6 one address is not one visitor
+
+Whichever header the key comes from, in IPv6 a single address does not map to a single visitor. A provider hands a single subscriber a /64 as the smallest block, and every host inside that block belongs to the same line. If I key the limiter on the full address, a visitor can walk 2^64 addresses, take a fresh budget for each one, and on the way evict every other key out of the limiter's bounded map. So only the first four 16 bit groups of an IPv6 address, its /64, become the key.
+
+## Normalise before it is a key
+
+Once a header wins, I do not turn its value straight into a key; I first reduce it to a single canonical form. Two spellings of the same address, upper or lower case, leading zeros, a zone id, a port, or an IPv4 mapped form, all have to answer with the same key. Otherwise one visitor could hold two budgets. ::ffff:203.0.113.9 and 203.0.113.9 are the same visitor, and both come down to the same IPv4 key; a value that is not an address at all yields no key, returns null, and that request falls into the separate, deliberately looser bucket shared by every address that cannot be resolved.
+
+```ts
+export function normalizeClientIp(value: string): string | null {
+  const candidate = stripPort(value.trim());
+  const version = isIP(candidate);
+  if (version === 4) {
+    return candidate;
+  }
+  if (version !== 6) {
+    return null;
+  }
+  const groups = ipv6Groups(candidate);
+  return groups ? ipv6Key(groups) : null;
+}
+```
+
+## What I got out of it
+
+In the end the application gives its trust only to a chain it can verify. With trustCloudflare on and the origin accepting Cloudflare alone, it reads the real visitor address; without that trust it falls back to the coarse hop that cannot be forged, never to a header the client populated itself. This inner limiter is not the only protection either: Cloudflare's own rate limiting rule sits in front of /api/contact as the outer layer, so even if the inner layer is wrong the outer one stays up. For a personal site that trade was worth it, because every decision lives in the repository next to the reason it was made, as part of a trust chain that cannot be forged.

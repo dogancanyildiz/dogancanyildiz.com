@@ -1,0 +1,61 @@
+---
+title: Running Next.js in Docker with multi-stage builds and a non-root user
+slug: nextjs-docker-multi-stage-non-root
+translationKey: nextjs-docker-multi-stage-non-root
+date: 2026-09-03
+summary: I built the same image to stay small and to run without root. Here is what the Dockerfile's three stages carry, and the reason behind each choice.
+tags:
+  - docker
+  - devops
+  - nextjs
+---
+
+## Two decisions, one Dockerfile
+
+When I built the image for this site, I settled two things up front: the running container would not be root, and the build would not be a single stage. Both are about security and size. A flaw in a container that runs as root means access to everything up to the container boundary, while the application needs no privilege beyond listening on the server and reading its own files. A single stage build, in turn, carries the build tools, the source and the whole `node_modules` tree into the final image, and none of that is needed at runtime. A multi stage build is exactly what lets me draw that line.
+
+## Three stages, three jobs
+
+The Dockerfile is split into three stages, and each one finishes a different job. `deps` installs the dependencies, `builder` runs `next build`, and `runner` carries only what has to run. The concrete payoff of keeping the stages separate is caching: when dependencies install in their own layer, a source-only change no longer invalidates the `npm` cache. `devDependencies` are needed in that first stage, because the Next build runs in the stage after it.
+
+What ends up in the final image matters as much as what does **not**. The runner stage copies only three things:
+
+```dockerfile
+COPY --from=builder --chown=node:node /app/public ./public
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+```
+
+The standalone output bundles the dependencies the server actually needs into itself, so the bloated `node_modules` folder from the `deps` stage, the source files and the build tooling never enter the final image at all. And because the runner base already provides a `node` user, there is no need for a separate `addgroup` or `adduser` call either.
+
+## Why the image is small and the surface is narrow
+
+What really keeps the final image small is the files that were never put into it. Since the standalone output contains only what is needed at runtime, the attack surface narrows by the same measure: there is no build tool to run over a shell, no leftover build script and no unused development dependency sitting in there. Two more decisions trim that surface a little further.
+
+The first is the cache mount. `npm`'s download cache is handed over through a transient mount instead of being written into a layer, so it survives across builds but is never baked into any image layer. The second is install scripts:
+
+```dockerfile
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --ignore-scripts && \
+    npm rebuild sharp esbuild @swc/core unrs-resolver @parcel/watcher
+```
+
+`--ignore-scripts` skips every package's `install` and `postinstall` script across the dependency tree. Those are arbitrary pieces of code, pulled from the tree, that run automatically on a plain `npm ci`. The handful of packages that carry one here are all native addons, and each ships a prebuilt binary anyway; `npm rebuild` reruns just those scripts, without granting the rest of the tree the right to run arbitrary code. So the default behavior is turned off, and only the one step that is genuinely required is turned back on explicitly.
+
+## The user and file ownership
+
+Switching to a non-root user is a single line, but the order matters. The files are copied before the `USER node` line, and ownership is handed straight to the `node` user at copy time with `--chown=node:node`. Fixing ownership afterward with a separate `RUN chown -R` would also work, but that command would rewrite the files into a new layer and grow the image needlessly for that path. Assigning ownership at the moment of copy removes both the extra layer and the "permission denied" errors that would otherwise show up once the user has switched.
+
+## Why the health check is a node fetch
+
+The health check is written with Node's own `fetch` call instead of `curl` or `wget`, and there is a real reason for it. Coolify's `curl` and `wget` based checks return connection refused in Dockerfile-built Node containers ([coollabsio/coolify#7500](https://github.com/coollabsio/coolify/issues/7500)), and on top of that the `node:24-alpine` image ships no `curl` at all. Rather than adding a binary into the container, the check uses the Node runtime that is already there:
+
+```dockerfile
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+  CMD ["node", "-e", "fetch(`http://127.0.0.1:${process.env.PORT || 3000}/api/health`).then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+```
+
+The 30 second start period covers the standalone server's cold start, and `PORT` is read back so that if the port is overridden at run time, the probe still hits the right one.
+
+## Closing
+
+Every stage in this Dockerfile exists to keep something out of the final image, and the non-root user is the natural consequence of that same simplicity. I wrote about how the deployment pipeline that runs this image is built in the [Coolify post](/blog/self-hosting-with-coolify); this one sits a layer below it, on the image itself.

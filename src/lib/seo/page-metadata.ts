@@ -25,6 +25,7 @@ export type StaticPathname =
   | "/projects"
   | "/blog"
   | "/contact"
+  | "/services"
   | "/privacy"
   | "/coming-soon"
   | "/updating";
@@ -135,5 +136,17 @@ export async function buildPageMetadata(
         tags: options.tags,
       }
     ),
+    // There is no X profile to attribute, so the card leans on the same title,
+    // description and image the openGraph object already carries. Declared per
+    // page rather than once on the layout because Next replaces a child's
+    // openGraph wholesale, and the twitter block has to move in step with it or
+    // a subpage would advertise the home card. summary_large_image matches the
+    // 1200x630 openGraph image.
+    twitter: {
+      card: "summary_large_image",
+      title: openGraphTitle,
+      description: options.description,
+      images: [imageUrl],
+    },
   };
 }

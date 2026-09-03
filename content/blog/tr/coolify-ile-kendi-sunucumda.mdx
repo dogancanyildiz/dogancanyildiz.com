@@ -22,8 +22,15 @@ Uygulama çok aşamalı bir Dockerfile ile derleniyor; `deps`, `builder` ve `run
 
 ## Nerede tökezledim
 
-İlk tökezleme sağlık kontrolüydü. Coolify'ın arayüzden kurduğu HTTP sağlık kontrolü, konteynerin içinde curl veya wget bulunmasını şart koşuyor ([Coolify docs](https://coolify.io/docs/knowledge-base/health-checks)); kullandığım `node:24-alpine` imajında curl yok, wget ise busybox'ın kısıtlı sürümü. Bu depodaki kontrol bu yüzden harici bir ikiliye yaslanmak yerine Node'un kendi fetch çağrısıyla yazıldı ve production'a bağlanmadan önce staging'de doğrulanıyor. İkincisi ortam değişkenlerinin katmanıydı: `NEXT_PUBLIC_` ile başlayan değerler derleme sırasında paket içine gömülüyor, bu yüzden derleme değişkeni olarak verilmek zorundalar; bu depoda site adresi eksikse derleme bilerek hata veriyor ki yanlış adres sessizce pakete gömülmesin. Bunun tersi daha kötü: bir API anahtarını derleme değişkeni yapmak onu imaj katmanlarına ve derleme günlüklerine sızdırabiliyor.
+İlk tökezleme sağlık kontrolüydü. Coolify'ın arayüzden kurduğu HTTP sağlık kontrolü, konteynerin içinde curl veya wget bulunmasını şart koşuyor ([Coolify docs](https://coolify.io/docs/knowledge-base/health-checks)); kullandığım `node:24-alpine` imajında curl yok, wget ise busybox'ın kısıtlı sürümü. Bu depodaki kontrol bu yüzden harici bir ikiliye yaslanmak yerine Node'un kendi fetch çağrısıyla yazıldı ve production'a bağlanmadan önce staging'de doğrulanıyor. Konteynerin kendi sağlık kontrolü şu satıra indi:
+
+```dockerfile
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+  CMD ["node", "-e", "fetch(`http://127.0.0.1:${process.env.PORT || 3000}/api/health`).then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+```
+
+İkincisi ortam değişkenlerinin katmanıydı: `NEXT_PUBLIC_` ile başlayan değerler derleme sırasında paket içine gömülüyor, bu yüzden derleme değişkeni olarak verilmek zorundalar; bu depoda site adresi eksikse derleme bilerek hata veriyor ki yanlış adres sessizce pakete gömülmesin. Bunun tersi daha kötü: bir API anahtarını derleme değişkeni yapmak onu imaj katmanlarına ve derleme günlüklerine sızdırabiliyor.
 
 ## Ne kazandım
 
-Yayın adımının tamamı bir komuta indi ve altyapının her parçası depoda duruyor. Karşılığında ödediğim bedel bakım: sunucu, sertifika ve güncellemeler artık benim işim. Kişisel bir site için bu takas bana değdi, çünkü öğrenmek istediğim şey tam olarak buydu.
+Yayın adımının tamamı bir komuta indi ve altyapının her parçası depoda duruyor. Karşılığında ödediğim bedel bakım: sunucu, sertifika ve güncellemeler artık benim işim. Kişisel bir site için bu takas bana değdi, çünkü öğrenmek istediğim şey tam olarak buydu. Aynı hattı bir müşterinin sitesi için de kurdum; bu tür işleri [hizmetler](/hizmetler) sayfasında topladım.

@@ -17,6 +17,14 @@ export const siteConfig = {
     },
     /** Public path stem; append .jpg/.webp when the file is delivered. */
     profileImagePath: "/images/profile",
+    /**
+     * Languages the person works in, ISO 639-1 codes, in the order the About
+     * page's languages section names them (Turkish native, English working).
+     * Feeds Person schema knowsLanguage; kept as codes rather than prose so
+     * the structured value stays unambiguous while the visible paragraph
+     * carries the same claim in words.
+     */
+    knowsLanguage: ["tr", "en"],
     /** Featured skills for Person schema knowsAbout. */
     knowsAbout: [
       "TypeScript",
