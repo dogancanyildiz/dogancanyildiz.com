@@ -46,6 +46,10 @@ export const siteConfig = {
     sameAs: [
       "https://github.com/dogancanyildiz",
       "https://www.linkedin.com/in/dogancanyildiz",
+      "https://www.credly.com/users/dogancanyildiz",
+      "https://x.com/dogancannyildiz",
+      "https://www.instagram.com/dogancanyildiz.dev",
+      "https://www.threads.com/@dogancanyildiz.dev",
     ],
   },
 } as const;

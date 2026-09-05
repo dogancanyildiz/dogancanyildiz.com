@@ -1,0 +1,52 @@
+name: IndexNow
+
+# Pings IndexNow after a green CI run on main so Bing, Yandex and the other
+# participating engines recrawl the changed pages quickly. Google does not use
+# IndexNow, so this only accelerates those engines (and, through Bing's index,
+# AI search surfaces).
+#
+# Like Release, this reacts to CI finishing rather than to the push itself, so
+# a build that failed its checks is never announced. It then waits before
+# submitting: the deploy to the server runs in parallel and the script reads
+# the live sitemap, so the pause gives the new content time to go live before
+# the engines are told to come and fetch it.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One submission at a time; a newer deploy's ping supersedes an older one.
+concurrency:
+  group: indexnow-main
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    name: Submit URLs
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Wait for the deploy to settle
+        run: sleep 120
+
+      - name: Submit sitemap URLs to IndexNow
+        env:
+          INDEXNOW_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+        run: npm run indexnow
