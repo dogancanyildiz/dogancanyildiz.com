@@ -1,24 +1,21 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { MDXContent } from "@/components/content/mdx-content";
 import { mdxComponents } from "@/components/content/mdx-components";
 import { JsonLd } from "@/components/seo/json-ld";
+import { Breadcrumb } from "@/components/seo/breadcrumb";
 import { PageSection } from "@/components/layout/page-section";
 import { ShareCard } from "@/components/sections/share-card";
 import { Button } from "@/components/ui/button";
 import { GithubIcon } from "@/components/ui/brand-icon";
 import { SkillTag } from "@/components/ui/skill-tag";
-import { contentHref, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getProject, getProjectSlugs, projectSlugsByKey } from "@/lib/content";
-import {
-  buildBreadcrumbList,
-  buildProjectCreativeWork,
-} from "@/lib/seo/jsonld";
+import { buildProjectCreativeWork } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocaleAndSlug } from "@/lib/route-params";
@@ -75,22 +72,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const structuredData = buildProjectCreativeWork(locale, project);
 
-  const breadcrumb = buildBreadcrumbList(locale, [
-    { name: t("title"), path: "/projects" },
-    { name: project.title, path: contentHref(locale, "project", slug) },
-  ]);
-
   return (
     <PageSection as="article">
       <JsonLd data={structuredData} />
-      <JsonLd data={breadcrumb} />
-      <Link
-        href="/projects"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        {t("back")}
-      </Link>
+      <Breadcrumb
+        locale={locale}
+        items={[
+          { name: t("title"), href: "/projects" },
+          { name: project.title },
+        ]}
+      />
 
       <header className="space-y-4">
         <h1 className="page-title">{project.title}</h1>

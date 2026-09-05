@@ -6,6 +6,7 @@
   },
   "nav": {
     "home": "Ana Sayfa",
+    "breadcrumb": "Sayfa yolu",
     "about": "Hakkımda",
     "projects": "Projeler",
     "blog": "Yazılar",
@@ -99,14 +100,12 @@
     "outcome": "Sonuç",
     "viewLive": "Canlı site",
     "viewSource": "Kaynak kod",
-    "back": "Tüm projeler",
     "empty": "Henüz yayımlanmış proje yok."
   },
   "blog": {
     "title": "Yazılar",
     "description": "Kurduğum sistemlerden ve karşılaştığım hatalardan çıkan yazılar. Önce Türkçe yazıyorum, bir kısmını sonra İngilizceye çeviriyorum.",
     "readingTime": "{minutes} dakikalık okuma",
-    "back": "Tüm yazılar",
     "empty": "Henüz yazı yok."
   },
   "share": {

@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/layout/page-section";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
+import { Breadcrumb } from "@/components/seo/breadcrumb";
 import {
   community,
   education,
@@ -74,6 +75,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
           describe one entity; description is the visible lead below, never a
           hidden string. */}
       <PersonJsonLd locale={locale} description={t("lead")} />
+      <Breadcrumb locale={locale} items={[{ name: t("title") }]} />
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
         {profileImageSrc ? (
           <ProfileAvatar
