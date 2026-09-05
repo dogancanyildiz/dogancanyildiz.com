@@ -256,7 +256,7 @@ describe("application shell", () => {
       true
     );
     expect(read("src/components/sections/contact-page-content.tsx")).toContain(
-      "export function ContactPageContent()"
+      "export function ContactPageContent("
     );
   });
 });

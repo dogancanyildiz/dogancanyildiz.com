@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import {
   getFormatter,
   getTranslations,
@@ -10,9 +9,9 @@ import { ContactCta } from "@/components/sections/contact-cta";
 import { MDXContent } from "@/components/content/mdx-content";
 import { mdxComponents } from "@/components/content/mdx-components";
 import { JsonLd } from "@/components/seo/json-ld";
+import { Breadcrumb } from "@/components/seo/breadcrumb";
 import { PageSection } from "@/components/layout/page-section";
 import { ShareCard } from "@/components/sections/share-card";
-import { contentHref, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import {
   getPost,
@@ -20,7 +19,7 @@ import {
   postSlugsByKey,
   readingMinutes,
 } from "@/lib/content";
-import { buildBlogPosting, buildBreadcrumbList } from "@/lib/seo/jsonld";
+import { buildBlogPosting } from "@/lib/seo/jsonld";
 import { siteConfig } from "@/lib/site-config";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocaleAndSlug } from "@/lib/route-params";
@@ -79,22 +78,13 @@ export default async function PostPage({ params }: PostPageProps) {
 
   const structuredData = buildBlogPosting(locale, post);
 
-  const breadcrumb = buildBreadcrumbList(locale, [
-    { name: t("title"), path: "/blog" },
-    { name: post.title, path: contentHref(locale, "post", slug) },
-  ]);
-
   return (
     <PageSection as="article">
       <JsonLd data={structuredData} />
-      <JsonLd data={breadcrumb} />
-      <Link
-        href="/blog"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        {t("back")}
-      </Link>
+      <Breadcrumb
+        locale={locale}
+        items={[{ name: t("title"), href: "/blog" }, { name: post.title }]}
+      />
 
       <header className="space-y-4 border-b border-border pb-6">
         <p className="meta-label">

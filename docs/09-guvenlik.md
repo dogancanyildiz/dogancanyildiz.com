@@ -86,12 +86,16 @@ tablo [06-devops-ve-deploy.md](./06-devops-ve-deploy.md) bölüm 4'te.
 - **`CF-Connecting-IP` yalnızca güvenilir kaynaktan geldiğinde geçerli.** Bu
   taklit edilebilir bir HTTP header'ı; Traefik'in onu gerçek ziyaretçi IP'si
   saymasi ancak `forwardedHeaders.trustedIPs` Cloudflare listesiyle set
-  edildiğinde güvenli. `TRUST_CF_CONNECTING_IP` bu yüzden varsayılan `false`.
+  edildiğinde güvenli. `TRUST_CF_CONNECTING_IP` varsayılan `false`; origin
+  kilidi tamamlandığı için (2026-09-05, Hetzner firewall) değer `true`'ya
+  çekilebilir.
 - **Origin yalnızca Cloudflare'a açık olmalı.** Aksi halde saldırgan edge'i
   bypass edip origin'e doğrudan bağlanabilir ve rate limiting gibi edge
   korumalarını es geçebilir. `CF-Connecting-IP` güveni bu kısıt olmadan
-  eksiksiz sayılmaz; ikisi tek bir savunma hattı. Uygulama `DOCKER-USER`
-  zincirinde, ufw tek başına yetmiyor (bkz. 06).
+  eksiksiz sayılmaz; ikisi tek bir savunma hattı. Kısıt Hetzner Cloud
+  Firewall ile ağ kenarında uygulanıyor (bkz. `docs/deploy/traefik-ve-origin.md`
+  bölüm 5); `DOCKER-USER` zinciri alternatif olarak aynı bölümde kalıyor,
+  ufw tek başına yetmiyor.
 
 ### 6. Bakım otomasyonu: Dependabot + CodeQL
 

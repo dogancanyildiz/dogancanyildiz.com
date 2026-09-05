@@ -163,6 +163,7 @@ tarihsel halleri artık tekrarlanmıyor.
 | 2026-09-03 | İzin bandı kaldırıldı | Umami çerezsiz ve IP saklamadığı için izin beklemeden yükleniyor; `src/components/consent/` silindi (#53) |
 | 2026-09-03 | İkinci alan adı alınmayacak | Kapsam dışı; ikinci zone, `sh to com` Redirect Rule ve Traefik yedek regex'i dokümanlardan silindi |
 | 2026-09-03 | Preview Deployments kullanılmayacak | Tek geliştirici, her PR CI'dan geçiyor; `*.preview` wildcard DNS ve preview'a özel `NEXT_PUBLIC_SITE_URL` kuralı dokümanlardan silindi |
+| 2026-09-05 | Origin kilidi Hetzner Cloud Firewall ile, `DOCKER-USER` değil | 80/443 yalnızca Cloudflare aralıklarından, 22/ICMP herkese açık; ağ kenarında çalışıyor, `docs/deploy/traefik-ve-origin.md` bölüm 5 |
 
 ## Kapsam dışı (YAGNI)
 

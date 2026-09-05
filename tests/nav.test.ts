@@ -275,6 +275,7 @@ describe("new message keys", () => {
       expect(messages.a11y, locale).toEqual({
         skipToContent: expect.any(String),
         toggleTheme: expect.any(String),
+        opensInNewTab: expect.any(String),
       });
     }
   });

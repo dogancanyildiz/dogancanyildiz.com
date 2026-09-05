@@ -239,31 +239,32 @@ function checkDeployDocs() {
     `${TRAEFIK} does not warn against deleting the generated labels`
   );
 
-  // Coolify publishes the Traefik ports, so Docker DNATs them into FORWARD
-  // while ufw only filters INPUT. An allowlist written in ufw alone leaves
-  // the origin open to the whole internet while the checklist ticks the box
-  // that gates TRUST_CF_CONNECTING_IP=true.
+  // The origin lock landed 2026-09-05 as a Hetzner Cloud Firewall rule (80
+  // and 443 restricted to Cloudflare's ranges at the network edge, 22 and
+  // ICMP left open), not the DOCKER-USER/iptables approach the checklist
+  // used to lead with. DOCKER-USER stays documented as an alternative for a
+  // provider without an edge firewall, so it must still be named, but the
+  // checklist must not present ufw as sufficient on its own for that
+  // alternative, and it must document the real IP placeholder used in the
+  // verification commands.
   {
     const doc = readDoc(TRAEFIK);
     check(
+      /Hetzner Cloud Firewall/.test(doc),
+      `${TRAEFIK} does not document the Hetzner Cloud Firewall origin lock`
+    );
+    check(
       /DOCKER-USER/.test(doc),
-      `${TRAEFIK} does not restrict the published ports through DOCKER-USER`
+      `${TRAEFIK} dropped the DOCKER-USER alternative for the origin lock`
     );
     check(
       !/ufw allow from/.test(doc),
       `${TRAEFIK} allowlists 80/443 in ufw, which Docker's FORWARD chain bypasses`
     );
-  }
-  {
-    const doc = readDoc(TRAEFIK);
-    check(
-      /ufw tek başına 80 ve 443'ü kapatmaz/.test(doc),
-      `${TRAEFIK} does not state that ufw alone does not close 80/443`
-    );
     check(/FORWARD/.test(doc), `${TRAEFIK} does not mention the FORWARD chain`);
     check(
-      /netfilter-persistent/.test(doc),
-      `${TRAEFIK} does not mention netfilter-persistent`
+      /<ORIGIN_IPV4>/.test(doc),
+      `${TRAEFIK} does not use the <ORIGIN_IPV4> placeholder in verification commands`
     );
   }
 

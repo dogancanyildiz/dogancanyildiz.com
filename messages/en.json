@@ -6,6 +6,7 @@
   },
   "nav": {
     "home": "Home",
+    "breadcrumb": "Breadcrumb",
     "about": "About",
     "projects": "Projects",
     "blog": "Writing",
@@ -99,14 +100,12 @@
     "outcome": "Outcome",
     "viewLive": "Live site",
     "viewSource": "Source",
-    "back": "All projects",
     "empty": "No projects published yet."
   },
   "blog": {
     "title": "Writing",
     "description": "Posts that come out of the systems I set up and the mistakes I run into. I write in Turkish first and translate some of them into English later.",
     "readingTime": "{minutes} min read",
-    "back": "All posts",
     "empty": "No posts yet."
   },
   "share": {
@@ -258,7 +257,8 @@
   },
   "a11y": {
     "skipToContent": "Skip to content",
-    "toggleTheme": "Toggle theme"
+    "toggleTheme": "Toggle theme",
+    "opensInNewTab": " (opens in a new tab)"
   },
   "services": {
     "title": "Web and Next.js development in Konya | Doğan Can YILDIZ",

@@ -13,6 +13,10 @@ import { SkillTag } from "@/components/ui/skill-tag";
 import { PageSection } from "@/components/layout/page-section";
 import { ServicesSubnav } from "@/components/sections/services-subnav";
 import { ContactCta } from "@/components/sections/contact-cta";
+import { Breadcrumb } from "@/components/seo/breadcrumb";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildFaqPage, buildServices } from "@/lib/seo/jsonld";
+import { absoluteUrl } from "@/lib/seo/alternates";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocale } from "@/lib/route-params";
 import { routing } from "@/i18n/routing";
@@ -131,8 +135,32 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
   const faqsLeft = faqs.slice(0, 3);
   const faqsRight = faqs.slice(3);
 
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+
+  // serviceType and the offer catalog name the same four entries the page
+  // prints below; areaServed carries the visible Konya/Türkiye pair.
+  const serviceSchema = buildServices(locale, {
+    name: t("h1"),
+    description: t("lead"),
+    url: absoluteUrl(locale, "/services"),
+    areaCity: "Konya",
+    areaCountry: locale === "tr" ? "Türkiye" : "Turkey",
+    offers: [
+      { name: t("s1Title") },
+      { name: t("s2Title") },
+      { name: t("s3Title") },
+      { name: t("s4Title") },
+    ],
+  });
+  const faqSchema = buildFaqPage(
+    faqs.map((item) => ({ question: item.q, answer: item.a }))
+  );
+
   return (
     <PageSection>
+      <JsonLd data={serviceSchema} />
+      <JsonLd data={faqSchema} />
+      <Breadcrumb locale={locale} items={[{ name: tNav("services") }]} />
       <PageHeader
         as="h1"
         eyebrow={t("eyebrow")}

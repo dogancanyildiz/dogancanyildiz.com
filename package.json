@@ -1,6 +1,6 @@
 {
   "name": "dogancanyildiz.com",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -16,6 +16,7 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "verify:routes": "node scripts/assert-static-routes.mjs",
+    "indexnow": "node scripts/indexnow-ping.mjs",
     "verify:links": "node scripts/audit-live-links.mjs",
     "verify:docs": "node scripts/verify-docs.mjs",
     "release:check": "node scripts/release-version.mjs --dry-run",

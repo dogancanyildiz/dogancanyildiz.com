@@ -218,6 +218,85 @@ export function buildBlogPosting(
   };
 }
 
+export interface ServiceOffer {
+  name: string;
+  description?: string;
+}
+
+/**
+ * Service node for the services page.
+ *
+ * `provider` is the same Person node the rest of the graph shares, by `@id`, so
+ * the offer and the human behind it are one entity. `areaServed` carries the
+ * city and country the visible page names, which is the local signal a query
+ * like "konya web sitesi" reads. Each offer becomes an `Offer` in a
+ * `hasOfferCatalog`, named after the visible service entries on the page and
+ * carrying no price: the page states a written fixed quote after scope, not a
+ * number, so the structured data cannot advertise one either.
+ */
+export function buildServices(
+  locale: Locale,
+  service: {
+    name: string;
+    description: string;
+    url: string;
+    areaCity: string;
+    areaCountry: string;
+    offers: ServiceOffer[];
+  }
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.name,
+    description: service.description,
+    url: service.url,
+    inLanguage: locale,
+    serviceType: service.offers.map((offer) => offer.name),
+    provider: personRef(),
+    areaServed: [
+      { "@type": "AdministrativeArea", name: service.areaCity },
+      { "@type": "Country", name: service.areaCountry },
+    ],
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: service.name,
+      itemListElement: service.offers.map((offer) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: offer.name,
+          ...(offer.description ? { description: offer.description } : {}),
+        },
+      })),
+    },
+  };
+}
+
+/**
+ * FAQPage for a page that prints a question/answer list. Each entry mirrors a
+ * visible `dt`/`dd` pair one to one, so the structured questions and the
+ * printed ones are the same text. Google no longer shows FAQ rich results for
+ * non-authoritative sites, so this earns no stars; it stays for answer engines
+ * and assistants that read the graph directly.
+ */
+export function buildFaqPage(
+  items: { question: string; answer: string }[]
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+}
+
 /** CreativeWork for one project, with the same shared creator node. */
 export function buildProjectCreativeWork(
   locale: Locale,

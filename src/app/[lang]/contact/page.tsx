@@ -9,6 +9,7 @@ import { routing } from "@/i18n/routing";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocale } from "@/lib/route-params";
 import { ContactPageContent } from "@/components/sections/contact-page-content";
+import { Breadcrumb } from "@/components/seo/breadcrumb";
 
 export function generateStaticParams() {
   return routing.locales.map((lang) => ({ lang }));
@@ -40,6 +41,8 @@ export default async function ContactPage({
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
 
+  const t = await getTranslations({ locale, namespace: "contact" });
+
   // contact is the largest namespace in the catalog and this is the only
   // route that renders a client component reading it (the form), so the
   // shell provider in src/app/[lang]/layout.tsx leaves it out and this
@@ -51,7 +54,11 @@ export default async function ContactPage({
 
   return (
     <NextIntlClientProvider messages={{ contact: messages.contact }}>
-      <ContactPageContent />
+      <ContactPageContent
+        breadcrumb={
+          <Breadcrumb locale={locale} items={[{ name: t("title") }]} />
+        }
+      />
     </NextIntlClientProvider>
   );
 }
