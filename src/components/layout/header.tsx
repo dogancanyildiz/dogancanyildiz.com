@@ -49,6 +49,7 @@ export function Header({ translations }: HeaderProps) {
             <SocialLinks
               githubLabel={t("footer.github")}
               linkedinLabel={t("footer.linkedin")}
+              newTabHint={t("a11y.opensInNewTab")}
             />
           </div>
         </div>

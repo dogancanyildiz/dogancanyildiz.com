@@ -10,6 +10,7 @@ import {
   LinkedinIcon,
   WhatsAppIcon,
 } from "@/components/ui/brand-icon";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { CONTACT_EMAIL_PUBLIC, SOCIAL, whatsappHref } from "@/lib/site";
 import { UMAMI_EVENT, outboundEvent, umamiEvent } from "@/lib/analytics-events";
 
@@ -110,6 +111,7 @@ export async function Footer() {
                 >
                   <WhatsAppIcon className="size-4 shrink-0" />
                   {t("footer.whatsapp")}
+                  <NewTabHint text={t("a11y.opensInNewTab")} />
                 </a>
               </li>
               <li>
@@ -122,6 +124,7 @@ export async function Footer() {
                 >
                   <GithubIcon className="size-4 shrink-0" />
                   {t("footer.github")}
+                  <NewTabHint text={t("a11y.opensInNewTab")} />
                 </a>
               </li>
               <li>
@@ -134,6 +137,7 @@ export async function Footer() {
                 >
                   <LinkedinIcon className="size-4 shrink-0" />
                   {t("footer.linkedin")}
+                  <NewTabHint text={t("a11y.opensInNewTab")} />
                 </a>
               </li>
               <li>

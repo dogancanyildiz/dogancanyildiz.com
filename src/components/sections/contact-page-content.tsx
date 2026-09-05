@@ -5,6 +5,7 @@ import { ContactForm } from "@/components/sections/contact-form";
 import { PageSection } from "@/components/layout/page-section";
 import { PageHeader } from "@/components/ui/page-header";
 import { WhatsAppIcon } from "@/components/ui/brand-icon";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { CONTACT_EMAIL_PUBLIC, whatsappHref } from "@/lib/site";
 import { UMAMI_EVENT, outboundEvent, umamiEvent } from "@/lib/analytics-events";
 
@@ -14,6 +15,7 @@ export function ContactPageContent({
   breadcrumb?: React.ReactNode;
 }) {
   const t = useTranslations("contact");
+  const tA11y = useTranslations("a11y");
 
   return (
     <PageSection>
@@ -61,6 +63,7 @@ export function ContactPageContent({
                   })}
                 >
                   {t("whatsappAction")}
+                  <NewTabHint text={tA11y("opensInNewTab")} />
                 </a>
               </div>
             </div>

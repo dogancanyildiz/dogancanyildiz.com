@@ -81,6 +81,7 @@ export function MobileMenu() {
             <SocialLinks
               githubLabel={t("footer.github")}
               linkedinLabel={t("footer.linkedin")}
+              newTabHint={t("a11y.opensInNewTab")}
             />
           </div>
         </Dialog.Content>

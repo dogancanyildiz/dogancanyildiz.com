@@ -257,7 +257,8 @@
   },
   "a11y": {
     "skipToContent": "İçeriğe geç",
-    "toggleTheme": "Temayı değiştir"
+    "toggleTheme": "Temayı değiştir",
+    "opensInNewTab": " (yeni sekmede açılır)"
   },
   "services": {
     "title": "Konya'da web ve Next.js geliştirme | Doğan Can YILDIZ",

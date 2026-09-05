@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { ogImageHref } from "@/i18n/navigation";
 import { LinkedinIcon, WhatsAppIcon, XIcon } from "@/components/ui/brand-icon";
 import { CopyLinkButton } from "@/components/sections/copy-link-button";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { outboundEvent } from "@/lib/analytics-events";
 import type { ContentKind, Locale } from "@/lib/content";
 import { contentUrl } from "@/lib/seo/alternates";
@@ -39,10 +40,12 @@ interface ShareCardProps {
  * route the crawlers read, not a mockup that can drift from it.
  */
 export async function ShareCard({ locale, kind, slug, title }: ShareCardProps) {
-  const [t, tMeta] = await Promise.all([
+  const [t, tMeta, tA11y] = await Promise.all([
     getTranslations("share"),
     getTranslations("metadata"),
+    getTranslations("a11y"),
   ]);
+  const newTabHint = tA11y("opensInNewTab");
 
   const url = contentUrl(locale, kind, slug);
   // Already locale prefixed: ogImageHref goes through the same localized
@@ -114,28 +117,30 @@ export async function ShareCard({ locale, kind, slug, title }: ShareCardProps) {
       />
 
       <ul className="flex flex-wrap items-center gap-x-5">
-        {links.map(({ key, label, href, icon }) => (
-          <li key={key}>
-            {/* mailto is not a document: a new tab for it is an empty tab
-                left behind once the mail client opens, so only the three web
-                targets leave the page. */}
-            <a
-              href={href}
-              target={href.startsWith("mailto:") ? undefined : "_blank"}
-              rel={
-                href.startsWith("mailto:") ? undefined : "noopener noreferrer"
-              }
-              className={shareLinkClass}
-              // outbound rather than a share event of its own: the host is
-              // already the network being shared to, and wa.me here is the
-              // generic share sheet rather than the owner's own chat.
-              {...outboundEvent(href)}
-            >
-              {icon}
-              {label}
-            </a>
-          </li>
-        ))}
+        {links.map(({ key, label, href, icon }) => {
+          // mailto is not a document: a new tab for it is an empty tab left
+          // behind once the mail client opens, so only the three web targets
+          // leave the page, and only they get the new-tab warning.
+          const opensNewTab = !href.startsWith("mailto:");
+          return (
+            <li key={key}>
+              <a
+                href={href}
+                target={opensNewTab ? "_blank" : undefined}
+                rel={opensNewTab ? "noopener noreferrer" : undefined}
+                className={shareLinkClass}
+                // outbound rather than a share event of its own: the host is
+                // already the network being shared to, and wa.me here is the
+                // generic share sheet rather than the owner's own chat.
+                {...outboundEvent(href)}
+              >
+                {icon}
+                {label}
+                {opensNewTab ? <NewTabHint text={newTabHint} /> : null}
+              </a>
+            </li>
+          );
+        })}
       </ul>
 
       <div className="flex flex-wrap items-center gap-x-4">

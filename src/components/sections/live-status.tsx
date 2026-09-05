@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from "next-intl/server";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { cn } from "@/lib/utils";
 import { getLiveStatus, type LiveStatusState } from "@/lib/status-page";
 
@@ -58,8 +59,9 @@ const UPTIME_FORMAT = {
 } as const;
 
 export async function LiveStatus({ href }: { href: string }) {
-  const [t, format, snapshot] = await Promise.all([
+  const [t, tA11y, format, snapshot] = await Promise.all([
     getTranslations("systems"),
+    getTranslations("a11y"),
     getFormatter(),
     getLiveStatus(),
   ]);
@@ -73,6 +75,7 @@ export async function LiveStatus({ href }: { href: string }) {
     >
       {t("statusPage")}
       <span aria-hidden="true"> ↗</span>
+      <NewTabHint text={tA11y("opensInNewTab")} />
     </a>
   );
 

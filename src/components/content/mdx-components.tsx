@@ -1,6 +1,8 @@
 import type { ComponentProps, ComponentType } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { AppHref } from "@/i18n/navigation";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 
 /**
  * Element overrides handed to every compiled MDX body.
@@ -25,8 +27,20 @@ import type { AppHref } from "@/i18n/navigation";
  * (/about, /projects/...). next-intl localizes what it recognizes and adds the
  * /en prefix only on the English locale, so each file's own path renders
  * unchanged on tr and picks up /en on en, without any double prefixing.
+ *
+ * velite.config.ts runs every external link through rehype-external-links,
+ * which sets target="_blank" and rel="noopener noreferrer" at compile time
+ * (R3-19 needs a screen reader warned before it leaves the page, and no
+ * content author should have to remember either attribute by hand). That
+ * target lands here in `rest`, so a NewTabHint child rides along with it
+ * automatically for every external link an MDX body writes.
  */
 function MdxLink({ href, children, ...rest }: ComponentProps<"a">) {
+  // Called unconditionally, before either return, per the rules of hooks.
+  // next-intl resolves this from the request scope: MDXContent
+  // (src/components/content/mdx-content.tsx) is server-only and always
+  // rendered inside a page that already called setRequestLocale.
+  const t = useTranslations("a11y");
   if (
     typeof href === "string" &&
     href.startsWith("/") &&
@@ -44,6 +58,9 @@ function MdxLink({ href, children, ...rest }: ComponentProps<"a">) {
   return (
     <a href={href} {...rest}>
       {children}
+      {rest.target === "_blank" ? (
+        <NewTabHint text={t("opensInNewTab")} />
+      ) : null}
     </a>
   );
 }

@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import { CredentialPreview } from "@/components/sections/credential-preview";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { certificateGroupsFor } from "@/content/profile";
 import type { CertificateEntry } from "@/content/profile";
 import { outboundEvent } from "@/lib/analytics-events";
@@ -27,10 +28,12 @@ const KEYWORD_SEPARATOR = " · ";
  * artwork. The name is the claim and the link is the way to check it, so
  * making the name itself a link would tint the row's only piece of substance
  * and give a screen reader two ways to reach the same place. The visible word
- * stays short and repeats down the list, so each link takes an aria label
- * naming its credential: a reader pulling up a list of links gets twelve
- * distinct entries rather than twelve identical ones. The label opens with the
- * visible word, which is what SC 2.5.3 asks of it.
+ * stays short and repeats down the list, so each link's accessible name comes
+ * from a visually hidden span naming its credential, not an aria-label: a
+ * reader pulling up a list of links gets twelve distinct entries rather than
+ * twelve identical ones, and the name still opens with the visible word,
+ * which is what SC 2.5.3 asks of it. A second hidden span, NewTabHint, adds
+ * the "opens in a new tab" warning the same way (R3-19).
  *
  * The artwork is the row's other control, and a different one: it opens the
  * same image large enough to read rather than leaving the page. See
@@ -54,8 +57,12 @@ const KEYWORD_SEPARATOR = " · ";
  * its last row instead of trailing a rule under half of it.
  */
 export async function CertificateList({ locale }: { locale: Locale }) {
-  const t = await getTranslations({ locale, namespace: "about" });
-  const format = await getFormatter({ locale });
+  const [t, tA11y, format] = await Promise.all([
+    getTranslations({ locale, namespace: "about" }),
+    getTranslations({ locale, namespace: "a11y" }),
+    getFormatter({ locale }),
+  ]);
+  const newTabHint = tA11y("opensInNewTab");
   const groups = certificateGroupsFor(locale);
 
   if (groups.length === 0) {
@@ -94,6 +101,7 @@ export async function CertificateList({ locale }: { locale: Locale }) {
                     verifyLabel={t("certificateVerifyLabel", {
                       name: entry.name,
                     })}
+                    newTabHint={newTabHint}
                   />
                 ) : (
                   /* The slot keeps its width whether or not there is artwork,
@@ -126,13 +134,19 @@ export async function CertificateList({ locale }: { locale: Locale }) {
                       href={entry.verifyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label={t("certificateVerifyLabel", {
-                        name: entry.name,
-                      })}
                       className="tap-target inline-flex items-center text-sm text-primary underline underline-offset-4"
                       {...outboundEvent(entry.verifyUrl)}
                     >
-                      {t("certificateVerify")}
+                      {/* The repeated word "Verify"/"Doğrula" is what a
+                          sighted reader sees down the whole list; the
+                          accessible name is the sr-only span below, which
+                          names the credential (SC 2.5.3, see the file-level
+                          comment). */}
+                      <span aria-hidden="true">{t("certificateVerify")}</span>
+                      <span className="sr-only">
+                        {t("certificateVerifyLabel", { name: entry.name })}
+                      </span>
+                      <NewTabHint text={newTabHint} />
                     </a>
                   ) : null}
                 </div>

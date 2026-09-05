@@ -12,6 +12,7 @@ import { PageSection } from "@/components/layout/page-section";
 import { ShareCard } from "@/components/sections/share-card";
 import { Button } from "@/components/ui/button";
 import { GithubIcon } from "@/components/ui/brand-icon";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { SkillTag } from "@/components/ui/skill-tag";
 import { routing } from "@/i18n/routing";
 import { getProject, getProjectSlugs, projectSlugsByKey } from "@/lib/content";
@@ -68,7 +69,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const project = getProject(locale, slug);
   if (!project) notFound();
 
-  const t = await getTranslations({ locale, namespace: "projects" });
+  const [t, tA11y] = await Promise.all([
+    getTranslations({ locale, namespace: "projects" }),
+    getTranslations({ locale, namespace: "a11y" }),
+  ]);
+  const newTabHint = tA11y("opensInNewTab");
 
   const structuredData = buildProjectCreativeWork(locale, project);
 
@@ -126,6 +131,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               >
                 <ExternalLink className="size-4" />
                 {t("viewLive")}
+                <NewTabHint text={newTabHint} />
               </a>
             </Button>
           ) : null}
@@ -138,6 +144,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               >
                 <GithubIcon className="size-4" />
                 {t("viewSource")}
+                <NewTabHint text={newTabHint} />
               </a>
             </Button>
           ) : null}
