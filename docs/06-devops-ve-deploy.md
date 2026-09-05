@@ -114,12 +114,15 @@ karara yol açıyor:
   aralıklarından geliyorsa güvenilir, o yüzden Traefik entrypoint'inde
   `forwardedHeaders.trustedIPs` Cloudflare listesiyle set edilmeli. Ayar
   yoksa tüm istekler tek bir rate-limit kovasına düşer.
-- **Origin yalnızca Cloudflare'dan erişilebilir olmalı.** Kısıt iki parçalı:
-  ufw host servislerini (SSH, publish edilmemiş portlar) kapatıyor, asıl
-  origin kısıtı `DOCKER-USER` zincirine yazılan iptables kurallarıyla
-  yapılıyor. Gerekçe: Coolify'ın Traefik'i publish ettiği 80/443 Docker'ın
-  DNAT'ıyla FORWARD zincirine giriyor, ufw INPUT'ta çalıştığı için o trafiği
-  hiç görmüyor. `TRUST_CF_CONNECTING_IP=true` ancak bu adımdan sonra.
+- **Origin yalnızca Cloudflare'dan erişilebilir olmalı.** Origin kısıtı
+  2026-09-05'te Hetzner Cloud Firewall ile tamamlandı: 80 ve 443 yalnızca
+  Cloudflare IPv4/IPv6 aralıklarından, 22 ve ICMP herkese açık; sunucudan
+  bağımsız, ağ kenarında çalışıyor. `DOCKER-USER` zincirine yazılan iptables
+  kuralları alternatif bir yol olarak kaldı, kullanılmadı: Coolify'ın
+  Traefik'i publish ettiği 80/443 Docker'ın DNAT'ıyla FORWARD zincirine
+  giriyor, ufw INPUT'ta çalıştığı için o trafiği hiç görmüyor, dolayısıyla
+  ufw tek başına yeterli olmazdı. `TRUST_CF_CONNECTING_IP=true` ancak bu
+  adımdan sonra.
 - **Traefik router adları uydurulmaz.** Coolify router adlarını uygulama
   UUID'sinden üretiyor (`https-0-<uuid>`, `http-0-<uuid>`); kuralı olmayan bir
   isme yazılan `middlewares` etiketi Traefik tarafından sessizce yok sayılıyor
