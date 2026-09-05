@@ -10,6 +10,22 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-09-05
+
+### Features
+
+- `936484e` **seo**: breadcrumb trail, service and FAQ schema, IndexNow
+
+### Fixes
+
+- `7fcda38` **a11y**: dış linklere yeni sekme ipucu; docs: origin kilidi Hetzner firewall (#86)
+
+### Other
+
+- `6a30bac` **release**: sync version v0.11.0 (#84)
+
+**Tam değişiklik listesi**: [v0.11.0...v0.12.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.11.0...v0.12.0)
+
 ## [0.11.0] - 2026-09-03
 
 ### Features
@@ -242,7 +258,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.9.0...v0.9.1
