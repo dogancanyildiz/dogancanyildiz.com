@@ -257,7 +257,8 @@
   },
   "a11y": {
     "skipToContent": "Skip to content",
-    "toggleTheme": "Toggle theme"
+    "toggleTheme": "Toggle theme",
+    "opensInNewTab": " (opens in a new tab)"
   },
   "services": {
     "title": "Web and Next.js development in Konya | Doğan Can YILDIZ",

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, type MouseEvent } from "react";
 import { X } from "lucide-react";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { outboundEvent } from "@/lib/analytics-events";
 
 export interface CredentialPreviewProps {
@@ -22,6 +23,8 @@ export interface CredentialPreviewProps {
   verifyText?: string;
   /** Accessible name for that link, "Verify {name}" / "Doğrula: {name}". */
   verifyLabel?: string;
+  /** The "a11y.opensInNewTab" string, resolved by the caller. */
+  newTabHint: string;
 }
 
 /**
@@ -57,6 +60,7 @@ export function CredentialPreview({
   verifyUrl,
   verifyText,
   verifyLabel,
+  newTabHint,
 }: CredentialPreviewProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -182,11 +186,15 @@ export function CredentialPreview({
               href={verifyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={verifyLabel}
               className="tap-target mt-1 inline-flex items-center text-sm text-primary underline underline-offset-4"
               {...outboundEvent(verifyUrl)}
             >
-              {verifyText}
+              {/* The repeated word "Verify"/"Doğrula" is what a sighted
+                  reader sees; the accessible name is the sr-only span below,
+                  which names the credential the way the row's own link does. */}
+              <span aria-hidden="true">{verifyText}</span>
+              <span className="sr-only">{verifyLabel ?? verifyText}</span>
+              <NewTabHint text={newTabHint} />
             </a>
           ) : null}
         </div>

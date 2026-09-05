@@ -181,68 +181,58 @@ Beklenen: middlewares etiketi `https-0-<uuid>` ve `http-0-<uuid>` router adları
 
 ## 5. Origin'i Cloudflare IP'lerine kısıtlamak
 
-Önce kritik gerçek: **ufw tek başına 80 ve 443'ü kapatmaz.** Coolify proxy'si Traefik'i `80:80` ve `443:443` ile publish eder. Docker bu portlar için PREROUTING'de DNAT yapıp paketi FORWARD zincirine sokar, ufw kuralları ise INPUT zincirindedir; ufw bu trafiği hiç görmez. `ufw default deny incoming` + Cloudflare allow kuralları yazılmış olsa bile origin tüm internete açık kalır. Docker tam bu iş için `DOCKER-USER` zincirini boş bırakır. Kaynak: `chaifeng/ufw-docker` ve Docker'ın kendi packet filtering dokümanı.
+**Durum (2026-09-05): tamamlandı.** Origin kısıtı Hetzner Cloud Firewall ile uygulandı. Bu, sunucudan bağımsız, ağ kenarında (Hetzner'in kendi altyapısında) çalışan bir kısıttır; konteyner içinde iptables kuralı veya `DOCKER-USER` zinciri gerekmiyor, çünkü paket sunucuya hiç ulaşmadan filtreleniyor.
 
-Bu yüzden kısıt iki parçadır: ufw host servislerini (SSH ve publish edilmemiş portlar) kapatır, `DOCKER-USER` kuralları Docker'ın publish ettiği 80/443'ü kapatır. İkisi de yapılmadan Bitti kriteri 9 sağlanmış sayılmaz ve `TRUST_CF_CONNECTING_IP=true` yapılmaz.
+### 5a. Hetzner Cloud Firewall (asıl origin kısıtı)
 
-### 5a. ufw (host servisleri)
-
-```bash
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw allow OpenSSH
-sudo ufw --force enable
-sudo ufw status numbered
-```
-
-- [ ] Buraya 80/443 kuralı yazmak gerekmiyor: o portlar ufw'nin görmediği zincirden geçiyor. Yazılırsa yanlış bir güvenlik hissi yaratır.
-- [ ] ufw'nin kapattığı tek şey host üzerinde dinleyen servisler (SSH, sistem daemon'ları) ve publish edilmemiş portlardır.
-
-### 5b. DOCKER-USER (asıl origin kısıtı)
-
-`DOCKER-USER`, Docker'ın FORWARD zincirinde kendi kurallarından **önce** işlettiği zincirdir; publish edilmiş konteyner portlarını filtrelemenin desteklenen yolu budur. Zincirin varsayılan içeriği tek bir `RETURN` kuralıdır, bu yüzden yeni kurallar `-A` ile değil `-I` ile başa eklenir; `-A` ile eklenen kural o `RETURN`'ün altında kalır ve hiç çalışmaz.
-
-```bash
-ADMIN_IPV4="$(curl -s https://api.ipify.org)"   # sahibinin IP'si, Cloudflare'ı atlayarak origin'e erişmek için
-
-# 1) Önce catch all DROP, zincirin başına
-sudo iptables  -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -j DROP
-sudo ip6tables -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -j DROP
-
-# 2) Sonra izinli kaynaklar, yine başa: DROP'un üstünde birikirler
-for cidr in $(curl -s https://www.cloudflare.com/ips-v4) "$ADMIN_IPV4"; do
-  sudo iptables -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -s "$cidr" -j RETURN
-done
-for cidr in $(curl -s https://www.cloudflare.com/ips-v6); do
-  sudo ip6tables -I DOCKER-USER 1 -p tcp -m multiport --dports 80,443 -s "$cidr" -j RETURN
-done
-
-sudo iptables -S DOCKER-USER
-sudo ip6tables -S DOCKER-USER
-```
-
-- [ ] Sıra bağlayıcı: DROP önce eklenir, izinler onun üstüne eklenir. Ters yapılırsa DROP tüm izinlerin üstünde kalır ve Cloudflare dahil her şey kesilir.
-- [ ] `ADMIN_IPV4` değeri `curl -s https://api.ipify.org` ile alınır, adres değiştikçe kural güncellenir (eski kural `sudo iptables -D DOCKER-USER ...` ile silinir).
-- [ ] Beklenen kural sayısı: `iptables -S DOCKER-USER` -> 15 Cloudflare IPv4 bloğu + admin + DROP; `ip6tables -S DOCKER-USER` -> 7 IPv6 bloğu + DROP.
-- [ ] Kalıcılık: `sudo apt install iptables-persistent && sudo netfilter-persistent save`. Docker daemon veya Coolify proxy yeniden başlatıldıktan sonra `iptables -S DOCKER-USER` tekrar kontrol edilir; kurallar düşmüşse `netfilter-persistent reload` ile ya da yukarıdaki bloğu tekrar koşarak geri yüklenir.
-- [ ] `chaifeng/ufw-docker` kurulup `ufw-docker allow` kullanmak da aynı işi yapar; hangisi seçilirse seçilsin doğrulama aynıdır.
+- [ ] Hetzner Cloud Console -> Firewalls -> `coolify server` (CPX42) -> Edit.
+- [ ] Inbound kurallar:
+  - TCP 22 (SSH): Sources `0.0.0.0/0`, `::/0` (herkese açık, dokunulmadı).
+  - ICMP: Sources `0.0.0.0/0`, `::/0` (herkese açık, dokunulmadı).
+  - TCP 80: Sources yalnızca Cloudflare IPv4/IPv6 aralıkları (bölüm 1'deki liste, 15 IPv4 + 7 IPv6 blok).
+  - TCP 443: Sources yalnızca Cloudflare IPv4/IPv6 aralıkları (aynı liste).
+- [ ] Tanımlı olmayan her port/kaynak kombinasyonu Hetzner Cloud Firewall'ın varsayılan davranışıyla reddedilir, ayrıca bir catch-all DROP kuralı eklemek gerekmiyor.
+- [ ] Kaydet. Hetzner Cloud Firewall sunucudan bağımsız çalıştığı için Docker, Traefik veya sunucu yeniden başlatmaya gerek yok; kural anında etkinleşiyor.
 
 Doğrulama, Cloudflare'ı bypass edip origin'e doğrudan bağlanmayı dene:
 
 ```bash
-# ORIGIN_IPV4 yerine sunucunun gerçek adresi. Bu komut allowlist'te olmayan
-# bir ağdan (ör. mobil veri) çalıştırılır.
-curl -sS --max-time 8 --resolve dogancanyildiz.com:443:ORIGIN_IPV4 https://dogancanyildiz.com/api/health
+# <ORIGIN_IPV4> yerine sunucunun gerçek adresi. Zaman aşımı beklenir.
+curl -m 8 --resolve www.dogancanyildiz.com:443:<ORIGIN_IPV4> \
+  https://www.dogancanyildiz.com/api/health
+
+# 22 dokunulmadı, açık kalmalı.
+nc -z <ORIGIN_IPV4> 22
+
+# Cloudflare üzerinden site normal şekilde 200 dönmeli.
+curl -sI https://www.dogancanyildiz.com/ | head -1
 ```
 
-Beklenen: `curl: (28) Connection timed out` veya `curl: (7) Failed to connect`. Bir JSON gövdesi dönerse kısıt çalışmıyordur. Bu tek geçerli kanıttır, ufw çıktısındaki kural listesi kanıt değildir. Test Cloudflare'ı baypas ettiği için sonucu edge'deki hiçbir kural etkilemez.
+Beklenen: ilk komut zaman aşımına uğrar (`curl: (28) Connection timed out` veya benzeri), ikinci komut portun açık olduğunu gösterir, üçüncü komut `HTTP/2 200` döner. İlk komut bir JSON gövdesi dönerse kısıt çalışmıyordur; bu tek geçerli kanıttır. Coolify paneli ve Uptime Kuma origin IP'sinin kendisi üzerinden (sunucu içinden veya SSH tüneli ile) erişilebilir kalır, bu doğrulamayı etkilemez.
 
-### 5c. Traefik ipAllowList (ek katman veya alternatif)
+- [ ] Kural kaydedildikten ve yukarıdaki üç kanıt doğrulandıktan sonra: Coolify -> uygulama -> Environment Variables -> `TRUST_CF_CONNECTING_IP` değeri `true` yapılır ve redeploy edilir (sıra bağlayıcı, bkz. bölüm 2).
 
-`DOCKER-USER` kullanılamıyorsa (ör. sağlayıcı tarafında yönetilen bir firewall varsa) bölüm 3'teki `cloudflare-only` middleware'i uygulamanın etiketlerine eklenir. Router adı yine bölüm 4'teki kurala uyar, mevcut satırın değeri korunur:
+### 5b. Bakım: Cloudflare IP aralıkları
+
+Cloudflare aralıkları nadiren değişir ama sabit değildir. Yılda bir:
+
+```bash
+curl -s https://www.cloudflare.com/ips-v4
+curl -s https://www.cloudflare.com/ips-v6
+```
+
+çıktısı bölüm 1'deki listeyle karşılaştırılır. Fark varsa üç yer birden güncellenir: Hetzner Cloud Firewall'daki 80 ve 443 satırlarının Sources alanı, bölüm 2'deki `trustedIPs` ve bölüm 3'teki `cloudflare-only` middleware'i.
+
+### 5c. Alternatif: DOCKER-USER / iptables
+
+Hetzner Cloud Firewall sağlayıcıya özgü bir katman. Başka bir sağlayıcıya taşınırsa veya ek bir savunma katmanı istenirse aynı kısıt `DOCKER-USER` zincirine yazılan iptables kurallarıyla origin üzerinde de uygulanabilir: ufw tek başına yetmez, çünkü Coolify'ın publish ettiği 80/443 Docker'ın DNAT'ıyla FORWARD zincirine giriyor ve ufw INPUT'ta çalıştığı için bu trafiği hiç görmüyor; `DOCKER-USER` zinciri Docker'ın FORWARD kurallarından önce işlediği için publish edilmiş portları filtrelemenin desteklenen yoludur (kaynak: `chaifeng/ufw-docker` ve Docker'ın packet filtering dokümanı). Doğrulama komutu aynıdır (bölüm 5a'daki `curl --resolve`, zaman aşımı beklenir). Bu yol bu sitede kullanılmadı.
+
+### 5d. Traefik ipAllowList (ek katman veya alternatif)
+
+Ağ seviyesinde bir kısıt mümkün değilse (ör. sağlayıcı tarafında yönetilen bir firewall yoksa) bölüm 3'teki `cloudflare-only` middleware'i uygulamanın etiketlerine eklenir. Router adı yine bölüm 4'teki kurala uyar, mevcut satırın değeri korunur:
 
 ```
 traefik.http.routers.https-0-<uuid>.middlewares=<mevcut değer>,cloudflare-only@file,security-headers@file,compress@file
 ```
 
-- [ ] Bu yol origin portlarını ağ seviyesinde kapatmaz, yalnızca HTTP katmanında `403` döner. Paket yine de Traefik'e ulaşır. `DOCKER-USER` ile birlikte kullanılabilir, yerine geçmez.
+- [ ] Bu yol origin portlarını ağ seviyesinde kapatmaz, yalnızca HTTP katmanında `403` döner. Paket yine de Traefik'e ulaşır. Hetzner Cloud Firewall ile birlikte kullanılabilir, yerine geçmez.

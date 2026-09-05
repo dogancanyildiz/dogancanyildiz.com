@@ -1,6 +1,7 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { LiveStatus } from "@/components/sections/live-status";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { buildInfo, commitUrl, formatBuildSha } from "@/lib/build-info";
 import { getLatestRelease, RELEASES_URL } from "@/lib/release-info";
 
@@ -82,10 +83,12 @@ function SystemsField({
  * second one here would double the vertical rhythm and horizontal padding.
  */
 export async function Systems() {
-  const [t, format] = await Promise.all([
+  const [t, tA11y, format] = await Promise.all([
     getTranslations("systems"),
+    getTranslations("a11y"),
     getFormatter(),
   ]);
+  const newTabHint = tA11y("opensInNewTab");
   const buildSha = buildInfo.sha ? formatBuildSha(buildInfo.sha) : null;
   const parsedBuildDate = buildInfo.date.trim()
     ? new Date(buildInfo.date)
@@ -125,6 +128,7 @@ export async function Systems() {
                 className="underline decoration-dotted underline-offset-4 hover:text-muted-foreground"
               >
                 v{version}
+                <NewTabHint text={newTabHint} />
               </a>
               {buildSha ? (
                 <a
@@ -132,10 +136,16 @@ export async function Systems() {
                   target="_blank"
                   rel="noopener noreferrer"
                   title={t("commitTitle")}
-                  aria-label={t("commitAria", { sha: buildSha })}
                   className="font-mono text-xs text-muted-foreground underline decoration-dotted underline-offset-4 hover:text-foreground"
                 >
-                  {buildSha}
+                  {/* The hash is what a sighted reader sees; the accessible
+                      name is the sr-only span, which spells out what it is a
+                      hash of. */}
+                  <span aria-hidden="true">{buildSha}</span>
+                  <span className="sr-only">
+                    {t("commitAria", { sha: buildSha })}
+                  </span>
+                  <NewTabHint text={newTabHint} />
                 </a>
               ) : null}
             </span>

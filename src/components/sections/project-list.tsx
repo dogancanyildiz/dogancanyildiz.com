@@ -7,6 +7,7 @@ import {
   ContentEntryBody,
   ContentEntryIndex,
 } from "@/components/ui/content-entry";
+import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { SkillTag } from "@/components/ui/skill-tag";
 import type { ProjectCardData } from "@/lib/content";
 
@@ -35,7 +36,11 @@ export async function ProjectList({
   headingLevel = "h2",
 }: ProjectListProps) {
   const Heading = headingLevel;
-  const t = await getTranslations("projects");
+  const [t, tA11y] = await Promise.all([
+    getTranslations("projects"),
+    getTranslations("a11y"),
+  ]);
+  const newTabHint = tA11y("opensInNewTab");
 
   return (
     <ul className="content-stack">
@@ -105,6 +110,7 @@ export async function ProjectList({
                   >
                     <ExternalLink className="size-3" aria-hidden="true" />
                     {t("viewLive")}
+                    <NewTabHint text={newTabHint} />
                   </a>
                 ) : null}
                 {project.repoUrl ? (
@@ -116,6 +122,7 @@ export async function ProjectList({
                   >
                     <GithubIcon className="size-3" aria-hidden="true" />
                     {t("viewSource")}
+                    <NewTabHint text={newTabHint} />
                   </a>
                 ) : null}
               </div>

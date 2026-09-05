@@ -60,10 +60,14 @@ yapılmadı.
       Systems panelindeki link satırı gizli (canlıda doğrulandı).
 - [ ] **Traefik `forwardedHeaders.trustedIPs`** Cloudflare listesiyle set
       edilmeli.
-- [ ] **Origin kilidi.** `DOCKER-USER` zincirine Cloudflare IPv4/IPv6 blokları
-      + admin IP allowlist + DROP; ufw yalnızca host servislerini kapatıyor.
-- [ ] **`TRUST_CF_CONNECTING_IP=true`,** yalnızca yukarıdaki iki adımdan
-      sonra. Bugün `false`, rate limit `X-Forwarded-For`'un son hop'una
+- [x] **Origin kilidi: tamamlandı (2026-09-05).** Hetzner Cloud Firewall'da
+      (`coolify server`, CPX42) 80 ve 443 yalnızca Cloudflare IPv4/IPv6
+      aralıklarından, 22 ve ICMP herkese açık bırakıldı; `DOCKER-USER`/
+      iptables kullanılmadı, kısıt sunucudan bağımsız ağ kenarında çalışıyor.
+      Doğrulama ve adımlar `docs/deploy/traefik-ve-origin.md` bölüm 5.
+- [ ] **`TRUST_CF_CONNECTING_IP=true`,** Coolify -> uygulama -> Environment
+      Variables, sonra redeploy. Origin kilidi tamamlandığı için tek kalan
+      adım bu; bugün `false`, rate limit `X-Forwarded-For`'un son hop'una
       düşüyor, yani Cloudflare edge adresi başına sayıyor.
 - [ ] **Cloudflare:** CAA kaydı (`letsencrypt.org`, `pki.goog`, `iodef`) ve
       Minimum TLS 1.2 ayarı; ikisi de 2026-08-28 denetiminde eksikti,

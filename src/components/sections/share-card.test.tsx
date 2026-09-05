@@ -131,14 +131,20 @@ describe("share card", () => {
 
     const hrefOf = (name: string) =>
       screen.getByRole("link", { name }).getAttribute("href");
+    // Every web target's accessible name picks up NewTabHint's sr-only span;
+    // the accessible-name computation trims each contributing node, so the
+    // hint's own leading space does not survive next to the label. mailto
+    // stays plain: it never gets target="_blank" (see share-card.tsx).
+    const newTab = (label: string) =>
+      `${label}${tr.a11y.opensInNewTab.trimStart()}`;
 
-    expect(hrefOf(tr.share.x)).toBe(
+    expect(hrefOf(newTab(tr.share.x))).toBe(
       `https://x.com/intent/post?text=${encodedTitle}&url=${encodedUrl}`
     );
-    expect(hrefOf(tr.share.linkedin)).toBe(
+    expect(hrefOf(newTab(tr.share.linkedin))).toBe(
       `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
     );
-    expect(hrefOf(tr.share.whatsapp)).toBe(
+    expect(hrefOf(newTab(tr.share.whatsapp))).toBe(
       `https://wa.me/?text=${encodeURIComponent(`${TITLE} ${url}`)}`
     );
     expect(hrefOf(tr.share.email)).toBe(
@@ -150,8 +156,8 @@ describe("share card", () => {
     // rewrite the url a reader posts. The apostrophe is left raw on purpose:
     // encodeURIComponent treats it as unreserved and it delimits nothing.
     for (const [label, parameters] of [
-      [tr.share.x, 2],
-      [tr.share.whatsapp, 1],
+      [newTab(tr.share.x), 2],
+      [newTab(tr.share.whatsapp), 1],
       [tr.share.email, 2],
     ] as const) {
       const href = hrefOf(label) ?? "";
@@ -170,7 +176,9 @@ describe("share card", () => {
     // reader passing the page on, not messaging him.
     const href =
       screen
-        .getByRole("link", { name: tr.share.whatsapp })
+        .getByRole("link", {
+          name: `${tr.share.whatsapp}${tr.a11y.opensInNewTab.trimStart()}`,
+        })
         .getAttribute("href") ?? "";
     expect(href.startsWith("https://wa.me/?text=")).toBe(true);
   });

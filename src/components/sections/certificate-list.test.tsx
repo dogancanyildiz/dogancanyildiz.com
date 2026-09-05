@@ -225,18 +225,33 @@ describe("certificate list", () => {
 
   it("tells the repeated verify links apart for a screen reader", async () => {
     const { unmount } = await renderList("en");
-    const link = screen.getByRole("link", { name: `Verify ${CAPT}` });
+    const link = screen.getByRole("link", {
+      // The accessible name concatenation trims each contributing node, so
+      // the sr-only hint's own leading space does not survive between it and
+      // the credential name; the DOM itself still carries the space (see the
+      // aria-hidden assertion below), which is what the eye and a browser's
+      // find-in-page see.
+      name: `Verify ${CAPT}(opens in a new tab)`,
+    });
 
     expect(link.getAttribute("href")).toBe(
       "https://hackviser.com/verify?id=HV-CAPT-02TKGO4Q"
     );
-    // SC 2.5.3: the accessible name opens with the word on screen.
-    expect(link.textContent).toBe("Verify");
+    // SC 2.5.3: the accessible name opens with the word on screen; the rest
+    // (the credential name, the new-tab warning) is sr-only, aria-hidden from
+    // the visible span's point of view.
+    expect(link.querySelector('[aria-hidden="true"]')?.textContent).toBe(
+      "Verify"
+    );
     unmount();
 
     await renderList("tr");
-    const trLink = screen.getByRole("link", { name: `Doğrula: ${CAPT}` });
-    expect(trLink.textContent).toBe("Doğrula");
+    const trLink = screen.getByRole("link", {
+      name: `Doğrula: ${CAPT}(yeni sekmede açılır)`,
+    });
+    expect(trLink.querySelector('[aria-hidden="true"]')?.textContent).toBe(
+      "Doğrula"
+    );
   });
 
   it("prints the credential id only where there is one", async () => {

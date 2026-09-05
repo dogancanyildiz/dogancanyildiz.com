@@ -108,7 +108,11 @@ describe("Systems", () => {
     // The version is what a visitor reads; the sha is fine print linking to
     // the commit on GitHub.
     // No release answer: the bundled version, linking to the releases list.
-    const versionLink = screen.getByRole("link", { name: "v0.7.0" });
+    // The accessible name concatenation trims each contributing node, so the
+    // sr-only hint's own leading space does not survive next to the version.
+    const versionLink = screen.getByRole("link", {
+      name: "v0.7.0(opens in a new tab)",
+    });
     expect(versionLink).toHaveAttribute(
       "href",
       "https://github.com/dogancanyildiz/dogancanyildiz.com/releases"
@@ -230,7 +234,9 @@ describe("Systems", () => {
     render(await resolveServerTree(<Systems />));
 
     expect(screen.queryByText("v0.7.0")).toBeNull();
-    expect(screen.getByRole("link", { name: "v0.8.0" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "v0.8.0(opens in a new tab)" })
+    ).toHaveAttribute(
       "href",
       "https://github.com/dogancanyildiz/dogancanyildiz.com/releases/tag/v0.8.0"
     );
