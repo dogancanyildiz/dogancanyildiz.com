@@ -118,8 +118,11 @@ describe("footer", () => {
   // Person JSON-LD publishes from the same module.
   it("takes every external destination from lib/site, never a literal", () => {
     expect(source).toContain('from "@/lib/site"');
-    expect(source).toContain("href={SOCIAL.github}");
-    expect(source).toContain("href={SOCIAL.linkedin}");
+    // Every profile row comes from SOCIAL_PROFILES (derived from sameAs),
+    // never from a pasted url or a hand picked pair.
+    expect(source).toContain("SOCIAL_PROFILES.map");
+    expect(source).toContain("href={profile.url}");
+    expect(source).toContain('rel="me noopener noreferrer"');
     expect(source).toContain(
       'href={whatsappHref(tContact("whatsappPrefill"))}'
     );
@@ -140,9 +143,9 @@ describe("footer", () => {
     expect(source).not.toContain("twitter.com");
   });
 
-  it("pairs the elsewhere labels with the same icon treatment as email", () => {
-    expect(source).toContain("GithubIcon");
-    expect(source).toContain("LinkedinIcon");
+  it("pairs the contact and profile rows with the same icon treatment as email", () => {
+    // Profile marks come from the shared PROFILE_ICONS map, one per network.
+    expect(source).toContain("PROFILE_ICONS[profile.id]");
     expect(source).toContain("WhatsAppIcon");
     expect(source).toContain("<Rss");
     expect(source).toContain("gap-2");
