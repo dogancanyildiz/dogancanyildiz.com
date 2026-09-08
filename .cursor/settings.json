@@ -1,0 +1,10 @@
+{
+  "plugins": {
+    "shadcn": {
+      "enabled": true
+    },
+    "superdesign": {
+      "enabled": true
+    }
+  }
+}
