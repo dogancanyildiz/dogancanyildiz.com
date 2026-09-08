@@ -15,9 +15,10 @@ describe("SOCIAL_PROFILES", () => {
   });
 
   it("leaves Credly out: an identity url for credentials, not a profile to follow", () => {
-    expect(SOCIAL_PROFILES.some((p) => p.url.includes("credly.com"))).toBe(
-      false
-    );
+    // Hostname, not a substring: CodeQL js/incomplete-url-substring-sanitization.
+    const hosts = SOCIAL_PROFILES.map((p) => new URL(p.url).hostname);
+    expect(hosts).not.toContain("www.credly.com");
+    expect(hosts).not.toContain("credly.com");
   });
 
   it("has no duplicate networks", () => {
