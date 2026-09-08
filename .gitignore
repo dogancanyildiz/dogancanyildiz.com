@@ -60,8 +60,8 @@ Thumbs.db
 .claude/worktrees/
 .claude/settings.local.json
 .claude/*.local.*
-.cursor/
-.cursorrules
+# .cursor/ (plugin toggles, rules) travels between machines; the superpowers
+# SDD workspace self-ignores by design and stays local.
 .superpowers/
 
 # ─── Session scratch ─────────────────────────────────────────────────────────
