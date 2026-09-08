@@ -7,12 +7,13 @@ import { SkillCategoryList } from "@/components/sections/skill-group-grid";
 import { AboutSubnav } from "@/components/sections/about-subnav";
 import { CertificateList } from "@/components/sections/certificate-list";
 import { TestimonialsBand } from "@/components/sections/testimonials-band";
-import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { ProfilePortrait } from "@/components/ui/profile-portrait";
 import {
   ContentEntryBody,
   ContentEntryIndex,
 } from "@/components/ui/content-entry";
 import { PageHeader } from "@/components/ui/page-header";
+import { ProfileLinks } from "@/components/sections/profile-links";
 import { PageSection } from "@/components/layout/page-section";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
@@ -26,9 +27,9 @@ import {
 } from "@/content/profile";
 import { routing } from "@/i18n/routing";
 import { UMAMI_EVENT, umamiEvent } from "@/lib/analytics-events";
-import { hasCv } from "@/lib/cv";
+import { availableCvLocales } from "@/lib/cv";
 import { profileImagePath } from "@/lib/profile-image";
-import { CV_PATH } from "@/lib/site";
+import { CV_PATHS } from "@/lib/site";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocale } from "@/lib/route-params";
 
@@ -60,12 +61,16 @@ export default async function AboutPage({ params }: AboutPageProps) {
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
 
-  const t = await getTranslations({ locale, namespace: "about" });
+  const [t, tA11y] = await Promise.all([
+    getTranslations({ locale, namespace: "about" }),
+    getTranslations({ locale, namespace: "a11y" }),
+  ]);
+  const newTabHint = tA11y("opensInNewTab");
   const talks = speaking[locale];
   const roles = experience[locale];
   const communityRoles = community[locale];
   const schools = education[locale];
-  const showCv = hasCv();
+  const cvLocales = availableCvLocales(locale);
   const profileImageSrc = profileImagePath();
 
   return (
@@ -76,17 +81,66 @@ export default async function AboutPage({ params }: AboutPageProps) {
           hidden string. */}
       <PersonJsonLd locale={locale} description={t("lead")} />
       <Breadcrumb locale={locale} items={[{ name: t("title") }]} />
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+      {/* Title and lead on the left, the portrait on the right from sm up; on
+          a phone the portrait comes first so the page opens on the person,
+          then the name. The photo lives only here, not on the home page
+          (owner's call, 2026-09-08): the first screen belongs to the offer. */}
+      <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
+        {/* Title, lead, the profile list and the CV buttons fill the column
+            beside the portrait; before 2026-09-08 the CV sat further down
+            and the space under the lead stood empty. */}
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
+          <PageHeader as="h1" title={t("title")} description={t("lead")} />
+          <ProfileLinks
+            label={t("profilesLabel")}
+            groupLabels={{
+              professional: t("profileGroupProfessional"),
+              content: t("profileGroupContent"),
+              social: t("profileGroupSocial"),
+            }}
+            newTabHint={newTabHint}
+          />
+          {cvLocales.length > 0 ? (
+            // One button per edition, the page's own language first as the
+            // primary action and the other as an outline beside it. hrefLang and
+            // type tell a crawler what sits behind each link, so the two PDFs
+            // land in the index as a Turkish and an English document rather than
+            // as duplicates of one another.
+            <div className="flex flex-wrap gap-3">
+              {cvLocales.map((cvLocale, index) => (
+                <Button
+                  key={cvLocale}
+                  asChild
+                  size="sm"
+                  variant={index === 0 ? "default" : "outline"}
+                >
+                  <a
+                    href={CV_PATHS[cvLocale]}
+                    hrefLang={cvLocale}
+                    type="application/pdf"
+                    download
+                    {...umamiEvent(UMAMI_EVENT.cvDownload, {
+                      locale,
+                      cv: cvLocale,
+                    })}
+                  >
+                    <Download className="size-4" />
+                    {t(cvLocale === "tr" ? "downloadCvTr" : "downloadCvEn")}
+                  </a>
+                </Button>
+              ))}
+            </div>
+          ) : null}
+        </div>
         {profileImageSrc ? (
-          <ProfileAvatar
+          <ProfilePortrait
             src={profileImageSrc}
             // Describes the person in the photo, not the page. "About" told a
             // screen reader nothing the heading beside it had not said.
             alt={t("profileImageAlt")}
-            sizeClass="size-24 sm:size-28"
+            className="order-first sm:order-none"
           />
         ) : null}
-        <PageHeader as="h1" title={t("title")} description={t("lead")} />
       </div>
 
       <AboutSubnav locale={locale} />
@@ -111,19 +165,6 @@ export default async function AboutPage({ params }: AboutPageProps) {
           </p>
         </div>
       </div>
-
-      {showCv ? (
-        <Button asChild size="sm">
-          <a
-            href={CV_PATH}
-            download
-            {...umamiEvent(UMAMI_EVENT.cvDownload, { locale })}
-          >
-            <Download className="size-4" />
-            {t("downloadCv")}
-          </a>
-        </Button>
-      ) : null}
 
       <section
         id="about-skills"

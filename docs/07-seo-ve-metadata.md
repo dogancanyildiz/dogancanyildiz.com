@@ -126,7 +126,12 @@ yalnızca kendi dilinin feed'ini duyuruyor. Üç uygulama detayı kayda değer:
 
 - Kök canonical ve hreflang eğik çizgisiz, sitemap `loc`'u eğik çizgili;
   tutarlılık iddiası yok.
-- `/cv/*` `X-Robots-Tag: noindex, nofollow` taşıyor (`robots.ts` değişmedi).
+- `/cv/*` dizine açık (2026-09-08 kararı): `dogancanyildiz-cv-tr.pdf` ve
+  `dogancanyildiz-cv-en.pdf` sitemap'te listeli, PDF üst verisinde Title,
+  Author ve Lang var; eski `/cv/dogancanyildiz-cv.pdf` İngilizce dosyaya 308.
+  Profil fotoğrafı (`/images/profile.webp`, 864x1080 portre) yalnızca
+  /hakkimda'da gösterilir; o satırda image sitemap girdisi ve Person şemasında
+  `image` olarak yer alır.
 - Sitemap'te satır bazında `x-default` anahtarı var, ama sayfa
   `<head>`'indeki `alternates.languages` ile aynı kaynaktan geliyor.
 

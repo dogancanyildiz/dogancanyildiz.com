@@ -1,5 +1,14 @@
 import type { SVGProps } from "react";
-import { siGithub, siWhatsapp, siX } from "simple-icons";
+import {
+  siGithub,
+  siInstagram,
+  siMedium,
+  siThreads,
+  siTiktok,
+  siWhatsapp,
+  siX,
+  siYoutube,
+} from "simple-icons";
 import { cn } from "@/lib/utils";
 
 /**
@@ -63,4 +72,24 @@ export function WhatsAppIcon(props: BrandIconProps) {
 
 export function XIcon(props: BrandIconProps) {
   return <BrandIcon path={siX.path} {...props} />;
+}
+
+export function InstagramIcon(props: BrandIconProps) {
+  return <BrandIcon path={siInstagram.path} {...props} />;
+}
+
+export function ThreadsIcon(props: BrandIconProps) {
+  return <BrandIcon path={siThreads.path} {...props} />;
+}
+
+export function YoutubeIcon(props: BrandIconProps) {
+  return <BrandIcon path={siYoutube.path} {...props} />;
+}
+
+export function TiktokIcon(props: BrandIconProps) {
+  return <BrandIcon path={siTiktok.path} {...props} />;
+}
+
+export function MediumIcon(props: BrandIconProps) {
+  return <BrandIcon path={siMedium.path} {...props} />;
 }

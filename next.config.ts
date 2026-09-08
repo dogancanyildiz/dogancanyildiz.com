@@ -244,11 +244,30 @@ const OG_IMAGE_SOURCES = [
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  images: {
+    // Next 16 allowlists image qualities (default [75]) and coerces any
+    // other value to the closest entry. 90 is for the About portrait; a
+    // face shows compression long before a card cover does.
+    qualities: [75, 90],
+  },
   experimental: {
     // Lets src/app/global-not-found.tsx handle requests that never reach the
     // [lang] segment. Without it those 404s render with no layout at all: no
     // stylesheet, no html lang attribute.
     globalNotFound: true,
+  },
+  async redirects() {
+    return [
+      {
+        // The single English PDF that lived at this path until the Turkish
+        // edition arrived. Literals rather than LEGACY_CV_PATH and CV_PATHS
+        // from src/lib/site.ts: that module reaches site-config through the
+        // "@/" alias, which the config loader does not resolve.
+        source: "/cv/dogancanyildiz-cv.pdf",
+        destination: "/cv/dogancanyildiz-cv-en.pdf",
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     const isProduction = process.env.NODE_ENV === "production";
@@ -287,16 +306,11 @@ const nextConfig: NextConfig = {
             : []),
         ],
       },
-      {
-        source: "/cv/:path*",
-        headers: [
-          ONE_DAY_CACHE,
-          // The CV is linked from the site but is not a page we want in the
-          // index; robots.txt alone would not stop a listing that comes from an
-          // external link.
-          { key: "X-Robots-Tag", value: "noindex, nofollow" },
-        ],
-      },
+      // The CV PDFs are meant to be found (owner's decision, 2026-09-08): no
+      // X-Robots-Tag here, they are listed in sitemap.ts, and each carries a
+      // Title, Author and Lang in its own metadata so a search result shows
+      // the person and the edition rather than the file name.
+      { source: "/cv/:path*", headers: [ONE_DAY_CACHE] },
       { source: "/fonts/:path*", headers: [ONE_DAY_CACHE] },
       // The icons are static files under src/app (favicon.ico, icon.png,
       // apple-icon.png), not the generated routes they replaced. Next writes

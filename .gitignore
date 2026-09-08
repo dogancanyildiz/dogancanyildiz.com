@@ -55,16 +55,18 @@ Thumbs.db
 .nodeterm/
 
 # ─── AI Tools ────────────────────────────────────────────────────────────────
-# The whole .claude/ tree stays local (worktrees, settings.local.json, workflow
-# scripts). The orchestration scripts were untracked on 2026-08-28 after the
-# repository went public; a copy lives in .local/claude-backup/.
-.claude/
-.cursor/
-.cursorrules
+# Per machine state only. Anything a cloud agent needs from a fresh clone
+# (CLAUDE.md, AGENTS.md, docs/) is tracked; see the 2026-09-08 change.
+.claude/worktrees/
+.claude/settings.local.json
+.claude/*.local.*
+# .cursor/ (plugin toggles, rules) travels between machines; the superpowers
+# SDD workspace self-ignores by design and stays local.
+.superpowers/
 
-# ─── Next.js agent rules (rewritten by `next dev` on every start) ─────────────
-AGENTS.md
-CLAUDE.md
+# ─── Session scratch ─────────────────────────────────────────────────────────
+# Snapshots of the live site pulled during verification, never source.
+/live/
 
 # ─── Velite content pipeline output ──────────────────────────────────────────
 /.velite/
@@ -78,4 +80,6 @@ tests/fixtures/.velite-duplicate-key/
 tests/fixtures/node_modules/
 
 # ─── Local audit registers (open items, private working notes) ───────────────
+# Owner's decision (2026-09-08): stays local; docs/11-acik-isler.md is the
+# tracked list of open work.
 /audit/

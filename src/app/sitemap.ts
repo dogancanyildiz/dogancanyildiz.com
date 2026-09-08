@@ -1,4 +1,8 @@
 import type { MetadataRoute } from "next";
+import { siteUrl } from "@/lib/env";
+import { availableCvLocales } from "@/lib/cv";
+import { profileImagePath } from "@/lib/profile-image";
+import { CV_PATHS } from "@/lib/site";
 import { routing } from "@/i18n/routing";
 import {
   getPosts,
@@ -28,8 +32,18 @@ const STATIC_PAGES: Array<{
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
 ];
 
+/**
+ * Pages that show the profile photo, the About page only since the home
+ * page dropped it (2026-09-08). Listing the image under the page is what
+ * puts the photo in image search with that page as its landing page; the
+ * Person node already names the same file as `image`.
+ */
+const PAGES_WITH_PORTRAIT = new Set(["/about"]);
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
+  const origin = siteUrl();
+  const portrait = profileImagePath();
 
   // No lastModified on the static pages. It used to be the build timestamp,
   // which told a crawler that all ten of them changed on every deploy, even a
@@ -44,6 +58,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
         alternates: {
           languages: buildLanguageAlternates(staticLanguageUrls(page.path)),
         },
+        ...(portrait && PAGES_WITH_PORTRAIT.has(page.path)
+          ? { images: [`${origin}${portrait}`] }
+          : {}),
       });
     }
   }
@@ -86,6 +103,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
       });
     }
+  }
+
+  // The CV PDFs, one per locale, only while the file is on disk. A PDF is a
+  // document to a crawler like any page; the file's own Title and Lang
+  // metadata carry what a page would put in <head>.
+  for (const cvLocale of availableCvLocales("tr")) {
+    entries.push({
+      url: `${origin}${CV_PATHS[cvLocale]}`,
+      changeFrequency: "yearly",
+      priority: 0.4,
+    });
   }
 
   return entries;

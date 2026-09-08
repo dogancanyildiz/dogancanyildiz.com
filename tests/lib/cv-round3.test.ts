@@ -10,26 +10,49 @@ afterEach(() => {
   existsSync.mockReset();
 });
 
-async function loadHasCv() {
-  const mod = await import("@/lib/cv");
-  return mod.hasCv;
+async function loadCv() {
+  return import("@/lib/cv");
 }
 
 describe("hasCv", () => {
-  it("is true once the CV PDF is present at the expected path", async () => {
+  it("is true once the PDF for that locale is present at its own path", async () => {
     existsSync.mockReturnValue(true);
-    const hasCv = await loadHasCv();
+    const { hasCv } = await loadCv();
 
-    expect(hasCv()).toBe(true);
+    expect(hasCv("tr")).toBe(true);
     expect(existsSync).toHaveBeenCalledWith(
-      join(process.cwd(), "public", "cv", "dogancanyildiz-cv.pdf")
+      join(process.cwd(), "public", "cv", "dogancanyildiz-cv-tr.pdf")
+    );
+
+    expect(hasCv("en")).toBe(true);
+    expect(existsSync).toHaveBeenCalledWith(
+      join(process.cwd(), "public", "cv", "dogancanyildiz-cv-en.pdf")
     );
   });
 
-  it("is false before the CV PDF has been delivered, so the download button never renders as a broken link", async () => {
+  it("is false before the PDF has been delivered, so the download button never renders as a broken link", async () => {
     existsSync.mockReturnValue(false);
-    const hasCv = await loadHasCv();
+    const { hasCv } = await loadCv();
 
-    expect(hasCv()).toBe(false);
+    expect(hasCv("tr")).toBe(false);
+  });
+});
+
+describe("availableCvLocales", () => {
+  it("lists the page locale first and the other edition after it", async () => {
+    existsSync.mockReturnValue(true);
+    const { availableCvLocales } = await loadCv();
+
+    expect(availableCvLocales("tr")).toEqual(["tr", "en"]);
+    expect(availableCvLocales("en")).toEqual(["en", "tr"]);
+  });
+
+  it("drops an edition whose file is missing instead of linking to a 404", async () => {
+    existsSync.mockImplementation((path: string) =>
+      String(path).endsWith("dogancanyildiz-cv-en.pdf")
+    );
+    const { availableCvLocales } = await loadCv();
+
+    expect(availableCvLocales("tr")).toEqual(["en"]);
   });
 });

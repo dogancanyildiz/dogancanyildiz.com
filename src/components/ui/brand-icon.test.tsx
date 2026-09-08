@@ -1,7 +1,16 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { GithubIcon, LinkedinIcon, WhatsAppIcon } from "./brand-icon";
+import {
+  GithubIcon,
+  InstagramIcon,
+  LinkedinIcon,
+  MediumIcon,
+  ThreadsIcon,
+  TiktokIcon,
+  WhatsAppIcon,
+  YoutubeIcon,
+} from "./brand-icon";
 
 describe("brand icons", () => {
   it("defaults GithubIcon to aria-hidden with no img role", () => {
@@ -33,5 +42,21 @@ describe("brand icons", () => {
     const svg = container.querySelector("svg");
     expect(svg).toHaveAttribute("aria-label", "GitHub");
     expect(svg).toHaveAttribute("role", "img");
+  });
+});
+
+describe("profile network icons", () => {
+  it.each([
+    ["Instagram", InstagramIcon],
+    ["Medium", MediumIcon],
+    ["Threads", ThreadsIcon],
+    ["YouTube", YoutubeIcon],
+    ["TikTok", TiktokIcon],
+  ])("%s defaults to aria-hidden with no img role", (_name, Icon) => {
+    const { container } = render(<Icon />);
+    const svg = container.querySelector("svg");
+    expect(svg).toHaveAttribute("aria-hidden", "true");
+    expect(svg).not.toHaveAttribute("role", "img");
+    expect(svg?.querySelector("path")?.getAttribute("d")).toBeTruthy();
   });
 });

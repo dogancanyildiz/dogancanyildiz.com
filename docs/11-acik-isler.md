@@ -38,8 +38,8 @@ Bu satırlar `curl` ile ölçüldü, tahmin değil:
 - [ ] **Metin onayı.** Üç TR yazı, üç EN çeviri ve altı case study'nin birinci
       şahıs cümleleri sahibinin onayını bekliyor; olgular (yıllar, teknoloji
       yığınları) herkese açık repolarla doğrulandı.
-- [ ] **CV PDF içerik onayı.** Dosya `public/cv/` altında yayınlandığı için
-      içindeki telefon numarası veya ev adresi herkese açık olur.
+- [x] **CV PDF içerik onayı.** 2026-09-08: iki dilde PDF yayında ve dizine
+      açık; telefon ve e-posta sahibinin kararıyla dosyada kalıyor.
 - [ ] **Wikonya canlı link teyidi.** Hedef site artık kendini "Konya Genç"
       olarak tanıtıyor; link hâlâ doğru hedefi gösteriyor mu kontrol edilmeli.
 
