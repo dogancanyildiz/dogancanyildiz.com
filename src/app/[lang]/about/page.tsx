@@ -91,7 +91,15 @@ export default async function AboutPage({ params }: AboutPageProps) {
             and the space under the lead stood empty. */}
         <div className="flex min-w-0 flex-1 flex-col gap-6">
           <PageHeader as="h1" title={t("title")} description={t("lead")} />
-          <ProfileLinks label={t("profilesLabel")} newTabHint={newTabHint} />
+          <ProfileLinks
+            label={t("profilesLabel")}
+            groupLabels={{
+              professional: t("profileGroupProfessional"),
+              content: t("profileGroupContent"),
+              social: t("profileGroupSocial"),
+            }}
+            newTabHint={newTabHint}
+          />
           {cvLocales.length > 0 ? (
             // One button per edition, the page's own language first as the
             // primary action and the other as an outline beside it. hrefLang and

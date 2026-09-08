@@ -5,6 +5,7 @@ import {
   GithubIcon,
   InstagramIcon,
   LinkedinIcon,
+  MediumIcon,
   ThreadsIcon,
   TiktokIcon,
   WhatsAppIcon,
@@ -47,6 +48,7 @@ describe("brand icons", () => {
 describe("profile network icons", () => {
   it.each([
     ["Instagram", InstagramIcon],
+    ["Medium", MediumIcon],
     ["Threads", ThreadsIcon],
     ["YouTube", YoutubeIcon],
     ["TikTok", TiktokIcon],

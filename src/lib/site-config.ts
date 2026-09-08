@@ -47,9 +47,12 @@ export const siteConfig = {
       "https://github.com/dogancanyildiz",
       "https://www.linkedin.com/in/dogancanyildiz",
       "https://www.credly.com/users/dogancanyildiz",
+      "https://medium.com/@dogancanyildiz",
+      "https://www.youtube.com/@dogancanyildiz",
       "https://x.com/dogancannyildiz",
       "https://www.instagram.com/dogancanyildiz.dev",
       "https://www.threads.com/@dogancanyildiz.dev",
+      "https://www.tiktok.com/@dogancanyildiz.dev",
     ],
   },
 } as const;

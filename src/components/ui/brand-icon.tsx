@@ -2,6 +2,7 @@ import type { SVGProps } from "react";
 import {
   siGithub,
   siInstagram,
+  siMedium,
   siThreads,
   siTiktok,
   siWhatsapp,
@@ -87,4 +88,8 @@ export function YoutubeIcon(props: BrandIconProps) {
 
 export function TiktokIcon(props: BrandIconProps) {
   return <BrandIcon path={siTiktok.path} {...props} />;
+}
+
+export function MediumIcon(props: BrandIconProps) {
+  return <BrandIcon path={siMedium.path} {...props} />;
 }
