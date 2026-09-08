@@ -18,6 +18,12 @@ updates:
     open-pull-requests-limit: 5
     labels: [dependencies]
     groups:
+      # vitest and its companion packages (@vitest/coverage-v8 pins vitest as
+      # an exact peer) can only move together: a major of one alone fails
+      # npm install, as PRs #90 and #91 did on 2026-09-07. Listed first so it
+      # wins over the minor/patch group for these packages.
+      vitest:
+        patterns: ["vitest", "@vitest/*"]
       # Patch and minor bumps land together so a week of updates is one PR.
       npm-minor-patch:
         update-types: [minor, patch]
