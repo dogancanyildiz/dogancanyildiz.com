@@ -174,10 +174,13 @@ describe("asset caching", () => {
 });
 
 describe("cv indexing", () => {
-  it("keeps the cv out of the search index", async () => {
+  // 2026-09-08 decision: the two CV PDFs are meant to be found, so the route
+  // carries no X-Robots-Tag and the files are listed in the sitemap instead.
+  it("leaves the cv open to the search index", async () => {
     const { forSource } = await loadHeaders("production");
-    expect(value(forSource("/cv/:path*"), "X-Robots-Tag")).toBe(
-      "noindex, nofollow"
+    expect(value(forSource("/cv/:path*"), "X-Robots-Tag")).toBeUndefined();
+    expect(value(forSource("/cv/:path*"), "Cache-Control")).toBe(
+      "public, max-age=86400"
     );
   });
 });

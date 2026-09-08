@@ -1,3 +1,4 @@
+import type { AppLocale } from "@/i18n/routing";
 import { siteConfig } from "@/lib/site-config";
 
 /**
@@ -32,11 +33,23 @@ export function whatsappHref(prefilledText: string): string {
 }
 
 /**
- * Public path to the CV file. Lives here rather than in lib/cv.ts because
- * client components (e.g. the hero) need to read the path without pulling
- * node:fs into the browser bundle.
+ * Public paths of the CV, one PDF per locale. They live here rather than in
+ * lib/cv.ts so a client component can read a path without pulling node:fs
+ * into the browser bundle. The file names carry the language on purpose: a
+ * search result for "dogancanyildiz cv" should say which edition it is
+ * before the click, and the two must never share a URL.
  */
-export const CV_PATH = "/cv/dogancanyildiz-cv.pdf";
+export const CV_PATHS = {
+  tr: "/cv/dogancanyildiz-cv-tr.pdf",
+  en: "/cv/dogancanyildiz-cv-en.pdf",
+} as const satisfies Record<AppLocale, string>;
+
+/**
+ * The single English PDF the site served before the Turkish edition arrived
+ * (2026-09-08). Redirected permanently to the English file in next.config.ts
+ * so an old bookmark or search listing still lands on a CV.
+ */
+export const LEGACY_CV_PATH = "/cv/dogancanyildiz-cv.pdf";
 
 /** Public path stem for the optional profile photo (see lib/profile-image.ts). */
 export const PROFILE_IMAGE_PATH = siteConfig.person.profileImagePath;

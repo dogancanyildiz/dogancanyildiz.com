@@ -191,9 +191,11 @@ describe("sitemap", () => {
   // page adds a seventh static page: 7 x 2 + 6 x 2 + 3 x 2 = 32. Two more
   // posts (cloudflare-traefik-arkasinda-gercek-istemci-ip and
   // nextjs-docker-multi-stage-non-root) take it to 7 x 2 + 6 x 2 + 5 x 2 = 36.
-  // A wrong count here is the cheapest place to catch a miscounted
-  // STATIC_PAGES entry or a project silently dropped from one locale.
-  it("lists exactly 36 urls: 7 static, 6 projects and 5 posts, each in both locales", async () => {
+  // The two CV PDFs (2026-09-08, one per locale, listed only while the file
+  // is on disk) make it 38. A wrong count here is the cheapest place to catch
+  // a miscounted STATIC_PAGES entry or a project silently dropped from one
+  // locale.
+  it("lists exactly 38 urls: 7 static, 6 projects and 5 posts in both locales, plus 2 cv pdfs", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const { getPosts, getProjects } = await import("@/lib/content");
 
@@ -201,7 +203,39 @@ describe("sitemap", () => {
     expect(getProjects("en")).toHaveLength(6);
     expect(getPosts("tr")).toHaveLength(5);
     expect(getPosts("en")).toHaveLength(5);
-    expect(sitemap()).toHaveLength(36);
+    expect(sitemap()).toHaveLength(38);
+  });
+
+  it("lists both cv pdfs and puts the profile photo under the pages that show it", async () => {
+    const sitemap = (await import("@/app/sitemap")).default;
+    const entries = sitemap();
+    const urls = entries.map((entry) => entry.url);
+
+    expect(urls).toContain(
+      "https://dogancanyildiz.com/cv/dogancanyildiz-cv-tr.pdf"
+    );
+    expect(urls).toContain(
+      "https://dogancanyildiz.com/cv/dogancanyildiz-cv-en.pdf"
+    );
+    // The old single English file is a redirect now, never a sitemap row.
+    expect(urls).not.toContain(
+      "https://dogancanyildiz.com/cv/dogancanyildiz-cv.pdf"
+    );
+
+    const portrait = "https://dogancanyildiz.com/images/profile.webp";
+    for (const url of [
+      "https://dogancanyildiz.com/",
+      "https://dogancanyildiz.com/en",
+      "https://dogancanyildiz.com/hakkimda",
+      "https://dogancanyildiz.com/en/about",
+    ]) {
+      const entry = entries.find((item) => item.url === url);
+      expect(entry?.images, url).toEqual([portrait]);
+    }
+    const contact = entries.find(
+      (item) => item.url === "https://dogancanyildiz.com/iletisim"
+    );
+    expect(contact?.images).toBeUndefined();
   });
 
   it("gives the brand-named sixth project the same slug in both locales", async () => {
@@ -229,10 +263,15 @@ describe("sitemap serialisation", () => {
     }
   });
 
-  it("gives every entry an x-default alternate", async () => {
+  it("gives every page entry an x-default alternate", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
 
     for (const entry of sitemap()) {
+      // A PDF is one document in one language; it has no alternates.
+      if (entry.url.endsWith(".pdf")) {
+        expect(entry.alternates, entry.url).toBeUndefined();
+        continue;
+      }
       const languages = entry.alternates?.languages;
       expect(languages, entry.url).toBeDefined();
       expect(languages?.["x-default"], entry.url).toBeTruthy();

@@ -26,9 +26,9 @@ import {
 } from "@/content/profile";
 import { routing } from "@/i18n/routing";
 import { UMAMI_EVENT, umamiEvent } from "@/lib/analytics-events";
-import { hasCv } from "@/lib/cv";
+import { availableCvLocales } from "@/lib/cv";
 import { profileImagePath } from "@/lib/profile-image";
-import { CV_PATH } from "@/lib/site";
+import { CV_PATHS } from "@/lib/site";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { resolveLocale } from "@/lib/route-params";
 
@@ -65,7 +65,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
   const roles = experience[locale];
   const communityRoles = community[locale];
   const schools = education[locale];
-  const showCv = hasCv();
+  const cvLocales = availableCvLocales(locale);
   const profileImageSrc = profileImagePath();
 
   return (
@@ -112,17 +112,36 @@ export default async function AboutPage({ params }: AboutPageProps) {
         </div>
       </div>
 
-      {showCv ? (
-        <Button asChild size="sm">
-          <a
-            href={CV_PATH}
-            download
-            {...umamiEvent(UMAMI_EVENT.cvDownload, { locale })}
-          >
-            <Download className="size-4" />
-            {t("downloadCv")}
-          </a>
-        </Button>
+      {cvLocales.length > 0 ? (
+        // One button per edition, the page's own language first as the
+        // primary action and the other as an outline beside it. hrefLang and
+        // type tell a crawler what sits behind each link, so the two PDFs
+        // land in the index as a Turkish and an English document rather than
+        // as duplicates of one another.
+        <div className="flex flex-wrap gap-3">
+          {cvLocales.map((cvLocale, index) => (
+            <Button
+              key={cvLocale}
+              asChild
+              size="sm"
+              variant={index === 0 ? "default" : "outline"}
+            >
+              <a
+                href={CV_PATHS[cvLocale]}
+                hrefLang={cvLocale}
+                type="application/pdf"
+                download
+                {...umamiEvent(UMAMI_EVENT.cvDownload, {
+                  locale,
+                  cv: cvLocale,
+                })}
+              >
+                <Download className="size-4" />
+                {t(cvLocale === "tr" ? "downloadCvTr" : "downloadCvEn")}
+              </a>
+            </Button>
+          ))}
+        </div>
       ) : null}
 
       <section
