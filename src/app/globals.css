@@ -293,8 +293,11 @@
     }
   }
 
+  /* Decorative, aria-hidden, but axe still measures it: /30 sat at 1.5:1 on
+     the light ground. /75 gives 3.2:1 light and 4.4:1 dark, the 3:1 large
+     text floor with a margin, while staying clearly quieter than body copy. */
   .content-index {
-    @apply pt-1 font-mono text-2xl font-medium tabular-nums leading-none text-muted-foreground/30 sm:text-3xl;
+    @apply pt-1 font-mono text-2xl font-medium tabular-nums leading-none text-muted-foreground/75 sm:text-3xl;
   }
 
   .tag-pill {

@@ -224,18 +224,22 @@ describe("sitemap", () => {
 
     const portrait = "https://dogancanyildiz.com/images/profile.webp";
     for (const url of [
-      "https://dogancanyildiz.com/",
-      "https://dogancanyildiz.com/en",
       "https://dogancanyildiz.com/hakkimda",
       "https://dogancanyildiz.com/en/about",
     ]) {
       const entry = entries.find((item) => item.url === url);
       expect(entry?.images, url).toEqual([portrait]);
     }
-    const contact = entries.find(
-      (item) => item.url === "https://dogancanyildiz.com/iletisim"
-    );
-    expect(contact?.images).toBeUndefined();
+    // The home page dropped the photo (2026-09-08), so it carries no image
+    // row either; a listed image a page does not show is a mismatch.
+    for (const url of [
+      "https://dogancanyildiz.com/",
+      "https://dogancanyildiz.com/en",
+      "https://dogancanyildiz.com/iletisim",
+    ]) {
+      const entry = entries.find((item) => item.url === url);
+      expect(entry?.images, url).toBeUndefined();
+    }
   });
 
   it("gives the brand-named sixth project the same slug in both locales", async () => {

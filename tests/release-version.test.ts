@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   bumpVersion,
   decideBump,
+  escapeRegExp,
   formatCommitLine,
   groupCommits,
   insertChangelogEntry,
@@ -276,6 +277,16 @@ describe("insertChangelogEntry", () => {
         tag: "v0.2.0",
       })
     ).toThrow(/Unreleased/);
+  });
+});
+
+describe("escapeRegExp", () => {
+  it("escapes every regex metacharacter, not only the dot", () => {
+    expect(escapeRegExp("1.2.3")).toBe("1\\.2\\.3");
+    expect(
+      new RegExp(`^${escapeRegExp("a+b(c)[d]\\e")}$`).test("a+b(c)[d]\\e")
+    ).toBe(true);
+    expect(new RegExp(`^${escapeRegExp("1.2.3")}$`).test("1x2y3")).toBe(false);
   });
 });
 

@@ -7,7 +7,7 @@ import { SkillCategoryList } from "@/components/sections/skill-group-grid";
 import { AboutSubnav } from "@/components/sections/about-subnav";
 import { CertificateList } from "@/components/sections/certificate-list";
 import { TestimonialsBand } from "@/components/sections/testimonials-band";
-import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { ProfilePortrait } from "@/components/ui/profile-portrait";
 import {
   ContentEntryBody,
   ContentEntryIndex,
@@ -76,17 +76,26 @@ export default async function AboutPage({ params }: AboutPageProps) {
           hidden string. */}
       <PersonJsonLd locale={locale} description={t("lead")} />
       <Breadcrumb locale={locale} items={[{ name: t("title") }]} />
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+      {/* Title and lead on the left, the portrait on the right from sm up; on
+          a phone the portrait comes first so the page opens on the person,
+          then the name. The photo lives only here, not on the home page
+          (owner's call, 2026-09-08): the first screen belongs to the offer. */}
+      <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
+        <PageHeader
+          as="h1"
+          title={t("title")}
+          description={t("lead")}
+          className="min-w-0 flex-1"
+        />
         {profileImageSrc ? (
-          <ProfileAvatar
+          <ProfilePortrait
             src={profileImageSrc}
             // Describes the person in the photo, not the page. "About" told a
             // screen reader nothing the heading beside it had not said.
             alt={t("profileImageAlt")}
-            sizeClass="size-24 sm:size-28"
+            className="order-first sm:order-none"
           />
         ) : null}
-        <PageHeader as="h1" title={t("title")} description={t("lead")} />
       </div>
 
       <AboutSubnav locale={locale} />
