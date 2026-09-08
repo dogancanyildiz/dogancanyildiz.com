@@ -110,6 +110,10 @@ export async function ProjectList({
                   >
                     <ExternalLink className="size-3" aria-hidden="true" />
                     {t("viewLive")}
+                    {/* Every card carries the same two labels, so without
+                        the project name a screen reader's link list reads
+                        "Live site, Live site, Live site". */}
+                    <span className="sr-only">, {project.title}</span>
                     <NewTabHint text={newTabHint} />
                   </a>
                 ) : null}
@@ -122,6 +126,7 @@ export async function ProjectList({
                   >
                     <GithubIcon className="size-3" aria-hidden="true" />
                     {t("viewSource")}
+                    <span className="sr-only">, {project.title}</span>
                     <NewTabHint text={newTabHint} />
                   </a>
                 ) : null}

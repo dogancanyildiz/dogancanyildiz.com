@@ -3,11 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { DisplayHeading } from "@/components/ui/display-heading";
-import { ProfileAvatar } from "@/components/ui/profile-avatar";
-
-interface HeroProps {
-  profileImageSrc?: string | null;
-}
 
 /**
  * Server rendered on purpose. The hero holds the LCP element, so it must never
@@ -20,7 +15,7 @@ interface HeroProps {
  * it read as a job application, and the first screen belongs to a visitor who
  * came to have work done.
  */
-export async function Hero({ profileImageSrc }: HeroProps) {
+export async function Hero() {
   const t = await getTranslations();
 
   // Both metrics resolve on the About page: the years come from the work
@@ -56,24 +51,13 @@ export async function Hero({ profileImageSrc }: HeroProps) {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-start gap-4">
-              {profileImageSrc ? (
-                <ProfileAvatar
-                  src={profileImageSrc}
-                  alt={t("brand.name")}
-                  sizeClass="size-14 sm:size-16"
-                />
-              ) : null}
-              <div className="min-w-0 space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {t("brand.name")} · {t("brand.role")}
-                </p>
-                <DisplayHeading as="h1" size="hero" className="text-balance">
-                  {t("hero.tagline")}
-                </DisplayHeading>
-                <p className="max-w-2xl section-copy">{t("hero.intro")}</p>
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              {t("brand.name")} · {t("brand.role")}
+            </p>
+            <DisplayHeading as="h1" size="hero" className="text-balance">
+              {t("hero.tagline")}
+            </DisplayHeading>
+            <p className="max-w-2xl section-copy">{t("hero.intro")}</p>
           </div>
 
           <div className="metric-strip">

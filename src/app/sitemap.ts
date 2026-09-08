@@ -33,11 +33,12 @@ const STATIC_PAGES: Array<{
 ];
 
 /**
- * Pages that show the profile photo. Listing the image under them is what
- * puts the photo in image search with these pages as its landing pages; the
+ * Pages that show the profile photo, the About page only since the home
+ * page dropped it (2026-09-08). Listing the image under the page is what
+ * puts the photo in image search with that page as its landing page; the
  * Person node already names the same file as `image`.
  */
-const PAGES_WITH_PORTRAIT = new Set(["/", "/about"]);
+const PAGES_WITH_PORTRAIT = new Set(["/about"]);
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];

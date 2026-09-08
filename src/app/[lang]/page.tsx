@@ -17,7 +17,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Link } from "@/i18n/navigation";
 import { skills } from "@/content/profile";
 import { featuredSkillGroups } from "@/lib/skills";
-import { profileImagePath } from "@/lib/profile-image";
 import {
   getHomeProjects,
   getPosts,
@@ -72,7 +71,7 @@ export default async function HomePage({
         name={tMeta("siteName")}
         description={tMeta("defaultDescription")}
       />
-      <Hero profileImageSrc={profileImagePath()} />
+      <Hero />
       <PageSection innerClassName="space-y-12">
         <div className="space-y-8">
           <PageHeader
