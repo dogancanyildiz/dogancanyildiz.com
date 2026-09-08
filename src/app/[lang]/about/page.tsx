@@ -13,6 +13,7 @@ import {
   ContentEntryIndex,
 } from "@/components/ui/content-entry";
 import { PageHeader } from "@/components/ui/page-header";
+import { ProfileLinks } from "@/components/sections/profile-links";
 import { PageSection } from "@/components/layout/page-section";
 import { ContactCta } from "@/components/sections/contact-cta";
 import { PersonJsonLd } from "@/components/seo/person-jsonld";
@@ -60,7 +61,11 @@ export default async function AboutPage({ params }: AboutPageProps) {
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
 
-  const t = await getTranslations({ locale, namespace: "about" });
+  const [t, tA11y] = await Promise.all([
+    getTranslations({ locale, namespace: "about" }),
+    getTranslations({ locale, namespace: "a11y" }),
+  ]);
+  const newTabHint = tA11y("opensInNewTab");
   const talks = speaking[locale];
   const roles = experience[locale];
   const communityRoles = community[locale];
@@ -81,12 +86,44 @@ export default async function AboutPage({ params }: AboutPageProps) {
           then the name. The photo lives only here, not on the home page
           (owner's call, 2026-09-08): the first screen belongs to the offer. */}
       <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
-        <PageHeader
-          as="h1"
-          title={t("title")}
-          description={t("lead")}
-          className="min-w-0 flex-1"
-        />
+        {/* Title, lead, the profile list and the CV buttons fill the column
+            beside the portrait; before 2026-09-08 the CV sat further down
+            and the space under the lead stood empty. */}
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
+          <PageHeader as="h1" title={t("title")} description={t("lead")} />
+          <ProfileLinks label={t("profilesLabel")} newTabHint={newTabHint} />
+          {cvLocales.length > 0 ? (
+            // One button per edition, the page's own language first as the
+            // primary action and the other as an outline beside it. hrefLang and
+            // type tell a crawler what sits behind each link, so the two PDFs
+            // land in the index as a Turkish and an English document rather than
+            // as duplicates of one another.
+            <div className="flex flex-wrap gap-3">
+              {cvLocales.map((cvLocale, index) => (
+                <Button
+                  key={cvLocale}
+                  asChild
+                  size="sm"
+                  variant={index === 0 ? "default" : "outline"}
+                >
+                  <a
+                    href={CV_PATHS[cvLocale]}
+                    hrefLang={cvLocale}
+                    type="application/pdf"
+                    download
+                    {...umamiEvent(UMAMI_EVENT.cvDownload, {
+                      locale,
+                      cv: cvLocale,
+                    })}
+                  >
+                    <Download className="size-4" />
+                    {t(cvLocale === "tr" ? "downloadCvTr" : "downloadCvEn")}
+                  </a>
+                </Button>
+              ))}
+            </div>
+          ) : null}
+        </div>
         {profileImageSrc ? (
           <ProfilePortrait
             src={profileImageSrc}
@@ -120,38 +157,6 @@ export default async function AboutPage({ params }: AboutPageProps) {
           </p>
         </div>
       </div>
-
-      {cvLocales.length > 0 ? (
-        // One button per edition, the page's own language first as the
-        // primary action and the other as an outline beside it. hrefLang and
-        // type tell a crawler what sits behind each link, so the two PDFs
-        // land in the index as a Turkish and an English document rather than
-        // as duplicates of one another.
-        <div className="flex flex-wrap gap-3">
-          {cvLocales.map((cvLocale, index) => (
-            <Button
-              key={cvLocale}
-              asChild
-              size="sm"
-              variant={index === 0 ? "default" : "outline"}
-            >
-              <a
-                href={CV_PATHS[cvLocale]}
-                hrefLang={cvLocale}
-                type="application/pdf"
-                download
-                {...umamiEvent(UMAMI_EVENT.cvDownload, {
-                  locale,
-                  cv: cvLocale,
-                })}
-              >
-                <Download className="size-4" />
-                {t(cvLocale === "tr" ? "downloadCvTr" : "downloadCvEn")}
-              </a>
-            </Button>
-          ))}
-        </div>
-      ) : null}
 
       <section
         id="about-skills"

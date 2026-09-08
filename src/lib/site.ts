@@ -19,6 +19,49 @@ export const SOCIAL = {
   linkedin: findSocial("linkedin.com"),
 };
 
+export type SocialProfileId =
+  "github" | "linkedin" | "x" | "instagram" | "threads" | "youtube" | "tiktok";
+
+export interface SocialProfile {
+  id: SocialProfileId;
+  /** Brand name as the network writes it; never translated. */
+  label: string;
+  url: string;
+}
+
+/**
+ * The networks the About page lists, in display order. Each row is matched
+ * against sameAs by host, so a profile appears the moment its url is added
+ * to site-config.ts and disappears when it is removed: the visible list and
+ * the Person node's sameAs cannot disagree. Credly stays in sameAs (it is an
+ * identity url for the credential graph) but is not a social profile, so it
+ * has no row here.
+ */
+const PROFILE_HOSTS: ReadonlyArray<{
+  id: SocialProfileId;
+  label: string;
+  host: string;
+}> = [
+  { id: "github", label: "GitHub", host: "github.com" },
+  { id: "linkedin", label: "LinkedIn", host: "linkedin.com" },
+  { id: "x", label: "X", host: "x.com" },
+  { id: "instagram", label: "Instagram", host: "instagram.com" },
+  { id: "threads", label: "Threads", host: "threads.com" },
+  { id: "youtube", label: "YouTube", host: "youtube.com" },
+  { id: "tiktok", label: "TikTok", host: "tiktok.com" },
+];
+
+function hostOf(url: string): string {
+  return new URL(url).hostname.replace(/^www\./, "");
+}
+
+export const SOCIAL_PROFILES: readonly SocialProfile[] = PROFILE_HOSTS.flatMap(
+  ({ id, label, host }) => {
+    const url = siteConfig.person.sameAs.find((u) => hostOf(u) === host);
+    return url ? [{ id, label, url }] : [];
+  }
+);
+
 export const CONTACT_EMAIL_PUBLIC = "me@dogancanyildiz.com";
 
 /**
