@@ -20,35 +20,69 @@ export const SOCIAL = {
 };
 
 export type SocialProfileId =
-  "github" | "linkedin" | "x" | "instagram" | "threads" | "youtube" | "tiktok";
+  | "linkedin"
+  | "github"
+  | "medium"
+  | "youtube"
+  | "x"
+  | "instagram"
+  | "threads"
+  | "tiktok";
+
+/**
+ * Three groups, in the order the About page shows them: where the work is
+ * (professional), where it is written up and talked through (content), and
+ * where the day-to-day lives (social). Labels are translated in messages
+ * under about.profileGroup*.
+ */
+export type SocialProfileGroup = "professional" | "content" | "social";
 
 export interface SocialProfile {
   id: SocialProfileId;
   /** Brand name as the network writes it; never translated. */
   label: string;
   url: string;
+  group: SocialProfileGroup;
 }
 
 /**
- * The networks the About page lists, in display order. Each row is matched
- * against sameAs by host, so a profile appears the moment its url is added
- * to site-config.ts and disappears when it is removed: the visible list and
- * the Person node's sameAs cannot disagree. Credly stays in sameAs (it is an
- * identity url for the credential graph) but is not a social profile, so it
- * has no row here.
+ * The networks the About page lists, in display order (owner's order,
+ * 2026-09-08). Each row is matched against sameAs by host, so a profile
+ * appears the moment its url is added to site-config.ts and disappears when
+ * it is removed: the visible list and the Person node's sameAs cannot
+ * disagree. Credly stays in sameAs (it is an identity url for the credential
+ * graph) but is not a profile to follow, so it has no row here.
  */
 const PROFILE_HOSTS: ReadonlyArray<{
   id: SocialProfileId;
   label: string;
   host: string;
+  group: SocialProfileGroup;
 }> = [
-  { id: "github", label: "GitHub", host: "github.com" },
-  { id: "linkedin", label: "LinkedIn", host: "linkedin.com" },
-  { id: "x", label: "X", host: "x.com" },
-  { id: "instagram", label: "Instagram", host: "instagram.com" },
-  { id: "threads", label: "Threads", host: "threads.com" },
-  { id: "youtube", label: "YouTube", host: "youtube.com" },
-  { id: "tiktok", label: "TikTok", host: "tiktok.com" },
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    host: "linkedin.com",
+    group: "professional",
+  },
+  { id: "github", label: "GitHub", host: "github.com", group: "professional" },
+  { id: "medium", label: "Medium", host: "medium.com", group: "content" },
+  { id: "youtube", label: "YouTube", host: "youtube.com", group: "content" },
+  { id: "x", label: "X", host: "x.com", group: "social" },
+  {
+    id: "instagram",
+    label: "Instagram",
+    host: "instagram.com",
+    group: "social",
+  },
+  { id: "threads", label: "Threads", host: "threads.com", group: "social" },
+  { id: "tiktok", label: "TikTok", host: "tiktok.com", group: "social" },
+];
+
+export const SOCIAL_PROFILE_GROUPS: readonly SocialProfileGroup[] = [
+  "professional",
+  "content",
+  "social",
 ];
 
 function hostOf(url: string): string {
@@ -56,9 +90,9 @@ function hostOf(url: string): string {
 }
 
 export const SOCIAL_PROFILES: readonly SocialProfile[] = PROFILE_HOSTS.flatMap(
-  ({ id, label, host }) => {
+  ({ id, label, host, group }) => {
     const url = siteConfig.person.sameAs.find((u) => hostOf(u) === host);
-    return url ? [{ id, label, url }] : [];
+    return url ? [{ id, label, url, group }] : [];
   }
 );
 
