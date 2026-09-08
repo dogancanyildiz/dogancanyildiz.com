@@ -244,6 +244,12 @@ const OG_IMAGE_SOURCES = [
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  images: {
+    // Next 16 allowlists image qualities (default [75]) and coerces any
+    // other value to the closest entry. 90 is for the About portrait; a
+    // face shows compression long before a card cover does.
+    qualities: [75, 90],
+  },
   experimental: {
     // Lets src/app/global-not-found.tsx handle requests that never reach the
     // [lang] segment. Without it those 404s render with no layout at all: no
