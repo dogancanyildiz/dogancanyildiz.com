@@ -78,7 +78,11 @@ export function MobileMenu() {
             })}
           </ul>
           <div className="mt-4 border-t border-border pt-3">
+            {/* Every profile here, not only the two header marks: the sheet
+                has a full row to spend and it is the phone's only reach to
+                the About page profile list without a scroll. */}
             <SocialLinks
+              profiles="all"
               githubLabel={t("footer.github")}
               linkedinLabel={t("footer.linkedin")}
               newTabHint={t("a11y.opensInNewTab")}

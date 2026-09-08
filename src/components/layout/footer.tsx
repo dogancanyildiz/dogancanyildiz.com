@@ -5,13 +5,14 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { navItems } from "@/lib/nav";
 import { localePath } from "@/lib/seo/alternates";
-import {
-  GithubIcon,
-  LinkedinIcon,
-  WhatsAppIcon,
-} from "@/components/ui/brand-icon";
+import { WhatsAppIcon } from "@/components/ui/brand-icon";
 import { NewTabHint } from "@/components/ui/new-tab-hint";
-import { CONTACT_EMAIL_PUBLIC, SOCIAL, whatsappHref } from "@/lib/site";
+import { PROFILE_ICONS } from "@/components/layout/social-links";
+import {
+  CONTACT_EMAIL_PUBLIC,
+  SOCIAL_PROFILES,
+  whatsappHref,
+} from "@/lib/site";
 import { UMAMI_EVENT, outboundEvent, umamiEvent } from "@/lib/analytics-events";
 
 // .tap-target, not the bare 24px floor SC 2.5.8 asks for: these are
@@ -37,7 +38,7 @@ export async function Footer() {
 
   return (
     <footer className="mt-auto border-t border-border">
-      <div className="page-shell grid gap-10 py-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
+      <div className="page-shell grid gap-10 py-10 lg:grid-cols-[1.1fr_1.6fr] lg:gap-16">
         <div className="space-y-3">
           {/* Same lockup as the header, cursor steady: two blinking cursors
               on one screen (sticky header plus footer) would be noise. */}
@@ -68,7 +69,7 @@ export async function Footer() {
           </div>
         </div>
 
-        <div className="grid min-w-0 gap-8 sm:grid-cols-2">
+        <div className="grid min-w-0 gap-8 sm:grid-cols-3">
           <nav aria-label={t("footer.navTitle")} className="min-w-0 space-y-2">
             <p className="meta-label">{t("footer.navTitle")}</p>
             <ul className="flex flex-col">
@@ -88,17 +89,18 @@ export async function Footer() {
           </nav>
 
           <div className="min-w-0 space-y-2">
-            <p className="meta-label">{t("footer.emailLabel")}</p>
-            <a
-              href={`mailto:${CONTACT_EMAIL_PUBLIC}`}
-              className="tap-target inline-flex min-w-0 items-center gap-2 break-all text-sm text-foreground transition-colors hover:text-primary"
-              {...outboundEvent(`mailto:${CONTACT_EMAIL_PUBLIC}`)}
-            >
-              <Mail className="size-4 shrink-0" aria-hidden="true" />
-              <span className="min-w-0">{CONTACT_EMAIL_PUBLIC}</span>
-            </a>
-            <p className="meta-label pt-3">{t("footer.elsewhereLabel")}</p>
+            <p className="meta-label">{t("footer.contactLabel")}</p>
             <ul className="flex flex-col">
+              <li>
+                <a
+                  href={`mailto:${CONTACT_EMAIL_PUBLIC}`}
+                  className="tap-target inline-flex min-w-0 items-center gap-2 break-all text-sm text-foreground transition-colors hover:text-primary"
+                  {...outboundEvent(`mailto:${CONTACT_EMAIL_PUBLIC}`)}
+                >
+                  <Mail className="size-4 shrink-0" aria-hidden="true" />
+                  <span className="min-w-0">{CONTACT_EMAIL_PUBLIC}</span>
+                </a>
+              </li>
               <li>
                 <a
                   href={whatsappHref(tContact("whatsappPrefill"))}
@@ -115,32 +117,6 @@ export async function Footer() {
                 </a>
               </li>
               <li>
-                <a
-                  href={SOCIAL.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={footerTextLinkClass}
-                  {...outboundEvent(SOCIAL.github)}
-                >
-                  <GithubIcon className="size-4 shrink-0" />
-                  {t("footer.github")}
-                  <NewTabHint text={t("a11y.opensInNewTab")} />
-                </a>
-              </li>
-              <li>
-                <a
-                  href={SOCIAL.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={footerTextLinkClass}
-                  {...outboundEvent(SOCIAL.linkedin)}
-                >
-                  <LinkedinIcon className="size-4 shrink-0" />
-                  {t("footer.linkedin")}
-                  <NewTabHint text={t("a11y.opensInNewTab")} />
-                </a>
-              </li>
-              <li>
                 <a href={feedHref} className={footerTextLinkClass}>
                   <Rss className="size-4 shrink-0" aria-hidden="true" />
                   {t("footer.rss")}
@@ -148,6 +124,37 @@ export async function Footer() {
               </li>
             </ul>
           </div>
+
+          {/* The same list the About page groups, flat here: a footer column
+              is a directory, not a pitch. Derived from SOCIAL_PROFILES so it
+              cannot drift from the Person node's sameAs; rel="me" marks each
+              as this person's own profile for crawlers that read it. */}
+          <nav
+            aria-label={t("footer.profilesLabel")}
+            className="min-w-0 space-y-2"
+          >
+            <p className="meta-label">{t("footer.profilesLabel")}</p>
+            <ul className="flex flex-col">
+              {SOCIAL_PROFILES.map((profile) => {
+                const Icon = PROFILE_ICONS[profile.id];
+                return (
+                  <li key={profile.id}>
+                    <a
+                      href={profile.url}
+                      target="_blank"
+                      rel="me noopener noreferrer"
+                      className={footerTextLinkClass}
+                      {...outboundEvent(profile.url)}
+                    >
+                      <Icon className="size-4 shrink-0" />
+                      {profile.label}
+                      <NewTabHint text={t("a11y.opensInNewTab")} />
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
         </div>
       </div>
     </footer>
