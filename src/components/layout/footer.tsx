@@ -1,7 +1,7 @@
 import { buildInfo, formatBuildSha } from "@/lib/build-info";
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { Mail, Rss } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { navItems } from "@/lib/nav";
 import { localePath } from "@/lib/seo/alternates";
@@ -22,16 +22,39 @@ import { UMAMI_EVENT, outboundEvent, umamiEvent } from "@/lib/analytics-events";
 const footerTextLinkClass =
   "tap-target inline-flex items-center gap-2 text-sm text-muted-foreground no-underline transition-colors hover:text-foreground";
 
+/** "" stays "", a valid instant is formatted, anything else is returned as is. */
+export function formatBuildDate(
+  raw: string,
+  render: (value: Date) => string
+): string {
+  if (!raw) return "";
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? raw : render(parsed);
+}
+
 export async function Footer() {
   const year = buildInfo.year;
-  const [t, tBrand, tContact, locale] = await Promise.all([
+  const [t, tBrand, tContact, locale, format] = await Promise.all([
     getTranslations(),
     getTranslations("brand"),
     getTranslations("contact"),
     getLocale(),
+    getFormatter(),
   ]);
   const buildSha = formatBuildSha(buildInfo.sha);
-  const buildDate = buildInfo.date;
+  // The build stamp is a UTC instant ("2026-09-05T16:59:07Z"). Printed as a
+  // date in Istanbul time, the way the Systems panel does, so the footer
+  // reads "5 Eylül 2026" rather than the raw ISO string. A stamp that does
+  // not parse (a hand set value) falls back to the raw text instead of
+  // printing "Invalid Date".
+  const buildDate = formatBuildDate(buildInfo.date, (value) =>
+    format.dateTime(value, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "Europe/Istanbul",
+    })
+  );
   // feed.xml is a route handler, so it is not a next-intl Link target;
   // localePath still applies the as-needed prefix from the routing config.
   const feedHref = localePath(locale, "/feed.xml");
@@ -69,7 +92,11 @@ export async function Footer() {
           </div>
         </div>
 
-        <div className="grid min-w-0 gap-8 sm:grid-cols-3">
+        {/* Phone: pages and profiles side by side (seven and eight rows,
+            about even), contact on its own full width row so the email
+            never breaks mid-word in a half column. From sm up the three
+            columns sit in reading order: pages, contact, profiles. */}
+        <div className="grid min-w-0 grid-cols-2 gap-8 sm:grid-cols-3">
           <nav aria-label={t("footer.navTitle")} className="min-w-0 space-y-2">
             <p className="meta-label">{t("footer.navTitle")}</p>
             <ul className="flex flex-col">
@@ -88,7 +115,7 @@ export async function Footer() {
             </ul>
           </nav>
 
-          <div className="min-w-0 space-y-2">
+          <div className="order-last col-span-2 min-w-0 space-y-2 sm:order-none sm:col-span-1">
             <p className="meta-label">{t("footer.contactLabel")}</p>
             <ul className="flex flex-col">
               <li>
