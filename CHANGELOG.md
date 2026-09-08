@@ -10,6 +10,35 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-09-08
+
+### Features
+
+- `f6054fe` **layout**: footer'da tüm profiller, mobil menüde tam ikon satırı, rel="me" (#104)
+- `b284d90` **about**: profiller üç grupta, Medium, YouTube ve TikTok eklendi (#103)
+- `16a98ba` **about**: profil bağlantıları ve CV düğmeleri portrenin yanına (#101)
+- `89cc0bd` **about**: büyük portre, ana sayfadan fotoğraf kaldırıldı (#97)
+- `b4e3c8e` **about**: iki dilde CV, profil fotoğrafı ve arama motoru görünürlüğü (#92)
+
+### Fixes
+
+- `2363c23` **footer**: telefonda iki sütunlu düzen, yayın tarihi İstanbul saatiyle (#105)
+- `0c1eb50` **test**: CodeQL, Credly denetimi alt dize yerine hostname ile (#102)
+- `e6ba3cf` **a11y**: PageSpeed bulguları, sıra numarası kontrastı ve aynı metinli bağlantılar (#98)
+- `3bff958` **release**: CodeQL uyarıları, regex kaçışı ve dosya okuma yarışı (#96)
+
+### Other
+
+- `e985722` **deps**: bump nodemailer from 9.1.1 to 10.0.0 (#95)
+- `b26c77b` **deps**: bump the npm-minor-patch group with 2 updates (#94)
+- `5528892` .cursor ayarları makineler arasında izlensin (#100)
+- `5fe2870` bulut ajanı için CLAUDE.md ve AGENTS.md izlensin, gitignore sadeleşti (#99)
+- `f4985e7` **deps-dev**: vitest ve @vitest/coverage-v8 5.0.0, Dependabot vitest grubu (#93)
+- `1e1cdf3` **deps**: bump the npm-minor-patch group with 3 updates (#89)
+- `e7637d3` **release**: sync version v0.12.0 (#88)
+
+**Tam değişiklik listesi**: [v0.12.0...v0.13.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.12.0...v0.13.0)
+
 ## [0.12.0] - 2026-09-05
 
 ### Features
@@ -258,7 +287,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.9.1...v0.10.0
