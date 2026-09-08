@@ -35,8 +35,9 @@ konacağına ve hangi formatta konacağına karar veriyor.
    İngilizce CEFR kırılımı (B1/A2) siteden çıkarıldı; İngilizce dokümantasyon,
    repo ve blog yazılarının kendisi zaten kanıt ve seviye ilan etmek öz-elemeyi
    artırıyor.
-8. **CV.** Gerçek PDF `public/cv/dogancanyildiz-cv.pdf` yolunda; dosya varken
-   indirme düğmesi görünüyor, yokken hiç render edilmiyor (`src/lib/cv.ts`).
+8. **CV.** İki PDF: `public/cv/dogancanyildiz-cv-tr.pdf` ve
+   `dogancanyildiz-cv-en.pdf`. /hakkimda'da sayfanın dili birincil düğme,
+   diğeri yanında; dosyası olmayan dil hiç render edilmiyor (`src/lib/cv.ts`).
 
 ## Gerekçe
 

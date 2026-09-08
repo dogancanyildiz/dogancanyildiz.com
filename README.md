@@ -125,7 +125,8 @@ katmanlarına ve derleme loglarına sızdırır.
   payload'ını inline script ile stream eder; nonce her rotayı dinamik
   üretime iter. İhlaller `/api/csp-report`'a gider; sıkı report-only politika
   derleme zamanında `CSP_REPORT_ONLY=1` ile ölçüm penceresi için yayınlanabilir.
-- `/cv/*` `X-Robots-Tag: noindex, nofollow` ve bir günlük cache ile sunulur,
+- `/cv/*` bir günlük cache ile sunulur ve dizine açıktır (iki dilde PDF,
+  sitemap'te listeli; eski `/cv/dogancanyildiz-cv.pdf` yolu İngilizce dosyaya 308),
   `/fonts/*` bir günlük cache (`immutable` yok, dosya adları hash'li değil).
 - `poweredByHeader` kapalı.
 - `images.remotePatterns` bilinçli olarak tanımsız. Tanımsız bırakmak

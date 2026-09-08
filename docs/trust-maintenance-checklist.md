@@ -37,14 +37,15 @@ merge kapısı değil); geri kalanı elle.
       Person şeması `image` kendiliğinden dolar.
 - [ ] Proje kapakları `content/images/<slug>-cover.png`, MDX ön maddesinde
       `cover:` ve `coverAlt:`.
-- [ ] Yeni CV aynı yola gider; yüklemeden sonra Cloudflare'da `/cv/*`
-      önbelleğini temizle (dosya bir günlük cache ile sunulur, adı
-      sürümlenmez).
+- [ ] Yeni CV aynı yollara gider (`public/cv/dogancanyildiz-cv-tr.pdf`,
+      `-en.pdf`); PDF üst verisini (Title, Author, Lang) koru, yüklemeden
+      sonra Cloudflare'da `/cv/*` önbelleğini temizle (dosya bir günlük cache
+      ile sunulur, adı sürümlenmez).
 - [ ] `src/content/profile.ts` içinde konuşma kayıtları (`speaking.en` /
       `speaking.tr`).
 - [ ] Referanslar onaylandıktan sonra `src/content/testimonials.ts`.
-- [ ] `public/cv/dogancanyildiz-cv.pdf` (dosya varken indirme düğmesi
-      görünür).
+- [x] `public/cv/dogancanyildiz-cv-tr.pdf` ve `-en.pdf` (2026-09-08; dosyası
+      olan dilin indirme düğmesi görünür).
 
 ## Search Console (Person şeması güncellemelerinden sonra)
 
