@@ -14,7 +14,7 @@
 //   node scripts/release-version.mjs --write-changelog --version 0.2.0 \
 //     --notes-in notes.md --previous-tag v0.1.0            # reuse rendered notes
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -23,6 +23,16 @@ const changelogPath = resolve(repoRoot, "CHANGELOG.md");
 const packageJsonPath = resolve(repoRoot, "package.json");
 
 const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+
+/**
+ * Escapes every regex metacharacter, not only the dot. A version string here
+ * has already passed SEMVER, so the dot was the only one that could occur;
+ * escaping the full set costs nothing and keeps the helper correct if it is
+ * ever handed something looser (CodeQL js/incomplete-sanitization).
+ */
+export function escapeRegExp(text) {
+  return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 const SUBJECT = /^([a-zA-Z]+)(?:\(([^)]*)\))?(!)?:\s*(.+)$/;
 
 // Which commit types move which part of the version. Everything that is not
@@ -178,11 +188,7 @@ export function insertChangelogEntry(
   if (!unreleased) {
     throw new Error("CHANGELOG.md has no '## [Unreleased]' heading");
   }
-  if (
-    new RegExp(`^## \\[${version.replace(/\./g, "\\.")}\\]`, "m").test(
-      changelog
-    )
-  ) {
+  if (new RegExp(`^## \\[${escapeRegExp(version)}\\]`, "m").test(changelog)) {
     return changelog;
   }
   const headingEnd = unreleased.index + unreleased[0].length;
@@ -203,9 +209,7 @@ export function insertChangelogEntry(
       /^\[Unreleased\]:.*$/m,
       `[Unreleased]: ${repoUrl}/compare/${tag}...HEAD`
     );
-    if (
-      !new RegExp(`^\\[${version.replace(/\./g, "\\.")}\\]:`, "m").test(result)
-    ) {
+    if (!new RegExp(`^\\[${escapeRegExp(version)}\\]:`, "m").test(result)) {
       result = result.replace(
         /^\[Unreleased\]:.*$/m,
         (line) => `${line}\n[${version}]: ${url}`
@@ -470,10 +474,19 @@ function writeChangelog({
   repoUrl,
   notes,
 }) {
-  if (!existsSync(changelogPath)) {
-    throw new Error("CHANGELOG.md not found");
+  // Read first and map the missing-file error, instead of an existsSync
+  // check followed by the read: the two calls are not atomic and CodeQL
+  // flags the gap (js/file-system-race). The outcome for the caller is the
+  // same message either way.
+  let changelog;
+  try {
+    changelog = readFileSync(changelogPath, "utf8");
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      throw new Error("CHANGELOG.md not found");
+    }
+    throw error;
   }
-  const changelog = readFileSync(changelogPath, "utf8");
   const next = insertChangelogEntry(changelog, {
     version,
     date: options.date ?? today(),
