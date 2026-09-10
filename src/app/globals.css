@@ -232,6 +232,78 @@
     @apply rounded-2xl border border-border/60 bg-card/50;
   }
 
+  /* The typed terminal (src/components/sections/terminal-card.tsx). Same
+     ground as the ambient page grid, a ghost of the handle in the corner the
+     way the OG card has it, and the DCY mark with its blinking block. */
+  .terminal-card {
+    @apply relative overflow-hidden rounded-2xl border border-border/60 bg-card/50 p-6 sm:p-8;
+  }
+  .terminal-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, var(--ambient-grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--ambient-grid-line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 80%);
+    opacity: var(--ambient-grid-opacity);
+  }
+  .terminal-watermark {
+    @apply pointer-events-none absolute -bottom-3 left-4 font-sans text-[5.5rem] leading-none font-bold tracking-[-0.04em] whitespace-nowrap text-foreground/[0.04] select-none sm:text-[8rem];
+  }
+  /* Typed text: a clipped inline box that widens one character per step. */
+  .terminal-type {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+    width: 0;
+    animation-name: terminal-type;
+    animation-delay: var(--from);
+    animation-fill-mode: forwards;
+  }
+  /* The caret after a command: lit when its line starts typing, out when the
+     next line starts. The final one stays and blinks like the header mark. */
+  .terminal-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 1px;
+    vertical-align: text-bottom;
+    background: var(--primary);
+    opacity: 0;
+    animation:
+      terminal-on 0s var(--from) forwards,
+      terminal-off 0s var(--to) forwards;
+  }
+  .terminal-cursor-final {
+    animation:
+      terminal-on 0s var(--from) forwards,
+      brand-cursor 1.06s step-end var(--from) infinite;
+  }
+  .terminal-reveal {
+    opacity: 0;
+    animation: terminal-on 0.4s var(--from) forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-type {
+      width: var(--w);
+      animation: none;
+    }
+    .terminal-reveal {
+      opacity: 1;
+      animation: none;
+    }
+    .terminal-cursor {
+      animation: none;
+    }
+    .terminal-cursor-final {
+      opacity: 1;
+    }
+  }
+
   /* 0.75rem is the floor for uppercase mono that carries information: below
      it the wide tracking and the caps stop being readable at arm's length.
      The section level label (.eyebrow) sits one step above that floor so
@@ -543,6 +615,22 @@
   .content-entry:hover {
     outline: 2px solid Highlight;
     outline-offset: -2px;
+  }
+}
+
+@keyframes terminal-type {
+  to {
+    width: var(--w);
+  }
+}
+@keyframes terminal-on {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes terminal-off {
+  to {
+    opacity: 0;
   }
 }
 

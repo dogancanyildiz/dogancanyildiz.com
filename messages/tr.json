@@ -258,6 +258,9 @@
     "liveUnknown": "Bilinmiyor",
     "liveUptimeWindow": "son 24 saat",
     "liveChecks": "Son {count} kontrol",
+    "terminalWhoami": "dogancanyildiz · full stack · devops · Konya",
+    "terminalStack": "Next.js · Node.js · PostgreSQL · Docker · Coolify · Traefik · Cloudflare · Linux",
+    "terminalCurl": "HTTP/2 200 · server: cloudflare · origin: Coolify, kendi sunucum",
     "livePing": "{ping} ms"
   },
   "a11y": {

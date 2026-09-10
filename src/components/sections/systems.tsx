@@ -1,6 +1,7 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { LiveStatus } from "@/components/sections/live-status";
+import { TerminalCard } from "@/components/sections/terminal-card";
 import { NewTabHint } from "@/components/ui/new-tab-hint";
 import { buildInfo, commitUrl, formatBuildSha } from "@/lib/build-info";
 import { getLatestRelease, RELEASES_URL } from "@/lib/release-info";
@@ -112,6 +113,10 @@ export async function Systems() {
         title={t("title")}
         description={t("description")}
       />
+      {/* The typed terminal from the GitHub profile, above the live cells:
+          the same voice ("I run the box it lives on") a screen before the
+          numbers that prove it. */}
+      <TerminalCard />
       <div className="surface-panel space-y-6 p-6">
         <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <SystemsField label={t("deployLabel")}>
