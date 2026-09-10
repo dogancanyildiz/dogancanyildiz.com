@@ -258,6 +258,9 @@
     "liveUnknown": "Unknown",
     "liveUptimeWindow": "last 24 hours",
     "liveChecks": "Last {count} checks",
+    "terminalWhoami": "dogancanyildiz · full stack · devops · Konya, Türkiye",
+    "terminalStack": "Next.js · Node.js · PostgreSQL · Docker · Coolify · Traefik · Cloudflare · Linux",
+    "terminalCurl": "HTTP/2 200 · server: cloudflare · origin: Coolify on my own box",
     "livePing": "{ping} ms"
   },
   "a11y": {
