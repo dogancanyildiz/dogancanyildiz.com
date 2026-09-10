@@ -46,7 +46,7 @@ describe("trust signals", () => {
     expect(source).toContain("sameAs: [...siteConfig.person.sameAs]");
     expect(source).not.toContain("telephone");
     expect(source).not.toContain("WHATSAPP_NUMBER");
-    expect(source).not.toContain("905543828000");
+    expect(source).not.toContain("905318739400");
   });
 
   it("ships a live link audit script wired into automation", () => {
