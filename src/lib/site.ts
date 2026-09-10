@@ -103,7 +103,7 @@ export const CONTACT_EMAIL_PUBLIC = "me@dogancanyildiz.com";
  * Kept off Person JSON-LD on purpose: the chat link is a contact path, not a
  * public identity URL, and the digits stay out of the structured data.
  */
-export const WHATSAPP_NUMBER = "905543828000";
+export const WHATSAPP_NUMBER = "905318739400";
 
 export function whatsappHref(prefilledText: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(prefilledText)}`;
