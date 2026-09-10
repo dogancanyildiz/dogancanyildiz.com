@@ -10,6 +10,18 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-09-10
+
+### Features
+
+- `71b871b` **home**: Canlı altyapı bölümüne yazılan terminal kartı (#111)
+
+### Other
+
+- `a934ccf` **release**: sync version v0.13.1 (#110)
+
+**Tam değişiklik listesi**: [v0.13.1...v0.14.0](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.1...v0.14.0)
+
 ## [0.13.1] - 2026-09-10
 
 ### Fixes
@@ -299,7 +311,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.1...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.11.0...v0.12.0
