@@ -10,6 +10,18 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.13.1] - 2026-09-10
+
+### Fixes
+
+- `c0773cc` **contact**: WhatsApp numarasını güncelle (#108)
+
+### Other
+
+- `5454fee` **release**: sync version v0.13.0 (#107)
+
+**Tam değişiklik listesi**: [v0.13.0...v0.13.1](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.0...v0.13.1)
+
 ## [0.13.0] - 2026-09-08
 
 ### Features
@@ -287,7 +299,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.1...HEAD
+[0.13.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.10.0...v0.11.0
