@@ -10,6 +10,22 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-10-07
+
+### Fixes
+
+- `78847b8` **deps**: sharp ve source-map-js güvenlik güncellemeleri (#128)
+
+### Other
+
+- `e5eedb5` **deps-dev**: bump undici from 7.29.0 to 7.30.0 (#119)
+- `826d722` **deps**: bump node from `e67514e` to `50c8e8c` (#114)
+- `5d414c5` **deps**: bump the actions group across 1 directory with 4 updates (#118)
+- `d40e9f0` **deps**: bump the npm-minor-patch group across 1 directory with 20 updates (#121)
+- `e7523cd` **release**: sync version v0.14.0 (#113)
+
+**Tam değişiklik listesi**: [v0.14.0...v0.14.1](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.0...v0.14.1)
+
 ## [0.14.0] - 2026-09-10
 
 ### Features
@@ -311,7 +327,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.12.0...v0.13.0
