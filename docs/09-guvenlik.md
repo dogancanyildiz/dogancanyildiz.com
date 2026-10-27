@@ -35,7 +35,11 @@ strict-origin-when-cross-origin`, geniş `Permissions-Policy` (camera,
 microphone, geolocation, payment, usb, serial, midi, display-capture,
 browsing-topics, interest-cohort kapalı), `X-Frame-Options: DENY`,
 `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy:
-same-origin`, üretimde `Strict-Transport-Security`.
+same-origin`, üretimde `Strict-Transport-Security`. Tek istisna üç ikon
+dosyası (`/favicon.ico`, `/icon.png`, `/apple-icon.png`): bunlar
+`Cross-Origin-Resource-Policy: cross-origin` alıyor, çünkü Coolify gibi
+paneller favicon'u kendi origin'inden `<img>` ile yüklüyor ve same-origin
+CORP bunu engelleyip kartı varsayılan ikona düşürüyordu (2026-10-27).
 `tests/deploy/security-headers.test.ts` bu kümeyi kilitliyor.
 
 **CSP'de `'unsafe-inline'` kalıyor, gerekçesi kayda geçti.** App Router RSC

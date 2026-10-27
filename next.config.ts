@@ -175,6 +175,20 @@ const ONE_DAY_CACHE = {
 };
 
 /**
+ * The catch all sends Cross-Origin-Resource-Policy: same-origin, which also
+ * stops another site from showing our favicon in an <img>. Dashboards do
+ * exactly that: Coolify's resource card loads https://<fqdn>/favicon.ico from
+ * its own origin and falls back to a generic Dockerfile icon when the browser
+ * blocks it. The icons are public brand artwork with nothing to protect, so
+ * only these three paths opt back in to cross origin embedding; every other
+ * response keeps same-origin.
+ */
+const ICON_CORP = {
+  key: "Cross-Origin-Resource-Policy",
+  value: "cross-origin",
+};
+
+/**
  * Default cache policy for everything the app renders.
  *
  * Next gives a statically prerendered route `s-maxage=31536000` (one year) and
@@ -321,9 +335,9 @@ const nextConfig: NextConfig = {
       // hash is what busts the cache when the artwork does change, which is
       // why a one day max-age is safe here in a way it is not for /cv or
       // /fonts.
-      { source: "/favicon.ico", headers: [ONE_DAY_CACHE] },
-      { source: "/icon.png", headers: [ONE_DAY_CACHE] },
-      { source: "/apple-icon.png", headers: [ONE_DAY_CACHE] },
+      { source: "/favicon.ico", headers: [ONE_DAY_CACHE, ICON_CORP] },
+      { source: "/icon.png", headers: [ONE_DAY_CACHE, ICON_CORP] },
+      { source: "/apple-icon.png", headers: [ONE_DAY_CACHE, ICON_CORP] },
       { source: "/_next/static/:path*", headers: [IMMUTABLE_BUILD_OUTPUT] },
       ...OG_IMAGE_SOURCES.map((source) => ({
         source,

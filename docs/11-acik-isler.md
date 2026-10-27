@@ -1,6 +1,6 @@
 # Açık İşler
 
-Durum: Site 2026-09-03'te yayında; kapanmamış maddeler aşağıda · Güncelleme: 2026-09-03 · Kapsam: dogancanyildiz.com
+Durum: Site 2026-09-03'te yayında; kapanmamış maddeler aşağıda · Güncelleme: 2026-10-07 · Kapsam: dogancanyildiz.com
 
 Site sahibine sorulan 11 açık sorunun tamamı 2026-08-27'de cevaplandı ve
 cevaplar kararlara işlendi; soru listesi
@@ -146,6 +146,25 @@ yapılamıyordu, yayına çıktıktan sonra da sırası gelmedi.
 - **typescript 7 ve eslint 10 majorları Dependabot'ta ignore.**
   `eslint-plugin-react` eslint 10'u desteklemiyor (transitif olarak
   `eslint-config-next` üzerinden), üst akış bekleniyor.
+- **`braces` danışması geliştirme bağımlılıklarında açık.** 2026-10-07
+  ölçümü: `npm audit` geliştirme bağımlılıklarında yüksek bulgular
+  gösteriyor, hepsi tek danışmadan geliyor: `braces` <=3.0.3,
+  `GHSA-vfj7-8cjw-p6xm` (iç içe desenlerle yığın tüketen DoS). `braces`'in
+  yayınlanmış son sürümü 3.0.3, yani yamalı sürüm yok. Zincir:
+  `eslint-config-next` -> `@next/eslint-plugin-next` -> `fast-glob` ->
+  `micromatch` -> `braces`. İkinci zincir `shadcn` üzerinden geliyordu;
+  `shadcn` devDependencies'ten çıkarıldı, CLI gerektiğinde
+  `npx shadcn@latest add ...` ile çalıştırılır. `npm audit fix --force`
+  kullanılmaz: önerdiği çözüm `eslint-config-next`'i 14.2.35'e düşürmek,
+  yani Next 16 ile uyumsuz bir geri gidiş. `overrides` ile de çözülmez:
+  işaret edilecek yamalı bir sürüm yok. **Bilinçli kabul (2026-10-07):**
+  paketler yalnızca lint sırasında, depodaki kendi glob desenleriyle
+  çalışıyor ve üretim imajına girmiyor; CI kapısı
+  `npm audit --omit=dev --audit-level=high` üretim bağımlılıklarında sıfır
+  bulgu veriyor. Tripwire: `braces` 3.0.3'ten büyük bir sürüm
+  yayınladığında ya da `fast-glob`/`micromatch` bu bağımlılığı bıraktığında
+  Dependabot PR'ı gelir; o PR girince `npm audit` sıfırlanmalı ve madde
+  kapatılır.
 - **Harici prob yok.** Uptime Kuma izlediği sunucuda çalışacağı için sunucu
   tümden düşerse uyarı gönderemez; kontrol dışı bir yerden ikinci bir prob
   öneriliyor.
