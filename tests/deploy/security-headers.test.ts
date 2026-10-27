@@ -171,6 +171,26 @@ describe("asset caching", () => {
       );
     }
   });
+
+  // Coolify and similar dashboards show the site's favicon in an <img> from
+  // their own origin; same-origin CORP made the browser block it.
+  it("lets other origins embed the icon files, and nothing else", async () => {
+    const { forSource } = await loadHeaders("production");
+
+    for (const source of ["/favicon.ico", "/icon.png", "/apple-icon.png"]) {
+      expect(value(forSource(source), "Cross-Origin-Resource-Policy")).toBe(
+        "cross-origin"
+      );
+    }
+    expect(value(forSource("/:path*"), "Cross-Origin-Resource-Policy")).toBe(
+      "same-origin"
+    );
+    for (const source of ["/cv/:path*", "/fonts/:path*", "/api/:path*"]) {
+      expect(
+        value(forSource(source), "Cross-Origin-Resource-Policy")
+      ).toBeUndefined();
+    }
+  });
 });
 
 describe("cv indexing", () => {
