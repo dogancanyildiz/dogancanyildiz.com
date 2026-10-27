@@ -10,6 +10,23 @@ ve Other (sürüm otomasyonu bu İngilizce başlıkları arar).
 
 ## [Unreleased]
 
+## [0.14.2] - 2026-10-27
+
+### Fixes
+
+- `e34e640` **deps**: nodemailer 10.2.1 (#139)
+- `d4c498b` **headers**: ikon dosyalarında CORP'u cross-origin yap (#137)
+
+### Other
+
+- `184e72f` **deps**: bump node from `50c8e8c` to `ebfe2f9` (#132)
+- `2bd2fd4` **deps**: bump the actions group with 3 updates (#134)
+- `ab88c99` **deps**: bump the npm-minor-patch group across 1 directory with 16 updates (#135)
+- `39aa4d5` **deps**: shadcn CLI'ını devDependencies'ten çıkar (#131)
+- `120ab93` **release**: sync version v0.14.1 (#130)
+
+**Tam değişiklik listesi**: [v0.14.1...v0.14.2](https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.1...v0.14.2)
+
 ## [0.14.1] - 2026-10-07
 
 ### Fixes
@@ -327,7 +344,8 @@ faz başına bir pull request ile merge edildi.
 [#4]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/4
 [#5]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/5
 [#6]: https://github.com/dogancanyildiz/dogancanyildiz.com/pull/6
-[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.2...HEAD
+[0.14.2]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/dogancanyildiz/dogancanyildiz.com/compare/v0.13.0...v0.13.1
