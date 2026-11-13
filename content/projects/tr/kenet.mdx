@@ -1,0 +1,89 @@
+---
+title: Kenet
+slug: kenet
+translationKey: kenet
+summary: "Gün içinde yazılan kısa olayları kişilere, konumlara ve zamana kendiliğinden bağlayan kişisel günlük. iPhone, iPad ve Mac için SwiftUI ile yazdım; hesap yok, veri Obsidian uyumlu düz Markdown dosyalarında duruyor."
+role: Ürün, tasarım ve geliştirme
+stack:
+  - Swift
+  - SwiftUI
+  - SQLite
+  - Markdown
+  - iCloud
+  - WidgetKit
+  - App Intents
+  - GitHub Actions
+  - Next.js
+year: 2026
+links:
+  live: https://www.kenet.app
+  repo: https://github.com/dogancanyildiz/kenet
+cover: ../../images/kenet-cover.png
+coverAlt: "Kenet üç cihazda: solda iPhone'da görevlerin Kanban görünümü, ortada bir kişi sayfası ve son görüşme grafiği, sağda iPad'de kenar çubuğu, günlük takvimi ve Bugün ekranı. Sol üstte uygulamanın mürdüm ve siyah halkalı simgesi."
+outcome: "iPhone, iPad ve Mac'te TestFlight testinde, iPhone ve iPad için App Store yayını hazırlanıyor; tanıtım sitesi kenet.app yayında. iCloud Drive'daki kasa, uygulama silinse de Obsidian'da açılan düz dosyalar olarak kalıyor."
+featured: true
+order: 1
+---
+
+## Ne yaptım
+
+Kenet, kişiler, konumlar ve olaylar etrafında dönen kişisel bir günlük. Gün içinde tek satır yazılıyor, uygulama o satırı tanıdığı kişiye, konuma ve saate bağlıyor. Görevler, hedefler ve alışkanlık zincirleri de aynı dosyaların üstünde duruyor; ayrı bir veri deposu yok.
+
+İhtiyaç benimdi. Çevremde olup biteni Obsidian'da klasörler ve elle kurduğum bağlantılarla tutuyordum; çalışıyordu ama zahmetliydi. Görev, alışkanlık zinciri, kanban ve not için de ayrı ayrı uygulamalar açıyordum. Kenet bunları tek kasada topluyor: bir kişinin sayfasını açınca onunla yaşananlar ve onunla ilgili açık görevler yan yana görünüyor.
+
+Ürün fikri, tasarım dili, kod, test altyapısı, TestFlight hattı ve tanıtım sitesi tek elden çıktı. iPhone, iPad ve Mac tek SwiftUI kod tabanından derleniyor: iPhone'da sekmeli, iPad'de geniş pencerede üç sütunlu, Mac'te kenar çubuklu düzen aynı ekran modellerini kullanıyor. Ana ekran widget'ı, paylaşım uzantısı, Siri ve Kısayollar girişleri ile Mac'teki sistem genelinde hızlı giriş penceresi de aynı yazma yolundan geçiyor.
+
+## Nasıl çalışıyor
+
+Hızlı giriş alanına bir satır yazılıyor:
+
+```text
+Ece ile Kadıköy'de kahve
+```
+
+Kasada takma adı Ece olan Ece Yalın ve Kadıköy varsa satır gün dosyasına şöyle düşüyor:
+
+```markdown
+- 09:41 [[Ece Yalın|Ece]] ile [[Kadıköy]]'de kahve ^a1b2c3
+```
+
+Türkçe ek bağlantının dışında kalıyor, böylece cümle Obsidian'da da doğal okunuyor. Tanıma sözcük sınırına ve en uzun eşleşmeye bakıyor; "deniz", "su", "ev" gibi gündelik sözcükler küçük harfle yazıldığında kendiliğinden bağlanmıyor. Aynı adı taşıyan iki kişi varsa uygulama tahmin etmiyor, soruyor. Görev satırlarında tarih, öncelik ve tekrar cümlenin içinden okunuyor ("yarın", "cuma", `!!`), yazım biçimi Obsidian Tasks ile aynı.
+
+Kasa düz klasörlerden oluşuyor: gün dosyaları, kişi ve konum sayfaları, şablonlar. Dosya yapısı İngilizce ve sabit, arayüz Türkçe ve İngilizce. Bu satırların üstüne kurulan ekranlar:
+
+- Kişi ve konum sayfaları: zaman akışı, son görüşme, bir süredir görüşülmeyenler.
+- Görevler: liste, Kanban ve zaman çizelgesi; aynı görev üçünde de görünüyor.
+- Hedefler: günlük, haftalık ve yıllık dönem, zincir, ısı haritası; bir konuma girince kendiliğinden işaretlenebilen hedefler.
+- Geri dönüş: haftalık ve aylık özet, kişi ve konum grafiği, harita, "bu gün geçmişte".
+
+## Neden böyle kurgulandı
+
+Üç vaat her kararın önünde duruyor: veri kullanıcınındır, hiçbir şey kaybolmaz, kasa başka platforma taşınabilir. Bir özellik bu üçünden birini bozuyorsa özellik gidiyor.
+
+**Markdown gerçek kaynak, SQLite yalnız indeks.** Arama ve sorgular için GRDB ve FTS5 üstünde bir indeks var, ama indeks her zaman dosyalardan yeniden üretilebiliyor. Şema değişince göç yazmıyorum; sürüm artıyor, uygulama indeksi silip dosyalardan baştan kuruyor. Dışa aktarma özelliği de yok, çünkü gerek yok: kasa zaten Obsidian'ın açtığı klasör.
+
+**Dokunulmayan satır bayt bayt aynı kalır.** Genel YAML ve Markdown kütüphaneleri dosyayı okuyup yeniden üretir; bu sırada yorumlar, tırnaklar, satır sonları değişir. Kenet'in belge modeli satır tabanlı ve kayıpsız: her satır ham baytlarını ve satır sonunu saklıyor, düzenleme yalnız hedef satırı yeniden yazıyor. CRLF, BOM ve sonlanmamış son satır korunuyor. Kullanıcı aynı dosyayı Obsidian'da da düzenlediği için bu bir incelik olmaktan çıkıp ön koşul oluyor.
+
+**Dosyaya yazan tek kapı.** Bütün yazmalar tek bir bileşenden geçiyor: dosyayı diskten yeni okuyor, değişikliği uyguluyor ve atomik yazıyor. Satır düzenlemelerinde sonuç yazılmadan önce yeniden okunuyor; hedef dışında bir blok, bölüm ya da frontmatter değişmişse yazma reddediliyor. Sıra hep aynı: önce dosya, sonra indeks. İndeks güncellemesi düşerse dosya geri alınmıyor, hata ayrı bildiriliyor.
+
+**Çekirdek Apple'dan bağımsız.** Ayrıştırıcı, yazıcı, indeks, varlık tanıma, tarih okuma, hedef takibi ve özetler ayrı bir Swift paketinde; arayüz ve sistem çerçevelerine bağlı değil. CI bu paketi macOS'un yanında Linux'ta da derleyip test ediyor. Linux derlemesi, çekirdeğe bir Apple bağımlılığının sızmasını engelleyen en ucuz denetim; ileride başka bir platforma istemci yazılırsa aynı kasa biçimi hazır duruyor.
+
+**Çakışmada kaybeden sürüm de saklanır.** İki cihaz aynı günü çevrimdışı düzenleyebilir. Bunun için yazdığım birleştirme, yalnız iki sürümün baytlarına ve değişiklik zamanlarına bağlı saf bir işlev: satırları blok kimliğiyle eşliyor, sonucu yeniden okuyup "hiçbir içerik eksilmedi" değişmezini denetliyor. Değişmez tutmazsa yarım birleşme döndürmüyor; yeni sürümü alıp eskisini ayrı bir klasörde saklıyor. Fazladan kopya zararsız, eksik kopya veri kaybı. İşlev çekirdekte yazılı ve testli; iki cihazla gerçek deneme ve eşitlenen kasada güvenli yazmanın kalanı açık işlerden.
+
+**Hesap yok, sunucu yok.** Kasa cihazda ya da iCloud Drive'da duruyor; uygulama veri toplamıyor ve kasayı şifrelemiyor, çünkü şifreleme Obsidian uyumunu bozar. Gelir modeli gönüllü destek: uygulama hiçbir özelliği kilitlemiyor.
+
+## Tanıtım sitesi
+
+[kenet.app](https://www.kenet.app) ayrı bir depoda, bu siteyle aynı düzende: Next.js, next-intl, Türkçe kökte ve İngilizce `/en` altında, [Coolify üzerinde kendi sunucumda](/yazilar/coolify-ile-kendi-sunucumda). Ürünün vaadi siteye de taşındı: çerez yok, üçüncü taraf betik yok, ölçüm yok, yazı tipi bile yüklenmiyor. Yapılandırılmış veride puan ve fiyat alanı yok; uygulama mağazaya girmeden ikisi de gerçek bir değer taşımıyor. Arama motorlarına ve dil modellerine giden her ürün cümlesi (`llms.txt` dahil) sitenin onaylı metninden alınıyor ve bir test bunu kilitliyor: site, makinelere sayfada yazmayan bir şey söyleyemiyor. Ekran görüntüleri de çizim değil; uygulamanın otomatik ekran turundan, kurgusal adlarla dolu örnek bir kasadan geliyor. Kaynağı [dogancanyildiz/kenet.app](https://github.com/dogancanyildiz/kenet.app) deposunda.
+
+## Şu an nerede
+
+Proje 2 Ekim 2026'da başladı, ilk sürüm beş gün sonra çıktı. Kasım ortasında yol haritasında dokuz madde açık kaldı; başlıcaları eşitlenen kasada güvenli yazma, Mac widget'ları, katlanabilir ekran düzeninin uyarlanması ve mağaza yayını. Uygulama iPhone, iPad ve Mac'te TestFlight'ta dahili testte; mağazaya önce iPhone ve iPad, sonra Mac girecek. Uygulama kodu 77 bin satır civarında Swift; test kodu 85 bin satır civarıyla bundan uzun. Ekran görüntüsü testleri ekranları kayıtlı referanslarla karşılaştırıyor; referansları yerel makine değil CI kaydediyor, çünkü Xcode ve simülatör sürümü pikselleri değiştiriyor. Depo incelenmek üzere herkese açık, lisans olarak tüm hakları saklı.
+
+## Ne öğrendim
+
+Kullanıcının dosyasına yazan bir uygulamada en pahalı hata sessiz olan. Tanımadığım bir yapıyı yanlış yorumlamak, onu hiç tanımamaktan kötü: tanımadığımı düz metin bırakırsam kullanıcı bir şey kaybetmiyor, yanlış yorumlayıp yeniden yazarsam kaybediyor. "Tanımadığına dokunma" kuralı bu yüzden bir tasarım ilkesinden çok test edilen bir değişmez oldu.
+
+İkinci ders hızla ilgili. İlk sekiz aşamayı (0'dan 7'ye) yapay zeka ajanlarıyla, gerçek kullanım ölçütünü beklemeden art arda yazdırdım. Sonradan yaptırdığım bağımsız inceleme gerçek hatalar ve ölçek sorunları buldu, yeni özelliklerin önüne bir sağlamlaştırma aşaması girdi. O günden beri yol haritasındaki işaret yalnızca "kodda var, testlerden ve CI'dan geçti" anlamına geliyor; "gerçekten kullanılıyor" ayrı bir tabloda tutuluyor. Ajanla hız kolay geliyor, kontrol noktasını kurmak bana kalıyor: korumalı dallar, zorunlu CI ve yazılı karar günlüğü bu yüzden ilk günden var. Yeşil CI de tek başına yetmiyor, çünkü CI kodu okuyamaz ve gevşetilmiş bir testi göremez. Mantık taşıyan her değişiklik bu yüzden bağımsız bir incelemeden geçiyor; inceleme üretim kodunu geçici olarak bozup hangi testin düştüğüne bakıyor. Hiçbiri düşmüyorsa o satırı aslında hiçbir test korumuyor demektir.
+
+Üçüncüsü Türkçenin kendisi. Ad karşılaştırmasını önce dilden bağımsız kurdum, sonra `İ` ile `i` ve `I` ile `ı` eşlemesini eklemek zorunda kaldım. Ek alan bir adı ("Kadıköy'de") bağlamak, tarihi cümleden okumak, gündelik sözcükle özel adı ayırmak: bunların hiçbiri hazır gelmedi, her biri ayrı bir kural ve ayrı bir test kümesi oldu.
