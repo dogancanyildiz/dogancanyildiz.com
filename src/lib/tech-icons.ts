@@ -11,8 +11,10 @@ import {
   siGithubactions,
   siGo,
   siHtml5,
+  siIcloud,
   siJavascript,
   siLinux,
+  siMarkdown,
   siMongodb,
   siMysql,
   siNextdotjs,
@@ -22,6 +24,7 @@ import {
   siQemu,
   siReact,
   siSqlite,
+  siSwift,
   siTailwindcss,
   siTraefikproxy,
   siTypescript,
@@ -67,6 +70,11 @@ const SKILL_ICONS: Record<string, TechIconData> = {
   QEMU: siQemu,
   Go: siGo,
   ClickUp: siClickup,
+  Swift: siSwift,
+  // SwiftUI has no mark of its own; the Swift logo stands for the pair.
+  SwiftUI: siSwift,
+  Markdown: siMarkdown,
+  iCloud: siIcloud,
 };
 
 export function skillIconFor(label: string): TechIconData | null {

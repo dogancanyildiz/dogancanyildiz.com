@@ -1,0 +1,89 @@
+---
+title: Kenet
+slug: kenet
+translationKey: kenet
+summary: "A personal journal that links the short entries you write during the day to people, places and time on its own. Built with SwiftUI for iPhone, iPad and Mac; no account, and the data lives in plain Markdown files Obsidian can open."
+role: Product, design and development
+stack:
+  - Swift
+  - SwiftUI
+  - SQLite
+  - Markdown
+  - iCloud
+  - WidgetKit
+  - App Intents
+  - GitHub Actions
+  - Next.js
+year: 2026
+links:
+  live: https://www.kenet.app
+  repo: https://github.com/dogancanyildiz/kenet
+cover: ../../images/kenet-cover.png
+coverAlt: "Kenet on three devices, in Turkish: the task Kanban board on an iPhone, a person page with a last-seen chart, and an iPad with the sidebar, the journal calendar and the Today screen. The plum and black app icon sits top left."
+outcome: "In TestFlight testing on iPhone, iPad and Mac, with the App Store release for iPhone and iPad in preparation; the website kenet.app is live. A vault in iCloud Drive stays behind as plain files Obsidian opens, even if the app is deleted."
+featured: true
+order: 1
+---
+
+## What I did
+
+Kenet is a personal journal built around people, places and events. You write one line during the day and the app links it to the person, the place and the time it recognizes. Tasks, goals and habit streaks sit on top of the same files; there is no second data store.
+
+The need was my own. I kept track of what happened around me in Obsidian, with folders and links I made by hand; it worked, but it was tedious. Tasks, habit streaks, a kanban board and notes each lived in a separate app. Kenet puts them in one vault: open a person's page and what happened with them sits next to the open tasks that involve them.
+
+The product idea, the design language, the code, the test setup, the TestFlight pipeline and the website all came from one pair of hands. iPhone, iPad and Mac build from a single SwiftUI codebase: tabs on iPhone, three columns in a wide iPad window and a sidebar on Mac share the same screen models. The home screen widget, the share extension, the Siri and Shortcuts entry points and a system-wide quick entry window on Mac all go through the same write path.
+
+## How it works
+
+You type one line into the quick entry field:
+
+```text
+Ece ile Kadıköy'de kahve
+```
+
+That is Turkish for "coffee with Ece in Kadıköy". If the vault has Ece Yalın, with Ece as an alias, and Kadıköy, the line lands in the day file like this:
+
+```markdown
+- 09:41 [[Ece Yalın|Ece]] ile [[Kadıköy]]'de kahve ^a1b2c3
+```
+
+The Turkish suffix stays outside the link, so the sentence still reads naturally in Obsidian. Recognition works on word boundaries and the longest match; everyday words that happen to be names are not linked on their own when written in lowercase. When two people share a name the app does not guess, it asks. In task lines the date, the priority and the recurrence are read out of the sentence (`!!` for high priority, for example), and the written format is the same as Obsidian Tasks.
+
+The vault is plain folders: day files, person and place pages, templates. The file structure is English and fixed, the interface is Turkish and English. The screens built on those lines:
+
+- Person and place pages: a timeline, the last time you met, and the people you have not seen for a while.
+- Tasks: a list, a Kanban board and a timeline; the same task shows up in all three.
+- Goals: daily, weekly and yearly periods, streaks, a heat map, and goals that can check themselves off when you arrive at a place.
+- Looking back: weekly and monthly summaries, a graph of people and places, a map, and "on this day".
+
+## Why it was built this way
+
+Three promises come before every decision: the data belongs to the user, nothing gets lost, and the vault can move to another platform. When a feature breaks one of them, the feature goes.
+
+**Markdown is the source of truth, SQLite is only an index.** Search and queries run on an index built with GRDB and FTS5, but that index can always be rebuilt from the files. I write no migrations when the schema changes: the version goes up and the app deletes the index and rebuilds it. There is no export feature either, because there is nothing to export: the vault already is the folder Obsidian opens.
+
+**An untouched line stays the same, byte for byte.** General YAML and Markdown libraries read a file and regenerate it, and comments, quotes and line endings change along the way. Kenet's document model is line based and lossless: every line keeps its raw bytes and its line ending, and an edit rewrites only the target line. CRLF, a BOM and an unterminated last line all survive. Since the user edits the same file in Obsidian too, this is a precondition and not a nicety.
+
+**One gate writes to disk.** Every write goes through a single component: it reads the file fresh from disk, applies the change and writes atomically. For line edits the result is read back before it is written, and the write is refused if a block, a section or the frontmatter outside the target changed. The order never changes: the file first, the index second. If the index update fails, the file is not rolled back and the error is reported separately.
+
+**The core does not depend on Apple.** The parser, the writer, the index, entity recognition, date parsing, goal tracking and summaries live in a separate Swift package with no UI or system framework underneath. CI builds and tests that package on Linux as well as macOS. The Linux build is the cheapest check that keeps an Apple dependency from leaking into the core, and if a client for another platform is ever written, the vault format is already there.
+
+**The losing side of a conflict is kept too.** Two devices can edit the same day offline. The merge I wrote for that is a pure function of the two versions' bytes and modification times: it matches lines by block id, then reads the result back and checks the invariant that no content went missing. If the invariant does not hold it returns no half-merged file; it takes the newer version and keeps the older one in a separate folder. An extra copy is harmless, a missing one is data loss. The function is written and tested in the core; a real two-device trial and the rest of safe writing in a synced vault are still open.
+
+**No account, no server.** The vault lives on the device or in iCloud Drive; the app collects no data and does not encrypt the vault, because encryption would break Obsidian compatibility. The revenue model is voluntary support: the app locks no feature.
+
+## The website
+
+[kenet.app](https://www.kenet.app/en) lives in its own repository and follows the same setup as this site: Next.js, next-intl, Turkish at the root and English under `/en`, [on my own server with Coolify](/blog/self-hosting-with-coolify). The product's promise carries over to the site: no cookies, no third-party scripts, no analytics, not even a web font. The structured data has no rating and no price; until the app is in the store, neither would carry a real value. Every product sentence that goes out to search engines and language models, `llms.txt` included, is taken from the site's approved copy and a test locks that in: the site cannot tell a machine something the page does not say. The screenshots are not mockups either; they come from the app's automated screen tour, run on a sample vault filled with made-up names. The source is in [dogancanyildiz/kenet.app](https://github.com/dogancanyildiz/kenet.app).
+
+## Where it stands
+
+The project started on 2 October 2026 and the first release went out five days later. By mid-November nine items on the roadmap are still open; the main ones are safe writing in a synced vault, the Mac widgets, adapting the layout for foldable screens and the store release. The app is in internal TestFlight testing on iPhone, iPad and Mac; iPhone and iPad go to the store first, Mac follows. The app code is around 77 thousand lines of Swift; the test code is longer, at around 85 thousand. Snapshot tests compare the screens against recorded references, and CI records those references, not a local machine, because the Xcode and simulator version changes the pixels. The repository is public for reading, with all rights reserved.
+
+## What I learned
+
+In an app that writes to the user's own files, the most expensive mistake is the silent one. Misreading a structure I do not recognize is worse than not recognizing it: if I leave it as plain text the user loses nothing, and if I misread it and rewrite it, they do. That is why "do not touch what you do not recognize" ended up as a tested invariant more than a design principle.
+
+The second lesson is about speed. I had AI agents write the first eight stages (0 to 7) back to back, without waiting for the real-use criteria of each one. The independent review I commissioned afterwards found real bugs and scaling problems, and a hardening stage went in ahead of new features. Since then a tick on the roadmap only means "it is in the code and it passed the tests and CI"; "it is actually in use" is tracked in a separate table. Speed comes easily with agents, and setting up the checkpoints is my job: protected branches, mandatory CI and a written decision log have been there since day one for that reason. Green CI is not enough on its own either, because CI cannot read the code and cannot see a test that was loosened. So every change that carries logic goes through an independent review, and that review breaks the production code on purpose to see which test fails. If none does, no test was protecting that line.
+
+The third is the Turkish language itself. I built name comparison to be locale independent first, then had to add the mapping between `İ` and `i` and between `I` and `ı`. Linking a name that carries a suffix ("Kadıköy'de"), reading a date out of a sentence, telling an everyday word from a proper name: none of it came ready-made, and each one turned into its own rule and its own set of tests.
