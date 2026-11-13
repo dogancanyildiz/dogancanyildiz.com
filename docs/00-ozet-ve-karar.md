@@ -36,7 +36,7 @@ kapanış kaydı `git show v0.5.0:docs/01-mevcut-durum-denetimi.md` ile okunur.
 - Sürüm v0.5.0; depo `dogancanyildiz/dogancanyildiz.com`, public, kod MIT,
   içerik ayrı lisansta (`LICENSE-CONTENT.md`).
 - İki dil: Türkçe kökte ve Türkçe yollarda, İngilizce `/en` altında.
-- İçerik: altı proje case study'si ve üç yazı, iki dilde; Velite ile
+- İçerik: yedi proje case study'si ve beş yazı, iki dilde; Velite ile
   build-time MDX derlemesi.
 - Posta sahibinin Mailcow sunucusundan SMTP ile gidiyor; üçüncü taraf runtime
   bağımlılığı yok.

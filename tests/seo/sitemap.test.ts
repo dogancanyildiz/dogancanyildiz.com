@@ -192,18 +192,19 @@ describe("sitemap", () => {
   // posts (cloudflare-traefik-arkasinda-gercek-istemci-ip and
   // nextjs-docker-multi-stage-non-root) take it to 7 x 2 + 6 x 2 + 5 x 2 = 36.
   // The two CV PDFs (2026-09-08, one per locale, listed only while the file
-  // is on disk) make it 38. A wrong count here is the cheapest place to catch
+  // is on disk) make it 38. A seventh project (kenet, 2026-11-13) makes it
+  // 7 x 2 + 7 x 2 + 5 x 2 + 2 = 40. A wrong count here is the cheapest place to catch
   // a miscounted STATIC_PAGES entry or a project silently dropped from one
   // locale.
-  it("lists exactly 38 urls: 7 static, 6 projects and 5 posts in both locales, plus 2 cv pdfs", async () => {
+  it("lists exactly 40 urls: 7 static, 7 projects and 5 posts in both locales, plus 2 cv pdfs", async () => {
     const sitemap = (await import("@/app/sitemap")).default;
     const { getPosts, getProjects } = await import("@/lib/content");
 
-    expect(getProjects("tr")).toHaveLength(6);
-    expect(getProjects("en")).toHaveLength(6);
+    expect(getProjects("tr")).toHaveLength(7);
+    expect(getProjects("en")).toHaveLength(7);
     expect(getPosts("tr")).toHaveLength(5);
     expect(getPosts("en")).toHaveLength(5);
-    expect(sitemap()).toHaveLength(38);
+    expect(sitemap()).toHaveLength(40);
   });
 
   it("lists both cv pdfs and puts the profile photo under the pages that show it", async () => {
