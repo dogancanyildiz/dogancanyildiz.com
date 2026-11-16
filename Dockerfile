@@ -13,7 +13,7 @@
 # Next build runs in the next stage. The cache mount keeps npm's download
 # cache across builds without baking it into any image layer.
 # ---------------------------------------------------------------------------
-FROM node:24-alpine@sha256:8a32c8cf649a49915a66e81e7a609223c708d0adabf288ee3f4077d765542f85 AS deps
+FROM node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5 AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 # --ignore-scripts skips every package's install/postinstall/preinstall
@@ -55,7 +55,7 @@ RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --ignore-sc
 # resolveSiteUrl instead of silently inlining the production url into a
 # preview bundle. CI, docker compose and Coolify all pass it explicitly.
 # ---------------------------------------------------------------------------
-FROM node:24-alpine@sha256:8a32c8cf649a49915a66e81e7a609223c708d0adabf288ee3f4077d765542f85 AS builder
+FROM node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5 AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_BUILD_SHA
@@ -90,7 +90,7 @@ RUN NEXT_PUBLIC_BUILD_DATE="${NEXT_PUBLIC_BUILD_DATE:-$(date -u +%Y-%m-%dT%H:%M:
 # image already provides an unprivileged "node" user, so no extra addgroup or
 # adduser call is needed.
 # ---------------------------------------------------------------------------
-FROM node:24-alpine@sha256:8a32c8cf649a49915a66e81e7a609223c708d0adabf288ee3f4077d765542f85 AS runner
+FROM node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
